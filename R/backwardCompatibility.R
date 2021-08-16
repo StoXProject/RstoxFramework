@@ -595,76 +595,6 @@ checkBackwardCompatibilityVersion <-  function(backwardCompatibilityAction, proj
 # - Replace process by several process
 
 
-readProjectXMLToList <- function(projectPath) {
-    projectXMLFile <- getProjectPaths(projectPath, "projectXMLFile")
-    # Read the project.xml file into a list:
-    #doc = XML::xmlParse(projectXMLFile)
-    doc = xml2::read_xml(projectXMLFile)
-    #projectList <- XML::xmlToList(doc)
-    projectList <- xml2::as_list(doc)$project
-    return(projectList)
-}
-
-
-UNUSED_readProjectXMLToProjectDescription2.7 <- function(projectPath) {
-    
-    # Read the project.xml file into a list:
-    projectList <- readProjectXMLToList(projectPath)
-    
-    # For convenience separate into models, processdata and attrs:
-    models <- projectList[names(projectList) == "model"]
-    processdata <- projectList$processdata
-    
-    # Get the model names and group baseline
-    modelNames2.7 <- sapply(models, attr, "name")
-    names(models) <- modelNames2.7
-    
-    return(models)
-}
-
-
-
-UNUSED_projectDescription2.7To3 <- function(projectDescription2.7) {
-    
-    # Create new models:
-    modelNameMapping2.7To3 <- getRstoxFrameworkDefinitions("modelNameMapping2.7To3")
-    projectDescription3 <- split(projectDescription2.7, modelNameMapping2.7To3[names(models)])
-    # Order the models:
-    projectDescription3 <- projectDescription3[getRstoxFrameworkDefinitions("stoxModelNames")]
-    
-    # Move single processes between models:
-    
-    
-    
-    
-    
-    # Convert the project attributes:
-    attriributes(projectDescription3) <- list(
-        TimeSaved = strftime(
-            as.POSIXlt(
-                attr(projectDescription2.7, "lastmodified"), 
-                "UTC", 
-                "%Y/%m/%d %H:%M"
-            ), 
-            "%Y-%m-%dT%H:%M:%OS3Z"
-        ), 
-        RVersion = attr(projectDescription2.7, "rversion"), 
-        RstoxPackageVersion = list(
-            Rstox = attr(projectDescription2.7, "rstoxversion")
-        ),
-        RstoxFrameworkDependencies = NA, 
-        CertifiedRstoxPackageVersion = NA,
-        AllCertifiedRstoxPackageVersion = FALSE, 
-        OfficialRstoxFrameworkVersion = FALSE,
-        DependentPackageVersion = NA,
-        Application = attr(projectDescription2.7, "stoxversion")
-    )
-    
-    
-    
-    
-    
-}
 # Rename DefineStratumPolygon to DefineStratum:
 #rename_DefineStratumPolygon_to_DefineStratum <- function(projectDescription) {
 #    if(StoxVersion == 2.7) {
@@ -750,63 +680,6 @@ UNUSED_projectDescription2.7To3 <- function(projectDescription2.7) {
 
 
 
-stratumpolygon2.7ToTable <- function(stratumpolygon) {
-    # Get polygon keys:
-    #polygonkey <- sapply(stratumpolygon, function(x) x$.attrs["polygonkey"])
-    polygonkey <- sapply(stratumpolygon, attr, "polygonkey")
-    
-    # Convert to a list with one list per polygon:
-    stratumpolygonList <- split(stratumpolygon, polygonkey)
-    # ... and extract the includeintotal and polygon:
-    stratumpolygonList <- lapply(stratumpolygonList, unlist)
-    
-    # Rbind to a data.table and add names:
-    stratumpolygonTable <- do.call(rbind, stratumpolygonList)
-    stratumpolygonTable <- data.table::data.table(names(stratumpolygonList), stratumpolygonTable)
-    names(stratumpolygonTable) <- c("polygonkey", "includeintotal", "polygon")
-    
-    return(stratumpolygonTable)
-}
-
-# Unused??
-#saveStoXMultipolygonWKT <- function(stratumpolygonTable, projectPath, stratumPolygonFileName = #"stratumPolygon.txt") {
-#    stratumpolygonFilePath <- file.path(
-#        getProjectPaths(projectPath, "input"), 
-#        stratumPolygonFileName
-#    )
-#    
-#    data.table::fwrite(
-#        stratumpolygonTable[, c("polygonkey", "polygon")], 
-#        stratumpolygonFilePath, 
-#        col.names = FALSE
-#    )
-#    
-#    return(stratumpolygonFilePath)
-#}
-
-
-copyStoXMultipolygonWKTFrom2.7 <- function(projectPath, stratumPolygonFileName = "stratumPolygon.txt") {
-    
-    # Read the project.xml file into a list:
-    projectList <- readProjectXMLToList(projectPath)
-    
-    # Convert the stratumpolygon to a table:
-    stratumpolygonTable <- stratumpolygon2.7ToTable(projectList$processdata$stratumpolygon)
-    # ... and write to file:
-    stratumpolygonFilePath <- file.path(
-        getProjectPaths(projectPath, "input"), 
-        stratumPolygonFileName
-    )
-    data.table::fwrite(
-        stratumpolygonTable[, c("polygonkey", "polygon")], 
-        stratumpolygonFilePath, 
-        col.names = FALSE, 
-        sep = "\t"
-    )
-    
-    return(stratumpolygonFilePath)
-}
-
 #' Backward compabitibility actions:
 #' 
 #' @inheritParams general_arguments
@@ -839,14 +712,14 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3 = NU
     }
     
     
-    redefineAcousticPSUFrom2.7(
-        projectPath2.7 = projectPath2.7, 
-        projectPath3 = projectPath3, 
-        newProjectPath3 = newProjectPath3, 
-        ow = ow
-    )
+    #redefineAcousticPSUFrom2.7(
+    #    projectPath2.7 = projectPath2.7, 
+    #    projectPath3 = projectPath3, 
+    #    newProjectPath3 = newProjectPath3, 
+    #    ow = ow
+    #)
     
-    redefineBioticAssignmentFrom2.7(projectPath2.7, newProjectPath3)
+    #redefineBioticAssignmentFrom2.7(projectPath2.7, newProjectPath3)
     
     updateInputDataFiles(newProjectPath3)
     
@@ -855,49 +728,8 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3 = NU
 
 redefineAcousticPSUFrom2.7 <- function(projectPath2.7, projectPath3, newProjectPath3 = NULL, ow = FALSE) {
     
-    # Read the old project.xml file:
-    projectList <- readProjectXMLToList(projectPath2.7)
-    
-    # Create the StratumPSU table:
-    Stratum_PSU <- data.table::as.data.table(
-        #matrix(
-        #    unlist(projectList$processdata$psustratum), 
-        #    ncol = 2, 
-        #    byrow = TRUE
-        #
-        cbind(
-            Stratum = unlist(projectList$processdata$psustratum), 
-            PSU = sapply(projectList$processdata$psustratum, attr, "psu")
-        )
-    )
-    #names(Stratum_PSU) <- c("Stratum", "PSU")
-    
-    EDSU_PSU <- data.table::as.data.table(
-        # matrix(
-        #        unlist(projectList$processdata$edsupsu), 
-        #        ncol = 2, 
-        #        byrow = TRUE
-        #    )
-        cbind(
-            PSU = unlist(projectList$processdata$edsupsu), 
-            EDSU = sapply(projectList$processdata$edsupsu, attr, "edsu")
-        )
-    )
-    
-    names(EDSU_PSU) <- c("PSU", "EDSU")
-    data.table::setcolorder(EDSU_PSU, c("EDSU", "PSU"))
-    
-    # Parse out the Cruise and DateTime:
-    splitted <- EDSU_PSU[, strsplit(EDSU, "/")][[1]]
-    
-    splitted <- strsplit(EDSU_PSU$EDSU, "/")
-    
-    Cruise <- sapply(splitted, "[[", 1)
-    Date <- sapply(splitted, "[[", 3)
-    Time <- sapply(splitted, "[[", 4)
-    DateTime <- paste0(Date, "T", Time, ".000Z")
-    
-    EDSU_PSU[, EDSU := paste(..Cruise, ..DateTime, sep = "/")]
+    # Read the AcousticPSU from the project.xml file:
+    AcousticPSU <- RstoxBase::readAcousticPSUFrom2.7(projectPath2.7)
     
     projectDescription <- readProjectDescription(projectPath3)
     atDefineAcousticPSU <- which(sapply(projectDescription$projectDescription$baseline, "[[", "functionName") == "RstoxBase::DefineAcousticPSU")
@@ -910,11 +742,7 @@ redefineAcousticPSUFrom2.7 <- function(projectPath2.7, projectPath3, newProjectP
         warning("Multiple processes using RstoxBase::DefineAcousticPSU found in the project", newProjectPath3, ". All were modified.")
     }
     for(ind in atDefineAcousticPSU) {
-        projectDescription$projectDescription$baseline[[ind]]$processData <- list(
-            Stratum_PSU = Stratum_PSU, 
-            EDSU_PSU = EDSU_PSU, 
-            PSUByTime = data.table::data.table()
-        )
+        projectDescription$projectDescription$baseline[[ind]]$processData <- AcousticPSU
     }
     
     openProject(newProjectPath3)
@@ -925,6 +753,8 @@ redefineAcousticPSUFrom2.7 <- function(projectPath2.7, projectPath3, newProjectP
     
     return(unname(newProjectPath3))
 }
+
+
 
 updateInputDataFiles <- function(projectPath, inputDataTypes = c("acoustic", "biotic", "landing")) {
     openProject(projectPath)
@@ -964,79 +794,8 @@ updateInputDataFilesOne <- function(inputDataType, projectPath, baselineTable) {
     return(inputFiles)
 }
 
-# Unifnished!!!!!!!!!!!!
-redefineBioticAssignmentFrom2.7 <- function(projectPath, newProjectPath) {
-    
-    # Read the BioticAssignment:
-    bioticassignment <- readStox2.7ProcessDataTable(projectPath, "bioticassignment")
-    names(bioticassignment) <- c("WeightingFactor", "AssignmentID", "Haul")
-    
-    # Read the link between AssignmentID and PSU:
-    suassignment <- readStox2.7ProcessDataTable(projectPath, "suassignment")
-    names(suassignment) <- c("AssignmentID", "PSU", "Layer")
-    
-    # Read the link between Stratum and PSU:
-    psustratum <- readStox2.7ProcessDataTable(projectPath, "psustratum")
-    names(psustratum) <- c("Stratum", "PSU")
-    
-    
-    if(!suassignment[, RstoxBase::allEqual(Layer)]) {
-        stop("Currently, only StoX 2.7 projects with layer type \"WaterColumn\" can be automatically converted to StoX 3.0 and higher.")
-    }
-    
-    
-    # Unifnished from here. Also we need to treat DepthLayer, WaterColumn and PChanel!!!!!!!
-    
-    
-    suassignment[, Layer := "WaterColumn"]
-    
-    # Add stratum:
-    psustratum <- data.table::as.data.table(
-        matrix(
-            unlist(projectList$processdata$psustratum), 
-            ncol = 2, 
-            byrow = TRUE
-        )
-    )
-    names(psustratum) <- c("Stratum", "PSU")
-    
-    BioticAssignment <- merge(bioticassignment, suassignment, by = "AssignmentID", allow.cartesian = TRUE)
-    BioticAssignment <- merge(BioticAssignment, psustratum, by = "PSU", allow.cartesian = TRUE)
-    
-    
-}
 
 
-readStox2.7ProcessDataTable <- function(projectPath, processDataName) {
-    projectList <- readProjectXMLToList(projectPath)
-    
-    # Read the BioticAssignment:
-    dataNames <- names(projectList$processdata[[processDataName]][1])
-    attNames <- names(attributes(projectList$processdata[[processDataName]][[1]]))
-    columnNames <- c(
-        dataNames, 
-        attNames
-    )
-    
-    # Get the data:
-    data <- matrix(unlist(projectList$processdata[[processDataName]]), ncol = length(dataNames), byrow = TRUE)
-    # Get the attributes:
-    att <- lapply(projectList$processdata[[processDataName]], attributes)
-    att <- matrix(unlist(att), ncol = length(attNames), byrow = TRUE)
-    
-    
-    
-    # Add the attributes to the data:
-    processDataTable <- data.table::as.data.table(
-        cbind(
-            data, 
-            att
-        )
-    )
-    names(processDataTable) <- columnNames
-    
-    return(processDataTable)
-}
 
 
 # Functions to subset an NMDBiotic or NMDEchosounder file, useful for creating small test-projects:

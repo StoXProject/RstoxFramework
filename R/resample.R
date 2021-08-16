@@ -48,11 +48,16 @@ Bootstrap <- function(
         
         # Read the outputData (from a former run of the proecss). Use functionArguments["outputData"] to add the data, since using functionArguments$outputData will delete this element if trying to giev it the value NULL:
         if(is.character(outputData)) {
-            if(length(outputData) && file.exists(outputData)) {
-                outputData <- tryCatch(
-                    get(load(outputData)), 
-                    error = function(err) list(NULL)
-                )
+            if(length(outputData)) {
+                if(!file.exists(outputData)) {
+                    stop("The file ", outputData, " does not exist. Please re-run the Bootstrap process.")
+                }
+                else {
+                    outputData <- tryCatch(
+                        get(load(outputData)), 
+                        error = function(err) list(NULL)
+                    )
+                }
             }
             else {
                 outputData <- list(NULL)
@@ -103,6 +108,7 @@ Bootstrap <- function(
     #SeedTable <- data.table::as.data.table(lapply(BootstrapMethodTable$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
     #names(SeedTable) <- BootstrapMethodTable$ProcessName
     #SeedList <- split(SeedTable, seq_len(nrow(SeedTable)))
+    NumberOfBootstraps <- NumberOfBootstraps
     SeedList <- drawSeedList(
         table = BootstrapMethodTable, 
         NumberOfBootstraps = NumberOfBootstraps, 
@@ -133,7 +139,8 @@ Bootstrap <- function(
         NumberOfBootstraps = NumberOfBootstraps, 
         listOf = "list"
     )
-    replaceArgs <- BaselineSeedList
+    replaceArgsList <- BaselineSeedList
+    #replaceArgsList <- lapply(replaceArgsList, function(x) lapply(x, function(y) list(Seed = y)))
     
     # Get the number of cores to open:
     NumberOfCores <- RstoxData::getNumberOfCores(NumberOfCores, n  = NumberOfBootstraps)
@@ -142,7 +149,7 @@ Bootstrap <- function(
     projecName <- basename(projectPath)
     # As of 2021-05-27 (v3.0.23) make a copy even if running on only one core. This for safety:
     #if(NumberOfCores > 1)  {
-        projectPath_copies <- file.path("~/workspace", paste0(projecName, seq_len(NumberOfCores)))
+        projectPath_copies <- file.path(tempdir(), paste0(projecName, seq_len(NumberOfCores)))
         temp <- RstoxData::mapplyOnCores(copyProject, MoreArgs = list(ow = TRUE, projectPath = projectPath), projectPath_copies, NumberOfCores = NumberOfCores)
     #}
     #else {
@@ -168,7 +175,7 @@ Bootstrap <- function(
         NumberOfCores = NumberOfCores, 
         # Vector inputs:
         ind = bootstrapIndex, 
-        replaceArgs = replaceArgs, 
+        replaceArgsList = replaceArgsList, 
         replaceDataList = replaceDataList, 
         projectPath = projectPath_copies, 
         
@@ -225,6 +232,7 @@ Bootstrap <- function(
     
     unlink(NumberOfBootstrapsFile, force = TRUE, recursive = TRUE)
     unlink(bootstrapProgressFile, force = TRUE, recursive = TRUE)
+    unlink(projectPath_copies, force = TRUE, recursive = TRUE)
     
     return(BootstrapData)
 }
@@ -284,7 +292,7 @@ createReplaceData <- function(SeedList, BootstrapMethodTable) {
 
 
 # Define a function to run processes and save the output of the last process to the output folder:
-runOneBootstrapSaveOutput <- function(ind, replaceArgs, replaceDataList, projectPath, projectPath_original, startProcess, endProcess, outputProcessesIDs, bootstrapProgressFile, stopBootstrapFile) {
+runOneBootstrapSaveOutput <- function(ind, replaceArgsList, replaceDataList, projectPath, projectPath_original, startProcess, endProcess, outputProcessesIDs, bootstrapProgressFile, stopBootstrapFile) {
     
     # Stop if the file stopBootstrap.txt exists:
     if(file.exists(stopBootstrapFile)) {
@@ -302,7 +310,7 @@ runOneBootstrapSaveOutput <- function(ind, replaceArgs, replaceDataList, project
         saveProcessData = FALSE, 
         fileOutput = FALSE, 
         setUseProcessDataToTRUE = FALSE, 
-        replaceArgs = replaceArgs, 
+        replaceArgsList = replaceArgsList, 
         replaceDataList = replaceDataList, 
         msg = FALSE
     )

@@ -16,10 +16,11 @@ runModel(
   save = TRUE,
   force.restart = FALSE,
   replaceDataList = list(),
-  replaceArgs = list(),
+  replaceArgsList = list(),
   fileOutput = NULL,
   setUseProcessDataToTRUE = TRUE,
   purge.processData = FALSE,
+  returnModelData = TRUE,
   try = TRUE,
   close = FALSE,
   ...
@@ -48,7 +49,7 @@ runModel(
 
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
 
-\item{replaceArgs}{A list of function parameters and inputs to override.}
+\item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
 
 \item{fileOutput}{Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.}
 
@@ -56,11 +57,13 @@ runModel(
 
 \item{purge.processData}{Logical: If TRUE replace process data entirely.}
 
+\item{returnModelData}{Logical: If TRUE return the output of the model runs.}
+
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
 \item{close}{Logical: If TRUE close the project after running and getting the output.}
 
-\item{...}{\code{replaceArgs} can also be given directly.}
+\item{...}{\code{replaceArgsList} can also be given directly.}
 }
 \value{
 A list of model output.

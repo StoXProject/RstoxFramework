@@ -717,6 +717,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
     }
     
+    #browser()
     # Run the test project:
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
@@ -725,11 +726,9 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     openProject(projectPath_copy)
     dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE)
     
-    bioticFile <- system.file("test",  "biotic_2020821.xml", package = "RstoxFramework")
-    exampleData <- StoxBiotic(ReadBiotic(bioticFile))
-
     # Read the original data:
-    dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
+    #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
+    dat_orig <- readModelData(projectPath_original, unlist = 1)
     
     # Compare only those elemens common to the two datasets:
     processNames_present <- all(names(dat_orig) %in% names(dat))
@@ -843,3 +842,48 @@ compareSPDF <- function(x, y) {
     yc<- getAllCoords(y)
     all.equal(xc, yc)
 }
+
+
+
+#' Convert to JSON
+#' 
+#' This function takes care of the defaults preferred by the Rstox packages
+#' 
+#' @param x An object to convert to JSON.
+#' @param ... Parameters overriding the defaults digits = NA, auto_unbox = TRUE, na = "null", null = "null".
+#' 
+toJSON_Rstox <- function(x, ...) {
+    # Define defaults:
+    digits <- NA
+    auto_unbox <- TRUE
+    # Changed on 2021-04-21 to supports NA strings:
+    #na <- "null"
+    na <- "string"
+    null <- "null"
+    
+    # Override by ...:
+    lll <- list(...)
+    
+    if(!"digits" %in% names(lll)) {
+        lll$digits <- digits
+    }
+    if(!"auto_unbox" %in% names(lll)) {
+        lll$auto_unbox <- auto_unbox
+    }
+    if(!"na" %in% names(lll)) {
+        lll$na <- na
+    }
+    if(!"null" %in% names(lll)) {
+        lll$null <- null
+    }
+    
+    #lll$x <- x
+    lll <- c(list(x = x), lll
+    )
+    
+    # Use ISO8601 for time:
+    lll$POSIXt ="ISO8601"
+    
+    do.call(jsonlite::toJSON, lll)
+}
+

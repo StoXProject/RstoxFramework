@@ -717,7 +717,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
     }
     
-    #browser()
+    # browser()
     # Run the test project:
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
@@ -789,6 +789,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     if(!ok) {
+        warning(paste(names(uallTests), uallTests, collapse = ", \n", sep = "-"))
         return(allTests)
     }
     else {

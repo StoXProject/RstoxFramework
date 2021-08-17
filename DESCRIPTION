@@ -55,7 +55,7 @@ Imports:
     stringr (>= 1.0.0),
     stringi (>= 1.4.3),
     RstoxData (>= 1.2.1),
-    RstoxBase (>= 1.4.1)
+    RstoxBase (>= 1.4.2)
 Suggests: 
     RCurl (>= 1.95-4.10),
     remotes (>= 2.0.0),

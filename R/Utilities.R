@@ -768,9 +768,9 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             
             if(!isTRUE(data_equal[[name]][[subname]])) {
                 warning("888888888888888888888888888888888888")
-                warning(paste(head(c(unlist(dat_orig[[name]][[subname]])), 100), collapse = "; "))
+                warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
                 warning("999999999999999999999999999999999999")
-                warning(paste(head(c(unlist(dat[[name]][[subname]])), 100), collapse = "; "))
+                warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
                 warning("777777777777777777777777777777777")
                 temp <- file.path(projectPath_copy, "output/report/WriteICESAcoustic/ListUserFile25__L1596.9-4452.2 - test 12.xml.csv")
                 if(file.exists(temp)) {

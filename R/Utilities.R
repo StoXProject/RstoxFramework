@@ -765,6 +765,13 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             else {
                 data_equal[[name]][[subname]] <- all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
+            
+            if(!isTRUE(data_equal[[name]][[subname]])) {
+                warning("888888888888888888888888888888888888")
+                warning(paste(head(c(unlist(dat_orig[[name]][[subname]]), collapse = "; "), 100)))
+                warning("999999999999999999999999999999999999")
+                warning(paste(head(c(unlist(dat[[name]][[subname]]), collapse = "; "), 100)))
+            }
         }
     }
     

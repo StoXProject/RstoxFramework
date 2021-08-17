@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function returning the names of the StoX functions available for a model: — getAvailableStoxFunctionNames • RstoxFramework</title>
+<title>Convert to JSON — toJSON_Rstox • RstoxFramework</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Function returning the names of the StoX functions available for a model: — getAvailableStoxFunctionNames" />
-<meta property="og:description" content="Function returning the names of the StoX functions available for a model:" />
+<meta property="og:title" content="Convert to JSON — toJSON_Rstox" />
+<meta property="og:description" content="This function takes care of the defaults preferred by the Rstox packages" />
 
 
 
@@ -113,23 +113,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Function returning the names of the StoX functions available for a model:</h1>
-    <small class="dont-index">Source: <a href='https://github.com/StoXProject/RstoxFramework/blob/master/R/Framework.R'><code>R/Framework.R</code></a></small>
-    <div class="hidden name"><code>getAvailableStoxFunctionNames.Rd</code></div>
+    <h1>Convert to JSON</h1>
+    <small class="dont-index">Source: <a href='https://github.com/StoXProject/RstoxFramework/blob/master/R/Utilities.R'><code>R/Utilities.R</code></a></small>
+    <div class="hidden name"><code>toJSON_Rstox.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Function returning the names of the StoX functions available for a model:</p>
+    <p>This function takes care of the defaults preferred by the Rstox packages</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class='sourceCode r'><code><span class='fu'>getAvailableStoxFunctionNames</span><span class='op'>(</span><span class='va'>modelName</span><span class='op'>)</span></code></pre></div>
+    <div class="ref-usage sourceCode"><pre class='sourceCode r'><code><span class='fu'>toJSON_Rstox</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></code></pre></div>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>modelName</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
+      <th>x</th>
+      <td><p>An object to convert to JSON.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Parameters overriding the defaults digits = NA, auto_unbox = TRUE, na = "null", null = "null".</p></td>
     </tr>
     </table>
 

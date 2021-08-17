@@ -57,7 +57,6 @@ Imports:
     RstoxData (>= 1.2.1),
     RstoxBase (>= 1.4.2)
 Suggests: 
-    RCurl (>= 1.95-4.10),
     remotes (>= 2.0.0),
     testthat (>= 2.0.0)
 Additional_repositories: 

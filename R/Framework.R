@@ -175,7 +175,7 @@ validateStoxLibraryPackage <- function(packageName) {
         return(FALSE)
     }
     
-    # Check that all the exported functions have a valid JSON schema:
+    # Check that all the exported process data functions have a valid JSON schema:
     processDataSchema <- readProcessDataSchema(packageName)
     processDataSchemaNames <- names(processDataSchema)
     exportedProcessDataFunctions <- names(stoxFunctionAttributes)[sapply(stoxFunctionAttributes, "[[", "functionType") == "processData"]
@@ -196,6 +196,8 @@ validateStoxLibraryPackage <- function(packageName) {
             return(FALSE)
         }
     }
+    
+    # Add more checks...
     
     TRUE
 }
@@ -1104,14 +1106,14 @@ writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFi
     )
     
     # Convert project description to json structure: 
-    json <- RstoxBase::toJSON_Rstox(projectDescriptionList)
+    json <- toJSON_Rstox(projectDescriptionList)
     
     # Read any geojson objects stored in temporary file by convertProcessDataToGeojson():
     json <- replaceSpatialFileReference(json)
     
     # Fix pretty formatting by reading in and writing back the file:
     #write(json, projectDescriptionFile)
-    #json <- RstoxBase::toJSON_Rstox(jsonlite::read_json(projectDescriptionFile), pretty = TRUE)
+    #json <- toJSON_Rstox(jsonlite::read_json(projectDescriptionFile), pretty = TRUE)
     json <- jsonlite::prettify(json)
     
     # Validate the json structure with json schema
@@ -2396,7 +2398,7 @@ readProcessIndexTable <- function(projectPath, modelName = NULL, processes = NUL
     
     # If present, interpret the requested 'processes' input:
     if(length(processes)) {
-        if(is.na(processes)) {
+        if(identical(processes, NA)) {
             return(processIndexTable[FALSE, ])
         }
         processesNumeric <- matchProcesses(
@@ -2745,7 +2747,6 @@ getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, end
 #' 
 scanForModelError <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, only.valid = TRUE, return.processIndex = FALSE) {
     
-    
     # Read the memory file paths once, and insert to the get* functions below to speed things up:
     if(length(argumentFilePaths) == 0) {
         argumentFilePaths <- getArgumentFilePaths(projectPath)
@@ -2909,6 +2910,10 @@ getProcessAndFunctionNames <- function(projectPath, modelName = NULL, startProce
     )
     processIndices <- match(processIDs, processIndexTable$processID)
     processIndexTable <- processIndexTable[processIndices, ]
+    # Return an empty data.table if the processIndexTable is empty, after finidng the prior processes:
+    if(nrow(processIndexTable) == 0) {
+        return(data.table::data.table())
+    }
     
     # Add the projectPath:
     processIndexTable[, projectPath := projectPath]
@@ -3853,10 +3858,10 @@ formatProcessDataOne <-  function(processDataOne) {
     else if("features" %in% tolower(names(processDataOne))) {
         
         # Using geojsonsf instead of geojsonio to reduce the number of dependencies:
-        #processDataOne <- geojsonio::geojson_sp(RstoxBase::toJSON_Rstox(processDataOne, pretty = TRUE))
+        #processDataOne <- geojsonio::geojson_sp(toJSON_Rstox(processDataOne, pretty = TRUE))
         
         # Check for empty multipolygonm, which is not well treated by sf:
-        geosf <- geojsonsf::geojson_sf(RstoxBase::toJSON_Rstox(processDataOne, pretty = TRUE))
+        geosf <- geojsonsf::geojson_sf(toJSON_Rstox(processDataOne, pretty = TRUE))
         if(length(geosf$geometry)) {
             processDataOne <- sf::as_Spatial(geosf)
             
@@ -3905,7 +3910,7 @@ formatProcessDataOne <-  function(processDataOne) {
 
 
 simplifyListReadFromJSON <- function(x) {
-    jsonlite::fromJSON(RstoxBase::toJSON_Rstox(x), simplifyVector = TRUE)
+    jsonlite::fromJSON(toJSON_Rstox(x), simplifyVector = TRUE)
 }
 
 
@@ -5577,7 +5582,8 @@ purgeOutput <- function(projectPath, modelName) {
 #' @param replaceDataList A list named by the processes to replace output data for. See \code{\link{runProcess}}.
 #' @param force.restart Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.
 #' @param prugeStopFile Logical: Should the file that signals that the model should be stopped be deleted if present before running? This parameter does not yet seem to in use by any other function.
-#' @param ... \code{replaceArgs} can also be given directly.
+#' @param replaceArgsList A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.
+#' @param ... \code{replaceArgsList} can also be given directly.
 #' 
 #' @export
 #' 
@@ -5592,7 +5598,7 @@ runProcesses <- function(
     returnProcessOutput = FALSE, fileOutput = NULL, setUseProcessDataToTRUE = TRUE, 
     purge.processData = FALSE, 
     replaceDataList = list(), 
-    replaceArgs = list(), 
+    replaceArgsList = list(), 
     try = TRUE, 
     prugeStopFile = FALSE, 
     ...
@@ -5615,13 +5621,13 @@ runProcesses <- function(
     processIDs <- processIndexTable$processID
     processNames <- processIndexTable$processName
     if(!length(processIDs)) {
-        warning("StoX: Empty model ", modelName, "of project, ", projectPath)
+        warning("StoX: Empty model ", modelName, " of project, ", projectPath)
         return(NULL)
     }
     
     # Check for parameters to override the processes by in "...":
     #replaceArgs <- getReplaceArgs(replaceArgs, ..., processNames = processNames)
-    replaceArgs <- getReplaceArgs(replaceArgs, ...)
+    replaceArgsList <- getreplaceArgsList(replaceArgsList, ...)
     
     # Check that the project exists:
     failedVector <- logical(length(processIDs))
@@ -5663,10 +5669,14 @@ runProcesses <- function(
         }
     }
     
+    replaceArgsListFull <- structure(vector("list", length(processIDs)), names = processNames)
+    valid <- intersect(names(replaceArgsListFull), names(replaceArgsList))
+    replaceArgsListFull[valid] <- replaceArgsList[valid]
+    
     mapply(
         runProcess, 
         processID = processIDs, 
-        #replaceArgs = replaceArgs[processNames], 
+        replaceArgs = replaceArgsListFull, 
         replaceData = replaceDataList[processNames], 
         MoreArgs = list(
             projectPath = projectPath, 
@@ -5676,7 +5686,7 @@ runProcesses <- function(
             fileOutput = fileOutput, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
             purge.processData = purge.processData, 
-            replaceArgs = replaceArgs, 
+            #replaceArgs = replaceArgsList, 
             try = try
         )
     )
@@ -5715,18 +5725,18 @@ runProcesses <- function(
 }
 
 
-# Function to merge the replaceArgs list and the ... input:
-getReplaceArgs <- function(replaceArgs = list(), ...){
+# Function to merge the replaceArgsList list and the ... input:
+getreplaceArgsList <- function(replaceArgsList = list(), ...){
     
     # Get the specifications given as '...':
     dotlist <- list(...)
     
     # Merge and unique the inputs:
-    replaceArgs <- c(replaceArgs, dotlist)
+    replaceArgsList <- c(replaceArgsList, dotlist)
     # parlist <- unique(parlist) THIS REMOVED THE NAMES AND SHOULD NOT BE USED
-    replaceArgs <- replaceArgs[!duplicated(replaceArgs)]
+    replaceArgsList <- replaceArgsList[!duplicated(replaceArgsList)]
     
-    return(replaceArgs)
+    return(replaceArgsList)
 }
 
 

@@ -19,7 +19,7 @@ runProcesses(
   setUseProcessDataToTRUE = TRUE,
   purge.processData = FALSE,
   replaceDataList = list(),
-  replaceArgs = list(),
+  replaceArgsList = list(),
   try = TRUE,
   prugeStopFile = FALSE,
   ...
@@ -54,13 +54,13 @@ runProcesses(
 
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
 
-\item{replaceArgs}{A list of function parameters and inputs to override.}
+\item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
 \item{prugeStopFile}{Logical: Should the file that signals that the model should be stopped be deleted if present before running? This parameter does not yet seem to in use by any other function.}
 
-\item{...}{\code{replaceArgs} can also be given directly.}
+\item{...}{\code{replaceArgsList} can also be given directly.}
 }
 \description{
 Run processes of a model.

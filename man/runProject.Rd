@@ -16,7 +16,7 @@ runProject(
   save = TRUE,
   force.restart = FALSE,
   replaceDataList = list(),
-  replaceArgs = list(),
+  replaceArgsList = list(),
   fileOutput = NULL,
   setUseProcessDataToTRUE = TRUE,
   purge.processData = FALSE,
@@ -49,7 +49,7 @@ runProject(
 
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
 
-\item{replaceArgs}{A list of function parameters and inputs to override.}
+\item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
 
 \item{fileOutput}{Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.}
 
@@ -63,7 +63,7 @@ runProject(
 
 \item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
 
-\item{...}{\code{replaceArgs} can also be given directly.}
+\item{...}{\code{replaceArgsList} can also be given directly.}
 }
 \value{
 A list of model output.

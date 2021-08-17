@@ -717,6 +717,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
     }
     
+    # browser()
     # Run the test project:
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
@@ -725,11 +726,9 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     openProject(projectPath_copy)
     dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE)
     
-    bioticFile <- system.file("test",  "biotic_2020821.xml", package = "RstoxFramework")
-    exampleData <- StoxBiotic(ReadBiotic(bioticFile))
-
     # Read the original data:
-    dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
+    #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
+    dat_orig <- readModelData(projectPath_original, unlist = 1)
     
     # Compare only those elemens common to the two datasets:
     processNames_present <- all(names(dat_orig) %in% names(dat))
@@ -750,6 +749,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     # Check the actual data:
     data_equal <- list()
     
+    browser()
+    
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
     
     for(name in names(dat_orig)) {
@@ -765,6 +766,32 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             }
             else {
                 data_equal[[name]][[subname]] <- all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+            }
+            
+            if(!isTRUE(data_equal[[name]][[subname]])) {
+                warning("888888888888888888888888888888888888")
+                warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
+                warning("999999999999999999999999999999999999")
+                warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
+                warning("777777777777777777777777777777777")
+                
+                atDiff <- which(dat_orig[[name]][[subname]] != dat[[name]][[subname]], arr.ind = TRUE)
+                warning(paste(c(atDiff), collapse = "; "))
+                warning("6666666666666")
+                
+                warning(paste(c(dat[[name]][[subname]][atDiff]), collapse = "; "))
+                warning("555555555555555")
+                warning(paste(c(dat_orig[[name]][[subname]][atDiff]), collapse = "; "))
+                warning("44444444444444444")
+                
+                
+                
+                temp <- file.path(projectPath_copy, "output/report/WriteICESAcoustic/ListUserFile25__L1596.9-4452.2 - test 12.xml.csv")
+                if(file.exists(temp)) {
+                    warning(paste(readLines(temp), collapse = "; "))
+                    warning("66666666666666666666666666666666666")
+                }
+                
             }
         }
     }
@@ -790,6 +817,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     if(!ok) {
+        warning(paste(names(uallTests), uallTests, collapse = ", \n", sep = "-"))
         return(allTests)
     }
     else {
@@ -843,3 +871,48 @@ compareSPDF <- function(x, y) {
     yc<- getAllCoords(y)
     all.equal(xc, yc)
 }
+
+
+
+#' Convert to JSON
+#' 
+#' This function takes care of the defaults preferred by the Rstox packages
+#' 
+#' @param x An object to convert to JSON.
+#' @param ... Parameters overriding the defaults digits = NA, auto_unbox = TRUE, na = "null", null = "null".
+#' 
+toJSON_Rstox <- function(x, ...) {
+    # Define defaults:
+    digits <- NA
+    auto_unbox <- TRUE
+    # Changed on 2021-04-21 to supports NA strings:
+    #na <- "null"
+    na <- "string"
+    null <- "null"
+    
+    # Override by ...:
+    lll <- list(...)
+    
+    if(!"digits" %in% names(lll)) {
+        lll$digits <- digits
+    }
+    if(!"auto_unbox" %in% names(lll)) {
+        lll$auto_unbox <- auto_unbox
+    }
+    if(!"na" %in% names(lll)) {
+        lll$na <- na
+    }
+    if(!"null" %in% names(lll)) {
+        lll$null <- null
+    }
+    
+    #lll$x <- x
+    lll <- c(list(x = x), lll
+    )
+    
+    # Use ISO8601 for time:
+    lll$POSIXt ="ISO8601"
+    
+    do.call(jsonlite::toJSON, lll)
+}
+

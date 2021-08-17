@@ -9,7 +9,7 @@ readModelData(
   modelName = NULL,
   processName = NULL,
   verifyFiles = FALSE,
-  unlist.models = FALSE
+  unlist = FALSE
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ readModelData(
 
 \item{verifyFiles}{Logical: If TRUE verify that the files are from processes that exist in the project.}
 
-\item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
+\item{unlist}{Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.}
 }
 \value{
 A list of model output.

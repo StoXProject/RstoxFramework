@@ -11,6 +11,7 @@
 #' @param save Logical: If TRUE save the project after running.
 #' @param force.restart Logical: If TRUE restart the model before running.
 #' @param close Logical: If TRUE close the project after running and getting the output.
+#' @param returnModelData Logical: If TRUE return the output of the model runs.
 #' 
 #' @return
 #' A list of model output.
@@ -22,9 +23,10 @@ runModel <- function(
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
     run = TRUE, save = TRUE, force.restart = FALSE, 
-    replaceDataList = list(), replaceArgs = list(), 
+    replaceDataList = list(), replaceArgsList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
+    returnModelData = TRUE, 
     try = TRUE, 
     close = FALSE, 
     ...
@@ -47,7 +49,7 @@ runModel <- function(
                 save = save, 
                 force.restart = force.restart, 
                 replaceDataList = replaceDataList, 
-                replaceArgs = replaceArgs, 
+                replaceArgsList = replaceArgsList, 
                 fileOutput = fileOutput, 
                 setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
                 purge.processData = purge.processData, 
@@ -55,16 +57,18 @@ runModel <- function(
                 ...
             )
             # Get the model data:
-            modelData <- getModelData(
-                projectPath = projectPath, 
-                modelName = modelName, 
-                processes = processes, 
-                startProcess = startProcess, 
-                endProcess = endProcess, 
-                drop.datatype = drop.datatype, 
-                warn = FALSE, 
-                unlistDepth2 = unlistDepth2
-            )
+            if(returnModelData) {
+                modelData <- getModelData(
+                    projectPath = projectPath, 
+                    modelName = modelName, 
+                    processes = processes, 
+                    startProcess = startProcess, 
+                    endProcess = endProcess, 
+                    drop.datatype = drop.datatype, 
+                    warn = FALSE, 
+                    unlistDepth2 = unlistDepth2
+                )
+            }
         }
         else{
             warning("The path ", projectPath, " does not point to a valid StoX project.")
@@ -104,7 +108,7 @@ runProject <- function(
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype  = TRUE, unlistDepth2 = FALSE, 
     run = TRUE, save = TRUE, force.restart = FALSE, 
-    replaceDataList = list(), replaceArgs = list(), 
+    replaceDataList = list(), replaceArgsList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
     try = TRUE, 
@@ -125,7 +129,7 @@ runProject <- function(
             save = save, 
             force.restart = force.restart, 
             replaceDataList = replaceDataList, 
-            replaceArgs = replaceArgs, 
+            replaceArgsList = replaceArgsList, 
             fileOutput = fileOutput, 
             processes = processes, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
@@ -175,7 +179,7 @@ runProjects <- function(
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
     run = TRUE, save = TRUE, force.restart = FALSE, 
-    replaceDataList = list(), replaceArgs = list(), 
+    replaceDataList = list(), replaceArgsList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
     try = TRUE, 
@@ -192,7 +196,7 @@ runProjects <- function(
         processes = processes, startProcess = startProcess, endProcess = endProcess, 
         drop.datatype = drop.datatype, unlistDepth2 = unlistDepth2, 
         run = run, save = save, force.restart = force.restart, 
-        replaceDataList = replaceDataList, replaceArgs = replaceArgs, 
+        replaceDataList = replaceDataList, replaceArgsList = replaceArgsList, 
         fileOutput = fileOutput, 
         setUseProcessDataToTRUE = setUseProcessDataToTRUE, purge.processData = purge.processData, 
         try = try, 
@@ -316,19 +320,38 @@ createNestedListElement <- function(x, namesVector) {
 #' @inheritParams general_arguments
 #' @inheritParams runProject
 #' @param verifyFiles Logical: If TRUE verify that the files are from processes that exist in the project.
+#' @param unlist Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.
 #' 
 #' @return
 #' A list of model output.
 #' 
 #' @export
 #'  
-readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist.models = FALSE) {
+readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist = FALSE) {
     # List the files of the project:
     if(isProject(projectPath)) {
         outputFolders <- getProjectPaths(projectPath)$outputFolders
         names(outputFolders) <- basename(outputFolders)
         outputFiles <- lapply(outputFolders, listOutputfiles)
-        # Place the file paths into a recursive list:
+        
+        
+        matchName <- function(x, name = NULL) {
+            if(length(name)) {
+                presentName <- intersect(names(x), name)
+                x[presentName]
+            }
+        }
+        
+        # Subset by the modelName:
+        if(length(modelName)) {
+            outputFiles <- matchName(outputFiles, modelName)
+        }
+        # Subset by the processName:
+        if(length(processName)) {
+            outputFiles <- lapply(outputFiles, matchName, processName)
+        }
+        
+        
         
         
         if(verifyFiles) {
@@ -353,9 +376,19 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         output <- rapply(outputFiles, readStoxOutputFiles, how = "replace")
         
         # Drop the list over models:
-        if(unlist.models) {
+        if(isTRUE(unlist)) {
+            unlist <- 2
+        }
+        if(unlist > 1) {
+            output <- lapply(output, function(x) unlist(unname(x), recursive = FALSE))
+        }
+        if(unlist > 0) {
             output <- unlist(unname(output), recursive = FALSE)
         }
+        # Did not work:
+        #if(unlist) {
+        #    output <- unlistToDataType(output)
+        #}
         
         return(output)
     }
@@ -391,7 +424,7 @@ readStoxOutputFile <- function(path) {
         output <- readOutputRDataFile(path)
     }
     else if(tolower(ext) %in% c("json", "geojson")) {
-        output <- reasdGeoJSON(path)
+        output <- RstoxBase::readGeoJSON(path)
     }
     else if(tolower(ext) %in% "txt") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:

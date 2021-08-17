@@ -1058,7 +1058,7 @@ cellToJSONStringOne <- function(x) {
         x <- ""
     }
     if(!is.character(x)) {
-        x <- as.character(RstoxBase::toJSON_Rstox(x))
+        x <- as.character(toJSON_Rstox(x))
     }
     return(x)
 }
@@ -1088,7 +1088,7 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
     # Convert to JSON string for each element if not already character:
     else if(!data.table::is.data.table(x)) {
         if(!is.character(x)) {
-            x <- sapply(x, function(y) as.character(RstoxBase::toJSON_Rstox(y)))
+            x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
         }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):
@@ -1097,7 +1097,7 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
     }
     
     if(stringifyVector) {
-        x <- as.character(RstoxBase::toJSON_Rstox(x))
+        x <- as.character(toJSON_Rstox(x))
     }
     return(x)
 }
@@ -1112,7 +1112,7 @@ possibleValuesToJSONStringOne <- function(x, nrow) {
     # Convert to JSON string for each element if not already character:
     else {
         if(!is.character(x)) {
-            x <- sapply(x, function(y) as.character(RstoxBase::toJSON_Rstox(y)))
+            x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
         }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):

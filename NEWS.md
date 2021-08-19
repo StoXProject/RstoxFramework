@@ -1,3 +1,6 @@
+# RstoxFramework v3.1.2 (2021-8-19)
+* Updated test projects for ICES export to pass the initial checks on https://acoustic.ices.dk/submit. Moved toJSON_Rstox() from RstoxBase to RstoxFramework, and moved reading AcousticPSU, BioticAssignment and StratumPolygon the other way.
+
 # RstoxFramework v3.0.30 (2021-06-16)
 * Added parallel bootstrapping.
 * Added BaselineSeedTable in Bootstrap().

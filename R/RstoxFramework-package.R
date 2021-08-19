@@ -14,17 +14,18 @@
 
 # Global variables
 utils::globalVariables(c(
-	 "RstoxFrameworkEnv", ":=", ".", "..PSU", "..activeProcessID", "..clickPointNames",
-	 "..coordinateNames", "..functionInputs", "..functionName", "..functionParameters",
-	 "..infoToKeep", "..processDirty", "..newProcessName", "CruiseKey", "Latitude", "Latitude2",
-	 "LogOrigin", "LogOrigin2", "Longitude", "Longitude2", "PSU", "atRemove", "canShowInMap",
-	 "filePahts", "functionName", "functionOutputDataType", "hasBeenRun", "hasProcessData",
-	 "modelName", "processDirty", "name", "possibleValues", "processID", "projectPath", "value",
-	 "..EDSUInfoToKeep", "..haulInfoToKeep", "..ind", "..propertyDirty", "..stationInfoToKeep",
-	 "..validInd", "BootstrapID", "JavaJEXL2R", "ProcessName", "ResampleFunction", "Stratum",
-	 "col2rgb", "colorRampPalette", "dataTable2SpatialPolygonsDataFrame", "dataType",
-	 "functionArguments", "packageVersion", "processIndex", "processName",
-	 "readProjectDescriptionXML", "resampledCountWithUniqueName", "writeProjectXML"))
+	 ".", "..Cruise", "..DateTime", "..EDSUInfoToKeep", "..PSU", "..activeProcessID",
+	 "..clickPointNames", "..coordinateNames", "..functionInputs", "..functionName",
+	 "..functionParameters", "..haulInfoToKeep", "..ind", "..newProcessName", "..processDirty",
+	 "..propertyDirty", "..stationInfoToKeep", "..validInd", "BootstrapID", "CruiseKey", "EDSU",
+	 "JavaJEXL2R", "Latitude", "Latitude2", "Layer", "LogOrigin", "LogOrigin2", "Longitude",
+	 "Longitude2", "PSU", "Package", "ProcessName", "ResampleFunction", "StoX", "Version",
+	 "attriributes<-", "binaryPath", "canShowInMap", "capture.output", "col2rgb",
+	 "colorRampPalette", "dataTable2SpatialPolygonsDataFrame", "dataType", "download.file",
+	 "functionName", "functionOutputDataType", "hasProcessData", "install.packages", "modelName",
+	 "models", "name", "newVersion", "possibleValues", "processID", "processIndex", "processName",
+	 "processNames", "projectList", "projectPath", "read.table", "remove.packages",
+	 "resampledCountWithUniqueName", "value"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

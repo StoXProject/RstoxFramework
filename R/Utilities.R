@@ -1,5 +1,5 @@
-#*********************************************
-#*********************************************
+##############################################
+##############################################
 #' Merge two data tables with all=TRUE and the specified columns and keys.
 #' 
 #' Merges two data tables (see \code{\link[data.table]{data.table}}) with all=TRUE, while keeping only columns of the data tables with names intersecting \code{var}, and using the intersect of \code{keys} and the names of the data tables as the 'by' argument.
@@ -84,6 +84,8 @@ flattenDataTable <- function(x, replace = NA) {
     x <- replaceEmptyInDataTable(x, replace = replace)
 
     x <- expandDT(x)
+    
+    return(x)
 }
 
 #' Function to convert data.table to fixed width:
@@ -92,9 +94,9 @@ flattenDataTable <- function(x, replace = NA) {
 #' @param columnSeparator The string to separate columns by, defaulted to a single space. 
 #' @param lineSeparator The string to separate lines by, defaulted to a NULL, which keeps the output as a vector of strings.
 #' @param na The string to replace NAs by, defaulted to "-".
-#' @param list.pretty Logical: If TRUE wrap the output in a list in the case that \code{pretty} is TRUE.
+#' @param enable.auto_unbox Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.
 #' 
-fixedWidthDataTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", list.pretty = FALSE) {
+fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE) {
     # Return immediately if x has length 0:
     if(length(x) == 0) {
         return(x)
@@ -102,38 +104,50 @@ fixedWidthDataTable <- function(x, columnSeparator = " ", lineSeparator = NULL, 
     
     # Hack to make it possible to print matrices:
     if(is.matrix(x)) {
-        x <- data.table::as.data.table(x)
+        # Replace all NA with the user specified na:
+        x[is.na(x)] <- na
+        
+        # Add the column names:
+        if(length(colnames(x))) {
+            x <- rbind(colnames(x), x)
+        }
+        
+        # Right pad with spaecs:
+        x <- apply(x, 2, function(y) stringr::str_pad(y, max(nchar(y)), pad = " "))
+        
+        # Collapse to lines:
+        x <- apply(x, 1, paste, collapse = columnSeparator)
     }
-    
-    # First convert all columns to character:
-    x <- x[, (colnames(x)) := lapply(.SD, as.character), .SDcols = names(x)]
-    
-    # Replace all NA with the user specified na:
-    x[is.na(x)] <- na
-    
-    # Add the column names:
-    out <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))
-    # Right pad with spaecs:
-    out <- out[, lapply(.SD, function(y) stringr::str_pad(y, max(nchar(y)), pad = " "))]
-    
-    #for(name in names(out)) {
-    #    out[, eval(name) := lapply(get(name), function(y) paste0(y, paste(rep(" ", max(nchar(get(name))) - nchar(y)), collapse = "")))]
-    #}
-    
-    
-    # Collapse to lines:
-    out <- out[, do.call
-               (paste, c(.SD, sep = columnSeparator)), .SDcols = names(x)]
+    else if(data.table::is.data.table(x)) {
+        # First convert all columns to character:
+        x <- x[, (colnames(x)) := lapply(.SD, as.character), .SDcols = names(x)]
+        
+        # Replace all NA with the user specified na:
+        x[is.na(x)] <- na
+        
+        # Add the column names:
+        x <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))
+        # Right pad with spaecs:
+        x <- x[, lapply(.SD, function(y) stringr::str_pad(y, max(nchar(y)), pad = " "))]
+        
+        #for(name in names(x)) {
+        #    x[, eval(name) := lapply(get(name), function(y) paste0(y, paste(rep(" ", max(nchar(get(name))) - nchar(y)), collapse = "")))]
+        #}
+        
+        
+        # Collapse to lines:
+        x <- x[, do.call(paste, c(.SD, sep = columnSeparator)), .SDcols = names(x)]
+    }
     
     # Collapse the lines if requested:
     if(length(lineSeparator)) {
-        out <- paste(out, collapse = lineSeparator)
+        x <- paste(x, collapse = lineSeparator)
     }
-    else if(list.pretty) {
-        out <- list(out)
+    else if(enable.auto_unbox && length(x) == 1) {
+        x <- list(x)
     }
     
-    out
+    return(x)
 }
 
 # Function to extract the trailing integer of a string (vector):
@@ -141,7 +155,8 @@ getTrailingInteger <- function(x, integer = TRUE) {
     # Get the trailing numerics:
     #trailing <- stringr::str_extract(x, "[^[a-z]]*$")
     #trailing <- stringr::str_extract(x, "\\-*\\d+\\.*\\d*")
-    trailing <- gsub("^\\d.*|[A-Za-z]", "", x)
+    #trailing <- gsub("^\\d.*|[A-Za-z]", "", x) # Kept the underscore
+    trailing <- gsub( "^\\d.*|[A-Za-z[:punct:][:space:]]", "", x )
     
     # Convert to numeric if specified:
     if(integer) {
@@ -182,7 +197,9 @@ getNewDefaultName <- function(names, prefix) {
     return(newName)
 }
 
-# Function to convert from json to R expression:
+#' Function to convert from json to R expression:
+#' 
+#' @param json A JSON string
 #' 
 #' @export
 #' 
@@ -195,11 +212,14 @@ json2expression <- function(json) {
 }
 
 
-# Function to convert from R list to R expression:
+#' Function to convert from R list to R expression:
+#' 
+#' @param l An R list.
+#' @param parentHasSiblings Logical: If TRUE there are more than one element in the top level of the list.
 #' 
 #' @export
 #' 
-list2expression <- function(l, parentHasSiblings=FALSE) {
+list2expression <- function(l, parentHasSiblings = FALSE) {
     # Declare the resulting expression
     result <- NULL
     # If the current rules or expression should be negated, we need to enclose the expression in paretheses:
@@ -213,7 +233,7 @@ list2expression <- function(l, parentHasSiblings=FALSE) {
         link <- paste('', l$condition, '')
         
         # Recurse into the children:
-        result <- paste(lapply(l$rules, list2expression, parentHasSiblings=length(l$rules) > 1), collapse = link)
+        result <- paste(lapply(l$rules, list2expression, parentHasSiblings = length(l$rules) > 1), collapse = link)
     } 
     # Otherwise build the expression:
     else {
@@ -456,7 +476,6 @@ verifyPaths <- function(x) {
 
 
 getMemoryFileFormat <- function(x) {
-    
     if(length(x) == 0) {
         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Empty")
     }
@@ -471,6 +490,18 @@ getMemoryFileFormat <- function(x) {
     }
     else if("SpatialPointsDataFrame" %in% class(x)) {
         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
+    }
+    else if(is.character(x)) {
+        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Character")
+    }
+    else if(is.numeric(x)) {
+        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Numeric")
+    }
+    else if(is.integer(x)) {
+        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Integer")
+    }
+    else if(is.logical(x)) {
+        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Logical")
     }
     else if(is.list(x)) {
         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_List")
@@ -498,10 +529,11 @@ writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
     }
     
     # Write the file:
-    if(ext == "fst") {
-        fst::write_fst(as.data.frame(x), path = filePath)
-    }
-    else if(ext == "rds") {
+    #if(ext == "fst") {
+    #    fst::write_fst(as.data.frame(x), path = filePath)
+    #}
+    #else 
+    if(ext == "rds") {
         saveRDS(x, file = filePath)
     }
     else {
@@ -515,27 +547,22 @@ writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
 
 writeMemoryFiles <- function(objects, filePathsSansExt, writeOrderFile = TRUE) {
     
-    # Write the files:
-    filePaths <- mapply(writeMemoryFile, objects, filePathsSansExt)
+    # Write the files, in an mapply loop if not a valid class at the top level (for outputDepth 2):
+    if(firstClass(objects) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
+        filePaths <- writeMemoryFile(objects, filePathsSansExt)
+    }
+    else {
+        filePaths <- mapply(writeMemoryFile, objects, filePathsSansExt)
+    }
+    
     
     # Write the orderfile:
     if(writeOrderFile) {
         orderFileName <- file.path(dirname(filePathsSansExt[1]), "tableOrder.txt")
         write(filePaths, orderFileName)
-        #orderFileName <- file.path(dirname(filePathsSansExt[1]), "tableOrder.rds")
-        #saveRDS(filePaths, orderFileName)
-        
-        ## Write also the table names to file:
-        #tableNames <- lapply(objects, function(x) 
-        #    if(data.table::is.data.table(x)) 
-        #        names(x) 
-        #    else 
-        #        RstoxBase::getStratumNames(x)
-        #)
-        #namesFileName <- file.path(dirname(filePathsSansExt[1]), "tableNames.rds")
-        #saveRDS(tableNames, namesFileName)
     }
 }
+
 
 readMemoryFile <- function(filePath) {
     
@@ -543,10 +570,11 @@ readMemoryFile <- function(filePath) {
     ext <- tools::file_ext(filePath)
     
     # Read the file:
-    if(grepl("fst", ext, ignore.case = TRUE)) {
-        output <- data.table::as.data.table(fst::read_fst(path = filePath))
-    }
-    else if(grepl("rds", ext, ignore.case = TRUE)) {
+    #if(grepl("fst", ext, ignore.case = TRUE)) {
+    #    output <- data.table::as.data.table(fst::read_fst(path = filePath))
+    #}
+    #else 
+    if(grepl("rds", ext, ignore.case = TRUE)) {
         output <- readRDS(file = filePath)
     }
     else {
@@ -582,6 +610,15 @@ isProcessOutputDataType <- function(processOutput) {
     names(processOutput) %in% getRstoxFrameworkDefinitions("stoxDataTypes")$functionOutputDataType
 }
 
+
+hasUseOutputData <- function(projectPath, modelName, processID) {
+    functionParameters <- getFunctionParameters(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID
+    )
+    "UseOutputData" %in% names(functionParameters)
+}
 
 
 
@@ -621,5 +658,261 @@ expandDT <- function(DT, toExpand = NULL) {
     }
     
     DT
+}
+
+as.list1 <- function(x) {
+    if(!length(x) && !is.list(x) && is.vector(x)) {
+        x <- list()
+    }
+    if(length(x) == 1 && !is.list(x) && is.vector(x)) {
+        x <- list(x)
+    }
+    
+    return(x)
+}
+
+
+capitalizeFirstLetter <- function(x) {
+    gsub("(^[[:alpha:]])", "\\U\\1", x, perl=TRUE)
+}
+
+
+
+
+
+#' Function for unzipping a zipped StoX project
+#' 
+#' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
+#' @param exdir The direcory to unzip to, defaulted to the current directory.
+#' 
+#' @export
+#'
+unzipProject <- function(projectPath, exdir = ".") {
+    if(!isProject(projectPath)) {
+        stop("The zip ", projectPath, " does not contain a valid StoX project at the root folder.")
+    }
+    
+    utils::unzip(projectPath, exdir = exdir)
+    projectName <- basename(tools::file_path_sans_ext(projectPath))
+    unzippedProjectPath <- file.path(exdir, projectName)
+    return(unzippedProjectPath)
+}
+
+
+
+#' Function for comparing existing output files with the memory read using runProject()
+#' 
+#' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
+#' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
+#' 
+#' @export
+#'
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath) {
+    
+    # Unzip if zipped:
+    if(tolower(tools::file_ext(projectPath)) == "zip") {
+        projectPath <- unzipProject(projectPath, exdir = tempdir())
+    }
+    if(projectPath_original != projectPath && tolower(tools::file_ext(projectPath_original)) == "zip") {
+        projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
+    }
+    
+    # browser()
+    # Run the test project:
+    projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
+    temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
+    
+    print(projectPath_copy)
+    openProject(projectPath_copy)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE)
+    
+    # Read the original data:
+    #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
+    dat_orig <- readModelData(projectPath_original, unlist = 1)
+    
+    # Compare only those elemens common to the two datasets:
+    processNames_present <- all(names(dat_orig) %in% names(dat))
+    
+    # Expect all column names:
+    tableNames_identical <- list()
+    columnNames_identical <- list()
+    for(name in names(dat_orig)) {
+        # Check identical table names: 
+        tableNames_identical[[name]] <- identical(sort(names(dat_orig[[name]])), sort(names(dat[[name]])))
+        # Check identical column names: 
+        columnNames_identical[[name]] <- list()
+        for(subname in names(dat_orig[[name]])) {
+            columnNames_identical[[name]][[subname]] <- identical(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
+        }
+    }
+    
+    # Check the actual data:
+    data_equal <- list()
+    
+    browser()
+    
+    # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
+    
+    for(name in names(dat_orig)) {
+        data_equal[[name]] <- list()
+        for(subname in names(dat_orig[[name]])) {
+            if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
+                data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfFirst(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+                # This caused trouble when converting character to POSIXct:
+                #data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfSecond(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+            }
+            else if("SpatialPolygonsDataFrame" %in% class(dat_orig[[name]][[subname]])){
+                data_equal[[name]][[subname]] <- compareSPDF(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+            }
+            else {
+                data_equal[[name]][[subname]] <- all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+            }
+            
+            if(!isTRUE(data_equal[[name]][[subname]])) {
+                warning("888888888888888888888888888888888888")
+                warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
+                warning("999999999999999999999999999999999999")
+                warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
+                warning("777777777777777777777777777777777")
+                
+                atDiff <- which(dat_orig[[name]][[subname]] != dat[[name]][[subname]], arr.ind = TRUE)
+                warning(paste(c(atDiff), collapse = "; "))
+                warning("6666666666666")
+                
+                warning(paste(c(dat[[name]][[subname]][atDiff]), collapse = "; "))
+                warning("555555555555555")
+                warning(paste(c(dat_orig[[name]][[subname]][atDiff]), collapse = "; "))
+                warning("44444444444444444")
+                
+                
+                
+                temp <- file.path(projectPath_copy, "output/report/WriteICESAcoustic/ListUserFile25__L1596.9-4452.2 - test 12.xml.csv")
+                if(file.exists(temp)) {
+                    warning(paste(readLines(temp), collapse = "; "))
+                    warning("66666666666666666666666666666666666")
+                }
+                
+            }
+        }
+    }
+    
+    allTests <- list(
+        processNames_present = processNames_present,
+        tableNames_identical = tableNames_identical,
+        columnNames_identical = columnNames_identical,
+        data_equal = data_equal
+    )
+    
+    ok <- all(unlist(allTests) %in% TRUE)
+    
+    
+    uallTests <- unlist(allTests)
+    
+    atNotTRUE <- !uallTests %in% TRUE
+    
+    if(any(atNotTRUE)) {
+        out <- uallTests[atNotTRUE]
+        print(allTests)
+        warning(paste(names(out), out, collapse = ",", sep = "-"))
+    }
+    
+    if(!ok) {
+        warning(paste(names(uallTests), uallTests, collapse = ", \n", sep = "-"))
+        return(allTests)
+    }
+    else {
+        return(TRUE)
+    }
+}
+
+# Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
+compareDataTablesUsingClassOfFirst <- function(x, y) {
+    # Get the classes of the first and second table:
+    classes_in_x <- sapply(x, firstClass)
+    classes_in_y <- sapply(y, firstClass)
+    
+    if(!identical(classes_in_x, classes_in_y)) {
+        # Coerce to the class in the memory:
+        differ <- names(x)[classes_in_x != classes_in_y]
+        for(col in differ){
+            data.table::set(x, j = col, value = methods::as(x[[col]], classes_in_y[col]))
+        }
+    }
+    # Check equality:
+    all.equal(x, y, check.attributes = FALSE)
+}
+
+# Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
+compareDataTablesUsingClassOfSecond <- function(x, y) {
+    # Get the classes of the first and second table:
+    classes_in_x <- sapply(x, firstClass)
+    classes_in_y <- sapply(y, firstClass)
+    if(!identical(classes_in_x, classes_in_y)) {
+        # Coerce to the class in the memory:
+        differ <- names(x)[classes_in_x != classes_in_y]
+        for(col in differ){
+            data.table::set(y, j = col, value = methods::as(y[[col]], classes_in_x[col]))
+        }
+    }
+    # Check equality:
+    all.equal(x, y, check.attributes = FALSE)
+}
+
+# Get all coordinates of a SpatialPolygonsDataFrame in one data.table:
+getAllCoords <- function(x) {
+    out <- RstoxBase::getStratumPolygonList(x)
+    out <- data.table::rbindlist(lapply(out, unname))
+    return(out)
+}
+
+# Compare two SpatialPolygonsDataFrames using only the polygons:
+compareSPDF <- function(x, y) {
+    xc<- getAllCoords(x)
+    yc<- getAllCoords(y)
+    all.equal(xc, yc)
+}
+
+
+
+#' Convert to JSON
+#' 
+#' This function takes care of the defaults preferred by the Rstox packages
+#' 
+#' @param x An object to convert to JSON.
+#' @param ... Parameters overriding the defaults digits = NA, auto_unbox = TRUE, na = "null", null = "null".
+#' 
+toJSON_Rstox <- function(x, ...) {
+    # Define defaults:
+    digits <- NA
+    auto_unbox <- TRUE
+    # Changed on 2021-04-21 to supports NA strings:
+    #na <- "null"
+    na <- "string"
+    null <- "null"
+    
+    # Override by ...:
+    lll <- list(...)
+    
+    if(!"digits" %in% names(lll)) {
+        lll$digits <- digits
+    }
+    if(!"auto_unbox" %in% names(lll)) {
+        lll$auto_unbox <- auto_unbox
+    }
+    if(!"na" %in% names(lll)) {
+        lll$na <- na
+    }
+    if(!"null" %in% names(lll)) {
+        lll$null <- null
+    }
+    
+    #lll$x <- x
+    lll <- c(list(x = x), lll
+    )
+    
+    # Use ISO8601 for time:
+    lll$POSIXt ="ISO8601"
+    
+    do.call(jsonlite::toJSON, lll)
 }
 

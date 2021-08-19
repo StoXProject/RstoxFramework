@@ -1,6 +1,7 @@
-# A list of the attributes of the exported StoX functions:
-# The format describes the actual content, such as catchabilityTable, filePath, filter, etc. These are used by StoX to choose action on these parameters.
-# The primitive type (one of integer, double, logical, character) will be interpreted in the process property functions from the type of the function input or parameter.
+#' A list of the attributes of the exported StoX functions:
+#' 
+#' The format describes the actual content, such as catchabilityTable, filePath, filter, etc. These are used by StoX to choose action on these parameters.
+#' The primitive type (one of integer, double, logical, character) will be interpreted in the process property functions from the type of the function input or parameter.
 #' 
 #' @export
 #' 
@@ -11,7 +12,9 @@ stoxFunctionAttributes <- list(
         functionCategory = "analysis", 
         functionOutputDataType = "BootstrapData", 
         functionParameterFormat = list(
-            BootstrapMethodTable = "bootstrapMethodTable"
+            BootstrapMethodTable = "bootstrapMethodTable", 
+            OutputProcesses = "outputProcesses", 
+            BaselineSeedTable = "baselineSeedTable"
         )
     ), 
     
@@ -26,15 +29,18 @@ stoxFunctionAttributes <- list(
         ), 
         functionArgumentHierarchy = list(
             AggregationWeightingVariable = list(
-                ReportFunction = expression(RstoxBase::getWeightingFunctions())
+                AggregationFunction = expression(RstoxBase::getWeightingFunctions())
             ), 
             BootstrapReportWeightingVariable = list(
-                ReportFunction = expression(RstoxBase::getWeightingFunctions())
+                BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
             )
         )
     )
 )
 
+#' Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:
+#' 
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
@@ -42,7 +48,7 @@ getResamplableProcesses <- function(projectPath) {
    
     # Get the data types that can be resampled:
     resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
-    # Find the processes that can be resampled:
+    # Find the functions that can be resampled:
     stoxLibrary <- getRstoxFrameworkDefinitions("stoxLibrary")
     validFunctions <- names(stoxLibrary)[sapply(stoxLibrary, "[[", "functionOutputDataType")  %in% resamplableDataTypes]
     
@@ -57,6 +63,7 @@ getResamplableProcesses <- function(projectPath) {
     return(processNames)
 }
 
+#' Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:
 #' 
 #' @export
 #' 
@@ -64,7 +71,7 @@ getResampleFunctions <- function() {
     paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
 }
 
-# Define the process property formats:
+#' Process property formats for RstoxFramework
 #' 
 #' @export
 #' 
@@ -73,8 +80,8 @@ processPropertyFormats <- list(
         class = "table", 
         title = "Define the bootstrap method",
         columnNames = c(
-            "ProcessName", 
             "ResampleFunction", 
+            "ProcessName", 
             #"ResampleBy", 
             "Seed"
         ), 
@@ -87,8 +94,8 @@ processPropertyFormats <- list(
         possibleValues = function(projectPath) {
             # Must be an unnamed list:
             possibleValues = list(
-                getResamplableProcesses(projectPath), 
                 getResampleFunctions(),
+                getResamplableProcesses(projectPath), 
                 NULL
             )
         }
@@ -97,6 +104,31 @@ processPropertyFormats <- list(
         #    getResampleFunctions(),
         #    NULL
         #)
+    ), 
+    
+    baselineSeedTable = list(
+        class = "table", 
+        title = "Define the seeds for Baseline processes with a Seed parameter",
+        columnNames = c(
+            "ProcessName", 
+            "Seed"
+        ), 
+        variableTypes = c(
+            "character",
+            "integer"
+        ), 
+        possibleValues = function(projectPath, BootstrapMethodTable, OutputProcesses) {
+            # Get the processes to run:
+            processesSansProcessData <- getProcessesSansProcessData(projectPath, modelName = "baseline", startProcess = BootstrapMethodTable$ProcessName, endProcess = OutputProcesses, return.processIndex = TRUE)
+            # Scan through the baseline processes to be run and look for processes with the parameter Seed:
+            hasSeed <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x))
+            
+            # Must be an unnamed list:
+            possibleValues = list(
+                processesSansProcessData$processName[hasSeed], 
+                NULL
+            )
+        }
     ), 
     
     targetVariable_ReportBootstrap = list(
@@ -109,8 +141,25 @@ processPropertyFormats <- list(
     groupingVariables_ReportBootstrap = list(
         class = "vector", 
         title = "One or more variables to group super-individuals by when reporting BootstrapData", 
-        possibleValues = function(BootstrapData, BaselineProcess) {
-            sort(setdiff(names(BootstrapData[[BaselineProcess]]), "BootstrapID"))
+        #possibleValues = function(BootstrapData, BaselineProcess) {
+        #    sort(setdiff(names(BootstrapData[[BaselineProcess]]), "BootstrapID"))
+        #}, 
+        possibleValues = list(), 
+        variableTypes <- "character"
+    ), 
+    
+    outputProcesses = list(
+        class = "vector", 
+        title = "One or more processes to store in BootstrapData", 
+        possibleValues = function(projectPath, BootstrapMethodTable) {
+            ## Get the reasmpled processes:
+            #reasmpledProcesses <- BootstrapMethodTable$ProcessName
+            #
+            # Get the process table:
+            processIndexTable <- readProcessIndexTable(projectPath, modelName = "baseline", startProcess = BootstrapMethodTable$ProcessName, endProcess = Inf)
+            
+            # Must be an unnamed list:
+            possibleValues = as.list(processIndexTable$processName)
         }, 
         variableTypes <- "character"
     )

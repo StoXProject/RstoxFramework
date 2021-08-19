@@ -8,7 +8,8 @@
 \alias{saveProject}
 \alias{saveAsProject}
 \alias{copyProject}
-\title{Create, open, close, save, saveAs and copy StoX projects.}
+\alias{deleteProject}
+\title{Create, open, close, save, saveAs, copy and delete a StoX project.}
 \usage{
 createProject(
   projectPath,
@@ -16,7 +17,7 @@ createProject(
   ow = FALSE,
   showWarnings = FALSE,
   open = TRUE,
-  GUI = "unspecified"
+  Application = R.version.string
 )
 
 openProject(
@@ -25,22 +26,35 @@ openProject(
   force = FALSE,
   reset = FALSE,
   type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"),
-  saveIfAlreadyOpen = FALSE
+  saveIfAlreadyOpen = FALSE,
+  verbose = FALSE
 )
 
-closeProject(projectPath, save = NULL, GUI = "unspecified", msg = TRUE)
+closeProject(
+  projectPath,
+  save = NULL,
+  Application = R.version.string,
+  msg = TRUE
+)
 
 saveProject(
   projectPath,
   type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"),
   force = FALSE,
-  GUI = "unspecified",
+  Application = R.version.string,
   msg = TRUE
 )
 
-saveAsProject(projectPath, newProjectPath, ow = FALSE, GUI = "unspecified")
+saveAsProject(
+  projectPath,
+  newProjectPath,
+  ow = FALSE,
+  Application = R.version.string
+)
 
 copyProject(projectPath, newProjectPath, ow = FALSE)
+
+deleteProject(projectPath)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
@@ -53,7 +67,7 @@ copyProject(projectPath, newProjectPath, ow = FALSE)
 
 \item{open}{Logical: If TRUE open the project after creating it.}
 
-\item{GUI}{A single string naming the GUI used when saving the project. Defaulted to "unspecified".}
+\item{Application}{A single string naming the application used when saving the project. Defaulted to R.version.string.}
 
 \item{force}{Logical: If TRUE reopen (close and then open) the project if already open.}
 
@@ -63,10 +77,14 @@ copyProject(projectPath, newProjectPath, ow = FALSE)
 
 \item{saveIfAlreadyOpen}{Logical: If TRUE save the project before closing if already open and force is TRUE.}
 
+\item{verbose}{Logical: If TRUE, print information to the console, e.g. about backward compatibility.}
+
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
 \item{newProjectPath}{The path to the copied StoX project.}
 }
 \description{
-Create a StoX project using \code{createProject}, possibly specifying a template; open an existing (un-opened) project using \code{openProject}, which involves creating files holding the memory of the project; close a project using  \code{closeProject}, which removes the memory files; save the project using \code{saveProject}, which saves the memory file to the project description file or make a copy using \code{saveProject} or \code{saveProject}, where the former closes the given project unsaved and opens the copy.
+Create a StoX project using \code{createProject}; open an existing (un-opened) project using \code{openProject}, which involves creating files holding the memory of the project; close a project using  \code{closeProject}, which removes the memory files; save the project using \code{saveProject}, which saves the memory files to the project description file; make a copy using \code{copyProject} or \code{saveAsProject}, where the former closes the given project unsaved and opens the copy, or delete a project using \code{deleteProject}.
 }

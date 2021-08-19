@@ -12,22 +12,55 @@ runProcesses(
   msg = TRUE,
   save = TRUE,
   saveProcessData = TRUE,
+  Application = R.version.string,
   force.restart = FALSE,
+  returnProcessOutput = FALSE,
   fileOutput = NULL,
   setUseProcessDataToTRUE = TRUE,
   purge.processData = FALSE,
   replaceDataList = list(),
-  replaceArgs = list(),
-  output.file.type = c("default", "text", "RData", "rds"),
+  replaceArgsList = list(),
+  try = TRUE,
+  prugeStopFile = FALSE,
   ...
 )
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model (one of "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+
+\item{startProcess}{The process index, name or ID at which to start and stop the model run.}
+
+\item{endProcess}{The process index, name or ID at which to start and stop the model run.}
+
+\item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
+
+\item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{saveProcessData}{Logical: If TRUE save the output as ProcessData, if the proecss is a ProcessData process.}
+
+\item{Application}{A single string naming the application used when saving the project. Defaulted to R.version.string.}
+
+\item{force.restart}{Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.}
+
+\item{returnProcessOutput}{Logical: If TRUE return the process output immediately after it is available. Used to get filter options.}
+
+\item{fileOutput}{Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.}
+
+\item{setUseProcessDataToTRUE}{Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.}
+
+\item{purge.processData}{Logical: If TRUE replace process data entirely.}
 
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
+
+\item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
+
+\item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
+
+\item{prugeStopFile}{Logical: Should the file that signals that the model should be stopped be deleted if present before running? This parameter does not yet seem to in use by any other function.}
+
+\item{...}{\code{replaceArgsList} can also be given directly.}
 }
 \description{
 Run processes of a model.

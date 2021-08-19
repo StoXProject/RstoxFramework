@@ -1,5 +1,5 @@
 
-# Decided after discussion with Åsmund on 2019-11-12:
+# Decided after discussion with Aasmund on 2019-11-12:
 
 # 1. We will strive for minimum redundancy in the process data. Process data will be saved as data tables with the possibility of variable length vectors in each cell, such as StratumID, StratumName and a vector of PSUs, and saved to the project.xml as JSON
 
@@ -13,7 +13,6 @@
 #' 
 #' @param Stratum The stratum name related to the PSU.
 #' @param PSU The acoustic primary sampling unit (PSU) for which to add/remove the haul.
-#' @param Layer The acoustic Layer for which to add/remove the haul.
 #' @param Haul The biotic haul to add/remove (can be a vector of hauls).
 #' @inheritParams general_arguments
 #' 
@@ -68,7 +67,7 @@ modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, process
         warning("StoX: The acoustic PSU with name ", PSU, " does not exist. Please choose a different PSU name or add the PSU using DefineAcousticPSU.")
     }
     
-    # Add the hauls:
+    # Add or remove the hauls (either using assignment_addHaul() or assignment_removeHaul()):
     utilityFunctionName <- paste0("assignment_", action[1], "Haul")
     BioticAssignment <- do.call(
         utilityFunctionName, 
@@ -110,12 +109,20 @@ assignment_addHaul <- function(Stratum, PSU, Layer, Haul, BioticAssignment) {
     toAdd <- data.table::data.table(
         Stratum = Stratum, 
         PSU = PSU, 
-        # Changed to add NA as Layer. The Layers are added later in RstoxBase::DefineBioticAssignment():
+        # Changed to add NA as Layer. The Layers are added when RstoxBase::DefineBioticAssignment() is run:
         #Layer = Layer, 
         Layer = NA, 
         Haul = Haul, 
         WeightingFactor = 1
     )
+    # If the PSU does not have any assignments it is still present with Haul = NA. If this is the case, remove that row before rbinnding, as such a row implies no assigned hauls:
+    #atThisPSU <- BioticAssignment$Stratum == Stratum & BioticAssignment$PSU == PSU
+    atThisPSU <- BioticAssignment$PSU == PSU
+    numberOfAssignments <- sum(atThisPSU)
+    if(numberOfAssignments == 1 && is.na(BioticAssignment[atThisPSU, Haul])) {
+        BioticAssignment <- BioticAssignment[!atThisPSU, ]
+    }
+    # Add the new assignment:
     BioticAssignment <- rbind(
         BioticAssignment, 
         toAdd
@@ -123,7 +130,7 @@ assignment_addHaul <- function(Stratum, PSU, Layer, Haul, BioticAssignment) {
     
     # Order the BioticAssignment:
     #setorderv(BioticAssignment, cols = c("PSU", "Layer", "Haul"), na.last = TRUE)
-    # Format the output:
+    # Format the output, also ordering by PSUs:
     RstoxBase::formatOutput(BioticAssignment, dataType = "BioticAssignment", keep.all = FALSE)
     
     return(BioticAssignment)
@@ -137,7 +144,7 @@ assignment_removeHaul <- function(Stratum, PSU, Haul, BioticAssignment) {
     #atPSU <- BioticAssignment$PSU %in% PSU
     #atLayer <- BioticAssignment$Layer  %in% Layer
     #at <- which(atPSU & atLayer)
-    at <- BioticAssignment$PSU %in% PSU
+    at <- which(BioticAssignment$PSU %in% PSU)
     
     # Get the indices in 'at' to remove:
     atHauls <- BioticAssignment[at, ]$Haul %in% Haul
@@ -145,7 +152,23 @@ assignment_removeHaul <- function(Stratum, PSU, Haul, BioticAssignment) {
     # Remove the hauls:
     BioticAssignment <- BioticAssignment[-at[atHauls], ]
     
-    # Format the output:
+    # If all Hauls were removed add a row with Haul = NA to keep the PSU in the data:
+    if(!sum(BioticAssignment$PSU == PSU)) {
+        dummyRowWithNAHaul <- data.table::data.table(
+            Stratum = Stratum, 
+            PSU = PSU, 
+            Layer = NA, 
+            Haul = NA, 
+            WeightingFactor = 1
+        )
+        # Add the row with Haul = NA:
+        BioticAssignment <- rbind(
+            BioticAssignment, 
+            dummyRowWithNAHaul
+        )
+    }
+
+    # Format the output, also ordering by PSUs:
     RstoxBase::formatOutput(BioticAssignment, dataType = "BioticAssignment", keep.all = FALSE)
     
     return(BioticAssignment)
@@ -423,12 +446,15 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     # If given as a GeoJSON string, parse to a SpatialPolygonsDataFrame object:
     if(is.character(stratum)) {
         #stratum <- geojsonio::geojson_sp(geojsonio::as.json(stratum))
-        stratum <- rgdal::readOGR(stratum, stringsAsFactors = FALSE)
+        #stratum <- rgdal::readOGR(stratum, stringsAsFactors = FALSE)
+        stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
+        
         stratum <- copyPolygonNameToID(stratum)
         # Add "x", "y" as column names of the coords, since readOGR() does not do this:
         stratum <- addCoordsNames(stratum)
         # added by aasmund: Set projection to empty by default, rbind will then work.
-        stratum@proj4string <- sp::CRS()
+        #stratum@proj4string <- sp::CRS()
+        suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
     }
     
     # Add the new strata, but check that the stratum names are not in use:
@@ -448,10 +474,18 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     #    StratumPolygon$StratumPolygon@polygons, 
     #    stratum@polygons
     #)
-    StratumPolygon$StratumPolygon <- rbind(
-        StratumPolygon$StratumPolygon, 
-        stratum
-    )
+    
+    # Avoid errors due to difference in projection, as an empty SpatialPolygonsDataFrame cannot have projection:
+    if(length(StratumPolygon$StratumPolygon)) {
+        StratumPolygon$StratumPolygon <- rbind(
+            StratumPolygon$StratumPolygon, 
+            stratum
+        )
+    }
+    else {
+        StratumPolygon$StratumPolygon <- stratum
+    }
+    
     
     # Set the StratumPolygon back to the process data of the process:
     setProcessMemory(
@@ -524,33 +558,33 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
     )
 }
 
-removePSUsByStratum <- function(stratumName, projectPath, modelName, processID) {
-    # Detect all processes returning PSUs (function names ending with PSU):
-    processTable <- getProcessAndFunctionNames(projectPath = projectPath, modelName = modelName, afterProcessID = processID)
-    PSUProccessIDs <- processTable[endsWith(functionName, "PSU"), processID]
-    
-    lapply(PSUProccessIDs, removePSUsByStratumOnePSUProcess, stratumName = stratumName, projectPath = projectPath, modelName = modelName)
-}
-
-removePSUsByStratumOnePSUProcess <- function(processID, stratumName, projectPath, modelName) {
-    # Get the processData:
-    PSUs <- getProcessData(projectPath, modelName, processID)
-    
-    # Get PSU type:
-    PSUType <- ifelse("Station_PSU" %in% names(PSUs), "Biotic", "Acoustic")
-    
-    # Find all PSUs of the stratum to be removed:
-    PSUs <- PSUs$Stratum_PSU[Stratum == stratumName]$PSU
-    
-    # Remove either swept area or acoustic PSUs:
-    nameOfRemoveFunction <- paste0("remove", PSUType, "PSU")
-    do.call(nameOfRemoveFunction, list(
-        PSU = PSUs, 
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = processID
-    ))
-}
+#removePSUsByStratum <- function(stratumName, projectPath, modelName, processID) {
+#    # Detect all processes returning PSUs (function names ending with PSU):
+#    processTable <- getProcessAndFunctionNames(projectPath = projectPath, modelName = modelName, afterProcessID = processID)
+#    PSUProccessIDs <- processTable[endsWith(functionName, "PSU"), processID]
+#    
+#    lapply(PSUProccessIDs, removePSUsByStratumOnePSUProcess, stratumName = stratumName, projectPath = projectPath, modelName = modelName)
+#}
+#
+#removePSUsByStratumOnePSUProcess <- function(processID, stratumName, projectPath, modelName) {
+#    # Get the processData:
+#    PSUs <- getProcessData(projectPath, modelName, processID)
+#    
+#    # Get PSU type:
+#    PSUType <- ifelse("Station_PSU" %in% names(PSUs), "Biotic", "Acoustic")
+#    
+#    # Find all PSUs of the stratum to be removed:
+#    PSUs <- PSUs$Stratum_PSU[Stratum == stratumName]$PSU
+#    
+#    # Remove either swept area or acoustic PSUs:
+#    nameOfRemoveFunction <- paste0("remove", PSUType, "PSU")
+#    do.call(nameOfRemoveFunction, list(
+#        PSU = PSUs, 
+#        projectPath = projectPath, 
+#        modelName = modelName, 
+#        processID = processID
+#    ))
+#}
 
 
 #' 
@@ -565,7 +599,9 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     # If given as a GeoJSON string, parse to a SpatialPolygonsDataFrame object:
     if(is.character(stratum)) {
         #stratum <- geojsonio::geojson_sp(geojsonio::as.json(stratum))
-        stratum <- rgdal::readOGR(stratum)
+        #stratum <- rgdal::readOGR(stratum)
+        stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
+        
         # Add "x", "y" as column names of the coords, since readOGR() does not do this:
         stratum <- addCoordsNames(stratum)
     }

@@ -19,11 +19,9 @@ removeHaulFromAssignment(Stratum, PSU, Haul, projectPath, modelName, processID)
 
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model (one of "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
 
 \item{processID}{The ID of the process.}
-
-\item{Layer}{The acoustic Layer for which to add/remove the haul.}
 }
 \description{
 The functions \code{addHaulsToAssignment} and \code{removeHaulsFromAssignment} adds or removes biotic hauls from the \code{\link{BioticAssignment}} process data of the specified process.

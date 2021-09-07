@@ -7,8 +7,9 @@
 convertStoX2.7To3(
   projectPath2.7,
   projectPath3,
-  newProjectPath3 = NULL,
-  ow = FALSE
+  newProjectPath3,
+  ow = FALSE,
+  run = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ convertStoX2.7To3(
 \item{newProjectPath3}{The path to the StoX 3.x.x project to create.}
 
 \item{ow}{Logical: If TRUE overwrite the project.}
+
+\item{run}{Logical: If TRUE, run the entire project after converting. If FALSE, changes will not be stored in the project.json before one opens and runs the baseline.}
 }
 \description{
 Backward compabitibility actions:

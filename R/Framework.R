@@ -3621,7 +3621,7 @@ modifyProcess <- function(projectPath, modelName, processName, newValues, archiv
         warning("StoX: The project ", projectPath, " is not open. Use openProject() to open the project.")
         return(NULL)
     }
-
+    
     # Get process ID from process name:
     processID <- getProcessIDFromProcessName(
         projectPath = projectPath, 
@@ -4496,7 +4496,7 @@ runProcess <- function(
             
             # Set the function parameters UseProcessData to TRUE:
             if(setUseProcessDataToTRUE) {
-                setUseProcessDataToTRUE(projectPath, modelName, processID)
+                setUseProcessData(projectPath, modelName, processID)
             }
         }
         else {
@@ -4527,14 +4527,15 @@ runProcess <- function(
 }
 
 
-setUseProcessDataToTRUE <- function(projectPath, modelName, processID) {
+setUseProcessData <- function(projectPath, modelName, processID, UseProcessData = TRUE) {
     # Try setting UseProcessData to TRUE:
-    modified <- modifyFunctionParameters(projectPath, modelName, processID, list(UseProcessData = TRUE))
+    modified <- modifyFunctionParameters(projectPath, modelName, processID, list(UseProcessData = UseProcessData))
     # If modified, set propertyDirty to TRUE:
     if(modified) {
         writeActiveProcessID(projectPath, modelName, propertyDirty = TRUE) 
     }
 }
+
 
 
 getFunctionArguments <- function(projectPath, modelName, processID, arguments = NULL, replaceArgs = list(), keepEmptyFunctionInputs = TRUE) {

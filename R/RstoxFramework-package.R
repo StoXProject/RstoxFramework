@@ -22,10 +22,10 @@ utils::globalVariables(c(
 	 "Longitude2", "PSU", "Package", "ProcessName", "ResampleFunction", "StoX", "Version",
 	 "attriributes<-", "binaryPath", "canShowInMap", "capture.output", "col2rgb",
 	 "colorRampPalette", "dataTable2SpatialPolygonsDataFrame", "dataType", "download.file",
-	 "functionName", "functionOutputDataType", "hasProcessData", "install.packages", "modelName",
-	 "models", "name", "newVersion", "possibleValues", "processID", "processIndex", "processName",
-	 "processNames", "projectList", "projectPath", "read.table", "remove.packages",
-	 "resampledCountWithUniqueName", "value"))
+	 "functionName", "functionOutputDataType", "hasProcessData", "install.packages", "model",
+	 "modelName", "models", "name", "newVersion", "possibleValues", "processID", "processIndex",
+	 "processName", "processNames", "projectList", "projectList2.7", "projectPath",
+	 "projectPath2.7", "read.table", "remove.packages", "resampledCountWithUniqueName", "value"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

@@ -749,8 +749,6 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     # Check the actual data:
     data_equal <- list()
     
-    browser()
-    
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
     
     for(name in names(dat_orig)) {

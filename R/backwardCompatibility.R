@@ -506,259 +506,224 @@ checkBackwardCompatibilityVersion <-  function(backwardCompatibilityAction, proj
 
 
 
-# Backwards compatibility:
-
-# 1. Re-organize models
-# 	Baseline report and Report into report, R renamed to analysis
-
-# 2. Distribute process data into processes
-# 2.0. Convert process data to appropriate tables and sp objects
-# 2.1. Copy stratumpolygon to all functions DefineStrata
-# 2.2. Copy edsupsu and psustratum to all functions DefineAcousticPSU
-# 2.3. Copy bioticassignment, suassignment and assignmentresolution to all functions BioStationAssignment and BioStationWeighting
-# 2.4. Copy temporal to DefineTemporal, gearfactor to DefineGearFactor, spatial to DefineSpatial, platformfactor to DefinePlatform, ageerror to DefineAgeErrorMatrix and stratumneighbour to DefineStratumNeighbour, and treat covparam somehow, since this is a table that is appended by each of DefineTemporal, DefineGearFactor, DefineSpatial and DefinePlatform.
-
-
-#
-#Generate process data processes. DefineAccoustic
-#
-#
-#- Removed function
-#- Added function
-#- Renamed function
-#- Split function
-#
-#- Renamed parameter
-#- Removed parameter
-#- Added parameter
-#
-#
-#
-
-
-# 1. Remove processes:
-# 1.1. Remove ReadProcessData
-# 2.2. Remove WriteProcessData
-# 
-# 2. Copy process data into processes:
-# 2.0. Convert process data to appropriate tables and sp objects
-# 2.1. Copy stratumpolygon to all functions DefineStrata
-# 2.2. Copy edsupsu and psustratum to a data.table for all functions DefineAcousticPSU
-# 2.3. Copy bioticassignment to all functions BioStationAssignment and BioStationWeighting
-# 2.4. Copy stratumpolygon to all functions DefineStrata
-# 2.5. Copy stratumpolygon to all functions DefineStrata
-# 2.6. Copy stratumpolygon to all functions DefineStrata
-# 
-# 
-# - Split ReadBioticXML into RstoxData::ReadBiotic and RstoxData::StoxBiotic
-# - Split ReadAcousticXML into RstoxData::ReadAcoustic and RstoxData::StoxAcoustic
-# - Split ReadLandingXML into RstoxData::ReadLanding and RstoxData::StoxLanding
-# 
-# - Convert FilterBiotic to RstoxData::AddToStoxBiotic with all variables detected in the FilterBiotic and RstoxData::FilterStoxBiotic # with a filter expression built based on the Java JEXL expression of FilterBiotic
-# - Convert FilterAcoustic to RstoxData::AddToAcoustic with all variables detected in the FilterAcoustic and RstoxData::FilterStoxAcou# stic with a filter expression built based on the Java JEXL expression of FilterAcoustic
-# - Convert FilterLanding to RstoxData::FilterStoxLanding with a filter expression built based on the Java JEXL expression of FilterLan# ding
-# 
-# - Read biostationassignment global process data and map to BioticAssignment process data
-# 
-# - Read edsupsu and psustratum global process data and map to AcousticPSU process data
-# 
-# - Split AcousticDensity into RstoxBase::DefineAcousticTargetStrength and RstoxBase::AcousticDensity
-# 
-# - Replace StationLengthDist with RstoxBase::LengthDistribution
-# 
-# - Replace RegroupLengthDist with RstoxBase::RegroupLengthDistribution
-# 
-# - Replace DefineStrata with RstoxBase::DefineStratumPolygon
-# 
-# - Replace BioStationAssignment with RstoxBase::DefineBioticAssignment
-# 
-# - Replace BioStationWeighting with RstoxBase::BioticAssignmentWeighting
-# 
-# - Replace TotalLengthDist with RstoxBase::MeanLengthDistribution in swept-area models and RstoxBase::AssignmentLengthDistribution
-# 
-# - Delete SumDensity
-# 
-# - Replace IndividualDataStations and IndividualData with RstoxBase::Individuals
-# 
-# - Replace SuperIndAbundance with RstoxBase::SuperIndividuals
-# 
-# - Move imputeByAge to RstoxBase::ImputeSuperIndividuals
-# 
-# - Replace runBootstrap with RstoxFramework::Bootstrap
-# 
-# 
-# 
-# Backwards compatibility actions:
-#     
-# - Delete process
-# - Replace process by new process
-# - Replace process by several process
-
-
-# Rename DefineStratumPolygon to DefineStratum:
-#rename_DefineStratumPolygon_to_DefineStratum <- function(projectDescription) {
-#    if(StoxVersion == 2.7) {
-#        # Get the function names:
-#        functionNames <- sapply(projectDescription$baseline, "[[", "functionName")
-#        # Get the position of the process using DefineStratumPolygon():
-#        atDefineStratumPolygon <- which("DefineStratumPolygon" %in% functionNames)
-#        if(length(atDefineStratumPolygon)) {
-#            # Split the process:
-#            projectDescription$baseline[[atDefineStratumPolygon]]$functionName <- "DefineStratum"
-#        }
-#    }
-#    
-#    return(projectDescription)
-#}
-
-
-
-
-
-
-
-### # A list of functions performing conversions of the projectDescription to ensure backward compatibilit### y:
-### #' 
-### #' @export
-### #' 
-### backwardCompatibility2.7 <- list(
-###     
-###     # 1. Move process between models:
-###     moveProcess = list(
-###         list(
-###             functionName = "ImpuetByAge", 
-###             model = "R", 
-###             newModel = "Baseline"
-###         )
-###     ), 
-###     
-###     # 2. Remove process: 
-###     removeProcess = list(
-###         list(
-###             functionName = "ReadProcessData", 
-###             model = "Baseline"
-###         ), 
-###         list(
-###             functionName = "WriteProcessData", 
-###             model = "Baseline"
-###         ), 
-###         list(
-###             functionName = "SumDensity", 
-###             model = "Baseline"
-###         ), 
-###         list(
-###             functionName = "saveProjectData", 
-###             model = "Analysis"
-###         )
-###     ), 
-###     
-###     # 3. Rename process:
-###     
-###     # 4. Split process:
-###     
-###     # 5. Join processes:
-###     joinProcess = list(
-###         list(
-###             functionNames = c(
-###                 "IndividualDataStations", 
-###                 "IndividualData"
-###             ), 
-###             newFunctionName = "Individuals",
-###             model = "Baseline"
-###         ), 
-###         list(
-###             functionName = "WriteProcessData", 
-###             model = "Baseline"
-###         )
-###     )
-###     
-###     
-### )
-
-
-
-
-
-
 #' Backward compabitibility actions:
 #' 
 #' @inheritParams general_arguments
 #' @param projectPath2.7 The path to the StoX 2.7 project to convert to StoX 3.x.x.
 #' @param projectPath3 The path to the StoX 3.x.x project used as model for the conversion.
 #' @param newProjectPath3 The path to the StoX 3.x.x project to create.
+#' @param run Logical: If TRUE, run the entire project after converting. If FALSE, changes will not be stored in the project.json before one opens and runs the baseline.
 #' 
 #' @export
 #' 
-convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3 = NULL, ow = FALSE) {
+convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow = FALSE, run = FALSE) {
     
     # Save to a different project:
-    if(!length(newProjectPath3)) {
-        newProjectPath3 <- projectPath3
-    }
-    else {
-        copyProject(
-            projectPath = projectPath3, 
-            newProjectPath = newProjectPath3, 
-            ow = ow
-        )
-    }
+    createProject(
+        projectPath = newProjectPath3, 
+        template = "EmptyTemplate", 
+        ow = ow, 
+        showWarnings = FALSE, 
+        open = FALSE, 
+        Application = R.version.string
+    )
+    # Replace the project.json file from the projectPath3:
+    projectDescriptionFile3 <- getProjectPaths(projectPath3, "projectJSONFile")
+    newProjectDescriptionFile3 <- getProjectPaths(newProjectPath3, "projectJSONFile")
+    unlink(newProjectDescriptionFile3, force = TRUE)
+    file.copy(projectDescriptionFile3, newProjectDescriptionFile3)
     
-    # Replace input data.
-    if(ow) {
-        inputDir2.7 <- file.path(projectPath2.7, "input")
-        inputDir3 <- file.path(newProjectPath3, "input")
-        unlink(inputDir3, force = TRUE, recursive = TRUE)
-        file.copy(inputDir2.7, newProjectPath3, recursive = TRUE)
-    }
+    # Open the project, and use the built-in functions to manipulate an open project, instead of developing functions to manipulate a project description file directly:
+    openProject(newProjectPath3)
     
-    
-    #redefineAcousticPSUFrom2.7(
-    #    projectPath2.7 = projectPath2.7, 
-    #    projectPath3 = projectPath3, 
-    #    newProjectPath3 = newProjectPath3, 
-    #    ow = ow
-    #)
-    
-    #redefineBioticAssignmentFrom2.7(projectPath2.7, newProjectPath3)
-    
+    # Copy input data.
+    copyInputDataFrom2.7(
+        projectPath2.7 = projectPath2.7, 
+        projectPath3 = newProjectPath3, 
+        clearExisting = TRUE
+    )
+    # And update the file paths:
     updateInputDataFiles(newProjectPath3)
+    
+    # Replace the project.xml file path:
+    projectXMLFilePath <- RstoxBase::getProjectXMLFilePath(projectPath = projectPath2.7)
+    functionsToApplyProjectXML2.7To <- c(
+        "DefineSurvey", 
+        "DefineStratumPolygon", 
+        "DefineAcousticPSU", 
+        "DefineBioticAssignment"
+    )
+    lapply(functionsToApplyProjectXML2.7To, 
+        applyProjectXML2.7, 
+        projectPath3 = newProjectPath3, 
+        projectXMLFilePath = projectXMLFilePath
+    )
+    
+    saveProject(newProjectPath3)
+    
+    if(run) {
+        temp <- runProject(newProjectPath3)
+    }
     
     closeProject(newProjectPath3)
 }
 
-redefineAcousticPSUFrom2.7 <- function(projectPath2.7, projectPath3, newProjectPath3 = NULL, ow = FALSE) {
+# Function to change the FileName in processes using Define* with DefinitionMethod = "ResourceFile", and FileName ending with "xml":
+applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, projectXMLFilePath = NULL) {
     
-    # Read the AcousticPSU from the project.xml file:
-    AcousticPSU <- RstoxBase::readAcousticPSUFrom2.7(projectPath2.7)
+    # Get the table of baseline processes:
+    baselineTable <- getProcessAndFunctionNames(projectPath = projectPath3, "baseline")
     
-    projectDescription <- readProjectDescription(projectPath3)
-    atDefineAcousticPSU <- which(sapply(projectDescription$projectDescription$baseline, "[[", "functionName") == "RstoxBase::DefineAcousticPSU")
-    
-    if(!length(atDefineAcousticPSU)) {
-        warning("No process using RstoxBase::DefineAcousticPSU found in the project", newProjectPath3)
-        return(FALSE)
+    # Find the processes that use the given function:
+    functionNames <- getFunctionNameFromPackageFunctionName(baselineTable$functionName)
+    atFunctionName <- which(functionNames == functionName)
+    baselineTable <- baselineTable[atFunctionName,]
+    if(!NROW(baselineTable)) {
+        warning("No processes using the function ", functionName, " found in the model ", model, ". Returning NULL.")
     }
-    else if(length(atDefineAcousticPSU) > 1) {
-        warning("Multiple processes using RstoxBase::DefineAcousticPSU found in the project", newProjectPath3, ". All were modified.")
-    }
-    for(ind in atDefineAcousticPSU) {
-        projectDescription$projectDescription$baseline[[ind]]$processData <- AcousticPSU
+    else if(NROW(baselineTable) > 1) {
+        stop("Applying a project.xml file from StoX 2.7 requires only one process using the function ", functionName, ".")
     }
     
-    openProject(newProjectPath3)
-    writeProjectDescription(newProjectPath3, projectDescription = projectDescription$projectDescription)
+    # Set DefinitionMethod to ResourceFile and FileName to the path to the project.xml:
+    if(!length(projectXMLFilePath)) {
+        projectXMLFilePath <- RstoxBase::getProjectXMLFilePath(projectPath = projectPath2.7)
+    }
     
-    closeProject(projectPath3)
-    closeProject(newProjectPath3)
     
-    return(unname(newProjectPath3))
+    modifyProcess(
+        projectPath = projectPath3, 
+        modelName = "baseline", 
+        processName = baselineTable$processName, 
+        newValues = list(
+            functionParameters = list(
+                DefinitionMethod = "ResourceFile"
+            )
+        )
+    )
+    
+    modifyProcess(
+        projectPath = projectPath3, 
+        modelName = "baseline", 
+        processName = baselineTable$processName, 
+        newValues = list(
+            functionParameters = list(
+                FileName = projectXMLFilePath
+            )
+        )
+    )
+    
+    setUseProcessData(
+        projectPath = projectPath3, 
+        modelName = "baseline", 
+        processID = getProcessIDFromProcessName(
+            projectPath = projectPath3, 
+            modelName = "baseline", 
+            processName = baselineTable$processName
+        )$processID, 
+        UseProcessData = FALSE
+    )
+    
+    
+    return(baselineTable$processName)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+copyInputDataFrom2.7 <- function(projectPath2.7, projectPath3, clearExisting = TRUE,  types = c("Acoustic", "Biotic", "Landing")) {
+    # Copy for the given possible input file types:
+    temp <- lapply(
+        types, 
+        copyInputFilesOneType, 
+        projectList2.7 = projectList2.7, 
+        projectPath3 = projectPath3, 
+        clearExisting = clearExisting
+    )
+    names(temp) <- types[lengths(temp) > 0]
+    temp <- temp[lengths(temp) > 0]
+    
+    return(temp)
+}
+
+# Find processes using ReadBiotic, ReadAcoustic or ReadLanding:
+copyInputFilesOneType <- function(
+    type = c("Acoustic", "Biotic", "Landing"), 
+    projectList2.7, 
+    projectPath3, 
+    clearExisting = TRUE
+) {
+    # Get the data type:
+    type <- match.arg(type)
+    
+    # Read the project.xml file to a list:
+    projectList2.7 <- RstoxBase::readProjectXMLToList(projectPath = projectPath2.7)
+    
+    # Find the reading processes of baseline model:
+    atBaseline <- which(lapply(getElementsByName(projectList2.7, "model"), attr, "name") == "baseline")
+    functions2.7 <- unname(unlist(lapply(projectList2.7[[atBaseline]], "[[", "function")))
+    readFunctionName <- paste0("Read", type, "XML")
+    atRead2.7 <- which(functions2.7 == readFunctionName)
+    
+    # There can only be one reading process of the type in the StoX 2.7 project, so we know for sure where to get the files:
+    if(!length(atRead2.7)) {
+        return(NULL)
+    }
+    else if(length(atRead2.7) > 1) {
+        stop("More than one process using ", readFunctionName, " detected. Only projects with exactly one such process can be used.")
+    }
+    
+    # Get the file names:
+    projectList2.7[[atBaseline]][[atRead2.7]]
+    atFileName <- which(startsWith(sapply(getElementsByName(projectList2.7[[atBaseline]][[atRead2.7]], "parameter"), attr, "name"), "FileName"))
+    fileRelativePaths <- unlist(getElementsByName(projectList2.7[[atBaseline]][[atRead2.7]], "parameter")[atFileName])
+    fileAbsolutePaths <- file.path(projectPath2.7, fileRelativePaths)
+    
+    # Get the path to the input directory:
+    inputDir <- getProjectPaths(projectPath3, tolower(type))
+    
+    # Delete the existing files:
+    if(clearExisting) {
+        toClear <- list.files(inputDir, full.names = TRUE)
+        unlink(toClear, force = TRUE, recursive = TRUE)
+    }
+    
+    # Copy the files:
+    file.copy(fileAbsolutePaths, inputDir)
+    
+    # Return the paths of the copied files:
+    copiedFiles <- file.path(inputDir, basename(fileAbsolutePaths))
+    
+    return(copiedFiles)
+}
+
+getElementsByName <- function(x, name) {
+    x[names(x) == name]
+}
+
+
 
 
 
 updateInputDataFiles <- function(projectPath, inputDataTypes = c("acoustic", "biotic", "landing")) {
-    openProject(projectPath)
+    
+    if(!isOpenProject(projectPath)) {
+        stop("The project ", projectPath, " needs to be open to modify the project.")
+        return(NULL)
+    }
+    
+    # Get the table of baseline processes:
     baselineTable <- getProcessAndFunctionNames(projectPath, "baseline")
+    
     
     lapply(
         inputDataTypes, 
@@ -775,7 +740,7 @@ updateInputDataFilesOne <- function(inputDataType, projectPath, baselineTable) {
     # Get the input files:
     inputFiles <- list.files(getProjectPaths(projectPath, inputDataType), full.names = TRUE)
     
-    inputFunctionName <- paste0("Read", inputDataType)
+    inputFunctionName <- paste0("Read", tools::toTitleCase(tolower(inputDataType)))
     inputProcessNames <- baselineTable[endsWith(functionName, inputFunctionName), processName]
     
     for(inputProcessName in inputProcessNames) {
@@ -793,6 +758,17 @@ updateInputDataFilesOne <- function(inputDataType, projectPath, baselineTable) {
     
     return(inputFiles)
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -832,7 +808,7 @@ subsetXMLFile <- function(XMLFile, newXMLFile, tag = "fishstation", index = 1) {
     # Cannot extend the number of tags:
     index <- subset(index, index <= numberOfTags)
     
-  
+    
     
     before <- l[seq_len(atStart[1] - 1)]
     bodyIndex <- unlist(mapply(seq, atStart[index], atEnd[index]))

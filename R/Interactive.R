@@ -672,19 +672,19 @@ copyPolygonNameToID <- function(stratum) {
     return(stratum)
 }
 
-# Function to rename the IDs to the column polygonNames of a SpatialPolygonsDataFrame:
-setEmptyID <- function(stratum) {
-    
-    # Get the polygon names and IDs:
-    polygonName <- stratum$polygonName
-    
-    # Rename all IDs to the polygon names:
-    for (ind in seq_along(stratum@polygons)) {
-        stratum@polygons[[ind]]@ID <- ""
-    }
-    
-    return(stratum)
-}
+## Function to rename the IDs to the column polygonNames of a SpatialPolygonsDataFrame:
+#setEmptyID <- function(stratum) {
+#    
+#    # Get the polygon names and IDs:
+#    polygonName <- stratum$polygonName
+#    
+#    # Rename all IDs to the polygon names:
+#    for (ind in seq_along(stratum@polygons)) {
+#        stratum@polygons[[ind]]@ID <- ""
+#    }
+#    
+#    return(stratum)
+#}
 
 
 

@@ -3866,7 +3866,8 @@ formatProcessDataOne <-  function(processDataOne) {
             processDataOne <- sf::as_Spatial(geosf)
             
             # Add names:
-            row.names(processDataOne) <- as.character(processDataOne@data$polygonName)
+            #row.names(processDataOne) <- as.character(processDataOne@data$StratumName)
+            row.names(processDataOne) <- RstoxBase::getStratumNames(processDataOne)
             processDataOne <- addCoordsNames(processDataOne)
         }
         else {

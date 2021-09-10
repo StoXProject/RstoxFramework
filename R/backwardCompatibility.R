@@ -645,7 +645,7 @@ copyInputDataFrom2.7 <- function(projectPath2.7, projectPath3, clearExisting = T
     temp <- lapply(
         types, 
         copyInputFilesOneType, 
-        projectList2.7 = projectList2.7, 
+        projectPath2.7 = projectPath2.7, 
         projectPath3 = projectPath3, 
         clearExisting = clearExisting
     )
@@ -658,7 +658,7 @@ copyInputDataFrom2.7 <- function(projectPath2.7, projectPath3, clearExisting = T
 # Find processes using ReadBiotic, ReadAcoustic or ReadLanding:
 copyInputFilesOneType <- function(
     type = c("Acoustic", "Biotic", "Landing"), 
-    projectList2.7, 
+    projectPath2.7, 
     projectPath3, 
     clearExisting = TRUE
 ) {

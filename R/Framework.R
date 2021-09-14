@@ -2414,14 +2414,14 @@ readProcessIndexTable <- function(projectPath, modelName = NULL, processes = NUL
         # If there are less elements affter matching, issue a warning:
         if(any(is.na(startProcessNumeric))) {
             warning(
-                "The following processes are not present in the project. ", 
+                "The following processes are not present in the project.", 
                 paste0(startProcess[is.na(startProcessNumeric)], collapse = ", ")
             )
             startProcessNumeric <- startProcessNumeric[!is.na(startProcessNumeric)]
         }
         if(any(is.na(endProcessNumeric))) {
             warning(
-                "The following processes are not present in the project. ", 
+                "The following processes are not present in the project.", 
                 paste0(endProcess[is.na(endProcessNumeric)], collapse = ", ")
             )
             endProcessNumeric <- endProcessNumeric[!is.na(endProcessNumeric)]
@@ -2474,7 +2474,7 @@ matchProcesses <- function(processes, processIndexTable, warn = TRUE) {
         if(any(is.na(processesNumeric))) {
             # stop("StoX: The following processes were not recognized as process names or process IDs: ", paste(processes[is.na(processesNumeric)], collapse = ", "), ".")
             if(warn) {
-                warning("StoX: The following processes were not recognized as process names or process IDs: ", paste(processes[is.na(processesNumeric)], collapse = ", "), ".")
+                stop("StoX: The following processes were not recognized as process names or process IDs: ", paste(processes[is.na(processesNumeric)], collapse = ", "), ".")
             }
             processesNumeric <- processesNumeric[!is.na(processesNumeric)]
         }
@@ -5376,7 +5376,8 @@ reportFunctionOutputOne <- function(processOutputOne, filePath) {
             cat("", file = filePath)
         }
         else {
-            data.table::fwrite(processOutputOne, filePath, sep = "\t", na = "")
+            # Changed on 2021-09-13 to quote strings, so as to avoid data.table::fread() from conerting numeric strings to numeric class:
+            data.table::fwrite(processOutputOne, filePath, sep = "\t", na = "NA", quote = TRUE, qmethod = "double")
         }
     }
     else if("matrix" %in% class(processOutputOne)) {

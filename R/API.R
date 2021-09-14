@@ -429,7 +429,8 @@ readStoxOutputFile <- function(path) {
     else if(tolower(ext) %in% "txt") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:
         #output <- data.table::fread(path, na.strings = c("NA", ""), tz = "UTC", encoding = "UTF-8")
-        output <- data.table::fread(path, na.strings = "", tz = "UTC", encoding = "UTF-8")
+        #output <- data.table::fread(path, na.strings = "", tz = "UTC", encoding = "UTF-8")
+        output <- freadKeepQuotedCharacterAsCharacter(path, na.strings = "NA", tz = "UTC", encoding = "UTF-8")
         
         # If here are any keys that are time (such as LogKey of the StoxAcoustic format), convert these to character with 3 digits:
         areKeys <- endsWith(names(output), "Key")
@@ -586,3 +587,60 @@ writeStoxJsonSchema <- function(con) {
         writeLines(as.character(schema), con)
     }
 }
+
+
+
+
+
+freadKeepQuotedCharacterAsCharacter <- function(...) {
+    # Get the inputs.
+    lll <- list(...)
+    
+    # Read using quote = "":
+    lll$quote <- ""
+    x <- do.call(data.table::fread, lll)
+    
+    # Remove escaped double quote characters in header:
+    names(x) <- gsub("\"", "", names(x))
+    
+    # Remove escaped double quote characters in character columns:
+    areCharacter <- sapply(x, class) == "character"
+    characterCols <- names(areCharacter)[areCharacter]
+    x[, (characterCols) := lapply(.SD, function(y) gsub("\"", "", y)), .SDcols = characterCols]
+    
+    return(x)
+}
+
+
+
+### data.table::fwrite(dat[[name]][[subname]], "test1.txt", sep = "\t", na = "NA")
+### data.table::fwrite(dat[[name]][[subname]], "test2.txt", quote = TRUE, sep = "\t", na = "NA")
+### t <- freadKeepQuotedCharacterAsCharacter("test2.txt")
+### t1 <- read.table("test1.txt", header = TRUE)
+### t2 <- read.table("test2.txt", header = TRUE)
+### 
+### 
+### library(data.table)
+### 
+### my_data <- data.table(
+###     var1 = c("001", "002", "003", "004", "005"),
+###     var2 = c("1", "2", "3", "4", "5"),
+###     var3 = c("a", "b", "c", "d", "e"),
+###     var4 = 1:5
+### )
+### 
+### str(my_data)
+### 
+### fwrite(x = my_data, file = "my_data.csv", quote = TRUE, qmethod = "double")
+### 
+### my_data_attempt1 <- fread(file = "my_data.csv")
+### str(my_data_attempt1)
+### 
+### my_data_attempt2 <- freadKeepQuotedCharacterAsCharacter("my_data.csv")
+### str(my_data_attempt2)
+### identical(my_data, my_data_attempt2)
+### 
+
+
+
+

@@ -717,7 +717,6 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
     }
     
-    # browser()
     # Run the test project:
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
@@ -767,30 +766,53 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             }
             
             if(!isTRUE(data_equal[[name]][[subname]])) {
-                warning("888888888888888888888888888888888888")
-                warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
-                warning("999999999999999999999999999999999999")
-                warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
-                warning("777777777777777777777777777777777")
+                #print(name)
+                #print(subname)
+                #print(head(dat_orig[[name]][[subname]]))
+                #print(tail(dat_orig[[name]][[subname]]))
+                #print(head(dat[[name]][[subname]]))
+                #print(tail(dat[[name]][[subname]]))
+                #print("___________________________")
                 
-                atDiff <- which(dat_orig[[name]][[subname]] != dat[[name]][[subname]], arr.ind = TRUE)
-                warning(paste(c(atDiff), collapse = "; "))
-                warning("6666666666666")
                 
-                warning(paste(c(dat[[name]][[subname]][atDiff]), collapse = "; "))
-                warning("555555555555555")
-                warning(paste(c(dat_orig[[name]][[subname]][atDiff]), collapse = "; "))
-                warning("44444444444444444")
+                #warning("888888888888888888888888888888888888")
+                #warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
+                #warning("999999999999999999999999999999999999")
+                #warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
+                #warning("777777777777777777777777777777777")
+                #
+                #atDiff <- which(dat_orig[[name]][[subname]] != dat[[name]][[subname]], arr.ind = TRUE)
+                #warning(paste(c(atDiff), collapse = "; "))
+                #warning("6666666666666")
+                
+                #warning(paste(c(dat[[name]][[subname]][atDiff]), collapse = "; "))
+                #warning("555555555555555")
+                #warning(paste(c(dat_orig[[name]][[subname]][atDiff]), collapse = "; "))
+                #warning("44444444444444444")
                 
             }
         }
     }
     
+    # Compare reports, but only numericc values:
+    reports <- startsWith(names(dat_orig), "Report")
+    reports_equal <- list()
+    
+    for(name in names(dat_orig)[reports]) {
+        reports_equal[[name]] <- list()
+        for(subname in names(dat_orig[[name]])) {
+            reports_equal[[name]][[subname]] <- compareReport(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+        }
+    }
+    print(reports_equal)
+    
+    
     allTests <- list(
         processNames_present = processNames_present,
         tableNames_identical = tableNames_identical,
         columnNames_identical = columnNames_identical,
-        data_equal = data_equal
+        data_equal = data_equal, 
+        reports_equal = reports_equal
     )
     
     ok <- all(unlist(allTests) %in% TRUE)
@@ -848,6 +870,20 @@ compareDataTablesUsingClassOfSecond <- function(x, y) {
     all.equal(x, y, check.attributes = FALSE)
 }
 
+compareReport <- function(x, y) {
+    # Set all coclumns of character class to NA:
+    x <- setCharacterColumnsToNA(x)
+    y <- setCharacterColumnsToNA(y)
+    all.equal(x, y, check.attributes = FALSE)
+}
+
+setCharacterColumnsToNA <- function(x) {
+    areCharacter <- sapply(x, class) == "character"
+    characterCols <- names(areCharacter)[areCharacter]
+    x[, (characterCols) := lapply(.SD, function(y) rep(NA, length(y))), .SDcols = characterCols]
+}
+
+
 # Get all coordinates of a SpatialPolygonsDataFrame in one data.table:
 getAllCoords <- function(x) {
     out <- RstoxBase::getStratumPolygonList(x)
@@ -861,6 +897,8 @@ compareSPDF <- function(x, y) {
     yc<- getAllCoords(y)
     all.equal(xc, yc)
 }
+
+
 
 
 

@@ -72,7 +72,7 @@ Bootstrap <- function(
     
     # Check the output processes:
     if(length(OutputProcesses) && !all(OutputProcesses %in% processesSansProcessData$processName)) {
-        warning("StoX: The following processes specified in OutputProcesses were not recognized: ", paste(setdiff(OutputProcesses, processesSansProcessData$processName), collapse = ", "))
+        stop("StoX: The following processes specified in OutputProcesses were not recognized: ", paste(setdiff(OutputProcesses, processesSansProcessData$processName), collapse = ", "))
         OutputProcesses <- intersect(OutputProcesses, processesSansProcessData$processName)
     }
     if(!length(OutputProcesses)) {

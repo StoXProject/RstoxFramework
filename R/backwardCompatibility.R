@@ -516,7 +516,7 @@ checkBackwardCompatibilityVersion <-  function(backwardCompatibilityAction, proj
 #' 
 #' @export
 #' 
-convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow = FALSE, run = FALSE) {
+convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow = FALSE, run = TRUE) {
     
     # Save to a different project:
     createProject(
@@ -559,13 +559,18 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow 
         projectXMLFilePath = projectXMLFilePath
     )
     
-    saveProject(newProjectPath3)
-    
+    output <- newProjectPath3
     if(run) {
-        temp <- runProject(newProjectPath3)
+        output <- tryCatch(
+            # Save afterwards in case the run fails:
+            runModel(newProjectPath3, modelName = "baseline", returnModelData = FALSE, save = FALSE), 
+            error = function(err) err$message
+        )
     }
-    
+    saveProject(newProjectPath3)
     closeProject(newProjectPath3)
+    
+    return(output)
 }
 
 # Function to change the FileName in processes using Define* with DefinitionMethod = "ResourceFile", and FileName ending with "xml":
@@ -590,7 +595,15 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
         projectXMLFilePath <- RstoxBase::getProjectXMLFilePath(projectPath = projectPath2.7)
     }
     
+    # We need the processID for some of the below actions:
+    processID <- getProcessIDFromProcessName(
+        projectPath = projectPath3, 
+        modelName = "baseline", 
+        processName = baselineTable$processName
+    )$processID
     
+    
+    # Set DefinitionMethod = "ResourceFile":
     modifyProcess(
         projectPath = projectPath3, 
         modelName = "baseline", 
@@ -602,6 +615,7 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
         )
     )
     
+    # Set FileName = projectXMLFilePath:
     modifyProcess(
         projectPath = projectPath3, 
         modelName = "baseline", 
@@ -613,31 +627,47 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
         )
     )
     
+    # Set UseProcessData = FALSE:
     setUseProcessData(
         projectPath = projectPath3, 
         modelName = "baseline", 
-        processID = getProcessIDFromProcessName(
-            projectPath = projectPath3, 
-            modelName = "baseline", 
-            processName = baselineTable$processName
-        )$processID, 
+        processID = processID, 
         UseProcessData = FALSE
     )
+    
+    # Empty non-visible parameters: 
+    nonVisibleArguments <- emptyNonVisibleArguments(
+        projectPath = projectPath3, 
+        modelName = "baseline", 
+        processID = processID
+    )
+    message("Emptied the following function parameters of procecss ", baselineTable$processName, ", as no longer relevant when DefinitionMethod = \"ResourceFile\":\n", paste0("\t", nonVisibleArguments, collapse = "\n "))
     
     
     return(baselineTable$processName)
 }
 
-
-
-
-
-
-
-
-
-
-
+# Function to empty all non-visible arguments of a process, used to avoid confusion when changing process data with info from a project.xml file from StoX 2.7:
+emptyNonVisibleArguments <- function(projectPath, modelName, processID) {
+    # Get the names of the non-visible arguments:
+    nonVisibleArguments <- getArgumentsToShow(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        return.only.names = FALSE
+    )
+    nonVisibleArguments <- names(nonVisibleArguments)[nonVisibleArguments %in% FALSE]
+    # Empty the arguments:
+    emptyFunctionParameters( 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        functionParameterNames = nonVisibleArguments, 
+        archive = TRUE
+    )
+    
+    return(nonVisibleArguments)
+}
 
 
 copyInputDataFrom2.7 <- function(projectPath2.7, projectPath3, clearExisting = TRUE,  types = c("Acoustic", "Biotic", "Landing")) {

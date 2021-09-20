@@ -117,7 +117,7 @@ getInteractiveMode <- function(projectPath, modelName, processID) {
     )
     
     # Get also the process parameters to detect whether showInMap is FALSE, in which case interactiveMode should be "none":
-    showInMap <- getProcessParameters(projectPath, modelName, processID)$showInMap
+    showInMap <- getProcessParameters(projectPath = projectPath, modelName = modelName, processID = processID)$showInMap
     
     # Select the type of interactive mode depending on the output data type from the process:
     if(dataType %in% getRstoxFrameworkDefinitions("stratumDataType") && showInMap) {
@@ -162,7 +162,7 @@ getInteractiveMode <- function(projectPath, modelName, processID) {
 getInteractiveData  <- function(projectPath, modelName, processID) {
     
     # Get the interactive mode:
-    interactiveMode <- getInteractiveMode(projectPath, modelName, processID)
+    interactiveMode <- getInteractiveMode(projectPath = projectPath, modelName = modelName, processID = processID)
     
     # Call the appropriate function depending on the interactive mode:
     if(interactiveMode == "stratum") {
@@ -220,7 +220,7 @@ getInteractiveData  <- function(projectPath, modelName, processID) {
 getMapData  <- function(projectPath, modelName, processID) {
     
     # Get the interactive mode:
-    interactiveMode <- getInteractiveMode(projectPath, modelName, processID)
+    interactiveMode <- getInteractiveMode(projectPath = projectPath, modelName = modelName, processID = processID)
     
     # Call the appropriate function depending on the interactive mode:
     if(interactiveMode == "stratum") {
@@ -257,7 +257,7 @@ getMapData  <- function(projectPath, modelName, processID) {
 getStratumData <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Return an empty StratumPolygon if processData is empty:
     # Change this to an error?????????????????
     if(length(processData) == 0) {
@@ -266,7 +266,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     
     # Issue an error of the process data are not of StratumPolygon type:
     if(names(processData) != "StratumPolygon"){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type StratumPolygon")
         return(NULL)
     }
@@ -293,10 +293,10 @@ getStratumData <- function(projectPath, modelName, processID) {
 getAcousticPSUData <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Issue an error of the process data are not of AcousticPSU type:
     if(! "EDSU_PSU" %in% names(processData)){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type AcousticPSU")
         return(NULL)
     }
@@ -308,10 +308,10 @@ getAcousticPSUData <- function(projectPath, modelName, processID) {
 getBioticPSUData <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Issue an error of the process data are not of BioticPSU type:
     if(! "Station_PSU" %in% names(processData)){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type BioticPSU")
         return(NULL)
     }
@@ -323,10 +323,10 @@ getBioticPSUData <- function(projectPath, modelName, processID) {
 getAcousticLayerData <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Issue an error of the process data are not of AcousticPSU type:
     if(! "AcousticLayer" %in% names(processData)){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type AcousticLayer")
         return(NULL)
     }
@@ -338,10 +338,10 @@ getAcousticLayerData <- function(projectPath, modelName, processID) {
 getBioticLayerData <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Issue an error of the process data are not of BioticPSU type:
     if(! "BioticLayer" %in% names(processData)){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type BioticLayer")
         return(NULL)
     }
@@ -353,10 +353,10 @@ getBioticLayerData <- function(projectPath, modelName, processID) {
 getBioticAssignmentData <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Issue an error of the process data are not of BioticAssignment type:
     if(names(processData) != "BioticAssignment"){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type BioticAssignment")
         return(NULL)
     }
@@ -378,7 +378,7 @@ getBioticAssignmentData <- function(projectPath, modelName, processID) {
 getStratumList <- function(projectPath, modelName, processID) {
     
     # Get the process data:
-    processData <- getProcessData(projectPath, modelName, processID)
+    processData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
     # Return an empty list if processData is empty:
     if(length(processData) == 0) {
         return(list())
@@ -386,7 +386,7 @@ getStratumList <- function(projectPath, modelName, processID) {
     
     # Issue an error of the process data are not of StratumPolygon type:
     if(names(processData) != "StratumPolygon"){
-        processName <- getProcessName(projectPath, modelName, processID)
+        processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
         warning("StoX: The process ", processName, " does not return process data of type StratumPolygon")
         return(list())
     }
@@ -405,11 +405,11 @@ getStratumList <- function(projectPath, modelName, processID) {
 # Function to get a list of station data:
 getStationData <- function(projectPath, modelName, processID) {
     # Get the station data:
-    Cruise <- getProcessOutput(projectPath, modelName, processID, tableName = "Cruise")$Cruise
-    Station <- getProcessOutput(projectPath, modelName, processID, tableName = "Station")$Station
+    Cruise <- getProcessOutput(projectPath = projectPath, modelName = modelName, processID = processID, tableName = "Cruise")$Cruise
+    Station <- getProcessOutput(projectPath = projectPath, modelName = modelName, processID = processID, tableName = "Station")$Station
     CruiseStation <- merge(Cruise, Station, by = intersect(names(Cruise), names(Station)))
     
-    Haul <- getProcessOutput(projectPath, modelName, processID, tableName = "Haul")$Haul
+    Haul <- getProcessOutput(projectPath = projectPath, modelName = modelName, processID = processID, tableName = "Haul")$Haul
     Station_Haul <- merge(Station, Haul, by = intersect(names(Station), names(Haul)))
     
     # Split the Station table into the coordinates and the properties:
@@ -456,7 +456,7 @@ getEDSUData <- function(projectPath, modelName, processID) {
         "Log", 
         "Beam"
     )
-    EDSUData <- sapply(tableNames, function(tableName) getProcessOutput(projectPath, modelName, processID, tableName = tableName)[[tableName]], simplify = FALSE)
+    EDSUData <- sapply(tableNames, function(tableName) getProcessOutput(projectPath = projectPath, modelName = modelName, processID = processID, tableName = tableName)[[tableName]], simplify = FALSE)
     CruiseLog <- RstoxData::mergeDataTables(EDSUData, tableNames = tableNames, output.only.last = TRUE)
     # Uniquify in case e.g. there are data from different instruments:
     #EDSUInfoToKeep <- c("EDSU", "Platform", "Log", "DateTime", "Longitude", "Latitude", "EffectiveLogDistance", "BottomDepth")
@@ -1240,7 +1240,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         newFunctionParameters <- stats::setNames(list(value), name)
         
         # Format the function parameters:
-        functionName <- getFunctionName(projectPath, modelName, processID)
+        functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID)
         newFunctionParameters <- formatFunctionParameters(newFunctionParameters, functionName = functionName)
         
         # Modify the process parameter:
@@ -1375,11 +1375,11 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
 getFilterOptionsAll <- function(projectPath, modelName, processID, include.numeric = TRUE, stopIfEmptyPossibleValues = FALSE) {
 
     # Run the process without saving and without filter:
-    processOutput <- runProcess(projectPath, modelName, processID, msg = FALSE, returnProcessOutput = TRUE, replaceArgs = list(FilterExpression = list()))
+    processOutput <- runProcess(projectPath = projectPath, modelName = modelName, processID = processID, msg = FALSE, returnProcessOutput = TRUE, replaceArgs = list(FilterExpression = list()))
     
     # Add a warning if the process output is empty:
     if(!length(processOutput)) {
-        warnText <- paste0("StoX: The process used as input the process ", getProcessNameFromProcessID(projectPath, modelName, processID), " must bee run to use the filter expression builder.")
+        warnText <- paste0("StoX: The process used as input the process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " must bee run to use the filter expression builder.")
         if(stopIfEmptyPossibleValues) {
             stop(warnText)
         }
@@ -1552,7 +1552,7 @@ getParameterTablePossibleValues <- function(projectPath, modelName, processID, f
     )
     
     if(!length(possibleValues)) {
-        warnText <- paste0("StoX: One or more input processes of the process ", getProcessName(projectPath, modelName, processID), " have not been run.")
+        warnText <- paste0("StoX: One or more input processes of the process ", getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), " have not been run.")
         if(stopIfEmptyPossibleValues) {
             stop(warnText)
         }
@@ -1589,7 +1589,7 @@ getParameterVectorPossibleValues <- function(projectPath, modelName, processID, 
     )
     
     if(!length(possibleValues)) {
-        warnText <- paste0("StoX: One or more input processes of the process ", getProcessName(projectPath, modelName, processID), " have not been run.")
+        warnText <- paste0("StoX: One or more input processes of the process ", getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), " have not been run.")
         if(stopIfEmptyPossibleValues) {
             stop(warnText)
         }

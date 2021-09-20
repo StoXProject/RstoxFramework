@@ -9,7 +9,7 @@ convertStoX2.7To3(
   projectPath3,
   newProjectPath3,
   ow = FALSE,
-  run = FALSE
+  run = TRUE
 )
 }
 \arguments{

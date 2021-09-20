@@ -1452,6 +1452,25 @@ getActiveProcess <- function(projectPath, modelName = NULL) {
     
 }
 
+isActiveProcess <- function(projectPath, modelName, processID, require = FALSE) {
+    # Read the active process ID for the model:
+    activeProcess <- getActiveProcess(
+        projectPath = projectPath, 
+        modelName = modelName
+    ) 
+    isActive <- activeProcess$processID == processID
+    if(require && !isActive) {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        stop("The process ", processName, " is not the active process.")
+    }
+    
+    return(isActive)
+}
+
 writeActiveProcessID <- function(projectPath, modelName, activeProcessID = NULL, processDirty = NULL, propertyDirty = NULL) {
     
     # Read the active process ID for the model:
@@ -1545,7 +1564,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         
         # Write the active process ID:
         #if(is.na(newActiveProcessID) || newActiveProcessID != currentActiveProcessID) {
-            writeActiveProcessID(projectPath, modelName, newActiveProcessID, processDirty = processDirty)
+            writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = newActiveProcessID, processDirty = processDirty)
         #}
         
         ##### (2) Delete process output of the processes from the new active process and onwards: #####
@@ -1755,7 +1774,7 @@ addTimeToFileName <- function(fileName, dir) {
 saveArgumentFile <- function(projectPath, modelName, processID, argumentName, argumentValue, ext = "rds") {
     
     # Get the path to the new argument file:
-    argumentFileSansExt <- getNewArgumentFileSansExt(projectPath, modelName, processID, argumentName)
+    argumentFileSansExt <- getNewArgumentFileSansExt(projectPath = projectPath, modelName = modelName, processID = processID, argumentName = argumentName)
     
     # Save the argument to the file, and return the file path:
     argumentFilePath <- writeMemoryFile(
@@ -2024,7 +2043,7 @@ getStoxFunctionMetaData <- function(functionName, metaDataName = NULL, showWarni
 }
 
 # Function to return the names of the arguments to show for a function:
-getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePaths = NULL) {
+getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePaths = NULL, return.only.names = TRUE) {
     
     # Get the function name and arguments:
     functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
@@ -2066,7 +2085,11 @@ getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePa
     }
     
     # Return only the names of the arguments to show:
-    return(names(toShow)[toShow])
+    if(return.only.names) {
+        toShow <- names(toShow)[toShow]
+    }
+    
+    return(toShow)
 }
 
 # Function to extract the actual the arguments to show from the arguments:
@@ -2295,7 +2318,14 @@ getProcessParameters <- function(projectPath, modelName, processID, argumentFile
 }
 
 # This function gets the process data as stored in the process memory files. These process data may differ from the process data output from the process, stored in the output data files, particularly if interactive functions have been used. In this case, the process must be run again with UseProcessData = TRUE (automatically set by RstoxFramework) to update the process output, which is used in runProcess() using getProcessOutput(). 
-getProcessData <- function(projectPath, modelName, processID, argumentFilePaths = NULL) {
+getProcessData <- function(projectPath, modelName, processID, argumentFilePaths = NULL, check.activeProcess = FALSE) {
+    
+    # Check that the process is the active process:
+    if(check.activeProcess) {
+        isActiveProcess(projectPath = projectPath, modelName = modelName, processID = processID, require = TRUE)
+    }
+    
+    # Get and return the processData:
     getProjectMemoryData(
         projectPath, 
         modelName = modelName, 
@@ -2352,8 +2382,8 @@ getDataType <- function(projectPath, modelName, processID, argumentFilePaths = N
 
 checkDataType <- function(dataType, projectPath, modelName, processID) {
     #dataType %in% getDataType(projectPath, modelName, processID)
-    if(!dataType %in% getDataType(projectPath, modelName, processID)) {
-        stop("StoX: The process ", getProcessName(projectPath, modelName, processID), " does not return ", dataType, " data.")
+    if(!dataType %in% getDataType(projectPath = projectPath, modelName = modelName, processID = processID)) {
+        stop("StoX: The process ", getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), " does not return ", dataType, " data.")
     }
 }
     
@@ -3264,6 +3294,16 @@ modifyFunctionName <- function(projectPath, modelName, processID, newFunctionNam
     }
     #process
 }
+emptyFunctionName <- function(projectPath, modelName, processID, archive = TRUE, add.defaults = FALSE) {
+    modifyFunctionName(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        newFunctionName = list(), 
+        archive = archive, 
+        add.defaults = add.defaults
+    )
+}
 modifyProcessName <- function(projectPath, modelName, processID, newProcessName, archive = TRUE, strict = TRUE) {
     
     # Get the current process name:
@@ -3316,6 +3356,16 @@ modifyProcessName <- function(projectPath, modelName, processID, newProcessName,
     
     #processName
 }
+emptyProcessName <- function(projectPath, modelName, processID, archive = TRUE, strict = TRUE) {
+    modifyProcessName(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        newProcessName = list(), 
+        archive = archive, 
+        strict = strict
+    )
+}
 modifyFunctionParameters <- function(projectPath, modelName, processID, newFunctionParameters, archive = TRUE) {
     
     # Get the function parameters:
@@ -3362,6 +3412,15 @@ modifyFunctionParameters <- function(projectPath, modelName, processID, newFunct
     
     #modifiedFunctionParameters
 }
+emptyFunctionParameters <- function(projectPath, modelName, processID, functionParameterNames, archive = TRUE) {
+    modifyFunctionParameters(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        newFunctionParameters = structure(rep(list(list()), length(functionParameterNames)), names = functionParameterNames), 
+        archive = archive
+    )
+}
 modifyFunctionInputs <- function(projectPath, modelName, processID, newFunctionInputs, archive = TRUE) {
     
     # Get the function inputs:
@@ -3399,6 +3458,15 @@ modifyFunctionInputs <- function(projectPath, modelName, processID, newFunctionI
     }
     
     #modifiedFunctionInputs
+}
+emptyFunctionInputs <- function(projectPath, modelName, processID, functionInputsNames, archive = TRUE) {
+    modifyFunctionInputs(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        newFunctionInputs = structure(rep(list(list()), length(functionParameterNames)), names = functionParameterNames), 
+        archive = archive
+    )
 }
 modifyProcessParameters <- function(projectPath, modelName, processID, newProcessParameters, archive = TRUE) {
     
@@ -3444,7 +3512,8 @@ modifyProcessData <- function(projectPath, modelName, processID, newProcessData,
     processData<- getProcessData(
         projectPath = projectPath, 
         modelName = modelName, 
-        processID = processID
+        processID = processID, 
+        check = FALSE
     )
     
     # Modify the process data:
@@ -3486,9 +3555,9 @@ modifyProcessData <- function(projectPath, modelName, processID, newProcessData,
 
 
 # Function returning a logical vector with TRUE for function parameters which are file paths as per the format attribute:
-detectFilePaths <- function(functionParameters, projectPath, modelName, processID) {
+detectFilePaths <- function(functionParameters, projectPath = projectPath, modelName = modelName, processID = processID) {
     # Get the function name and the function parameter formats:
-    functionName <- getFunctionName(projectPath, modelName, processID)
+    functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID)
     functionParameterFormat <- getStoxFunctionMetaData(functionName, "functionParameterFormat")
     
     # Detect file path formats:
@@ -4308,12 +4377,12 @@ duplicateProcess <- function(projectPath, modelName, processID, newProcessName =
 rearrangeProcesses <- function(projectPath, modelName, processID, afterProcessID = NULL) {
     # Rearrange the process index table defining the order of the processes:
     #if(length(afterProcessID)) {
-    activeProcessID <- rearrangeProcessIndexTable(projectPath, modelName, processID, afterProcessID)
+    activeProcessID <- rearrangeProcessIndexTable(projectPath = projectPath, modelName = modelName, processID = processID, afterProcessID = afterProcessID)
     #}
     
     # Reset the model to the first of afterProcessID and the processes to be rearranged, but only if there was any change:
     if(length(activeProcessID)) {
-        resetModel(projectPath, modelName, processID = activeProcessID)
+        resetModel(projectPath = projectPath, modelName = modelName, processID = activeProcessID)
         # Set the status as not saved (saving is done when running a process):
         setSavedStatus(projectPath, status = FALSE)
     }
@@ -4407,9 +4476,9 @@ runProcess <- function(
     if(msg) {
         message(
             "StoX: Running ", modelName, " process ", 
-            getProcessIndexFromProcessID(projectPath, modelName, processID), 
+            getProcessIndexFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), 
             ": ", 
-            getProcessName(projectPath, modelName, processID), 
+            getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), 
             "...", 
             appendLF = TRUE
         )
@@ -4483,7 +4552,7 @@ runProcess <- function(
     else if(length(processOutput) || any(c("data.table", "SpatialPolygonsDataFrame") %in% class(processOutput))){
         
         # Update the active process ID:
-        writeActiveProcessID(projectPath, modelName, processID, processDirty = FALSE)
+        writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = processID, processDirty = FALSE)
         
         # If a valid output class, wrap the function output to a list named with the data type:
         if(firstClass(processOutput) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
@@ -4493,11 +4562,11 @@ runProcess <- function(
         
         # Store the processData:
         if(saveProcessData && isProcessDataFunction(process$functionName)) {
-            modifyProcessData(projectPath, modelName, processID, processOutput, purge.processData = purge.processData)
+            modifyProcessData(projectPath = projectPath, modelName = modelName, processID = processID, newProcessData = processOutput, purge.processData = purge.processData)
             
             # Set the function parameters UseProcessData to TRUE:
             if(setUseProcessDataToTRUE) {
-                setUseProcessData(projectPath, modelName, processID)
+                setUseProcessData(projectPath = projectPath, modelName = modelName, processID = processID)
             }
         }
         else {
@@ -4530,7 +4599,7 @@ runProcess <- function(
 
 setUseProcessData <- function(projectPath, modelName, processID, UseProcessData = TRUE) {
     # Try setting UseProcessData to TRUE:
-    modified <- modifyFunctionParameters(projectPath, modelName, processID, list(UseProcessData = UseProcessData))
+    modified <- modifyFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, newFunctionParameters = list(UseProcessData = UseProcessData))
     # If modified, set propertyDirty to TRUE:
     if(modified) {
         writeActiveProcessID(projectPath, modelName, propertyDirty = TRUE) 
@@ -4961,7 +5030,7 @@ getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNa
     if(length(folderPath) == 0 || !file.exists(folderPath)) {
         #processName <- getProcessName(projectPath, modelName, processID)
         #stop("Has the previous processes been run? The folder ", folderPath, " does not exist.")
-        warning("StoX: Process ", getProcessNameFromProcessID(projectPath, modelName, processID), " of the model ", modelName, " has not been run.")
+        warning("StoX: Process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " of the model ", modelName, " has not been run.")
         return(NULL)
     }
     
@@ -5037,7 +5106,7 @@ listMemoryFiles <- function(folderPath) {
 #' 
 getProcessOutputTableNames <- function(projectPath, modelName, processID) {
     # Get the output file names, and add the process name:
-    tableNames <- getProcessOutputFiles(projectPath, modelName, processID, onlyTableNames = TRUE)
+    tableNames <- getProcessOutputFiles(projectPath = projectPath, modelName = modelName, processID = processID, onlyTableNames = TRUE)
     ### processName <- getProcessName(projectPath, modelName, processID)
     #tableNames <- paste(processName, tableNames, sep ="_")
     
@@ -5063,7 +5132,7 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
     }
     else if(type == "output") {
         # Get the processName and build the folderPath:
-        processName <- getProcessNameFromProcessID(projectPath, modelName, processID)
+        processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
         folderPath <- file.path(
             getProjectPaths(
                 projectPath, 
@@ -5174,7 +5243,8 @@ getProcessOutputTextFilePath <- function(
     if(output.file.type == "RData") {
         # Define a single file output named by the process name:
         #fileNameSansExt <- processName
-        dataType <- getDataType(projectPath, modelName, processID = getProcessIDFromProcessName(projectPath, modelName, processName)$processID)
+        processID <- getProcessIDFromProcessName(projectPath = projectPath, modelName = modelName, processName = processName)$processID
+        dataType <- getDataType(projectPath = projectPath, modelName = modelName, processID = processID)
         fileNameSansExt <- dataType
         
         
@@ -5284,7 +5354,7 @@ getProcessOutputTextFilePath <- function(
 writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, processID, output.file.type = c("default", "text", "RData", "rds")) {
     
     # Get the process name
-    processName <- getProcessNameFromProcessID(projectPath, modelName, processID)
+    processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
     
     # Get the output.file.type:
     output.file.type <- match.arg(output.file.type)
@@ -5313,7 +5383,7 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             
             
             # Rename the process output to the datatype:
-            dataType <- getDataType(projectPath, modelName, processID = getProcessIDFromProcessName(projectPath, modelName, processName)$processID)
+            dataType <- getDataType(projectPath = projectPath, modelName = modelName, processID = processID)
             assign(dataType, processOutput)
             
             # Write to RData file:
@@ -5754,10 +5824,10 @@ hasBeenRun <- function(projectPath, modelName, processID) {
     )
     activeProcessIndex <- getProcessIndexFromProcessID(
         projectPath = projectPath, 
-        modelName = "baseline", 
+        modelName = modelName, 
         processID = getActiveProcess(
             projectPath = projectPath, 
-            modelName = "baseline"
+            modelName = modelName
         )$processID
     )
     # TRUE if the process is not later than the active process:

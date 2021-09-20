@@ -57,10 +57,10 @@ removeHaulFromAssignment <- function(Stratum, PSU, Haul, projectPath, modelName,
 modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, processID, action = c("add", "remove")) {
     
     # Check that the process returns BioticAssigment process data:
-    checkDataType("BioticAssignment", projectPath, modelName, processID)
+    checkDataType("BioticAssignment", projectPath = projectPath, modelName = modelName, processID = processID)
     
-    # Get the process data of the process, a table of PSU, Layer, Haul and HaulWeight:
-    BioticAssignment <- getProcessData(projectPath, modelName, processID)$BioticAssignment
+    ## Get the process data of the process, a table of PSU, Layer, Haul and HaulWeight:
+    BioticAssignment <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)$BioticAssignment
     
     # Check for existing PSU:
     if(!PSU %in% BioticAssignment$PSU) {
@@ -89,7 +89,7 @@ modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, process
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -201,11 +201,11 @@ NULL
 #' 
 addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processID) {
     
-    # Check that the process returns Assigment process data:
-    checkDataType("AcousticPSU", projectPath, modelName, processID)
+    # Check that the process returns AcousticPSU process data:
+    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
     
     # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath, modelName, processID)
+    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # If the PSU is not given, use the default PSU name:
     if(length(PSU) == 0) {
@@ -238,8 +238,8 @@ addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processI
         argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
     )
     
-    # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    # Revert the active process ID to the current process (currently it is a requirement that the process is the active process for the GUI to allow modification, so resetting the active process is not effective here) and set it as dirty:
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -257,10 +257,13 @@ addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processI
 #' 
 removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
     
-    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath, modelName, processID)
+    # Check that the process returns AcousticPSU process data:
+    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
     
-    # Remove  the acsoutic PSU:
+    # Get the process data of the process:
+    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
+    
+    # Remove the acsoutic PSU:
     PSUsToKeepInStratum_PSU <- !AcousticPSU$Stratum_PSU$PSU %in% PSU
     PSUsToSetToNAInEDSU_PSU <- AcousticPSU$EDSU_PSU$PSU %in% PSU
     
@@ -281,7 +284,7 @@ removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -298,8 +301,11 @@ removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
 #' 
 renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID) {
     
-    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath, modelName, processID)
+    # Check that the process returns AcousticPSU process data:
+    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
+    
+    ## Get the process data of the process:
+    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # Add the acsoutic PSU:
     PSUsToRename <- AcousticPSU$Stratum_PSU$PSU %in% PSU
@@ -321,7 +327,7 @@ renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -339,8 +345,11 @@ renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID
 #' 
 addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
     
+    # Check that the process returns AcousticPSU process data:
+    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
+    
     # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath, modelName, processID)
+    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # Set the PSU column for the given EDSUs:
     atEDSUs <- AcousticPSU$EDSU_PSU$EDSU %in% EDSU
@@ -359,7 +368,7 @@ addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -376,8 +385,11 @@ addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
 #' 
 removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     
+    # Check that the process returns AcousticPSU process data:
+    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
+    
     # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath, modelName, processID)
+    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # Set the PSU column to empty string for the given EDSUs:
     atEDSUs <- AcousticPSU$EDSU_PSU$EDSU %in% EDSU
@@ -401,7 +413,7 @@ removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -440,8 +452,11 @@ NULL
 #' 
 addStratum <- function(stratum, projectPath, modelName, processID) {
     
+    # Check that the process returns StratumPolygon process data:
+    checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
+    
     # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    StratumPolygon <- getProcessData(projectPath, modelName, processID)
+    StratumPolygon <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # If given as a GeoJSON string, parse to a SpatialPolygonsDataFrame object:
     if(is.character(stratum)) {
@@ -497,7 +512,7 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -514,8 +529,11 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
 #' 
 removeStratum <- function(stratumName, projectPath, modelName, processID) {
     
+    # Check that the process returns StratumPolygon process data:
+    checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
+    
     # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    StratumPolygon <- getProcessData(projectPath, modelName, processID)
+    StratumPolygon <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # Add the coordinates:
     # Modify the coordinates:
@@ -546,7 +564,7 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
     #)
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -558,33 +576,6 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
     )
 }
 
-#removePSUsByStratum <- function(stratumName, projectPath, modelName, processID) {
-#    # Detect all processes returning PSUs (function names ending with PSU):
-#    processTable <- getProcessAndFunctionNames(projectPath = projectPath, modelName = modelName, afterProcessID = processID)
-#    PSUProccessIDs <- processTable[endsWith(functionName, "PSU"), processID]
-#    
-#    lapply(PSUProccessIDs, removePSUsByStratumOnePSUProcess, stratumName = stratumName, projectPath = projectPath, modelName = modelName)
-#}
-#
-#removePSUsByStratumOnePSUProcess <- function(processID, stratumName, projectPath, modelName) {
-#    # Get the processData:
-#    PSUs <- getProcessData(projectPath, modelName, processID)
-#    
-#    # Get PSU type:
-#    PSUType <- ifelse("Station_PSU" %in% names(PSUs), "Biotic", "Acoustic")
-#    
-#    # Find all PSUs of the stratum to be removed:
-#    PSUs <- PSUs$Stratum_PSU[Stratum == stratumName]$PSU
-#    
-#    # Remove either swept area or acoustic PSUs:
-#    nameOfRemoveFunction <- paste0("remove", PSUType, "PSU")
-#    do.call(nameOfRemoveFunction, list(
-#        PSU = PSUs, 
-#        projectPath = projectPath, 
-#        modelName = modelName, 
-#        processID = processID
-#    ))
-#}
 
 
 #' 
@@ -593,8 +584,11 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
 #' 
 modifyStratum <- function(stratum, projectPath, modelName, processID) {
     
+    # Check that the process returns StratumPolygon process data:
+    checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
+    
     # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    StratumPolygon <- getProcessData(projectPath, modelName, processID)
+    StratumPolygon <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # If given as a GeoJSON string, parse to a SpatialPolygonsDataFrame object:
     if(is.character(stratum)) {
@@ -631,7 +625,7 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath, modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)

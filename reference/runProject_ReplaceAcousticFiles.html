@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Run all models of a StoX project — runProject • RstoxFramework</title>
+<title>Add a process DefineAcousticPSU with DefinitionMethod "PreDefined" — runProject_ReplaceAcousticFiles • RstoxFramework</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Run all models of a StoX project — runProject" />
-<meta property="og:description" content="This function runs and returns output from all models of a StoX project." />
+<meta property="og:title" content="Add a process DefineAcousticPSU with DefinitionMethod "PreDefined" — runProject_ReplaceAcousticFiles" />
+<meta property="og:description" content="This function adds a process named DefineAcousticPSU using the function DefineAcousticPSU with DefinitionMethod = &quot;PreDefined&quot;. It is a requirement that there exists a procecss named DefineAcousticPSU in the project, which will be renamed and used as input to the new DefineAcousticPSU process." />
 
 
 
@@ -113,35 +113,25 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Run all models of a StoX project</h1>
+    <h1>Add a process DefineAcousticPSU with DefinitionMethod "PreDefined"</h1>
     <small class="dont-index">Source: <a href='https://github.com/StoXProject/RstoxFramework/blob/master/R/API.R'><code>R/API.R</code></a></small>
-    <div class="hidden name"><code>runProject.Rd</code></div>
+    <div class="hidden name"><code>runProject_ReplaceAcousticFiles.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function runs and returns output from all models of a StoX project.</p>
+    <p>This function adds a process named DefineAcousticPSU using the function DefineAcousticPSU with DefinitionMethod = "PreDefined". It is a requirement that there exists a procecss named DefineAcousticPSU in the project, which will be renamed and used as input to the new DefineAcousticPSU process.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class='sourceCode r'><code><span class='fu'>runProject</span><span class='op'>(</span>
+    <div class="ref-usage sourceCode"><pre class='sourceCode r'><code><span class='fu'>runProject_ReplaceAcousticFiles</span><span class='op'>(</span>
   <span class='va'>projectPath</span>,
+  <span class='va'>ReadAcoustic.FileNames</span>,
   modelNames <span class='op'>=</span> <span class='fu'><a href='getRstoxFrameworkDefinitions.html'>getRstoxFrameworkDefinitions</a></span><span class='op'>(</span><span class='st'>"stoxModelNames"</span><span class='op'>)</span>,
-  processes <span class='op'>=</span> <span class='cn'>NULL</span>,
-  startProcess <span class='op'>=</span> <span class='fl'>1</span>,
-  endProcess <span class='op'>=</span> <span class='cn'>Inf</span>,
-  drop.datatype <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  unlistDepth2 <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  projectPath0 <span class='op'>=</span> <span class='cn'>NULL</span>,
   run <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  save <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  force.restart <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  replaceDataList <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
-  replaceArgsList <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
-  fileOutput <span class='op'>=</span> <span class='cn'>NULL</span>,
-  setUseProcessDataToTRUE <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  purge.processData <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  try <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  close <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  unlist.models <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  <span class='va'>...</span>
+  AcousticPSUProcessName <span class='op'>=</span> <span class='st'>"DefineAcousticPSU"</span>,
+  AcousticPSUProcessNameNew <span class='op'>=</span> <span class='st'>"DefineAcousticPSU0"</span>,
+  save <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ow <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></code></pre></div>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -152,76 +142,36 @@
       <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
     </tr>
     <tr>
+      <th>ReadAcoustic.FileNames</th>
+      <td><p>Optional: character vector with file paths to input acoustic files to replaec the existing acoustic files by in the procecss using the function <code>ReadAcoustic</code>.</p></td>
+    </tr>
+    <tr>
       <th>modelNames</th>
       <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
     </tr>
     <tr>
-      <th>processes</th>
-      <td><p>The name of the process(es).</p></td>
-    </tr>
-    <tr>
-      <th>startProcess</th>
-      <td><p>The process index, name or ID at which to start and stop the model run.</p></td>
-    </tr>
-    <tr>
-      <th>endProcess</th>
-      <td><p>The process index, name or ID at which to start and stop the model run.</p></td>
-    </tr>
-    <tr>
-      <th>drop.datatype</th>
-      <td><p>Logical: If TRUE, drop the top level of the output list if it has length 1 and that single element is named by the datatype name.</p></td>
-    </tr>
-    <tr>
-      <th>unlistDepth2</th>
-      <td><p>Logical: Related to <code>drop.datatype</code>, but setting this to TRUE unlists output data that are nested in 2 levels, such as output from <code><a href='https://rdrr.io/pkg/RstoxData/man/ReadBiotic.html'>ReadBiotic</a></code>, which outputs a set of tables for each input file. Using unlistDepth2 = TRUE puts all these tables in one list, and uses the concatenation of the file names and the table name separated by underscore. This is how it is displayed in the StoX GUI when selecting "View output".</p></td>
+      <th>projectPath0</th>
+      <td><p>Optional: Path to the project to copy to the project given by <code>projectPath</code>.</p></td>
     </tr>
     <tr>
       <th>run</th>
       <td><p>Logical: If TRUE run the model.</p></td>
     </tr>
     <tr>
+      <th>AcousticPSUProcessName</th>
+      <td><p>The name of the existing process using DefineAcousticPSU.</p></td>
+    </tr>
+    <tr>
+      <th>AcousticPSUProcessNameNew</th>
+      <td><p>The new name of the existing process using DefineAcousticPSU.</p></td>
+    </tr>
+    <tr>
       <th>save</th>
-      <td><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></td>
+      <td><p>Logical: If TRUE save the project after running.</p></td>
     </tr>
     <tr>
-      <th>force.restart</th>
-      <td><p>Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.</p></td>
-    </tr>
-    <tr>
-      <th>replaceDataList</th>
-      <td><p>A list named by the processes to replace output data for. See <code><a href='runProcess.html'>runProcess</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>replaceArgsList</th>
-      <td><p>A list of <code>replaceArgs</code> holding parameters to replace in the function call, named by the processes to modify.</p></td>
-    </tr>
-    <tr>
-      <th>fileOutput</th>
-      <td><p>Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.</p></td>
-    </tr>
-    <tr>
-      <th>setUseProcessDataToTRUE</th>
-      <td><p>Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.</p></td>
-    </tr>
-    <tr>
-      <th>purge.processData</th>
-      <td><p>Logical: If TRUE replace process data entirely.</p></td>
-    </tr>
-    <tr>
-      <th>try</th>
-      <td><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></td>
-    </tr>
-    <tr>
-      <th>close</th>
-      <td><p>Logical: If TRUE close the project after running and getting the output.</p></td>
-    </tr>
-    <tr>
-      <th>unlist.models</th>
-      <td><p>Logical: If TRUE unlist the top level so that all processes are in one list.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p><code>replaceArgsList</code> can also be given directly.</p></td>
+      <th>ow</th>
+      <td><p>Logical: If TRUE overwrite the project.</p></td>
     </tr>
     </table>
 

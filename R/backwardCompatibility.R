@@ -573,20 +573,24 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow 
     return(output)
 }
 
+
+
+
+
 # Function to change the FileName in processes using Define* with DefinitionMethod = "ResourceFile", and FileName ending with "xml":
 applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, projectXMLFilePath = NULL) {
     
-    # Get the table of baseline processes:
-    baselineTable <- getProcessAndFunctionNames(projectPath = projectPath3, "baseline")
+    # Find the processes:
+    processName <- findProcess(
+        projectPath, 
+        modelName = "baseline", 
+        functionName = functionName
+    )$processName
     
-    # Find the processes that use the given function:
-    functionNames <- getFunctionNameFromPackageFunctionName(baselineTable$functionName)
-    atFunctionName <- which(functionNames == functionName)
-    baselineTable <- baselineTable[atFunctionName,]
-    if(!NROW(baselineTable)) {
-        warning("No processes using the function ", functionName, " found in the model ", model, ". Returning NULL.")
+    if(!length(processName)) {
+        warning("No processes using the function ", functionName, " found in the baseline model. Returning NULL.")
     }
-    else if(NROW(baselineTable) > 1) {
+    else if(length(processName) > 1) {
         stop("Applying a project.xml file from StoX 2.7 requires only one process using the function ", functionName, ".")
     }
     
@@ -657,12 +661,22 @@ emptyNonVisibleArguments <- function(projectPath, modelName, processID) {
         return.only.names = FALSE
     )
     nonVisibleArguments <- names(nonVisibleArguments)[nonVisibleArguments %in% FALSE]
+    
+    areInputs <- isFunctionInput(nonVisibleArguments)
+        
     # Empty the arguments:
+    emptyFunctionInputs( 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        functionInputsNames = nonVisibleArguments[areInputs], 
+        archive = TRUE
+    )
     emptyFunctionParameters( 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        functionParameterNames = nonVisibleArguments, 
+        functionParameterNames = nonVisibleArguments[!areInputs], 
         archive = TRUE
     )
     

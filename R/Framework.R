@@ -3304,7 +3304,7 @@ emptyFunctionName <- function(projectPath, modelName, processID, archive = TRUE,
         add.defaults = add.defaults
     )
 }
-modifyProcessName <- function(projectPath, modelName, processID, newProcessName, archive = TRUE, strict = TRUE) {
+modifyProcessName <- function(projectPath, modelName, processID, newProcessName, archive = TRUE, strict = TRUE, update.functionInputs = TRUE) {
     
     # Get the current process name:
     processName <- getProcessName(
@@ -3345,7 +3345,9 @@ modifyProcessName <- function(projectPath, modelName, processID, newProcessName,
         modifyProcessNameInProcessIndexTable(projectPath, modelName, processName, newProcessName)
         
         # Change the process name in all relevant function inputs of consecutive processes:
-        modifyProcessNameInFunctionInputs(projectPath, modelName, processName, newProcessName)
+        if(update.functionInputs) {
+            modifyProcessNameInFunctionInputs(projectPath, modelName, processName, newProcessName)
+        }
         
         # Return a flag TRUE if the process name was changed: 
         return(TRUE)
@@ -3464,7 +3466,7 @@ emptyFunctionInputs <- function(projectPath, modelName, processID, functionInput
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        newFunctionInputs = structure(rep(list(list()), length(functionParameterNames)), names = functionParameterNames), 
+        newFunctionInputs = structure(rep(list(list()), length(functionInputsNames)), names = functionInputsNames), 
         archive = archive
     )
 }
@@ -3513,7 +3515,7 @@ modifyProcessData <- function(projectPath, modelName, processID, newProcessData,
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        check = FALSE
+        check.activeProcess = FALSE
     )
     
     # Modify the process data:
@@ -3674,10 +3676,11 @@ getAbsolutePath <- function(filePath, projectPath) {
 #' @inheritParams addProcess
 #' @param newValues A list named by the elements to modify (see getRstoxFrameworkDefinitions("processProperties") for possible elements), holding the values to modify to (e.g., list(functionParameter = list(DefinitionMethod = "Stratum"))).
 #' @param purge.processData Logical: If TRUE replace process data entirely.
+#' @param update.functionInputs Logical: If TRUE update the process name in the function inputs to other processes.
 #' 
 #' @export
 #' 
-modifyProcess <- function(projectPath, modelName, processName, newValues, archive = TRUE, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE) {
+modifyProcess <- function(projectPath, modelName, processName, newValues, archive = TRUE, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE, update.functionInputs = TRUE) {
     
     # The values of the process must be changed in the following order:
     # 1. Function name
@@ -3743,7 +3746,8 @@ modifyProcess <- function(projectPath, modelName, processName, newValues, archiv
             processID = processID, 
             newProcessName = newValues$processName, 
             archive = archive, 
-            strict = strict
+            strict = strict, 
+            update.functionInputs = update.functionInputs
         )
     }
     
@@ -5832,4 +5836,27 @@ hasBeenRun <- function(projectPath, modelName, processID) {
     )
     # TRUE if the process is not later than the active process:
     processIndex <= activeProcessIndex
+}
+
+
+
+
+
+
+
+
+findProcess <- function(projectPath, modelName, processName = NULL, functionName = NULL) {
+    
+    # Get the table of baseline processes:
+    processTable <- getProcessAndFunctionNames(
+        projectPath = projectPath, 
+        modelName = modelName
+    )
+    
+    # Find the processes that use the given function:
+    functionNames <- getFunctionNameFromPackageFunctionName(processTable$functionName)
+    atFunctionName <- which(functionNames == functionName)
+    processTable <- processTable[atFunctionName,]
+    
+    return(processTable)
 }

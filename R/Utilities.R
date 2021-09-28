@@ -277,6 +277,9 @@ list2expression <- function(l, parentHasSiblings = FALSE) {
         
         #value <- lapply(value, function(x) if (is.character(x)) if(x == "NA") NA else paste0("\"", x, "\"") else x)
         # If more than one value, obtain the c(...) notation: 
+        if(!length(value)) {
+            value = 'c()'
+        }
         if(l$operator %in% c('%in%', '%notin%') && length(value) > 1) {
             value = paste0('c(', paste(value, collapse=', '), ')')
         }

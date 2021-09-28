@@ -20,7 +20,7 @@ utils::globalVariables(c(
 	 "..propertyDirty", "..stationInfoToKeep", "..validInd", "BootstrapID", "CruiseKey", "EDSU",
 	 "JavaJEXL2R", "Latitude", "Latitude2", "Layer", "LogOrigin", "LogOrigin2", "Longitude",
 	 "Longitude2", "PSU", "Package", "ProcessName", "ResampleFunction", "StoX", "Version",
-	 "attriributes<-", "binaryPath", "canShowInMap", "capture.output", "col2rgb",
+	 "attriributes<-", "baselineTable", "binaryPath", "canShowInMap", "capture.output", "col2rgb",
 	 "colorRampPalette", "dataTable2SpatialPolygonsDataFrame", "dataType", "download.file",
 	 "functionName", "functionOutputDataType", "hasProcessData", "install.packages", "model",
 	 "modelName", "models", "name", "newVersion", "possibleValues", "processID", "processIndex",

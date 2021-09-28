@@ -618,3 +618,137 @@ stripLeadingAndTrailingQuote <- function(x) {
     #x <-stringi::stri_unescape_unicode(x)
     return(x)
 }
+
+
+
+
+
+##################################################
+##################################################
+#' Add a process DefineAcousticPSU with DefinitionMethod "PreDefined"
+#' 
+#' This function adds a process named DefineAcousticPSU using the function DefineAcousticPSU with DefinitionMethod = "PreDefined". It is a requirement that there exists a procecss named DefineAcousticPSU in the project, which will be renamed and used as input to the new DefineAcousticPSU process.
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams getModelData
+#' @inheritParams runProcesses
+#' @param run Logical: If TRUE run the model.
+#' @param save Logical: If TRUE save the project after running.
+#' @param projectPath0 Optional: Path to the project to copy to the project given by \code{projectPath}.
+#' @param AcousticPSUProcessName The name of the existing process using DefineAcousticPSU.
+#' @param AcousticPSUProcessNameNew The new name of the existing process using DefineAcousticPSU.
+#' @param ReadAcoustic.FileNames Optional: character vector with file paths to input acoustic files to replaec the existing acoustic files by in the procecss using the function \code{ReadAcoustic}.
+#' 
+#' @return
+#' A list of model output.
+#' 
+#' @export
+#' 
+runProject_ReplaceAcousticFiles <- function(projectPath, ReadAcoustic.FileNames, modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), projectPath0 = NULL, run = TRUE, AcousticPSUProcessName = "DefineAcousticPSU", AcousticPSUProcessNameNew = "DefineAcousticPSU0", save = NULL, ow = FALSE) {
+    
+    # If using a model project, copy this to the given project path:
+    if(length(projectPath0) && isProject(projectPath0)) {
+        copyProject(projectPath0, projectPath, ow = ow)
+    }
+    
+    # Open the project, if not already open:
+    if(!isProject(projectPath)) {
+        warning("Non-existing project ", projectPath, ".")
+        return(NULL)
+    }
+    if(!isOpenProject(projectPath)) {
+        openProject(projectPath)
+    }
+    
+    # Get the process ID of the existing DefineAcousticPSU process:
+    processID_existing <- findProcess(
+        projectPath, 
+        modelName = "baseline", 
+        functionName = AcousticPSUProcessName
+    )$processID
+    if(length(processID_existing) != 1) {
+        stop("Can only add new acoustic input files if exactly one ReadAcoustic process exists in the model.")
+    }
+    
+    # Rename the process to the name given by AcousticPSUProcessNameNew:
+    modifyProcessName(
+        projectPath, 
+        modelName = "baseline", 
+        processID = processID_existing, 
+        newProcessName = AcousticPSUProcessNameNew, 
+        update.functionInputs = FALSE
+    )
+    
+    # Duplicate the existinig (now renamed) process, and use the original name:
+    suppressWarnings(duplicateProcess(
+        projectPath, 
+        modelName = "baseline", 
+        processID = processID_existing, 
+        newProcessName = AcousticPSUProcessName
+    ))
+    
+    # Get the procecss ID of the new process, which replaces the existing in terms of inputs to other processes:
+    processID <- getProcessIDFromProcessName(
+        projectPath, 
+        modelName <- "baseline", 
+        processName = AcousticPSUProcessName
+    )$processID
+    
+    # Move the new process to immediately after the existing:
+    rearrangeProcesses(
+        projectPath, 
+        modelName = "baseline", 
+        processID = processID, 
+        afterProcessID = processID_existing
+    )
+    
+    # Set DefinitionMethod and AcousticPSU for the new process. Set also UseProcessData = FALSE since the process needs to be run to be effective:
+    modifyProcess(
+        projectPath, 
+        modelName = "baseline", 
+        processName = AcousticPSUProcessName, 
+        newValues = list(
+            functionParameters = list(
+                DefinitionMethod = "PreDefined", 
+                UseProcessData = FALSE
+            ), 
+            functionInputs = list(
+                AcousticPSU = AcousticPSUProcessNameNew
+            )
+        )
+    )
+    
+    # Replace the FileNames parameter of the ReadAcoustic process (requiring only one such process):
+    if(length(ReadAcoustic.FileNames)) {
+        ReadAcousticProcess <- findProcess(
+            projectPath, 
+            modelName = "baseline", 
+            functionName = "ReadAcoustic"
+        )
+        if(NROW(ReadAcousticProcess) != 1) {
+            stop("Can only add new acoustic input files if exactly one ReadAcoustic process exists in the model.")
+        }
+        modifyProcess(
+            projectPath, 
+            modelName = "baseline", 
+            processName = ReadAcousticProcess$processName, 
+            newValues = list(
+                functionParameters = list(
+                    FileNames = ReadAcoustic.FileNames
+                )
+            )
+        )
+    }
+    
+    # Run the baseline, save and close:
+    output <- projectPath
+    if(run) {
+        output <- runProject(projectPath, modelNames = modelNames)
+    }
+    
+    closeProject(projectPath, save = save)
+    
+    return(output)
+}
+
+

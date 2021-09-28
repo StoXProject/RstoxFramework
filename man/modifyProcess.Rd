@@ -12,7 +12,8 @@ modifyProcess(
   archive = TRUE,
   add.defaults = FALSE,
   purge.processData = FALSE,
-  strict = TRUE
+  strict = TRUE,
+  update.functionInputs = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ modifyProcess(
 \item{purge.processData}{Logical: If TRUE replace process data entirely.}
 
 \item{strict}{Logical: If FALSE a proposed process nname is changed to the default new process name, whereas TRUE throws an error.}
+
+\item{update.functionInputs}{Logical: If TRUE update the process name in the function inputs to other processes.}
 }
 \description{
 Modify a process

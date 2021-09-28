@@ -759,7 +759,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
     ##### 1. Process: #####
     #######################
     
-    # Get the process properties to return, which are all but the proccessData:
+    # Get the process properties to return, which are all but the processData:
     functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID)
     processName <- getProcessName(projectPath = projectPath, modelName = modelName, processID = processID)
     processParameters <- getProcessParameters(projectPath = projectPath, modelName = modelName, processID = processID)

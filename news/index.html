@@ -79,7 +79,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.10</span>
       </span>
     </div>
 
@@ -116,9 +116,29 @@
       <small>Source: <a href='https://github.com/StoXProject/RstoxFramework/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="rstoxframework-v312-2021-8-19" class="section level1">
+    <div id="rstoxframework-v3110-2021-10-05" class="section level1">
+<h1 class="page-header" data-toc-text="3.1.10">
+<a href="#rstoxframework-v3110-2021-10-05" class="anchor" aria-hidden="true"></a>RstoxFramework v3.1.10 (2021-10-05)</h1>
+<ul><li>Fixed bugs in getObjectHelpAsHtml() which caused all links to fail.</li>
+</ul></div>
+    <div id="rstoxframework-v319-2021-09-28" class="section level1">
+<h1 class="page-header" data-toc-text="3.1.9">
+<a href="#rstoxframework-v319-2021-09-28" class="anchor" aria-hidden="true"></a>RstoxFramework v3.1.9 (2021-09-28)</h1>
+<ul><li>Changed output text files (located in the output folder) from un-quoted files for all values (numeric, character, time, logical) to files where all character class values are quoted with ". Also missing values are represented by empty space in the preivous version and NA (un-quoted) in the new version. This ensures equality in class when reading the files back in using RstoxFramework::readModelData().</li>
+<li>Modified Versions.R to support installing from source when on Linux. Also, fixed bug where Rstox packages were not sorted hierarchically when installing with installOfficialRstoxPackagesWithDependencies().</li>
+<li>Fixed bug where emptying a field in the filter expression bulder caused syntax error.</li>
+<li>Fixed bug where acoustic PSUs could be added even if the procecss using DefineAcousticPSU was not active.</li>
+<li>Changed warning to error when processes listed in OutputProcesses in Bootstrap().</li>
+<li>Added warning when UseOutputData or RemoveMissingValues is TRUE.</li>
+<li>Added runProject_ReplaceAcousticFiles().</li>
+<li>Added parameter update.functionInputs in modifyProcessName().</li>
+<li>Added function findProcess().</li>
+<li>First working version of convertStoX2.7To3(). Emptying unused arguments in processes modified by convertStoX2.7To3().</li>
+<li>Added check for equality of numeric values in the reports in compareProjectToStoredOutputFiles().</li>
+</ul></div>
+    <div id="rstoxframework-v312-2021-08-19" class="section level1">
 <h1 class="page-header" data-toc-text="3.1.2">
-<a href="#rstoxframework-v312-2021-8-19" class="anchor" aria-hidden="true"></a>RstoxFramework v3.1.2 (2021-8-19)</h1>
+<a href="#rstoxframework-v312-2021-08-19" class="anchor" aria-hidden="true"></a>RstoxFramework v3.1.2 (2021-08-19)</h1>
 <ul><li>Updated test projects for ICES export to pass the initial checks on <a href="https://acoustic.ices.dk/submit" class="external-link uri">https://acoustic.ices.dk/submit</a>. Moved toJSON_Rstox() from RstoxBase to RstoxFramework, and moved reading AcousticPSU, BioticAssignment and StratumPolygon the other way.</li>
 </ul></div>
     <div id="rstoxframework-v3030-2021-06-16" class="section level1">
@@ -151,7 +171,7 @@
 <a href="#rstoxframework-v1239-2021-01-28" class="anchor" aria-hidden="true"></a>RstoxFramework v1.2.39 (2021-01-28)</h1>
 <ul><li>Fixed bug with possible values of length 1 being dropped.</li>
 <li>Renamed official to certified in the project.json.</li>
-<li>Removing empty function arguments in runProcess(), in order to use the error “argument ___ is missing, with no default”.</li>
+<li>Removing empty function arguments in runProcess(), in order to use the error âargument ___ is missing, with no defaultâ.</li>
 <li>Added warning for non-official project.json</li>
 </ul></div>
     <div id="rstoxframework-v1238-2021-01-21" class="section level1">
@@ -209,7 +229,7 @@
 </div>
 
 <div class="pkgdown">
-  <p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.6.1.9001.</p></p>
+  <p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p></p>
 </div>
 
       </footer>

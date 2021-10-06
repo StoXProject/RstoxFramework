@@ -271,6 +271,9 @@ getStratumData <- function(projectPath, modelName, processID) {
         return(NULL)
     }
     
+    # Add polygonname, as this is used by the GUI (as per tradition):
+    processData$StratumPolygon$polygonName <- getStratumNames(processData$StratumPolygon)
+    
     # Create the objects EDSU_PSU, PSU_Stratum and Stratum
     # On 2020-12-21 changed to using geojsonsf to reduce depencdencies:
     #stratumPolygon <- geojsonio::geojson_json(processData$StratumPolygon)
@@ -1345,22 +1348,74 @@ getFunctionHelpAsHtml <- function(projectPath, modelName, processID, stylesheet 
 #' 
 getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
     
+    if(objectName == "00Index") {
+        # Parse the  Index:
+        html <- tools::parse_Rd(system.file("html", "00Index.html", package = packageName))
+        
+        # Remove logo and arrows:
+        html <- html[!grepl("Rlogo.svg", html)]
+        html <- html[!grepl("left.jpg", html)]
+        html <- html[!grepl("up.jpg", html)]
+        html <- html[!grepl("DESCRIPTION", html)]
+        
+        # Find lines with links:
+        docLinkMatch <- ".*href=\"(.+).html\">.*"
+        atHref <- which(grepl(docLinkMatch, html))
+        # Insert proper links which are expected by the GUI:
+        for(at in atHref) {
+            toReplace <- paste0(gsub(docLinkMatch, "\\1", html[at]), ".html")
+            toReplaceBy <- paste0("../../", packageName, "/html/", toReplace)
+            html[at] <- gsub(toReplace, toReplaceBy, html[at])
+        }
+        # Paste to one string:
+        html <- paste(html, collapse="\n")
+        
+        return(html)
+    }
+    
+    
     # Read the documentation database:
     db <- tools::Rd_db(packageName)
+    # Add 00Index:
+    db[["00Index.Rd"]] <- tools::parse_Rd(system.file('html', "00Index.html", package = packageName))
+    
     # Write the help to file as html and read back:
     objectName.Rd <- paste0(objectName, ".Rd")
     
     # Get the links of the package:
     Links <- tools::findHTMLlinks(pkgDir = find.package(packageName))
+    ## Add the index links of the Rstox packages:
+    #Links <- c(
+    #    Links, 
+    #    structure(paste0("../../", packageName, "/html/00Index.html"), names = packageName)
+    #)
+    
     # Return empty string if the function 
-    if(! objectName %in% names(Links)) {
+    if(! objectName.Rd %in% names(db)) {
         return("")
     }
     
     # Write to a temporary file
     outfile <- tempfile(fileext = ".html")
-    tools::Rd2HTML(db[[objectName.Rd]], out = outfile, Links = Links, stylesheet = stylesheet)
+    tools::Rd2HTML(
+        db[[objectName.Rd]], 
+        out = outfile, 
+        package = packageName, 
+        Links = Links, 
+        stylesheet = stylesheet
+    )
     html <- paste(readLines(outfile), collapse="\n")
+    
+    # This hack was needed as of R 4.1 or something, where the links all of a sudden were with "help" instead of "html":
+    html  <-  gsub("/help/",  "/html/", html)
+    
+    # Add the index links of the Rstox packages:
+    html  <-  gsub(
+        "href=\"00Index.html\">Index",  
+        paste0("href=\"../../", packageName, "/html/00Index.html\">Index"), 
+        html
+    )
+    
     unlink(outfile, force = TRUE)
     
     return(html)

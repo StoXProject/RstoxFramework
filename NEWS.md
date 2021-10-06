@@ -1,4 +1,20 @@
-# RstoxFramework v3.1.2 (2021-8-19)
+# RstoxFramework v3.1.10 (2021-10-05)
+* Fixed bugs in getObjectHelpAsHtml() which caused all links to fail.
+
+# RstoxFramework v3.1.9 (2021-09-28)
+* Changed output text files (located in the output folder) from un-quoted files for all values (numeric, character, time, logical) to files where all character class values are quoted with ". Also missing values are represented by empty space in the preivous version and NA (un-quoted) in the new version. This ensures equality in class when reading the files back in using RstoxFramework::readModelData(). 
+* Modified Versions.R to support installing from source when on Linux. Also, fixed bug where Rstox packages were not sorted hierarchically when installing with installOfficialRstoxPackagesWithDependencies().
+* Fixed bug where emptying a field in the filter expression bulder caused syntax error. 
+* Fixed bug where acoustic PSUs could be added even if the procecss using DefineAcousticPSU was not active.
+* Changed warning to error when processes listed in OutputProcesses in Bootstrap(). 
+* Added warning when UseOutputData or RemoveMissingValues is TRUE. 
+* Added runProject_ReplaceAcousticFiles(). 
+* Added parameter update.functionInputs in modifyProcessName(). 
+* Added function findProcess(). 
+* First working version of convertStoX2.7To3(). Emptying unused arguments in processes modified by convertStoX2.7To3(). 
+* Added check for equality of numeric values in the reports in compareProjectToStoredOutputFiles().
+
+# RstoxFramework v3.1.2 (2021-08-19)
 * Updated test projects for ICES export to pass the initial checks on https://acoustic.ices.dk/submit. Moved toJSON_Rstox() from RstoxBase to RstoxFramework, and moved reading AcousticPSU, BioticAssignment and StratumPolygon the other way.
 
 # RstoxFramework v3.0.30 (2021-06-16)

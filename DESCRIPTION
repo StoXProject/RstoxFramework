@@ -1,6 +1,6 @@
 Package: RstoxFramework
-Version: 3.1.10
-Date: 2021-10-06
+Version: 3.1.11
+Date: 2021-10-11
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
@@ -55,7 +55,7 @@ Imports:
     stringr (>= 1.0.0),
     stringi (>= 1.4.3),
     RstoxData (>= 1.2.8),
-    RstoxBase (>= 1.4.15)
+    RstoxBase (>= 1.4.16)
 Suggests: 
     remotes (>= 2.0.0),
     testthat (>= 2.0.0)

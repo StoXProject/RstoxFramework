@@ -1,3 +1,7 @@
+# RstoxFramework v3.1.11 (2021-10-15)
+* Added support for mixed level function outputs, whereas only a list of tables or a list of lists of tables were preivously allowed. This fixed bug when a two table output process was included as output from Bootstrap.
+* Added support for two table output processes in Bootstrap, where only the table "Data" is used.
+
 # RstoxFramework v3.1.10 (2021-10-05)
 * Fixed bugs in getObjectHelpAsHtml() which caused all links to fail.
 

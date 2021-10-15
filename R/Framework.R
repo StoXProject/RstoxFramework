@@ -4801,7 +4801,6 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         warning("StoX: Invalid specification of projectPath, modelName, processID or tableName (most likely tableName).")
     }
     
-    
     # Read the files recursively:
     processOutput <- rapply(
         processOutputFiles, 
@@ -5038,8 +5037,8 @@ getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNa
         return(NULL)
     }
     
-    # Detect whether the output is a list of tables (depth 1) or a list of lists of tables (depth 2):
-    folderDepth <- getFolderDepth(folderPath)
+    ## Detect whether the output is a list of tables (depth 1) or a list of lists of tables (depth 2):
+    #folderDepth <- getFolderDepth(folderPath)
     
     # Get the file paths of the memory files and prepare the processOutput for writing to these files:
     processOutputFiles <- getFilesRecursiveWithOrder(folderPath)
@@ -5071,13 +5070,17 @@ getFilesRecursiveWithOrder <- function(folderPath) {
     if(length(dirs)) {
         output <- lapply(dirs, getFilesRecursiveWithOrder)
         names(output) <- basename(dirs)
-        return(output)
+        output <- c(
+            listMemoryFiles(folderPath),
+            output
+        )
     }
     else {
-        listMemoryFiles(folderPath)
+        output <- listMemoryFiles(folderPath)
     }
+    
+    return(output)
 }
-
 
 # Function to list RDS file in a folder:
 listMemoryFiles <- function(folderPath) {
@@ -5552,32 +5555,20 @@ writeProcessOutputTables <- function(processOutput, folderPath, writeOrderFile =
         outputDepth <- getOutputDepth(processOutput)
         
         # Get the file paths of the memory files and prepare the processOutput for writing to these files:
-        if(outputDepth == 1) {
-            #fileNames <- getProcessOutputMemoryFileNames(processOutput)
-            fileNamesSansExt <- names(processOutput)
-            filePaths <- file.path(folderPath, fileNamesSansExt)
-            
-            # Wrap in a list to coordinate with using the saveRDSs():
-            filePaths <- list(filePaths)
-            processOutput <- list(processOutput)
+        if(any(outputDepth == 1)) {
+            writeProcessOutput1(
+                processOutput = processOutput[outputDepth == 1], 
+                folderPath = folderPath, 
+                writeOrderFile = writeOrderFile
+            )
         }
-        else {
-            # Get the sub folder paths and create the folders:
-            folderPaths <- file.path(folderPath, names(processOutput))
-            lapply(folderPaths, dir.create, recursive = TRUE, showWarnings = FALSE)
-            
-            # Create the file names and add the folder paths to the file names (flattening the output):
-            fileNamesSansExt <- vector("list", length(processOutput))
-            # Add names of the elements which are lists of valid output data types (typically table):
-            areValid <- sapply(processOutput, isValidOutputDataOne)
-            fileNamesSansExt[areValid] <- as.list(names(processOutput)[areValid])
-            
-            # Add the names of the list for lists of valid output data types:
-            fileNamesSansExt[!areValid] <- lapply(processOutput[!areValid], names)
-            filePaths <- mapply(file.path, folderPaths, fileNamesSansExt, SIMPLIFY = FALSE)
+        if(any(outputDepth == 2)) {
+            writeProcessOutput2(
+                processOutput = processOutput[outputDepth == 2], 
+                folderPath = folderPath, 
+                writeOrderFile = writeOrderFile
+            )
         }
-        # Write the individual tables:
-        mapply(writeMemoryFiles, processOutput, filePaths, writeOrderFile = writeOrderFile)
     }
     else {
         NULL
@@ -5585,14 +5576,42 @@ writeProcessOutputTables <- function(processOutput, folderPath, writeOrderFile =
 }
 
 
+writeProcessOutput1 <- function(processOutput, folderPath, writeOrderFile = TRUE) {
+    #  Define the file paths for output depth 1:
+    fileNamesSansExt <- names(processOutput)
+    filePaths <- file.path(folderPath, fileNamesSansExt)
+    
+    # Wrap in a list to coordinate with using the saveRDSs():
+    filePaths <- list(filePaths)
+    processOutput <- list(processOutput)
+        
+    # Write the individual tables:
+    mapply(writeMemoryFiles, processOutput, filePaths, writeOrderFile = writeOrderFile)
+}
+
+writeProcessOutput2 <- function(processOutput, folderPath, writeOrderFile = TRUE) {
+    # Get the sub folder paths and create the folders:
+    folderPaths <- file.path(folderPath, names(processOutput))
+    lapply(folderPaths, dir.create, recursive = TRUE, showWarnings = FALSE)
+    
+    # Create the file names and add the folder paths to the file names (flattening the output):
+    fileNamesSansExt <- vector("list", length(processOutput))
+    # Add names of the elements which are lists of valid output data types (typically table):
+    areValid <- sapply(processOutput, isValidOutputDataOne)
+    fileNamesSansExt[areValid] <- as.list(names(processOutput)[areValid])
+    
+    # Add the names of the list for lists of valid output data types:
+    fileNamesSansExt[!areValid] <- lapply(processOutput[!areValid], names)
+    filePaths <- mapply(file.path, folderPaths, fileNamesSansExt, SIMPLIFY = FALSE)
+    
+    # Write the individual tables:
+    mapply(writeMemoryFiles, processOutput, filePaths, writeOrderFile = writeOrderFile)
+}
+
+
 # Function to get the depth of the data, 1 for a list of valid output data objects, and 2 for a list of such lists:
 getOutputDepth <- function(outputData) {
-    
-    outputDepths <- sapply(outputData, getOutputDepthOne)
-    
-    outputDepth <- max(outputDepths)
-    
-    return(outputDepth)
+    sapply(outputData, getOutputDepthOne)
 }
 getOutputDepthOne <- function(outputDataOne) {
     # If the outputDataOne has length 0 or is of valid output data classes, set outputDepth to 1:

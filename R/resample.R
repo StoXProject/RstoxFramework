@@ -690,6 +690,16 @@ ReportBootstrap <- function(
         warning(RstoxBase::getRstoxBaseDefinitions("RemoveMissingValuesWarning"))
     }
     
+    if(! BaselineProcess %in% names(BootstrapData)) {
+        stop("The BaselineProcess ", BaselineProcess, " is not one of the outputs of the Bootstrap. Possible values are ", paste(names(BootstrapData), collapse = ", "), ".")
+    }
+    else if(
+        is.list(BootstrapData[[BaselineProcess]]) && 
+        all(c("Data", "Resolution")  %in% names(BootstrapData[[BaselineProcess]]))
+    ) {
+        BootstrapData[[BaselineProcess]] <- BootstrapData[[BaselineProcess]]$Data
+    }
+    
     # Run the initial aggregation (only applicable for single output functions):
     AggregationFunction <- match.arg(AggregationFunction)
     out <- RstoxBase::aggregateBaselineDataOneTable(

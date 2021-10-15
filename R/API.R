@@ -606,8 +606,10 @@ freadKeepQuotedCharacterAsCharacter <- function(...) {
     
     # Remove escaped double quote characters in character columns:
     areCharacter <- sapply(x, class) == "character"
-    characterCols <- names(areCharacter)[areCharacter]
-    x[, (characterCols) := lapply(.SD, stripLeadingAndTrailingQuote), .SDcols = characterCols]
+    if(any(areCharacter)) {
+        characterCols <- names(areCharacter)[areCharacter]
+        x[, (characterCols) := lapply(.SD, stripLeadingAndTrailingQuote), .SDcols = characterCols]
+    }
     
     return(x)
 }

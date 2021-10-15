@@ -752,7 +752,6 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     data_equal <- list()
     
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
-    
     for(name in names(dat_orig)) {
         data_equal[[name]] <- list()
         for(subname in names(dat_orig[[name]])) {
@@ -769,6 +768,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             }
             
             if(!isTRUE(data_equal[[name]][[subname]])) {
+                
+                # browser()
                 #print(name)
                 #print(subname)
                 #print(head(dat_orig[[name]][[subname]]))
@@ -776,18 +777,18 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                 #print(head(dat[[name]][[subname]]))
                 #print(tail(dat[[name]][[subname]]))
                 #print("___________________________")
-                
-                
+            
+            
                 #warning("888888888888888888888888888888888888")
                 #warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
                 #warning("999999999999999999999999999999999999")
                 #warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
                 #warning("777777777777777777777777777777777")
-                #
+                
                 #atDiff <- which(dat_orig[[name]][[subname]] != dat[[name]][[subname]], arr.ind = TRUE)
                 #warning(paste(c(atDiff), collapse = "; "))
                 #warning("6666666666666")
-                
+            #
                 #warning(paste(c(dat[[name]][[subname]][atDiff]), collapse = "; "))
                 #warning("555555555555555")
                 #warning(paste(c(dat_orig[[name]][[subname]][atDiff]), collapse = "; "))
@@ -807,6 +808,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             reports_equal[[name]][[subname]] <- compareReport(dat_orig[[name]][[subname]], dat[[name]][[subname]])
         }
     }
+    print("reports_equal")
     print(reports_equal)
     
     
@@ -817,7 +819,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         data_equal = data_equal, 
         reports_equal = reports_equal
     )
-    
+
     ok <- all(unlist(allTests) %in% TRUE)
     
     
@@ -882,8 +884,10 @@ compareReport <- function(x, y) {
 
 setCharacterColumnsToNA <- function(x) {
     areCharacter <- sapply(x, class) == "character"
-    characterCols <- names(areCharacter)[areCharacter]
-    x[, (characterCols) := lapply(.SD, function(y) rep(NA, length(y))), .SDcols = characterCols]
+    if(any(areCharacter)) {
+        characterCols <- names(areCharacter)[areCharacter]
+        x[, (characterCols) := lapply(.SD, function(y) rep(NA, length(y))), .SDcols = characterCols]
+    }
 }
 
 

@@ -1,3 +1,3 @@
 # Run the test project:
-projectPaths <- system.file("test",  "split_18.zip", package = "RstoxFramework")
+projectPaths <- system.file("test",  "split_18_.zip", package = "RstoxFramework")
 expect_true(compareProjectToStoredOutputFiles(projectPaths))

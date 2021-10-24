@@ -550,6 +550,7 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow 
     functionsToApplyProjectXML2.7To <- c(
         "DefineSurvey", 
         "DefineStratumPolygon", 
+        "DefineBioticPSU", 
         "DefineAcousticPSU", 
         "DefineBioticAssignment"
     )
@@ -582,13 +583,14 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
     
     # Find the processes:
     processName <- findProcess(
-        projectPath, 
+        projectPath3, 
         modelName = "baseline", 
         functionName = functionName
     )$processName
     
     if(!length(processName)) {
         warning("No processes using the function ", functionName, " found in the baseline model. Returning NULL.")
+        return(NULL)
     }
     else if(length(processName) > 1) {
         stop("Applying a project.xml file from StoX 2.7 requires only one process using the function ", functionName, ".")
@@ -603,7 +605,7 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
     processID <- getProcessIDFromProcessName(
         projectPath = projectPath3, 
         modelName = "baseline", 
-        processName = baselineTable$processName
+        processName = processName
     )$processID
     
     
@@ -611,7 +613,7 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
     modifyProcess(
         projectPath = projectPath3, 
         modelName = "baseline", 
-        processName = baselineTable$processName, 
+        processName = processName, 
         newValues = list(
             functionParameters = list(
                 DefinitionMethod = "ResourceFile"
@@ -623,13 +625,27 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
     modifyProcess(
         projectPath = projectPath3, 
         modelName = "baseline", 
-        processName = baselineTable$processName, 
+        processName = processName, 
         newValues = list(
             functionParameters = list(
                 FileName = projectXMLFilePath
             )
         )
     )
+    
+    # In the case of DefineStratumPolygon, set StratumNameLabel = "StratumName":
+    if(processName == "DefineStratumPolygon") {
+        modifyProcess(
+            projectPath = projectPath3, 
+            modelName = "baseline", 
+            processName = processName, 
+            newValues = list(
+                functionParameters = list(
+                    StratumNameLabel = "StratumName"
+                )
+            )
+        )
+    }
     
     # Set UseProcessData = FALSE:
     setUseProcessData(
@@ -645,10 +661,10 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
         modelName = "baseline", 
         processID = processID
     )
-    message("Emptied the following function parameters of procecss ", baselineTable$processName, ", as no longer relevant when DefinitionMethod = \"ResourceFile\":\n", paste0("\t", nonVisibleArguments, collapse = "\n "))
+    message("Emptied the following function parameters of procecss ", processName, ", as no longer relevant when DefinitionMethod = \"ResourceFile\":\n", paste0("\t", nonVisibleArguments, collapse = "\n "))
     
     
-    return(baselineTable$processName)
+    return(processName)
 }
 
 # Function to empty all non-visible arguments of a process, used to avoid confusion when changing process data with info from a project.xml file from StoX 2.7:

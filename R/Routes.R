@@ -1583,7 +1583,7 @@ getParameterFormatElement <- function(projectPath, modelName, processID, format,
 }
 
 # Get the variable types of a parameter table:
-getParameterVariableTypes <- function(projectPath, modelName, processID, format) {
+getParameterVariableTypes <- function(projectPath, modelName, processID, format, list.out = FALSE) {
     variableTypes <- getParameterFormatElement(
         projectPath = projectPath, 
         modelName = modelName, 
@@ -1592,6 +1592,18 @@ getParameterVariableTypes <- function(projectPath, modelName, processID, format)
         element = "variableTypes"
     )
     variableTypes <- replace(variableTypes, variableTypes %in% c("double"), "numeric")
+    
+    # Return a list named by the column names if specified:
+    if(list.out) {
+        columnNames <- getParameterFormatElement(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format, 
+            element = "columnNames"
+        )
+        variableTypes <- structure(as.list(variableTypes), names = columnNames)
+    }
     
     return(variableTypes)
 }

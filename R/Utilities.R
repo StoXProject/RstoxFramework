@@ -732,6 +732,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
     dat_orig <- readModelData(projectPath_original, unlist = 1)
     
+    #browser()
+    
     # Compare only those elemens common to the two datasets:
     processNames_present <- all(names(dat_orig) %in% names(dat))
     
@@ -827,15 +829,17 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     atNotTRUE <- !uallTests %in% TRUE
     
+    out <- uallTests[atNotTRUE]
+    
     if(any(atNotTRUE)) {
-        out <- uallTests[atNotTRUE]
         print(allTests)
+        #tmp <- file.path(path.expand("~"), paste0("ErrorLog_", basename(projectPath), ".txt"))
+        #writeLines(paste(names(out), out, sep = "-"), tmp)
         warning(paste(names(out), out, collapse = ",", sep = "-"))
     }
     
     if(!ok) {
-        warning(paste(names(uallTests), uallTests, collapse = ", \n", sep = "-"))
-        return(allTests)
+        return(out)
     }
     else {
         return(TRUE)
@@ -949,5 +953,13 @@ toJSON_Rstox <- function(x, ...) {
     lll$POSIXt ="ISO8601"
     
     do.call(jsonlite::toJSON, lll)
+}
+
+# NOT CURRENTLY USED: Function to convert classes of a data.table given a list of variablename-class pairs:
+convertClassOfDataTable <- function(x, classes) {
+    for(col in names(classes)) {
+        fun <- paste("as", classes[[col]], sep = ".")
+        x[, eval(col) := do.call(fun, list(get(col)))]
+    }
 }
 

@@ -1,3 +1,8 @@
+# RstoxFramework v3.1.13 (2021-10-24)
+* Fixed bug in getProcessOutputFiles() where project paths containing special characters resulted in corrupt file paths, causing View output to crash.
+* Added DefineBioticPSU() to convertStoX2.7To3().
+* In readProjectDescription(), StratumNameLabel is now set to "StratumName", in case the stratum polygon was added from shapefile or GeoJSON in StoX < 3.2.0.
+
 # RstoxFramework v3.1.11 (2021-10-15)
 * Added support for mixed level function outputs, whereas only a list of tables or a list of lists of tables were preivously allowed. This fixed bug when a two table output process was included as output from Bootstrap.
 * Added support for two table output processes in Bootstrap, where only the table "Data" is used.

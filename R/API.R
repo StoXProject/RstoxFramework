@@ -681,7 +681,7 @@ runProject_ReplaceAcousticFiles <- function(projectPath, ReadAcoustic.FileNames,
         update.functionInputs = FALSE
     )
     
-    # Duplicate the existinig (now renamed) process, and use the original name:
+    # Duplicate the existing (now renamed) process, and use the original name:
     suppressWarnings(duplicateProcess(
         projectPath, 
         modelName = "baseline", 

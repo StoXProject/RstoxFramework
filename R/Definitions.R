@@ -35,7 +35,7 @@ initiateRstoxFramework <- function(){
     )
     # Add RstoxFramework:
     officialStoxLibraryPackagesAll <- c("RstoxFramework", officialStoxLibraryPackages)
-    
+    warning("tttttttttttttttttttttttttttttttttttttttttttt")
     # Get installed versions:
     InstalledRstoxPackageVersion <- as.list(getPackageVersion(officialStoxLibraryPackagesAll, only.version = TRUE))
     

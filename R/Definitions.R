@@ -210,6 +210,7 @@ initiateRstoxFramework <- function(){
     )
     # Create a project.json validator:
     warning("22222222222222222222")
+    warning(paste0(schema, collapse = "_____"))
     projectValidator <- jsonvalidate::json_validator(schema)
     warning("33333333333333333333333")
     

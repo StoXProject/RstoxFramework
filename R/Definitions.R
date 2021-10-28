@@ -194,6 +194,7 @@ initiateRstoxFramework <- function(){
             ) 
         )
     )
+    warning("1111111111111111111111111111")
     
     # Paste the subSchemas to the RstoxFramework schema:
     schema <- jsonlite::toJSON(

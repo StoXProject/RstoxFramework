@@ -895,13 +895,13 @@ readProjectDescriptionRData <- function(projectDescriptionFile) {
 readProjectDescriptionJSON <- function(projectDescriptionFile) {
     
     # Validate json object against schema
-    projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
-    valid <- projectValidator(projectDescriptionFile)
-    if(!isTRUE(valid)) {
-        cat("Output from project.json validator:\n")
-        print(projectValidator(projectDescriptionFile, verbose = TRUE))
-        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
-    }
+    ### projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
+    ### valid <- projectValidator(projectDescriptionFile)
+    ### if(!isTRUE(valid)) {
+    ###     cat("Output from project.json validator:\n")
+    ###     print(projectValidator(projectDescriptionFile, verbose = TRUE))
+    ###     stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
+    ### }
     
     # Read project.json file to R list. Use simplifyVector = FALSE to preserve names:
     projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
@@ -1117,13 +1117,13 @@ writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFi
     json <- jsonlite::prettify(json)
     
     # Validate the json structure with json schema
-    projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
-    valid <- projectValidator(json)
-    if(!isTRUE(valid)) {
-        cat("Output from project.json validator:\n")
-        print(projectValidator(json, verbose = TRUE))
-        stop("StoX: Cannot write the project.json file. It is not a valid project.json file.")
-    }
+    ### projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
+    ### valid <- projectValidator(json)
+    ### if(!isTRUE(valid)) {
+    ###     cat("Output from project.json validator:\n")
+    ###     print(projectValidator(json, verbose = TRUE))
+    ###     stop("StoX: Cannot write the project.json file. It is not a valid project.json file.")
+    ### }
     #jsonvalidate::json_validate(json)
     
     # 5. Write the validated json to file: 

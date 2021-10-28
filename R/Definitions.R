@@ -168,7 +168,7 @@ initiateRstoxFramework <- function(){
     
     # Order by changeVersion:
     backwardCompatibility <- lapply(backwardCompatibility, orderBackwardCompatibility)
-    warning("errrrrrrrrrrrrrrrrrrrrrr")
+    #warning("errrrrrrrrrrrrrrrrrrrrrr")
     
     
     # Get the possible values of the functions. Here we use the full name of the functions in case the parameter defaults are defined using functions in the specific packages, such as ReportBootstrap(). In extractStoxFunctionParameterPossibleValues() the packageName RstoxFramework is discarded, as that package has not been loaded yet (this function is run onload):
@@ -250,7 +250,7 @@ initiateRstoxFramework <- function(){
     if(length(commonFunctionAndDataTypeName)) {
         warning("StoX: The function name ", paste0("\"", commonFunctionAndDataTypeName, "\"", collapse = ", "), " of the package ", paste0("\"", stoxDataTypes$packageName[stoxDataTypes$functionName == commonFunctionAndDataTypeName], "\"", collapse = ", "),  " is identical to the name of a data type. This may lead to unexpected errors when overriding a model using 'replaceArgs' and '...' in RstoxBase::runProcesses() and runModel(). Please notify the packcage maintainer.")
     }
-    
+    warning("wwwwwwwwwwwwwwwwwwwwwwwwwwwww")
     
     ##### Data: #####
     speciesVariables <- list(

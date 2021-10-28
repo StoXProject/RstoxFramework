@@ -210,6 +210,7 @@ initiateRstoxFramework <- function(){
     )
     # Create a project.json validator:
     projectValidator <- jsonvalidate::json_validator(schema)
+    warning("22222222222222222222")
     
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
@@ -245,6 +246,7 @@ initiateRstoxFramework <- function(){
         functionName = availableFunctions, 
         packageName = sapply(stoxLibrary, "[[", "packageName")
     )
+    warning("444444444444444444444")
     
     # Check that there are no functions with the same name as a datatype:
     commonFunctionAndDataTypeName <- intersect(stoxDataTypes$functionOutputDataType, stoxDataTypes$functionName)

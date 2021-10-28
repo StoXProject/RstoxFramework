@@ -60,7 +60,7 @@ initiateRstoxFramework <- function(){
     )
     dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
     #dependentPackageVersion <- dependentPackageVersionSansRstoxFramework
-    warning("eeeeeeeeeeeeeeeeeeeeeeeeeee")
+    #warning("eeeeeeeeeeeeeeeeeeeeeeeeeee")
     
     # Define the possible projectDescription file formats:
     projectDescriptionFileFormats <- c("JSON", "RData")
@@ -168,6 +168,7 @@ initiateRstoxFramework <- function(){
     
     # Order by changeVersion:
     backwardCompatibility <- lapply(backwardCompatibility, orderBackwardCompatibility)
+    warning("errrrrrrrrrrrrrrrrrrrrrr")
     
     
     # Get the possible values of the functions. Here we use the full name of the functions in case the parameter defaults are defined using functions in the specific packages, such as ReportBootstrap(). In extractStoxFunctionParameterPossibleValues() the packageName RstoxFramework is discarded, as that package has not been loaded yet (this function is run onload):

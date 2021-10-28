@@ -40,16 +40,16 @@ initiateRstoxFramework <- function(){
     InstalledRstoxPackageVersion <- as.list(getPackageVersion(officialStoxLibraryPackagesAll, only.version = TRUE))
     
     # Get the versions of the dependencies:
-    dependentPackagesOnlyRstoxFramework <- getPackageVersion(
-        getDependencies(
-            "RstoxFramework", 
-            packageTable = NULL, 
-            repos = NA, 
-            recursive = FALSE, 
-            append = FALSE, 
-            sort = FALSE
-        )
-    )
+    #dependentPackagesOnlyRstoxFramework <- getPackageVersion(
+    #    getDependencies(
+    #        "RstoxFramework", 
+    #        packageTable = NULL, 
+    #        repos = NA, 
+    #        recursive = FALSE, 
+    #        append = FALSE, 
+    #        sort = FALSE
+    #    )
+    #)
     
     dependentPackageVersionSansRstoxFramework <- getDependentPackageVersion(
         packageName = officialStoxLibraryPackages, 
@@ -59,7 +59,8 @@ initiateRstoxFramework <- function(){
         nonRstox.repos = NULL, 
         sort = FALSE
     )
-    dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
+    #dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
+    dependentPackageVersion <- dependentPackageVersionSansRstoxFramework
     
     # Define the possible projectDescription file formats:
     projectDescriptionFileFormats <- c("JSON", "RData")

@@ -60,7 +60,6 @@ initiateRstoxFramework <- function(){
     )
     dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
     #dependentPackageVersion <- dependentPackageVersionSansRstoxFramework
-    #warning("eeeeeeeeeeeeeeeeeeeeeeeeeee")
     
     # Define the possible projectDescription file formats:
     projectDescriptionFileFormats <- c("JSON", "RData")
@@ -168,7 +167,6 @@ initiateRstoxFramework <- function(){
     
     # Order by changeVersion:
     backwardCompatibility <- lapply(backwardCompatibility, orderBackwardCompatibility)
-    #warning("errrrrrrrrrrrrrrrrrrrrrr")
     
     
     # Get the possible values of the functions. Here we use the full name of the functions in case the parameter defaults are defined using functions in the specific packages, such as ReportBootstrap(). In extractStoxFunctionParameterPossibleValues() the packageName RstoxFramework is discarded, as that package has not been loaded yet (this function is run onload):
@@ -194,7 +192,6 @@ initiateRstoxFramework <- function(){
             ) 
         )
     )
-    warning("1111111111111111111111111111")
     
     # Paste the subSchemas to the RstoxFramework schema:
     schema <- jsonlite::toJSON(
@@ -209,10 +206,7 @@ initiateRstoxFramework <- function(){
         pretty = TRUE
     )
     # Create a project.json validator:
-    warning("22222222222222222222")
-    warning(paste0(schema, collapse = "_____"))
     projectValidator <- jsonvalidate::json_validator(schema)
-    warning("33333333333333333333333")
     
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
@@ -248,14 +242,13 @@ initiateRstoxFramework <- function(){
         functionName = availableFunctions, 
         packageName = sapply(stoxLibrary, "[[", "packageName")
     )
-    warning("444444444444444444444")
     
     # Check that there are no functions with the same name as a datatype:
     commonFunctionAndDataTypeName <- intersect(stoxDataTypes$functionOutputDataType, stoxDataTypes$functionName)
     if(length(commonFunctionAndDataTypeName)) {
         warning("StoX: The function name ", paste0("\"", commonFunctionAndDataTypeName, "\"", collapse = ", "), " of the package ", paste0("\"", stoxDataTypes$packageName[stoxDataTypes$functionName == commonFunctionAndDataTypeName], "\"", collapse = ", "),  " is identical to the name of a data type. This may lead to unexpected errors when overriding a model using 'replaceArgs' and '...' in RstoxBase::runProcesses() and runModel(). Please notify the packcage maintainer.")
     }
-    warning("wwwwwwwwwwwwwwwwwwwwwwwwwwwww")
+    
     
     ##### Data: #####
     speciesVariables <- list(

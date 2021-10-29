@@ -37,8 +37,7 @@ initiateRstoxFramework <- function(){
     officialStoxLibraryPackagesAll <- c("RstoxFramework", officialStoxLibraryPackages)
     # Get installed versions:
     InstalledRstoxPackageVersion <- as.list(getPackageVersion(officialStoxLibraryPackagesAll, only.version = TRUE))
-    warning("11111111")
-    
+
     # Get the versions of the dependencies:
     ### dependentPackagesOnlyRstoxFramework <- getPackageVersion(
     ###     getDependencies(
@@ -69,8 +68,7 @@ initiateRstoxFramework <- function(){
        nonRstox.repos = NULL, 
        sort = FALSE
    )
-    warning("22222222222")
-    
+
     # Define the possible projectDescription file formats:
     projectDescriptionFileFormats <- c("JSON", "RData")
     
@@ -120,8 +118,7 @@ initiateRstoxFramework <- function(){
     orderProcessArguments <- function(process) {
         process[processProperties]
     }
-    warning("333333333333")
-    
+
     # Define the requested (all) function attributes:
     requestedFunctionAttributeNames <- c(
         "packageName", 
@@ -150,8 +147,7 @@ initiateRstoxFramework <- function(){
     stoxLibrary <- getStoxLibrary(officialStoxLibraryPackagesAll, requestedFunctionAttributeNames = requestedFunctionAttributeNames)
     availableFunctions <- names(stoxLibrary)
     availablePackageFunctionNames <- unname(sapply(stoxLibrary, "[[", "functionName"))
-    warning("4444444444")
-    
+
     # Define the supported backward compatibility actions:
     backwardCompatibilityActionNames <- c(
         "renameAttribute", 
@@ -179,7 +175,6 @@ initiateRstoxFramework <- function(){
     
     # Order by changeVersion:
     backwardCompatibility <- lapply(backwardCompatibility, orderBackwardCompatibility)
-    warning("5555555555")
     
     
     # Get the possible values of the functions. Here we use the full name of the functions in case the parameter defaults are defined using functions in the specific packages, such as ReportBootstrap(). In extractStoxFunctionParameterPossibleValues() the packageName RstoxFramework is discarded, as that package has not been loaded yet (this function is run onload):
@@ -192,8 +187,7 @@ initiateRstoxFramework <- function(){
     # Get the schemas of the Rstox packages:
     processDataSchemas <- lapply(officialStoxLibraryPackages, readProcessDataSchema)
     processDataSchemas <- unlist(processDataSchemas, recursive = FALSE)
-    warning("666666")
-    
+
     # Get the names of the processData schemas:
     processDataSchemaNames <- names(processDataSchemas)
     processDataSchema <- list(
@@ -206,8 +200,7 @@ initiateRstoxFramework <- function(){
             ) 
         )
     )
-    warning("77777777")
-    
+
     # Paste the subSchemas to the RstoxFramework schema:
     schema <- jsonlite::toJSON(
         c(
@@ -221,9 +214,8 @@ initiateRstoxFramework <- function(){
         pretty = TRUE
     )
     # Create a project.json validator:
-    #projectValidator <- jsonvalidate::json_validator(schema)
-    warning("8888888")
-    
+    projectValidator <- jsonvalidate::json_validator(schema)
+
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",
@@ -258,7 +250,6 @@ initiateRstoxFramework <- function(){
         functionName = availableFunctions, 
         packageName = sapply(stoxLibrary, "[[", "packageName")
     )
-    warning("999999999")
     
     # Check that there are no functions with the same name as a datatype:
     commonFunctionAndDataTypeName <- intersect(stoxDataTypes$functionOutputDataType, stoxDataTypes$functionName)
@@ -284,7 +275,6 @@ initiateRstoxFramework <- function(){
             "SpeciesCode"
         )
     )
-    warning("aaaaaaa")
     
     #### Fundamental settings of StoX: ####
     # The time format used in the project.json:
@@ -319,7 +309,6 @@ initiateRstoxFramework <- function(){
     process_Prefix <- "Process_"
     # The number of digits in the integer part of the project IDs:
     numDigitsOfProcessIntegerID <- 3
-    warning("bbbbbbb")
     
     
     # Define the process property types:
@@ -342,8 +331,7 @@ initiateRstoxFramework <- function(){
         ), 
         recursive = FALSE
     )
-    warning("ccccccccc")
-    
+
     #
     #allFormatClasses <- unique(unlist(lapply(processPropertyFormats, names)))
     #processPropertyFormats <- lapply(allFormatClasses, function(x) unlist(lapply(processPropertyFormats, "[[", x)))
@@ -407,8 +395,7 @@ initiateRstoxFramework <- function(){
         displayName = stoxModelDisplayNames, 
         description = stoxModelDescriptions
     )
-    warning("dddddddddd")
-    
+
     # Backwards compatibility:
     # Get the mapping between models iin 
     modelNameMapping2.7To3 <- structure(c("baseline", "analysis", "report", "report"), names = c("baseline", "r", "baseline-report", "r-report"))
@@ -427,7 +414,6 @@ initiateRstoxFramework <- function(){
     stoxFolderStructureList <- as.list(stoxFolderStructure)
     
     stoxFolderStructureList$outputFolders <- stoxFolderStructure[stoxModelFolders]
-    warning("eeeeeeeee")
     
     
     # Define data types which can be plotted in the map (includes also changing colour etc, such as assigned stations of an acoustic PSU):
@@ -454,7 +440,6 @@ initiateRstoxFramework <- function(){
         data = data.frame()
     )
     emptyStratumPolygonGeojson <- "{\n\t\"type\": \"FeatureCollection\",\n\t\"features\": []\n}\n"
-    warning("ffffffffff")
     
     # Define the process parameters with default values, display names and descriptions:
     processParameters <- list(
@@ -478,7 +463,6 @@ initiateRstoxFramework <- function(){
         name = c("process", "functionInputs", "functionParameters"), 
         displayName = c("Process", "Function inputs", "Function parameters")
     )
-    warning("gggggggg")
     
     # Define the process arguments, which define a process:
     processDefaultFull <- list(
@@ -511,7 +495,6 @@ initiateRstoxFramework <- function(){
     progressFile <- structure(mapply(file.path, statusFolder, paste0(stoxModelNames, "Progress.txt"), SIMPLIFY = FALSE), names = stoxModelNames)
     NFile <- structure(mapply(file.path, statusFolder, paste0(stoxModelNames, "N.txt"), SIMPLIFY = FALSE), names = stoxModelNames)
     stopFile <- structure(mapply(file.path, statusFolder, paste0(stoxModelNames, "Stop.txt"), SIMPLIFY = FALSE), names = stoxModelNames)
-    warning("hhhhhhhhhhh")
     
     # Sub folders of the data folder:
     dataModelsFolder <- file.path(dataFolder, "models")
@@ -541,7 +524,6 @@ initiateRstoxFramework <- function(){
         memoryCurrentModelsFolders
     )
     
-    warning("iiiiiiiiii")
     
     #### Project description: ####
     projectRDataFile <- file.path(stoxFolders["process"], "project.RData")
@@ -569,9 +551,7 @@ initiateRstoxFramework <- function(){
     # The file containing the project description attributes:
     projectDescriptionAttributesFile <- file.path(memoryModelsFolder, "projectDescriptionAttributes.rds")
     
-    warning("jjjjjjjjjjj")
-    
-    
+
     #### Define an object with all path objects for convenience in getProjectPaths(): ####
     paths <- c(
         stoxFolderStructureList, 
@@ -629,7 +609,6 @@ initiateRstoxFramework <- function(){
     
     # Add the stoxTemplates: 
     definitions$stoxTemplates <- stoxTemplates
-    warning("kkkkkkkkk")
     
     # The globalVariables were moved to pkgnameFile written by RstoxBuild:
     #### Create the RstoxFrameworkEnv environment, holding definitions on folder structure and all the projects. This environment cna be accesses using RstoxFramework:::RstoxFrameworkEnv: ####
@@ -676,7 +655,6 @@ initiateRstoxFramework <- function(){
     
     assign("definitions", definitions, envir=get("RstoxFrameworkEnv"))
     assign("projects", list(), envir=get("RstoxFrameworkEnv"))
-    warning("llllllllll")
     
     #### Return the definitions: ####
     definitions

@@ -134,6 +134,16 @@ installOfficialRstoxPackagesWithDependencies <- function(
     }
     utils::install.packages(toInstall$package, repos = dependency.repos, type = getInstallType(), quiet = quiet, lib = lib)
     
+    # If Linux, all packages are installed from source, but otherwise a check is made for non-installed binarry packages, and an attempt to install from source:
+    if (getPlatform(platform) !=  "linux") {
+        installed <- utils::installed.packages()[, "Package"]
+        missing <- setdiff(toInstall, installed)
+        if(length(missing)) {
+            message("Installing the following packages using default type:\n", paste0(missing, collapse = ", "))
+            utils::install.packages(missing, dependencies = TRUE)
+        }
+    }
+    
     # Step 4: Install the Rstox packages
     binaryLocalFiles <- paste(destdir, basename(officialRstoxPackagesInfo$Package), sep = "/")
     mapply(

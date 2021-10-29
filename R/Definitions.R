@@ -40,35 +40,35 @@ initiateRstoxFramework <- function(){
     warning("11111111")
     
     # Get the versions of the dependencies:
-    dependentPackagesOnlyRstoxFramework <- getPackageVersion(
-        getDependencies(
-            "RstoxFramework", 
-            packageTable = NULL, 
-            repos = NA, 
-            recursive = FALSE, 
-            append = FALSE, 
-            sort = FALSE
-        )
-    )
-    dependentPackageVersionSansRstoxFramework <- getDependentPackageVersion(
-        packageName = officialStoxLibraryPackages, 
-        dependencyTypes = NA, 
-        Rstox.repos = NULL, 
-        # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
-        nonRstox.repos = NULL, 
-        sort = FALSE
-    )
-    dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
-    
-    # Get the versions of the dependencies:
-    ### dependentPackageVersion <- getDependentPackageVersion(
-    ###     packageName = officialStoxLibraryPackagesAll, 
+    ### dependentPackagesOnlyRstoxFramework <- getPackageVersion(
+    ###     getDependencies(
+    ###         "RstoxFramework", 
+    ###         packageTable = NULL, 
+    ###         repos = NA, 
+    ###         recursive = FALSE, 
+    ###         append = FALSE, 
+    ###         sort = FALSE
+    ###     )
+    ### )
+    ### dependentPackageVersionSansRstoxFramework <- getDependentPackageVersion(
+    ###     packageName = officialStoxLibraryPackages, 
     ###     dependencyTypes = NA, 
     ###     Rstox.repos = NULL, 
     ###     # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
     ###     nonRstox.repos = NULL, 
     ###     sort = FALSE
     ### )
+    ### dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
+    
+    # Get the versions of the dependencies:
+   dependentPackageVersion <- getDependentPackageVersion(
+       packageName = officialStoxLibraryPackagesAll, 
+       dependencyTypes = NA, 
+       Rstox.repos = NULL, 
+       # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
+       nonRstox.repos = NULL, 
+       sort = FALSE
+   )
     warning("22222222222")
     
     # Define the possible projectDescription file formats:

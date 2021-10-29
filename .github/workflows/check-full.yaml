@@ -109,7 +109,7 @@ jobs:
           installed <- utils::installed.packages()[, "Package"]
           needed <- remotes::dev_package_deps()
           missing <- setdiff(needed, installed)
-          remotes::packages(missing, dependencies = TRUE)
+          utils::install.packages(missing, dependencies = TRUE)
         shell: Rscript {0}
 
       - name: Install CRANdependencies

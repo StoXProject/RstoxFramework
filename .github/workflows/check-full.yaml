@@ -106,7 +106,10 @@ jobs:
         run: |
           # First try binary and then possibly source:
           remotes::install_deps(dependencies = TRUE, type = "binary")
-          remotes::install_deps(dependencies = TRUE)
+          installed <- utils::installed.packages()[, "Package"]
+          needed <- remotes::remotes::dev_package_deps()
+          missing <- setdiff(needed, installed)
+          remotes::packages(missing, dependencies = TRUE)
         shell: Rscript {0}
 
       - name: Install CRANdependencies

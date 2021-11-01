@@ -203,10 +203,12 @@ initiateRstoxFramework <- function(){
 
     #browser()
     # Paste the subSchemas to the RstoxFramework schema:
+    prrr <- processDataSchema
+    prrr$processData$oneOf <- head(prrr$processData$oneOf, 1)
     projectValidator <- jsonvalidate::json_validator(jsonlite::toJSON(
         c(
             schema, 
-            processDataSchema[1]
+            prrr
         ), 
         digits = NA, 
         auto_unbox = TRUE, 

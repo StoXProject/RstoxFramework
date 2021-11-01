@@ -202,6 +202,15 @@ initiateRstoxFramework <- function(){
     )
 
     # Paste the subSchemas to the RstoxFramework schema:
+    projectValidator <- jsonvalidate::json_validator(jsonlite::toJSON(
+        schema, 
+        digits = NA, 
+        auto_unbox = TRUE, 
+        na = "null", 
+        pretty = TRUE
+    ))
+    warning("1111111111111111111111111111")
+    
     schema <- jsonlite::toJSON(
         c(
             schema, 

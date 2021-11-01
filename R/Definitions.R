@@ -215,8 +215,10 @@ initiateRstoxFramework <- function(){
     )
     # Create a project.json validator:
     warning(V8::engine_info()$version)
+    warning(substr(schema, 1,  1000))
     projectValidator <- jsonvalidate::json_validator(schema)
-
+    warning("jsonvalidate::json_validator worked!!!!!!!!!!!!!!")
+    
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",

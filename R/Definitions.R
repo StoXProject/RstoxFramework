@@ -195,26 +195,13 @@ initiateRstoxFramework <- function(){
             oneOf = lapply(
                 processDataSchemaNames, 
                 function(x) list(
-                    "$ref" = paste0("\"#/", x, "\"")
+                    "$ref" = paste0("#/", x, "")
                 )
             ) 
         )
     )
 
-    #browser()
     # Paste the subSchemas to the RstoxFramework schema:
-    prrr <- processDataSchema
-    prrr$processData$oneOf <- head(prrr$processData$oneOf, 1)
-    projectValidator <- jsonvalidate::json_validator(jsonlite::toJSON(
-        c(
-            schema, 
-            prrr
-        ), 
-        digits = NA, 
-        auto_unbox = TRUE, 
-        na = "null", 
-        pretty = TRUE
-    ))
     warning("2222222222222222222")
     
     schema <- jsonlite::toJSON(
@@ -231,14 +218,6 @@ initiateRstoxFramework <- function(){
     # Create a project.json validator:
     warning(V8::engine_info()$version)
     warning(substr(schema, 1,  1000))
-    
-    schema2 <- "{
-        \"productId\": 1
-    }"
-    
-    
-    projectValidator <- jsonvalidate::json_validator(schema2)
-    warning("jsonvalidate::json_validator worked for a simple example!!!!!!!!!!!!!!")
     
     
     projectValidator <- jsonvalidate::json_validator(schema)

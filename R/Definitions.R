@@ -214,8 +214,8 @@ initiateRstoxFramework <- function(){
         pretty = TRUE
     )
     # Create a project.json validator:
-    ###warning(V8::engine_info()$version)
-    ###projectValidator <- jsonvalidate::json_validator(schema)
+    warning(V8::engine_info()$version)
+    projectValidator <- jsonvalidate::json_validator(schema)
 
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(

@@ -21,7 +21,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -33,7 +33,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -48,7 +48,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Utilities for projects.</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Framework.R"><code>R/Framework.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Framework.R" class="external-link"><code>R/Framework.R</code></a></small>
     <div class="hidden name"><code>ProjectUtils.Rd</code></div>
     </div>
 
@@ -77,7 +77,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
 
 <span class="fu">writeProjectDescription</span><span class="op">(</span>
   <span class="va">projectPath</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"JSON"</span>, <span class="st">"RData"</span><span class="op">)</span>,
+  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"JSON"</span>, <span class="st">"RData"</span><span class="op">)</span>,
   Application <span class="op">=</span> <span class="va">R.version.string</span>,
   projectDescription <span class="op">=</span> <span class="cn">NULL</span>,
   verbose <span class="op">=</span> <span class="cn">FALSE</span>
@@ -91,28 +91,29 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
 
 <span class="fu">setNotRunning</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span><span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>type</th>
-      <td><p>The type of file to read.</p></td>
-    </tr><tr><th>verbose</th>
-      <td><p>Logical: If TRUE extra messages are printed to console.</p></td>
-    </tr><tr><th>projectDescriptionFile</th>
-      <td><p>The path to the file holding the projectDescription.</p></td>
-    </tr><tr><th>applyBackwardCompatibility</th>
-      <td><p>Logical: If TRUE apply backward compatibility actions when running <code>readProjectDescription</code>.</p></td>
-    </tr><tr><th>formatProcesses</th>
-      <td><p>Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in <code>readModelData</code>, but should otherwise be set to TRUE.</p></td>
-    </tr><tr><th>Application</th>
-      <td><p>A single string naming the application used when saving the project. Defaulted to R.version.string.</p></td>
-    </tr><tr><th>projectDescription</th>
-      <td><p>A list holding the project description, as read using <code>readProjectDescription</code>.</p></td>
-    </tr><tr><th>modelName</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>type</dt>
+<dd><p>The type of file to read.</p></dd>
+<dt>verbose</dt>
+<dd><p>Logical: If TRUE extra messages are printed to console.</p></dd>
+<dt>projectDescriptionFile</dt>
+<dd><p>The path to the file holding the projectDescription.</p></dd>
+<dt>applyBackwardCompatibility</dt>
+<dd><p>Logical: If TRUE apply backward compatibility actions when running <code>readProjectDescription</code>.</p></dd>
+<dt>formatProcesses</dt>
+<dd><p>Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in <code>readModelData</code>, but should otherwise be set to TRUE.</p></dd>
+<dt>Application</dt>
+<dd><p>A single string naming the application used when saving the project. Defaulted to R.version.string.</p></dd>
+<dt>projectDescription</dt>
+<dd><p>A list holding the project description, as read using <code>readProjectDescription</code>.</p></dd>
+<dt>modelName</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+</dl></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

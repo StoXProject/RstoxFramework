@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Stratum manipulation</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Interactive.R"><code>R/Interactive.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Interactive.R" class="external-link"><code>R/Interactive.R</code></a></small>
     <div class="hidden name"><code>Stratum.Rd</code></div>
     </div>
 
@@ -58,23 +58,24 @@
 
 <span class="fu">modifyStratum</span><span class="op">(</span><span class="va">stratum</span>, <span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>stratum</th>
-      <td><p>The SpatialPolygonsDataFrame object defining the stratum to add.</p></td>
-    </tr><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>modelName</th>
-      <td><p>The name of the model (one of "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>processID</th>
-      <td><p>The ID of the process.</p></td>
-    </tr><tr><th>stratumName</th>
-      <td><p>The name of the stratum.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>stratum</dt>
+<dd><p>The SpatialPolygonsDataFrame object defining the stratum to add.</p></dd>
+<dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>modelName</dt>
+<dd><p>The name of the model (one of "baseline", "analysis" and "report").</p></dd>
+<dt>processID</dt>
+<dd><p>The ID of the process.</p></dd>
+<dt>stratumName</dt>
+<dd><p>The name of the stratum.</p></dd>
+</dl></div>
     <div id="details">
-    <h2>Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <h2>Details</h2>
     <p>The assignment IDs are refreshed for every change, after sorting the assignemnts by the PSU column.</p>
+    </div>
     </div>
 
   </div>

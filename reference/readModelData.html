@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Read the output files of a project</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/API.R"><code>R/API.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/API.R" class="external-link"><code>R/API.R</code></a></small>
     <div class="hidden name"><code>readModelData.Rd</code></div>
     </div>
 
@@ -60,23 +60,24 @@
   unlist <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>modelName</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>processName</th>
-      <td><p>The name of the process(es).</p></td>
-    </tr><tr><th>verifyFiles</th>
-      <td><p>Logical: If TRUE verify that the files are from processes that exist in the project.</p></td>
-    </tr><tr><th>unlist</th>
-      <td><p>Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>modelName</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dt>processName</dt>
+<dd><p>The name of the process(es).</p></dd>
+<dt>verifyFiles</dt>
+<dd><p>Logical: If TRUE verify that the files are from processes that exist in the project.</p></dd>
+<dt>unlist</dt>
+<dd><p>Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.</p></dd>
+</dl></div>
     <div id="value">
-    <h2>Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <h2>Value</h2>
     <p>A list of model output.</p>
+    </div>
     </div>
 
   </div>

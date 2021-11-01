@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Run all models of a StoX project</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/API.R"><code>R/API.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/API.R" class="external-link"><code>R/API.R</code></a></small>
     <div class="hidden name"><code>runProjects.Rd</code></div>
     </div>
 
@@ -63,8 +63,8 @@
   run <span class="op">=</span> <span class="cn">TRUE</span>,
   save <span class="op">=</span> <span class="cn">TRUE</span>,
   force.restart <span class="op">=</span> <span class="cn">FALSE</span>,
-  replaceDataList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>,
-  replaceArgsList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>,
+  replaceDataList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  replaceArgsList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   fileOutput <span class="op">=</span> <span class="cn">NULL</span>,
   setUseProcessDataToTRUE <span class="op">=</span> <span class="cn">TRUE</span>,
   purge.processData <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -74,51 +74,52 @@
   <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPaths</th>
-      <td><p>The paths to the projects to run.</p></td>
-    </tr><tr><th>modelNames</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>processes</th>
-      <td><p>The name of the process(es).</p></td>
-    </tr><tr><th>startProcess</th>
-      <td><p>The process index, name or ID at which to start and stop the model run.</p></td>
-    </tr><tr><th>endProcess</th>
-      <td><p>The process index, name or ID at which to start and stop the model run.</p></td>
-    </tr><tr><th>drop.datatype</th>
-      <td><p>Logical: If TRUE, drop the top level of the output list if it has length 1 and that single element is named by the datatype name.</p></td>
-    </tr><tr><th>unlistDepth2</th>
-      <td><p>Logical: Related to <code>drop.datatype</code>, but setting this to TRUE unlists output data that are nested in 2 levels, such as output from <code><a href="https://rdrr.io/pkg/RstoxData/man/ReadBiotic.html">ReadBiotic</a></code>, which outputs a set of tables for each input file. Using unlistDepth2 = TRUE puts all these tables in one list, and uses the concatenation of the file names and the table name separated by underscore. This is how it is displayed in the StoX GUI when selecting "View output".</p></td>
-    </tr><tr><th>run</th>
-      <td><p>Logical: If TRUE run the model.</p></td>
-    </tr><tr><th>save</th>
-      <td><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></td>
-    </tr><tr><th>force.restart</th>
-      <td><p>Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.</p></td>
-    </tr><tr><th>replaceDataList</th>
-      <td><p>A list named by the processes to replace output data for. See <code><a href="runProcess.html">runProcess</a></code>.</p></td>
-    </tr><tr><th>replaceArgsList</th>
-      <td><p>A list of <code>replaceArgs</code> holding parameters to replace in the function call, named by the processes to modify.</p></td>
-    </tr><tr><th>fileOutput</th>
-      <td><p>Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.</p></td>
-    </tr><tr><th>setUseProcessDataToTRUE</th>
-      <td><p>Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.</p></td>
-    </tr><tr><th>purge.processData</th>
-      <td><p>Logical: If TRUE replace process data entirely.</p></td>
-    </tr><tr><th>try</th>
-      <td><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></td>
-    </tr><tr><th>unlist.models</th>
-      <td><p>Logical: If TRUE unlist the top level so that all processes are in one list.</p></td>
-    </tr><tr><th>close</th>
-      <td><p>Logical: If TRUE close the project after running and getting the output.</p></td>
-    </tr><tr><th>...</th>
-      <td><p><code>replaceArgsList</code> can also be given directly.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPaths</dt>
+<dd><p>The paths to the projects to run.</p></dd>
+<dt>modelNames</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dt>processes</dt>
+<dd><p>The name of the process(es).</p></dd>
+<dt>startProcess</dt>
+<dd><p>The process index, name or ID at which to start and stop the model run.</p></dd>
+<dt>endProcess</dt>
+<dd><p>The process index, name or ID at which to start and stop the model run.</p></dd>
+<dt>drop.datatype</dt>
+<dd><p>Logical: If TRUE, drop the top level of the output list if it has length 1 and that single element is named by the datatype name.</p></dd>
+<dt>unlistDepth2</dt>
+<dd><p>Logical: Related to <code>drop.datatype</code>, but setting this to TRUE unlists output data that are nested in 2 levels, such as output from <code><a href="https://rdrr.io/pkg/RstoxData/man/ReadBiotic.html" class="external-link">ReadBiotic</a></code>, which outputs a set of tables for each input file. Using unlistDepth2 = TRUE puts all these tables in one list, and uses the concatenation of the file names and the table name separated by underscore. This is how it is displayed in the StoX GUI when selecting "View output".</p></dd>
+<dt>run</dt>
+<dd><p>Logical: If TRUE run the model.</p></dd>
+<dt>save</dt>
+<dd><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></dd>
+<dt>force.restart</dt>
+<dd><p>Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.</p></dd>
+<dt>replaceDataList</dt>
+<dd><p>A list named by the processes to replace output data for. See <code><a href="runProcess.html">runProcess</a></code>.</p></dd>
+<dt>replaceArgsList</dt>
+<dd><p>A list of <code>replaceArgs</code> holding parameters to replace in the function call, named by the processes to modify.</p></dd>
+<dt>fileOutput</dt>
+<dd><p>Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.</p></dd>
+<dt>setUseProcessDataToTRUE</dt>
+<dd><p>Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.</p></dd>
+<dt>purge.processData</dt>
+<dd><p>Logical: If TRUE replace process data entirely.</p></dd>
+<dt>try</dt>
+<dd><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></dd>
+<dt>unlist.models</dt>
+<dd><p>Logical: If TRUE unlist the top level so that all processes are in one list.</p></dd>
+<dt>close</dt>
+<dd><p>Logical: If TRUE close the project after running and getting the output.</p></dd>
+<dt>...</dt>
+<dd><p><code>replaceArgsList</code> can also be given directly.</p></dd>
+</dl></div>
     <div id="value">
-    <h2>Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <h2>Value</h2>
     <p>A list of model output.</p>
+    </div>
     </div>
 
   </div>

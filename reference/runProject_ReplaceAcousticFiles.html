@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Add a process DefineAcousticPSU with DefinitionMethod "PreDefined"</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/API.R"><code>R/API.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/API.R" class="external-link"><code>R/API.R</code></a></small>
     <div class="hidden name"><code>runProject_ReplaceAcousticFiles.Rd</code></div>
     </div>
 
@@ -64,31 +64,32 @@
   ow <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>ReadAcoustic.FileNames</th>
-      <td><p>Optional: character vector with file paths to input acoustic files to replaec the existing acoustic files by in the procecss using the function <code>ReadAcoustic</code>.</p></td>
-    </tr><tr><th>modelNames</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>projectPath0</th>
-      <td><p>Optional: Path to the project to copy to the project given by <code>projectPath</code>.</p></td>
-    </tr><tr><th>run</th>
-      <td><p>Logical: If TRUE run the model.</p></td>
-    </tr><tr><th>AcousticPSUProcessName</th>
-      <td><p>The name of the existing process using DefineAcousticPSU.</p></td>
-    </tr><tr><th>AcousticPSUProcessNameNew</th>
-      <td><p>The new name of the existing process using DefineAcousticPSU.</p></td>
-    </tr><tr><th>save</th>
-      <td><p>Logical: If TRUE save the project after running.</p></td>
-    </tr><tr><th>ow</th>
-      <td><p>Logical: If TRUE overwrite the project.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>ReadAcoustic.FileNames</dt>
+<dd><p>Optional: character vector with file paths to input acoustic files to replaec the existing acoustic files by in the procecss using the function <code>ReadAcoustic</code>.</p></dd>
+<dt>modelNames</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dt>projectPath0</dt>
+<dd><p>Optional: Path to the project to copy to the project given by <code>projectPath</code>.</p></dd>
+<dt>run</dt>
+<dd><p>Logical: If TRUE run the model.</p></dd>
+<dt>AcousticPSUProcessName</dt>
+<dd><p>The name of the existing process using DefineAcousticPSU.</p></dd>
+<dt>AcousticPSUProcessNameNew</dt>
+<dd><p>The new name of the existing process using DefineAcousticPSU.</p></dd>
+<dt>save</dt>
+<dd><p>Logical: If TRUE save the project after running.</p></dd>
+<dt>ow</dt>
+<dd><p>Logical: If TRUE overwrite the project.</p></dd>
+</dl></div>
     <div id="value">
-    <h2>Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <h2>Value</h2>
     <p>A list of model output.</p>
+    </div>
     </div>
 
   </div>

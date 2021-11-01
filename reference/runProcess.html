@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Run one process</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Framework.R"><code>R/Framework.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Framework.R" class="external-link"><code>R/Framework.R</code></a></small>
     <div class="hidden name"><code>runProcess.Rd</code></div>
     </div>
 
@@ -62,39 +62,40 @@
   fileOutput <span class="op">=</span> <span class="cn">NULL</span>,
   setUseProcessDataToTRUE <span class="op">=</span> <span class="cn">TRUE</span>,
   purge.processData <span class="op">=</span> <span class="cn">FALSE</span>,
-  replaceArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>,
+  replaceArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   replaceData <span class="op">=</span> <span class="cn">NULL</span>,
   try <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>modelName</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>processID</th>
-      <td><p>The ID of the process.</p></td>
-    </tr><tr><th>msg</th>
-      <td><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></td>
-    </tr><tr><th>saveProcessData</th>
-      <td><p>Logical: If TRUE save the output as ProcessData, if the proecss is a ProcessData process.</p></td>
-    </tr><tr><th>returnProcessOutput</th>
-      <td><p>Logical: If TRUE return the process output immediately after it is available. Used to get filter options.</p></td>
-    </tr><tr><th>fileOutput</th>
-      <td><p>Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.</p></td>
-    </tr><tr><th>setUseProcessDataToTRUE</th>
-      <td><p>Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.</p></td>
-    </tr><tr><th>purge.processData</th>
-      <td><p>Logical: If TRUE replace process data entirely.</p></td>
-    </tr><tr><th>replaceArgs</th>
-      <td><p>A list of function parameters and inputs to override.</p></td>
-    </tr><tr><th>replaceData</th>
-      <td><p>Either the data to replace the process output by, or a list of two elements <code>FunctionName</code> and <code>MoreArgs</code>, giving a function to apply to the output from the process with additional arguments stored in <code>MoreArgs</code>. The function is applied using <code><a href="https://rdrr.io/r/base/do.call.html">do.call</a></code>, with <code>args</code> being a list with the process output first, followed by the <code>MoreArgs</code>.</p></td>
-    </tr><tr><th>try</th>
-      <td><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>modelName</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dt>processID</dt>
+<dd><p>The ID of the process.</p></dd>
+<dt>msg</dt>
+<dd><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></dd>
+<dt>saveProcessData</dt>
+<dd><p>Logical: If TRUE save the output as ProcessData, if the proecss is a ProcessData process.</p></dd>
+<dt>returnProcessOutput</dt>
+<dd><p>Logical: If TRUE return the process output immediately after it is available. Used to get filter options.</p></dd>
+<dt>fileOutput</dt>
+<dd><p>Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.</p></dd>
+<dt>setUseProcessDataToTRUE</dt>
+<dd><p>Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.</p></dd>
+<dt>purge.processData</dt>
+<dd><p>Logical: If TRUE replace process data entirely.</p></dd>
+<dt>replaceArgs</dt>
+<dd><p>A list of function parameters and inputs to override.</p></dd>
+<dt>replaceData</dt>
+<dd><p>Either the data to replace the process output by, or a list of two elements <code>FunctionName</code> and <code>MoreArgs</code>, giving a function to apply to the output from the process with additional arguments stored in <code>MoreArgs</code>. The function is applied using <code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></code>, with <code>args</code> being a list with the process output first, followed by the <code>MoreArgs</code>.</p></dd>
+<dt>try</dt>
+<dd><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></dd>
+</dl></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

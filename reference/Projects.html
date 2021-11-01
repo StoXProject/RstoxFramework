@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Create, open, close, save, saveAs, copy and delete a StoX project.</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Framework.R"><code>R/Framework.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Framework.R" class="external-link"><code>R/Framework.R</code></a></small>
     <div class="hidden name"><code>Projects.Rd</code></div>
     </div>
 
@@ -97,38 +97,39 @@
 
 <span class="fu">deleteProject</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>template</th>
-      <td><p>A string naming the template to use when generating the project. See <code>getAvaiableTemplates</code> for a list of available templates.</p></td>
-    </tr><tr><th>ow</th>
-      <td><p>Logical: If TRUE overwrite the project.</p></td>
-    </tr><tr><th>showWarnings</th>
-      <td><p>Logical: If TRUE display warninigs when creting the project folders.</p></td>
-    </tr><tr><th>open</th>
-      <td><p>Logical: If TRUE open the project after creating it.</p></td>
-    </tr><tr><th>Application</th>
-      <td><p>A single string naming the application used when saving the project. Defaulted to R.version.string.</p></td>
-    </tr><tr><th>force</th>
-      <td><p>Logical: If TRUE reopen (close and then open) the project if already open.</p></td>
-    </tr><tr><th>reset</th>
-      <td><p>Logical: If TRUE reset each model to the start of the model.</p></td>
-    </tr><tr><th>type</th>
-      <td><p>The type of file to save the project to.</p></td>
-    </tr><tr><th>saveIfAlreadyOpen</th>
-      <td><p>Logical: If TRUE save the project before closing if already open and force is TRUE.</p></td>
-    </tr><tr><th>verbose</th>
-      <td><p>Logical: If TRUE, print information to the console, e.g. about backward compatibility.</p></td>
-    </tr><tr><th>save</th>
-      <td><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></td>
-    </tr><tr><th>msg</th>
-      <td><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></td>
-    </tr><tr><th>newProjectPath</th>
-      <td><p>The path to the copied StoX project.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>template</dt>
+<dd><p>A string naming the template to use when generating the project. See <code>getAvaiableTemplates</code> for a list of available templates.</p></dd>
+<dt>ow</dt>
+<dd><p>Logical: If TRUE overwrite the project.</p></dd>
+<dt>showWarnings</dt>
+<dd><p>Logical: If TRUE display warninigs when creting the project folders.</p></dd>
+<dt>open</dt>
+<dd><p>Logical: If TRUE open the project after creating it.</p></dd>
+<dt>Application</dt>
+<dd><p>A single string naming the application used when saving the project. Defaulted to R.version.string.</p></dd>
+<dt>force</dt>
+<dd><p>Logical: If TRUE reopen (close and then open) the project if already open.</p></dd>
+<dt>reset</dt>
+<dd><p>Logical: If TRUE reset each model to the start of the model.</p></dd>
+<dt>type</dt>
+<dd><p>The type of file to save the project to.</p></dd>
+<dt>saveIfAlreadyOpen</dt>
+<dd><p>Logical: If TRUE save the project before closing if already open and force is TRUE.</p></dd>
+<dt>verbose</dt>
+<dd><p>Logical: If TRUE, print information to the console, e.g. about backward compatibility.</p></dd>
+<dt>save</dt>
+<dd><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></dd>
+<dt>msg</dt>
+<dd><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></dd>
+<dt>newProjectPath</dt>
+<dd><p>The path to the copied StoX project.</p></dd>
+</dl></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

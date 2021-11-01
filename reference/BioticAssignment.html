@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Add or remove biotic hauls to/from assignment of hauls to acoustic PSU/Layer</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Interactive.R"><code>R/Interactive.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Interactive.R" class="external-link"><code>R/Interactive.R</code></a></small>
     <div class="hidden name"><code>BioticAssignment.Rd</code></div>
     </div>
 
@@ -56,25 +56,26 @@
 
 <span class="fu">removeHaulFromAssignment</span><span class="op">(</span><span class="va">Stratum</span>, <span class="va">PSU</span>, <span class="va">Haul</span>, <span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>Stratum</th>
-      <td><p>The stratum name related to the PSU.</p></td>
-    </tr><tr><th>PSU</th>
-      <td><p>The acoustic primary sampling unit (PSU) for which to add/remove the haul.</p></td>
-    </tr><tr><th>Haul</th>
-      <td><p>The biotic haul to add/remove (can be a vector of hauls).</p></td>
-    </tr><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>modelName</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>processID</th>
-      <td><p>The ID of the process.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>Stratum</dt>
+<dd><p>The stratum name related to the PSU.</p></dd>
+<dt>PSU</dt>
+<dd><p>The acoustic primary sampling unit (PSU) for which to add/remove the haul.</p></dd>
+<dt>Haul</dt>
+<dd><p>The biotic haul to add/remove (can be a vector of hauls).</p></dd>
+<dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>modelName</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dt>processID</dt>
+<dd><p>The ID of the process.</p></dd>
+</dl></div>
     <div id="details">
-    <h2>Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <h2>Details</h2>
     <p>The assignment IDs are refreshed for every change, after sorting the assignemnts by the PSU column.</p>
+    </div>
     </div>
 
   </div>

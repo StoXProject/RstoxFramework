@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -29,7 +29,7 @@
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -44,7 +44,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Add a StoX process to a model.</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Framework.R"><code>R/Framework.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Framework.R" class="external-link"><code>R/Framework.R</code></a></small>
     <div class="hidden name"><code>addProcess.Rd</code></div>
     </div>
 
@@ -62,24 +62,25 @@
   strict <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>projectPath</th>
-      <td><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></td>
-    </tr><tr><th>modelName</th>
-      <td><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></td>
-    </tr><tr><th>values</th>
-      <td><p>A list of values to assign to the process, such as list(processName = "ReadBiotic", functionName = "RstoxBase::ReadBiotic").</p></td>
-    </tr><tr><th>returnProcessTable</th>
-      <td><p>Logical: If TRUE return the process table.</p></td>
-    </tr><tr><th>archive</th>
-      <td><p>Logical: Should the project memory state be archived using <code>archiveProject</code>? This stores one step in the history.</p></td>
-    </tr><tr><th>add.defaults</th>
-      <td><p>Logical: If TRUE defaults of a function are added when setting the function of the process.</p></td>
-    </tr><tr><th>strict</th>
-      <td><p>Logical: If FALSE a proposed process nname is changed to the default new process name, whereas TRUE throws an error.</p></td>
-    </tr></table></div>
-
+    <h2>Arguments</h2>
+    <dl><dt>projectPath</dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+<dt>modelName</dt>
+<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dt>values</dt>
+<dd><p>A list of values to assign to the process, such as list(processName = "ReadBiotic", functionName = "RstoxBase::ReadBiotic").</p></dd>
+<dt>returnProcessTable</dt>
+<dd><p>Logical: If TRUE return the process table.</p></dd>
+<dt>archive</dt>
+<dd><p>Logical: Should the project memory state be archived using <code>archiveProject</code>? This stores one step in the history.</p></dd>
+<dt>add.defaults</dt>
+<dd><p>Logical: If TRUE defaults of a function are added when setting the function of the process.</p></dd>
+<dt>strict</dt>
+<dd><p>Logical: If FALSE a proposed process nname is changed to the default new process name, whereas TRUE throws an error.</p></dd>
+</dl></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

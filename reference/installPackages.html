@@ -19,7 +19,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.13</span>
       </span>
     </div>
 
@@ -31,7 +31,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul><ul class="nav navbar-nav navbar-right"><li>
-  <a href="https://github.com/StoXProject/RstoxFramework/">
+  <a href="https://github.com/StoXProject/RstoxFramework/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -46,7 +46,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Tools to download and install Rstox packages and dependen packages.</h1>
-    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/R/Versions.R"><code>R/Versions.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/R/Versions.R" class="external-link"><code>R/Versions.R</code></a></small>
     <div class="hidden name"><code>installPackages.Rd</code></div>
     </div>
 
@@ -55,7 +55,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
     </div>
 
     <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">getNonRstoxDependencies</span><span class="op">(</span>
-  packageName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RstoxFramework"</span>, <span class="st">"RstoxBase"</span>, <span class="st">"RstoxData"</span><span class="op">)</span>,
+  packageName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RstoxFramework"</span>, <span class="st">"RstoxBase"</span>, <span class="st">"RstoxData"</span><span class="op">)</span>,
   dependencyTypes <span class="op">=</span> <span class="cn">NA</span>,
   Rstox.repos <span class="op">=</span> <span class="cn">NULL</span>,
   nonRstox.repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span>,
@@ -78,47 +78,48 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
 
 <span class="fu">getOfficialRstoxPackageVersion</span><span class="op">(</span>
   StoXGUIVersion <span class="op">=</span> <span class="cn">NULL</span>,
-  officialRstoxPackageVersionsFile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"versions"</span>,
+  officialRstoxPackageVersionsFile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"versions"</span>,
     <span class="st">"OfficialRstoxFrameworkVersions.txt"</span>, package <span class="op">=</span> <span class="st">"RstoxFramework"</span><span class="op">)</span>,
-  packageName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RstoxFramework"</span>, <span class="st">"RstoxBase"</span>, <span class="st">"RstoxData"</span><span class="op">)</span>,
+  packageName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RstoxFramework"</span>, <span class="st">"RstoxBase"</span>, <span class="st">"RstoxData"</span><span class="op">)</span>,
   toJSON <span class="op">=</span> <span class="cn">FALSE</span>,
   list.out <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
 
+    <div id="ref-sections">
     <div id="arguments">
-    <h2>Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>packageName</th>
-      <td><p>The packages considered official Rstox pakcages, "RstoxFramework","RstoxBase" and "RstoxData".</p></td>
-    </tr><tr><th>dependencyTypes</th>
-      <td><p>A character vector listing the dependencies to get, with possible values "Depends", "Imports", "LinkingTo", "Suggests", "Enhances". Default is NA, implying c("Depends", "Imports", "LinkingTo").</p></td>
-    </tr><tr><th>Rstox.repos, nonRstox.repos</th>
-      <td><p>Either NULL to search for packages locally, or a repository passed to <code><a href="https://rdrr.io/r/utils/available.packages.html">available.packages</a></code>, where <code>Rstox.repos</code> is used to locate direct dependencies of the Rstox packages, and <code>nonRstox.repos</code> is used to get the dependencies of the direct dependencies recursively, defaulted to the CRAN repository.</p></td>
-    </tr><tr><th>sort</th>
-      <td><p>Logical: If TRUE sort the dependent packages, defaulted to FALSE to enable installing the most basic dependencies first.</p></td>
-    </tr><tr><th>StoXGUIVersion</th>
-      <td><p>The version of the StoX GUI defining the combination of official Rstox package versions.</p></td>
-    </tr><tr><th>officialRstoxPackageVersionsFile</th>
-      <td><p>The path to the file holding the link between StoX GUI version and Rstox package versions.</p></td>
-    </tr><tr><th>destdir</th>
-      <td><p>The directory to download binaries to, defaulted to NA which implies tempdir().</p></td>
-    </tr><tr><th>dependency.repos</th>
-      <td><p>The repository to download from.</p></td>
-    </tr><tr><th>lib</th>
-      <td><p>character vector giving the library directories where to
+    <h2>Arguments</h2>
+    <dl><dt>packageName</dt>
+<dd><p>The packages considered official Rstox pakcages, "RstoxFramework","RstoxBase" and "RstoxData".</p></dd>
+<dt>dependencyTypes</dt>
+<dd><p>A character vector listing the dependencies to get, with possible values "Depends", "Imports", "LinkingTo", "Suggests", "Enhances". Default is NA, implying c("Depends", "Imports", "LinkingTo").</p></dd>
+<dt>Rstox.repos, nonRstox.repos</dt>
+<dd><p>Either NULL to search for packages locally, or a repository passed to <code><a href="https://rdrr.io/r/utils/available.packages.html" class="external-link">available.packages</a></code>, where <code>Rstox.repos</code> is used to locate direct dependencies of the Rstox packages, and <code>nonRstox.repos</code> is used to get the dependencies of the direct dependencies recursively, defaulted to the CRAN repository.</p></dd>
+<dt>sort</dt>
+<dd><p>Logical: If TRUE sort the dependent packages, defaulted to FALSE to enable installing the most basic dependencies first.</p></dd>
+<dt>StoXGUIVersion</dt>
+<dd><p>The version of the StoX GUI defining the combination of official Rstox package versions.</p></dd>
+<dt>officialRstoxPackageVersionsFile</dt>
+<dd><p>The path to the file holding the link between StoX GUI version and Rstox package versions.</p></dd>
+<dt>destdir</dt>
+<dd><p>The directory to download binaries to, defaulted to NA which implies tempdir().</p></dd>
+<dt>dependency.repos</dt>
+<dd><p>The repository to download from.</p></dd>
+<dt>lib</dt>
+<dd><p>character vector giving the library directories where to
     install the packages.  Recycled as needed.  If missing, defaults to
-    the first element of <code><a href="https://rdrr.io/r/base/libPaths.html">.libPaths</a>()</code>.</p></td>
-    </tr><tr><th>platform</th>
-      <td><p>The platform to download binaries for, defaulted to the current platform, but with the option to download for other platforms (possible values are "windows" and "macosx").</p></td>
-    </tr><tr><th>toJSON</th>
-      <td><p>Logical: If TRUE output a JSON string.</p></td>
-    </tr><tr><th>quiet</th>
-      <td><p>logical: if true, reduce the amount of output.  This is <em>not</em>
-    passed to <code><a href="https://rdrr.io/r/utils/available.packages.html">available.packages</a>()</code> in case that is called, on
-    purpose.</p></td>
-    </tr><tr><th>list.out</th>
-      <td><p>Logical: If TRUE wrap the output of <code>getOfficialRstoxPackageVersion</code> in a list with packageName and version.</p></td>
-    </tr></table></div>
-
+    the first element of <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths</a>()</code>.</p></dd>
+<dt>platform</dt>
+<dd><p>The platform to download binaries for, defaulted to the current platform, but with the option to download for other platforms (possible values are "windows" and "macosx").</p></dd>
+<dt>toJSON</dt>
+<dd><p>Logical: If TRUE output a JSON string.</p></dd>
+<dt>quiet</dt>
+<dd><p>logical: if true, reduce the amount of output.  This is <em>not</em>
+    passed to <code><a href="https://rdrr.io/r/utils/available.packages.html" class="external-link">available.packages</a>()</code> in case that is called, on
+    purpose.</p></dd>
+<dt>list.out</dt>
+<dd><p>Logical: If TRUE wrap the output of <code>getOfficialRstoxPackageVersion</code> in a list with packageName and version.</p></dd>
+</dl></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

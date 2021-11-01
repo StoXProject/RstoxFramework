@@ -35,20 +35,40 @@ initiateRstoxFramework <- function(){
     )
     # Add RstoxFramework:
     officialStoxLibraryPackagesAll <- c("RstoxFramework", officialStoxLibraryPackages)
-    
     # Get installed versions:
     InstalledRstoxPackageVersion <- as.list(getPackageVersion(officialStoxLibraryPackagesAll, only.version = TRUE))
+
+    # Get the versions of the dependencies:
+    ### dependentPackagesOnlyRstoxFramework <- getPackageVersion(
+    ###     getDependencies(
+    ###         "RstoxFramework", 
+    ###         packageTable = NULL, 
+    ###         repos = NA, 
+    ###         recursive = FALSE, 
+    ###         append = FALSE, 
+    ###         sort = FALSE
+    ###     )
+    ### )
+    ### dependentPackageVersionSansRstoxFramework <- getDependentPackageVersion(
+    ###     packageName = officialStoxLibraryPackages, 
+    ###     dependencyTypes = NA, 
+    ###     Rstox.repos = NULL, 
+    ###     # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
+    ###     nonRstox.repos = NULL, 
+    ###     sort = FALSE
+    ### )
+    ### dependentPackageVersion <- unique(c(dependentPackagesOnlyRstoxFramework, dependentPackageVersionSansRstoxFramework))
     
     # Get the versions of the dependencies:
-    dependentPackageVersion <- getDependentPackageVersion(
-        packageName = officialStoxLibraryPackagesAll, 
-        dependencyTypes = NA, 
-        Rstox.repos = NULL, 
-        # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
-        nonRstox.repos = NULL, 
-        sort = FALSE
-    )
-    
+   dependentPackageVersion <- getDependentPackageVersion(
+       packageName = officialStoxLibraryPackagesAll, 
+       dependencyTypes = NA, 
+       Rstox.repos = NULL, 
+       # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
+       nonRstox.repos = NULL, 
+       sort = FALSE
+   )
+
     # Define the possible projectDescription file formats:
     projectDescriptionFileFormats <- c("JSON", "RData")
     
@@ -98,7 +118,7 @@ initiateRstoxFramework <- function(){
     orderProcessArguments <- function(process) {
         process[processProperties]
     }
-    
+
     # Define the requested (all) function attributes:
     requestedFunctionAttributeNames <- c(
         "packageName", 
@@ -127,7 +147,7 @@ initiateRstoxFramework <- function(){
     stoxLibrary <- getStoxLibrary(officialStoxLibraryPackagesAll, requestedFunctionAttributeNames = requestedFunctionAttributeNames)
     availableFunctions <- names(stoxLibrary)
     availablePackageFunctionNames <- unname(sapply(stoxLibrary, "[[", "functionName"))
-    
+
     # Define the supported backward compatibility actions:
     backwardCompatibilityActionNames <- c(
         "renameAttribute", 
@@ -167,7 +187,7 @@ initiateRstoxFramework <- function(){
     # Get the schemas of the Rstox packages:
     processDataSchemas <- lapply(officialStoxLibraryPackages, readProcessDataSchema)
     processDataSchemas <- unlist(processDataSchemas, recursive = FALSE)
-    
+
     # Get the names of the processData schemas:
     processDataSchemaNames <- names(processDataSchemas)
     processDataSchema <- list(
@@ -180,7 +200,7 @@ initiateRstoxFramework <- function(){
             ) 
         )
     )
-    
+
     # Paste the subSchemas to the RstoxFramework schema:
     schema <- jsonlite::toJSON(
         c(
@@ -194,8 +214,9 @@ initiateRstoxFramework <- function(){
         pretty = TRUE
     )
     # Create a project.json validator:
-    projectValidator <- jsonvalidate::json_validator(schema)
-    
+    ###warning(V8::engine_info()$version)
+    ###projectValidator <- jsonvalidate::json_validator(schema)
+
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",
@@ -311,7 +332,7 @@ initiateRstoxFramework <- function(){
         ), 
         recursive = FALSE
     )
-    
+
     #
     #allFormatClasses <- unique(unlist(lapply(processPropertyFormats, names)))
     #processPropertyFormats <- lapply(allFormatClasses, function(x) unlist(lapply(processPropertyFormats, "[[", x)))
@@ -375,7 +396,7 @@ initiateRstoxFramework <- function(){
         displayName = stoxModelDisplayNames, 
         description = stoxModelDescriptions
     )
-    
+
     # Backwards compatibility:
     # Get the mapping between models iin 
     modelNameMapping2.7To3 <- structure(c("baseline", "analysis", "report", "report"), names = c("baseline", "r", "baseline-report", "r-report"))
@@ -531,8 +552,7 @@ initiateRstoxFramework <- function(){
     # The file containing the project description attributes:
     projectDescriptionAttributesFile <- file.path(memoryModelsFolder, "projectDescriptionAttributes.rds")
     
-    
-    
+
     #### Define an object with all path objects for convenience in getProjectPaths(): ####
     paths <- c(
         stoxFolderStructureList, 

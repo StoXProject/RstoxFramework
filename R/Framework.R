@@ -895,13 +895,13 @@ readProjectDescriptionRData <- function(projectDescriptionFile) {
 readProjectDescriptionJSON <- function(projectDescriptionFile) {
     
     # Validate json object against schema
-    projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
-    valid <- projectValidator(projectDescriptionFile)
-    if(!isTRUE(valid)) {
-        cat("Output from project.json validator:\n")
-        print(projectValidator(projectDescriptionFile, verbose = TRUE))
-        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
-    }
+    ### projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
+    ### valid <- projectValidator(projectDescriptionFile)
+    ### if(!isTRUE(valid)) {
+    ###     cat("Output from project.json validator:\n")
+    ###     print(projectValidator(projectDescriptionFile, verbose = TRUE))
+    ###     stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
+    ### }
     
     # Read project.json file to R list. Use simplifyVector = FALSE to preserve names:
     projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
@@ -1117,13 +1117,13 @@ writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFi
     json <- jsonlite::prettify(json)
     
     # Validate the json structure with json schema
-    projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
-    valid <- projectValidator(json)
-    if(!isTRUE(valid)) {
-        cat("Output from project.json validator:\n")
-        print(projectValidator(json, verbose = TRUE))
-        stop("StoX: Cannot write the project.json file. It is not a valid project.json file.")
-    }
+    ### projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
+    ### valid <- projectValidator(json)
+    ### if(!isTRUE(valid)) {
+    ###     cat("Output from project.json validator:\n")
+    ###     print(projectValidator(json, verbose = TRUE))
+    ###     stop("StoX: Cannot write the project.json file. It is not a valid project.json file.")
+    ### }
     #jsonvalidate::json_validate(json)
     
     # 5. Write the validated json to file: 
@@ -3828,13 +3828,13 @@ formatProcessName <-  function(processName) {
 }
 
 formatProcessParameters <-  function(processParameters) {
-    #if(length(processParameters)) {
-        notLogical <- !sapply(processParameters, is.logical)
-        if(any(notLogical)) {
-            processParameters[notLogical] <- lapply(processParameters[notLogical], as.logical)
-        }
-    #}
-        return(processParameters)
+    # All process parameters are logical:
+    notLogical <- !sapply(processParameters, is.logical)
+    if(any(notLogical)) {
+        processParameters[notLogical] <- lapply(processParameters[notLogical], as.logical)
+    }
+
+    return(processParameters)
 }
 
 formatFunctionInputs <-  function(functionInputs) {
@@ -3847,7 +3847,7 @@ formatFunctionInputs <-  function(functionInputs) {
 
 formatFunctionParameters <-  function(functionParameters, functionName) {
     
-    # Simplify verctors and matrices and data.frames using the jsonlite package:
+    # Simplify vectors, matrices and data.frames using the jsonlite package:
     functionParameters <- simplifyListReadFromJSON(functionParameters)
     
     if(length(functionParameters)) {
@@ -3892,7 +3892,7 @@ formatFunctionParameters <-  function(functionParameters, functionName) {
                         functionParameters[[this]] <- data.table::data.table()
                     }
                     else if(table) {
-                        functionParameters[[this]] <- as.data.table(functionParameters[[this]])
+                        functionParameters[[this]] <- data.table::as.data.table(functionParameters[[this]])
                     }
                     # Set class to the defined class:
                     else if(classIsDefined && differingClass) {
@@ -3940,8 +3940,8 @@ formatProcessDataOne <-  function(processDataOne) {
             
             # Add names:
             #row.names(processDataOne) <- as.character(processDataOne@data$StratumName)
-            row.names(processDataOne) <- RstoxBase::getStratumNames(processDataOne)
             processDataOne <- addCoordsNames(processDataOne)
+            processDataOne <- RstoxBase::addStratumNames(processDataOne, accept.wrong.name.if.only.one = TRUE)
         }
         else {
             processDataOne <- getRstoxFrameworkDefinitions("emptyStratumPolygon")
@@ -5054,7 +5054,8 @@ getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNa
     
     if(onlyTableNames) {
         # Strip to only the table names of the folderPath:
-        processOutputFiles <- gsub(path.expand(folderPath), "", unname(unlist(processOutputFiles)))
+        # Added fixed = TRUE, since special characters cause problems:
+        processOutputFiles <- gsub(path.expand(folderPath), "", unname(unlist(processOutputFiles)), fixed = TRUE)
         # Remove the resulting trailing "/" and the file extension:
         processOutputFiles <- substring(processOutputFiles, 2)
         processOutputFiles <- tools::file_path_sans_ext(processOutputFiles)

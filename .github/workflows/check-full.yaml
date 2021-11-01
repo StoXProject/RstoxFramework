@@ -104,7 +104,15 @@ jobs:
       - name: Install dependencies on Windows and macOS
         if: runner.os != 'Linux'
         run: |
+          # First try binary and then possibly source:
           remotes::install_deps(dependencies = TRUE, type = "binary")
+          installed <- utils::installed.packages()[, "Package"]
+          needed <- remotes::dev_package_deps()
+          missing <- setdiff(needed$package, installed)
+          if(length(missing)) {
+            message("Installing the following packages using default type:\n", paste0(missing, collapse = ", "))
+            utils::install.packages(missing, dependencies = TRUE)
+          }
         shell: Rscript {0}
 
       - name: Install CRANdependencies

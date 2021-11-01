@@ -216,6 +216,16 @@ initiateRstoxFramework <- function(){
     # Create a project.json validator:
     warning(V8::engine_info()$version)
     warning(substr(schema, 1,  1000))
+    
+    schema2 <- "{
+        \"productId\": 1
+    }"
+    
+    
+    projectValidator <- jsonvalidate::json_validator(schema2)
+    warning("jsonvalidate::json_validator worked for a simple example!!!!!!!!!!!!!!")
+    
+    
     projectValidator <- jsonvalidate::json_validator(schema)
     warning("jsonvalidate::json_validator worked!!!!!!!!!!!!!!")
     

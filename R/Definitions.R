@@ -192,15 +192,33 @@ initiateRstoxFramework <- function(){
     processDataSchemaNames <- names(processDataSchemas)
     processDataSchema <- list(
         processData = list(
-            oneOf = lapply(
-                processDataSchemaNames, 
-                function(x) list(
-                    "$ref" = paste0("\"#/", x, "\"")
+            #  This supports both an empty array, which currently is what is written to the project.json for processes with no process data, and a list of process data. Note here that only process data with only one element (table or spatialPolygonsDataFrame) are enclosed in a list named by the data type. Process data with two or more elements are given as a list with the individual elements, and it is these elements that are validated:
+            type = c("array", "object"),
+            minItems = 0,
+            patternProperties = list(
+                "^.*$" = list(
+                    anyOf = lapply(
+                        processDataSchemaNames, 
+                        function(x) list(
+                            # Removed the quotation as it failed with jsonvalidate v1.3.1, which contained update to ajv version 8.5.0: 
+                            # "$ref" = paste0("\"#/", x, "\"")
+                            "$ref" = paste0("#/", x, "")
+                        )
+                    )
                 )
-            ) 
+            ),
+            additionalProperties = FALSE
+            #oneOf = lapply(
+            #    processDataSchemaNames, 
+            #    function(x) list(
+            #        # Removed the quotation as it failed with jsonvalidate v1.3.1, which contained update to ajv version #8.5.0: 
+            #        # "$ref" = paste0("\"#/", x, "\"")
+            #        "$ref" = paste0("#/", x, "")
+            #    )
+            #) 
         )
     )
-
+    
     # Paste the subSchemas to the RstoxFramework schema:
     schema <- jsonlite::toJSON(
         c(
@@ -214,9 +232,8 @@ initiateRstoxFramework <- function(){
         pretty = TRUE
     )
     # Create a project.json validator:
-    ###warning(V8::engine_info()$version)
-    ###projectValidator <- jsonvalidate::json_validator(schema)
-
+    projectValidator <- jsonvalidate::json_validator(schema)
+    
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",

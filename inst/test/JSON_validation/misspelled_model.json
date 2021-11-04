@@ -1,0 +1,402 @@
+{
+    "project": {
+        "TimeSaved": "2021-10-13T21:55:08.876Z",
+        "RVersion": "R version 4.1.0 (2021-05-18)",
+        "RstoxPackageVersion": [
+            "RstoxFramework_3.1.11",
+            "RstoxBase_1.4.17",
+            "RstoxData_1.2.9"
+        ],
+        "CertifiedRstoxPackageVersion": [
+            "RstoxFramework_3.1.11",
+            "RstoxBase_1.4.16",
+            "RstoxData_1.2.8"
+        ],
+        "AllCertifiedRstoxPackageVersion": false,
+        "OfficialRstoxFrameworkVersion": false,
+        "DependentPackageVersion": [
+            "geojsonsf_2.0.1",
+            "data.table_1.14.0",
+            "jsonlite_1.7.2",
+            "jsonvalidate_1.1.0",
+            "rgdal_1.5-27",
+            "sp_1.4-5",
+            "sf_1.0-2",
+            "xml2_1.3.2",
+            "stringr_1.4.0",
+            "stringi_1.7.4",
+            "rgeos_0.5-8",
+            "lwgeom_0.2-7",
+            "ggplot2_3.3.5",
+            "units_0.7-2",
+            "Rcpp_1.0.7",
+            "xslt_1.4.3",
+            "geometries_0.2.0",
+            "jsonify_1.2.1",
+            "rapidjsonr_1.2.0",
+            "sfheaders_0.4.0",
+            "digest_0.6.28",
+            "glue_1.4.2",
+            "gtable_0.3.0",
+            "isoband_0.2.5",
+            "MASS_7.3-54",
+            "mgcv_1.8-36",
+            "rlang_0.4.11",
+            "scales_1.1.1",
+            "tibble_3.1.4",
+            "withr_2.4.2",
+            "V8_3.4.2",
+            "classInt_0.4-3",
+            "DBI_1.1.1",
+            "magrittr_2.0.1",
+            "s2_1.0.6",
+            "lattice_0.20-44",
+            "nlme_3.1-152",
+            "Matrix_1.3-4",
+            "farver_2.1.0",
+            "labeling_0.4.2",
+            "lifecycle_1.0.1",
+            "munsell_0.5.0",
+            "R6_2.5.1",
+            "RColorBrewer_1.1-2",
+            "viridisLite_0.4.0",
+            "colorspace_2.0-2",
+            "ellipsis_0.3.2",
+            "fansi_0.5.0",
+            "pillar_1.6.3",
+            "pkgconfig_2.0.3",
+            "vctrs_0.3.8",
+            "cli_3.0.1",
+            "crayon_1.4.1",
+            "utf8_1.2.2",
+            "curl_4.3.2",
+            "e1071_1.7-9",
+            "class_7.3-19",
+            "KernSmooth_2.23-20",
+            "proxy_0.4-26",
+            "wk_0.5.0",
+            "cpp11_0.4.0"
+        ],
+        "Application": "StoX 3.1.6",
+        "models": {
+            "Baseline": [
+                {
+                    "processName": "ReadAcoustic",
+                    "functionName": "RstoxData::ReadAcoustic",
+                    "functionInputs": {
+
+                    },
+                    "functionParameters": {
+                        "FileNames": "input/acoustic/echosounder_2020821_two_strata.zip"
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": false,
+                        "fileOutput": false
+                    },
+                    "processData": [
+
+                    ]
+                },
+                {
+                    "processName": "DefineAcousticTargetStrength",
+                    "functionName": "RstoxBase::DefineAcousticTargetStrength",
+                    "functionInputs": {
+
+                    },
+                    "functionParameters": {
+                        "UseProcessData": true,
+                        "DefinitionMethod": "TargetStrengthTable",
+                        "TargetStrengthMethod": "LengthDependent",
+                        "TargetStrengthTable": [
+                            {
+                                "AcousticCategory": "27",
+                                "Frequency": 38000,
+                                "TargetStrength0": -93,
+                                "LengthExponent": 20
+                            }
+                        ],
+                        "FileName": [
+
+                        ]
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": false,
+                        "fileOutput": true
+                    },
+                    "processData": {
+                        "TargetStrengthMethod": [
+                            {
+                                "TargetStrengthMethod": "LengthDependent"
+                            }
+                        ],
+                        "TargetStrengthTable": [
+                            {
+                                "AcousticCategory": "27",
+                                "Frequency": 38000,
+                                "TargetStrength0": -93,
+                                "LengthExponent": 20
+                            }
+                        ]
+                    }
+                },
+                {
+                    "processName": "DefineStratumPolygon",
+                    "functionName": "RstoxBase::DefineStratumPolygon",
+                    "functionInputs": {
+
+                    },
+                    "functionParameters": {
+                        "UseProcessData": true,
+                        "DefinitionMethod": "ResourceFile",
+                        "FileName": "input/StratumPolygon_first_two_strata.geojson",
+                        "StratumNameLabel": "polygonName",
+                        "SimplifyStratumPolygon": false,
+                        "SimplificationFactor": 1
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": true,
+                        "fileOutput": true
+                    },
+                    "processData": {
+                        "StratumPolygon": {
+                            "type": "FeatureCollection",
+                            "features": [
+                                {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "polygonName": "Engelsk_Klondyke_2020"
+                                    },
+                                    "geometry": {
+                                        "type": "Polygon",
+                                        "coordinates": [
+                                            [
+                                                [
+                                                    3.89416102,
+                                                    57.62228401
+                                                ],
+                                                [
+                                                    3.91605099,
+                                                    57.6819898
+                                                ],
+                                                [
+                                                    3.90903491,
+                                                    57.81640515
+                                                ],
+                                                [
+                                                    3.89416102,
+                                                    57.62228401
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "Feature",
+                                    "properties": {
+                                        "polygonName": "Outer_Shoal_2020_1"
+                                    },
+                                    "geometry": {
+                                        "type": "Polygon",
+                                        "coordinates": [
+                                            [
+                                                [
+                                                    5.02891502,
+                                                    57.3735277599907
+                                                ],
+                                                [
+                                                    4.99981767,
+                                                    57.3390296500082
+                                                ],
+                                                [
+                                                    5.00265998,
+                                                    57.2333677700618
+                                                ],
+                                                [
+                                                    5.02891502,
+                                                    57.3735277599907
+                                                ]
+                                            ]
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "processName": "DefineAcousticPSU",
+                    "functionName": "RstoxBase::DefineAcousticPSU",
+                    "functionInputs": {
+                        "StratumPolygon": "DefineStratumPolygon",
+                        "StoxAcousticData": "FilterStoxAcoustic",
+                        "AcousticPSU": null
+                    },
+                    "functionParameters": {
+                        "UseProcessData": true,
+                        "DefinitionMethod": "Manual",
+                        "FileName": [
+
+                        ]
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": false,
+                        "fileOutput": true
+                    },
+                    "processData": {
+                        "Stratum_PSU": [
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "PSU": "T1"
+                            },
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "PSU": "T101"
+                            }
+                        ],
+                        "EDSU_PSU": [
+                            {
+                                "EDSU": "2020821/2020-04-24T03:51:26.000Z",
+                                "PSU": "NA"
+                            },
+                            {
+                                "EDSU": "2020821/2020-04-24T03:52:00.000Z",
+                                "PSU": "NA"
+                            },
+                            {
+                                "EDSU": "2020821/2020-04-24T03:52:33.000Z",
+                                "PSU": "NA"
+                            }
+                        ],
+                        "PSUByTime": [
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "PSU": "T1",
+                                "Cruise": "2020821",
+                                "StartDateTime": "2020-04-24T18:43:00",
+                                "StopDateTime": "2020-04-24T19:17:45"
+                            },
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "PSU": "T2",
+                                "Cruise": "2020821",
+                                "StartDateTime": "2020-04-24T17:54:57",
+                                "StopDateTime": "2020-04-24T18:43:00"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "processName": "DefineBioticAssignment",
+                    "functionName": "RstoxBase::DefineBioticAssignment",
+                    "functionInputs": {
+                        "StoxBioticData": "FilterStoxBiotic1",
+                        "StratumPolygon": "DefineStratumPolygon",
+                        "AcousticPSU": "DefineAcousticPSU",
+                        "AcousticLayer": null,
+                        "StoxAcousticData": "FilterStoxAcoustic"
+                    },
+                    "functionParameters": {
+                        "UseProcessData": true,
+                        "DefinitionMethod": "Stratum",
+                        "FileName": [
+
+                        ],
+                        "LayerDefinition": "FunctionParameter",
+                        "LayerDefinitionMethod": "WaterColumn",
+                        "Resolution": [
+
+                        ],
+                        "LayerTable": [
+
+                        ],
+                        "Radius": 10,
+                        "MinNumberOfHauls": 2,
+                        "Distance": 10,
+                        "TimeDifference": 5,
+                        "BottomDepthDifference": [
+
+                        ],
+                        "LongitudeDifference": [
+
+                        ],
+                        "LatitudeDifference": [
+
+                        ]
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": false,
+                        "fileOutput": true
+                    },
+                    "processData": {
+                        "BioticAssignment": [
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "PSU": "T1",
+                                "Layer": "WaterColumn",
+                                "Haul": "2020821/5/2020/3317/21-36-37251",
+                                "WeightingFactor": 1
+                            },
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "PSU": "T1",
+                                "Layer": "WaterColumn",
+                                "Haul": "2020821/5/2020/3317/21-37-37252",
+                                "WeightingFactor": 1
+                            }
+                        ]
+                    }
+                }
+            ],
+            "analysis": [
+                {
+                    "processName": "Bootstrap",
+                    "functionName": "RstoxFramework::Bootstrap",
+                    "functionInputs": {
+
+                    },
+                    "functionParameters": {
+                        "BootstrapMethodTable": [
+                            {
+                                "ResampleFunction": "ResampleMeanNASCData",
+                                "ProcessName": "MeanNASC",
+                                "Seed": 1
+                            },
+                            {
+                                "ResampleFunction": "ResampleBioticAssignment",
+                                "ProcessName": "BioticAssignmentWeighting",
+                                "Seed": 2
+                            }
+                        ],
+                        "NumberOfBootstraps": 50,
+                        "OutputProcesses": "ImputeSuperIndividuals",
+                        "UseOutputData": false,
+                        "NumberOfCores": 1,
+                        "BaselineSeedTable": [
+                            {
+                                "ProcessName": "ImputeSuperIndividuals",
+                                "Seed": 1
+                            }
+                        ]
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": false,
+                        "fileOutput": true
+                    },
+                    "processData": [
+
+                    ]
+                }
+            ],
+            "report": [
+                
+            ]
+        }
+    }
+}
+

@@ -597,14 +597,6 @@ closeProject <- function(
         message("StoX: Project ", projectPath, " is already closed.")
     }
 }
-##' 
-##' @export
-##' @rdname Projects
-##' 
-#resetProject <- function(projectPath, save = NULL) {
-#    #closeProject(projectPath, save = save)
-#    openProject(projectPath, showWarnings = FALSE, force = TRUE)
-#}
 #' 
 #' @export
 #' @rdname Projects
@@ -895,13 +887,19 @@ readProjectDescriptionRData <- function(projectDescriptionFile) {
 readProjectDescriptionJSON <- function(projectDescriptionFile) {
     
     # Validate json object against schema
-    ### projectValidator <- getRstoxFrameworkDefinitions("projectValidator")
-    ### valid <- projectValidator(projectDescriptionFile)
-    ### if(!isTRUE(valid)) {
-    ###     cat("Output from project.json validator:\n")
-    ###     print(projectValidator(projectDescriptionFile, verbose = TRUE))
-    ###     stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
-    ### }
+    projectValidator <- getRstoxFrameworkDefinitions("projectValidator", engine = "ajv")
+    valid <- projectValidator(projectDescriptionFile, verbose = TRUE)
+    if(!isTRUE(valid)) {
+        message(
+            paste(
+                capture.output(
+                    projectValidator("~/Code/Github/RstoxFramework/RstoxFramework/inst/test/project.json", verbose = TRUE)
+                    ), 
+                collapse = "\n"
+            )
+        )
+        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
+    }
     
     # Read project.json file to R list. Use simplifyVector = FALSE to preserve names:
     projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
@@ -5718,7 +5716,7 @@ runProcesses <- function(
     processIDs <- processIndexTable$processID
     processNames <- processIndexTable$processName
     if(!length(processIDs)) {
-        warning("StoX: Empty model ", modelName, " of project, ", projectPath)
+        #warning("StoX: Empty model ", modelName, " of project, ", projectPath)
         return(NULL)
     }
     

@@ -54,7 +54,7 @@ Imports:
     xml2 (>= 1.2.2),
     stringr (>= 1.0.0),
     stringi (>= 1.4.3),
-    RstoxData (>= 1.2.14),
+    RstoxData (>= 1.2.15),
     RstoxBase (>= 1.4.22)
 Suggests: 
     remotes (>= 2.0.0),

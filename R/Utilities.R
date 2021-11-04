@@ -832,7 +832,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     out <- uallTests[atNotTRUE]
     
     if(any(atNotTRUE)) {
-        print(allTests)
+        #print(allTests)
         #tmp <- file.path(path.expand("~"), paste0("ErrorLog_", basename(projectPath), ".txt"))
         #writeLines(paste(names(out), out, sep = "-"), tmp)
         warning(paste(names(out), out, collapse = ",", sep = "-"))

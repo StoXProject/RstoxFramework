@@ -5716,7 +5716,7 @@ runProcesses <- function(
     processIDs <- processIndexTable$processID
     processNames <- processIndexTable$processName
     if(!length(processIDs)) {
-        warning("StoX: Empty model ", modelName, " of project, ", projectPath)
+        #warning("StoX: Empty model ", modelName, " of project, ", projectPath)
         return(NULL)
     }
     

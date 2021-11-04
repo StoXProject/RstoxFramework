@@ -1,3 +1,6 @@
+# RstoxFramework v3.1.14 (2021-11-04)
+* Updated vvalidation of project.json (using processDataSchema).
+
 # RstoxFramework v3.1.13 (2021-10-24)
 * Fixed bug in getProcessOutputFiles() where project paths containing special characters resulted in corrupt file paths, causing View output to crash.
 * Added DefineBioticPSU() to convertStoX2.7To3().

@@ -17,15 +17,18 @@ utils::globalVariables(c(
 	 ".", "..Cruise", "..DateTime", "..EDSUInfoToKeep", "..PSU", "..activeProcessID",
 	 "..clickPointNames", "..coordinateNames", "..functionInputs", "..functionName",
 	 "..functionParameters", "..haulInfoToKeep", "..ind", "..newProcessName", "..processDirty",
-	 "..propertyDirty", "..stationInfoToKeep", "..validInd", "BootstrapID", "CruiseKey", "EDSU",
-	 "JavaJEXL2R", "Latitude", "Latitude2", "Layer", "LogOrigin", "LogOrigin2", "Longitude",
-	 "Longitude2", "PSU", "Package", "ProcessName", "ResampleFunction", "StoX", "Version",
-	 "attriributes<-", "baselineTable", "binaryPath", "canShowInMap", "capture.output", "col2rgb",
-	 "colorRampPalette", "dataTable2SpatialPolygonsDataFrame", "dataType", "download.file",
-	 "functionName", "functionOutputDataType", "hasProcessData", "install.packages", "model",
-	 "modelName", "models", "name", "newVersion", "possibleValues", "processID", "processIndex",
+	 "..propertyDirty", "..stationInfoToKeep", "..validInd", "AcoCat", "BeamKey", "BootstrapID",
+	 "CruiseKey", "EDSU", "Haul", "JavaJEXL2R", "Latitude", "Latitude2", "Layer", "LogKey",
+	 "LogOrigin", "LogOrigin2", "Longitude", "Longitude2", "PSU", "Package", "PolygonKey",
+	 "ProcessName", "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum",
+	 "Version", "WeightingFactor", "assignmentPasted", "attriributes<-", "baselineTable",
+	 "binaryPath", "canShowInMap", "capture.output", "ch", "col2rgb", "colorRampPalette",
+	 "dataTable2SpatialPolygonsDataFrame", "dataType", "download.file", "freq", "functionName",
+	 "functionOutputDataType", "hasProcessData", "install.packages", "model", "modelName", "models",
+	 "name", "newVersion", "numStations", "possibleValues", "processID", "processIndex",
 	 "processName", "processNames", "projectList", "projectList2.7", "projectPath",
-	 "projectPath2.7", "read.table", "remove.packages", "resampledCountWithUniqueName", "value"))
+	 "projectPath2.7", "read.table", "remove.packages", "resampledCountWithUniqueName",
+	 "start_time", "transceiver", "value", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

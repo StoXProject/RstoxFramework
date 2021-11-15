@@ -1,3 +1,6 @@
+# RstoxFramework v3.1.16 (2021-11-08)
+* Added tests comparing results to StoX 2.7 for Barents sea cod 2020 and sandeel 2011.
+
 # RstoxFramework v3.1.14 (2021-11-04)
 * Updated validation of project.json (using processDataSchema).
 

@@ -50,7 +50,10 @@ getResamplableProcesses <- function(projectPath) {
     resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
     # Find the functions that can be resampled:
     stoxLibrary <- getRstoxFrameworkDefinitions("stoxLibrary")
-    validFunctions <- names(stoxLibrary)[sapply(stoxLibrary, "[[", "functionOutputDataType")  %in% resamplableDataTypes]
+    atValidFunction <- lapply(resamplableDataTypes, getValidFunctionsOneResamplableDataType, stoxLibrary = stoxLibrary)
+    atValidFunction <- do.call(cbind, atValidFunction)
+    atValidFunction <- rowSums(atValidFunction) > 0
+    validFunctions <- names(stoxLibrary)[atValidFunction]
     
     # Get the baseline processes with valid functions:
     baselineProcesses <- getProcessAndFunctionNames(
@@ -61,6 +64,18 @@ getResamplableProcesses <- function(projectPath) {
     processNames <- baselineProcesses[getFunctionNameFromPackageFunctionName(functionName) %in% validFunctions, processName]
     
     return(processNames)
+}
+
+# Function to get a logical vector finding resamplable functions for one data type:
+getValidFunctionsOneResamplableDataType <- function(resamplableDataType, stoxLibrary) {
+    hasResamplableDataType <- sapply(stoxLibrary, "[[", "functionOutputDataType")  %in% resamplableDataType
+    functionTypes <- sapply(stoxLibrary[hasResamplableDataType], "[[", "functionType")
+    unequalFunctionTypes <- !all(functionTypes == functionTypes[1])
+    if(sum(hasResamplableDataType) > 1 && unequalFunctionTypes) {
+        # Accept only procecss data when both proecss data and model data have the same data type (speicfiaclly DefineBioticAssignment and BioticAssignmentWeighting)
+        hasResamplableDataType[functionTypes != "processData"] <- FALSE
+    }
+    return(hasResamplableDataType)
 }
 
 #' Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:

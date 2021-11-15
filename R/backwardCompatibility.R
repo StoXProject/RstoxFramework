@@ -891,3 +891,151 @@ subsetXMLFile <- function(XMLFile, newXMLFile, tag = "fishstation", index = 1) {
 
 
 
+
+# Utility functions:
+# Add EDSU as defined in the new StoX:
+old2NewESDU <- function(x) {
+    x <- lapply(strsplit(x, "/"), "[", -2)
+    time <- lapply(x, function(y) paste0(paste(y[2], y[3], sep = "T"), ".000Z"))
+    paste(sapply(x, utils::head, 1), time, sep = "/")
+}
+# Add LogKey as defined in the new StoX:
+old2NewLogKey <- function(x) {
+    format(as.POSIXct(x), format = "%Y-%m-%dT%H:%M:%OS3Z")
+}
+# Add BeamKey as defined in the new StoX:
+old2NewBeamKey <- function(frequency, transceiver) {
+    paste(frequency, transceiver, sep = "/")
+}
+# Add Station as defined in the old StoX:
+new2OldStation <- function(x) {
+    paste(
+        sub("/.*", "", x), 
+        sub(".*-", "", x), 
+        sep = "/"
+    )
+}
+# Convert all data.frames to data.table:
+setDTs <- function(x) {
+    if(is.list(x) && !is.data.frame(x)) {
+        for(ind in seq_along(x)) {
+            setDTs(x[[ind]])
+        }
+    }
+    else if(is.data.frame(x)){
+        data.table::setDT(x)
+    }
+    else {
+        x
+    }
+}
+# Order all data.tables:
+setOrders <- function(x) {
+    
+    if(is.list(x) && !is.data.frame(x)) {
+        for(ind in seq_along(x)) {
+            setOrders(x[[ind]])
+        }
+    }
+    else if(is.data.frame(x)){
+        data.table::setorder(x)
+    }
+    else {
+        x
+    }
+}
+
+readStoX2.7OutputFile <- function(x) {
+    # Read the file:
+    out <- data.table::fread(x, na.strings = "NA")
+    
+    # Do type conversions:
+    # StratumArea:
+    if("PolygonKey" %in% names(out)) {
+        out[, PolygonKey := as.character(PolygonKey)]
+    }
+
+    # General:
+    if("SampleUnit" %in% names(out)) {
+        out[, SampleUnit := as.character(SampleUnit)]
+    }
+    if("Layer" %in% names(out)) {
+        out[, Layer := as.character(Layer)]
+    }
+    if("Stratum" %in% names(out)) {
+        out[, Stratum := as.character(Stratum)]
+    }
+    
+    # Acoustic and NASC:
+    if("AcoCat" %in% names(out)) {
+        out[, AcoCat := as.character(AcoCat)]
+    }
+    if("ch" %in% names(out)) {
+        out[, ch := as.character(ch)]
+    }
+    
+    
+    return(out)
+}
+
+
+convertKeys2.7To3 <- function(x) {
+    # NASC data type: 
+    if(all(c("NASC", "SampleUnit") %in% names(x))) {
+        x[, SampleUnit := old2NewESDU(SampleUnit)]
+    }
+    # NASC table of AcousticXML:
+    if(all(c("sa", "start_time", "freq", "transceiver") %in% names(x))) {
+        x[, LogKey := old2NewLogKey(start_time)]
+        x[, BeamKey := old2NewBeamKey(freq, transceiver)]
+    }
+    
+    if("Station" %in% names(x)) {
+        message("Old Station cannot be converted to new Station. Use new2OldStation() on the new table instead.")
+    }
+     return(x)
+}
+
+
+mergeAssignment2.7With3 <- function(bioticassignment_2.7, BioticAssignment_3) {
+    
+    if(!data.table::is.data.table(bioticassignment_2.7)) {
+        warning("bioticassignment_2.7 must be converted to a data.table.")
+    }
+    
+    # Add Station as in old StoX:
+    BioticAssignment_3[, Station := new2OldStation(Haul)]
+    
+    # Convert bioticassignment_2.7 to the form of the new BioticAssignment after pasting:
+    bioticassignment_2.7 <- bioticassignment_2.7[, list(
+        assignmentPasted = paste(Station, collapse = "__"), 
+        weightsPasted = paste(StationWeight, collapse = "__")
+    ), by = "AssignmentID"]
+    
+    # Convert BioticAssignmentWeighting to the form of the old bioticassignment with AssignmentID:
+    data.table::setorderv(BioticAssignment_3, c("Stratum", "PSU", "Layer", "Station"))
+    BioticAssignment_3[, assignmentPasted := paste(Station, collapse = "__"), by = "PSU"]
+    BioticAssignment_3[, weightsPasted := paste(WeightingFactor, collapse = "__"), by = "PSU"]
+    BioticAssignment_3[, numStations := .N, by = "PSU"]
+    
+    newBioticassignment <- unique(BioticAssignment_3[, c("assignmentPasted", "weightsPasted", "numStations")], by = "assignmentPasted")
+    
+    # Now we are ready for merging:
+    m <- merge(bioticassignment_2.7, newBioticassignment, by = "assignmentPasted", all = TRUE)
+    
+    BioticAsignment <- data.table::data.table(
+        AssignmentID = rep(m$AssignmentID,  m$numStations), 
+        assignmentPasted = rep(m$assignmentPasted, m$numStations), 
+        Station = unlist(strsplit(m$assignmentPasted, "__")), 
+        StationWeight.x = as.numeric(unlist(strsplit(m$weightsPasted.x, "__"))), 
+        StationWeight.y = as.numeric(unlist(strsplit(m$weightsPasted.y, "__")))
+    )
+    data.table::setorderv(BioticAsignment, c("AssignmentID", "Station"))
+    
+    return(BioticAsignment)
+}
+
+
+
+
+

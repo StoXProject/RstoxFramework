@@ -61,6 +61,9 @@
     <loc>/reference/compareProjectToStoredOutputFiles.html</loc>
   </url>
   <url>
+    <loc>/reference/convertKeys2.7To3.html</loc>
+  </url>
+  <url>
     <loc>/reference/convertStoX2.7To3.html</loc>
   </url>
   <url>
@@ -155,6 +158,9 @@
   </url>
   <url>
     <loc>/reference/readProcessOutputFile.html</loc>
+  </url>
+  <url>
+    <loc>/reference/readStoX2.7OutputFile.html</loc>
   </url>
   <url>
     <loc>/reference/rearrangeProcesses.html</loc>

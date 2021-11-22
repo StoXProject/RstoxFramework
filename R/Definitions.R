@@ -234,6 +234,28 @@ initiateRstoxFramework <- function(){
     # Create a project.json validator:
     projectValidator <- jsonvalidate::json_validator(schema)
     
+    getProcessDataColumnTypes <- function(processDataSchemas) {
+        # Get the process data which are lists of tables, which are those that have properties:
+        atMultiTableProcessData <- which(sapply(processDataSchemas, function(x) "properties" %in% names(x)))
+        atSingleTableProcessData <- setdiff(seq_along(processDataSchemas), atMultiTableProcessData)
+        # Find column types of the process data tables:
+        columnTypes <- lapply(processDataSchemas[atSingleTableProcessData], function(x) sapply(x$items[[1]]$properties, "[[", "type"))
+        columnTypes <- rapply(columnTypes, function(x) replace(x, x == "string", "character"), how = "replace")
+        columnTypes <- rapply(columnTypes, function(x) replace(x, x == "number", "double"), how = "replace")
+        return(columnTypes)
+    }
+    processDataColumnTypes <- getProcessDataColumnTypes(processDataSchemas)
+    
+ 
+    
+    
+    
+    getProcessDataItemTypes <- function(items) {
+        sapply(processDataSchemas$Stratum_PSU$items[[1]]$properties, "[[", "type")
+    }
+    
+    
+    
     # Get the functions that cacn be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",

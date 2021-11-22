@@ -957,7 +957,7 @@ toJSON_Rstox <- function(x, ...) {
 
 # NOT CURRENTLY USED: Function to convert classes of a data.table given a list of variablename-class pairs:
 convertClassOfDataTable <- function(x, classes) {
-    for(col in names(classes)) {
+    for(col in intersect(names(x), names(classes))) {
         fun <- paste("as", classes[[col]], sep = ".")
         x[, eval(col) := do.call(fun, list(get(col)))]
     }

@@ -687,7 +687,7 @@ ReportBootstrap <- function(
     
     # Issue a warning if RemoveMissingValues = TRUE:
     if(isTRUE(RemoveMissingValues)) {
-        warning(RstoxBase::getRstoxBaseDefinitions("RemoveMissingValuesWarning"))
+        warning(RstoxBase::getRstoxBaseDefinitions("RemoveMissingValuesWarning")(TargetVariable))
     }
     
     if(! BaselineProcess %in% names(BootstrapData)) {

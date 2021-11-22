@@ -945,6 +945,12 @@ setOrders <- function(x) {
     }
 }
 
+#' Read output file from StoX 2.7
+#' 
+#' @param x The path to the StoX 2.7 project file to read.
+#' 
+#' @export
+#' 
 readStoX2.7OutputFile <- function(x) {
     # Read the file:
     out <- data.table::fread(x, na.strings = "NA")
@@ -978,7 +984,12 @@ readStoX2.7OutputFile <- function(x) {
     return(out)
 }
 
-
+#' Convert keys of a 2.7 table to mimic the keys of StoX >= 3
+#' 
+#' @param x The StoX 2.7 table.
+#' 
+#' @export
+#' 
 convertKeys2.7To3 <- function(x) {
     # NASC data type: 
     if(all(c("NASC", "SampleUnit") %in% names(x))) {

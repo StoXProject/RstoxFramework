@@ -204,6 +204,9 @@ validateStoxLibraryPackage <- function(packageName) {
 
 # Get the package name from the full adress to a function.
 getPackageNameFromPackageFunctionName <- function(functionName) {
+    if(!grepl("::", functionName, fixed = TRUE)) {
+        warning("StoX: The function must be given as packageName::functionName. Was \"", functionName, "\".")
+    }
     sub("\\::.*", "", functionName)
 }
 # Get the function name from the full adress to a function.
@@ -240,26 +243,24 @@ getPackageNameFromFunctionName <- function(functionName) {
 validateFunction <- function(functionName) {
     
     # Expand the funciton name:
-    functionName <- getPackageFunctionName(functionName)
+    packageFunctionName <- getPackageFunctionName(functionName)
     
     # 1. Check first that the function name contains a double colon, which is the first requirement for a process:
-    #if(!grepl("::", functionName, fixed = TRUE)) {
-    #    stop("The function \"", functionName, "\" does not appear to be a string of the form PACKAGENAME::FUNCTIONNAME, where PACK#AGENAME is the package exporting the function with name FUNCTIONNAME.")
-    #}
-    if(length(functionName) == 0) {
-        stop("StoX: The function \"", functionName, "\" does not appear to be a string of the form PACKAGENAME::FUNCTIONNAME, where PACKAGENAME is the package exporting the function with name FUNCTIONNAME.")
+    if(length(packageFunctionName) == 0) {
+        warning("StoX: The function \"", packageFunctionName, "\" does not appear to be a string of the form PACKAGENAME::FUNCTIONNAME, where PACKAGENAME is the package exporting the function with name FUNCTIONNAME.")
     }
     
     # Extract the packageName:
-    packageName <- getPackageNameFromPackageFunctionName(functionName)
+    packageName <- getPackageNameFromPackageFunctionName(packageFunctionName)
     
     # 2. Validate the package for use in the process:
     if(packageName %in% getRstoxFrameworkDefinitions("officialStoxLibraryPackagesAll")) {
     #if(validateStoxLibraryPackage(packageName)) {
-        functionName
+        packageFunctionName
     }
     else {
-        stop("StoX: Invalid function ", functionName)
+        warning("StoX: Invalid function \"", functionName, "\"")
+        functionName
     }
 }
 
@@ -862,6 +863,7 @@ readProjectDescription <- function(projectPath, type = getRstoxFrameworkDefiniti
             }
         }
     }
+    
     
     # Introduce process IDs: 
     projectDescription <- defineProcessIDs(projectDescription)
@@ -3912,16 +3914,16 @@ formatProcessData <-  function(processData) {
     if(!is.list(processData)) {
         stop("StoX: ProcessData must be a list. The list can consist of SpatialPolygonsDataFrame or data.table objects. No other objects are allowed.")
     }
+    
     if(length(processData)) {
-        processData <- lapply(processData, formatProcessDataOne)
+        processData <- mapply(formatProcessDataOne, processDataName = names(processData), processDataOne = processData, SIMPLIFY = FALSE)
     }
     
     return(processData)
 }
 
 
-formatProcessDataOne <-  function(processDataOne) {
-    
+formatProcessDataOne <-  function(processDataName, processDataOne) {
     if(!length(processDataOne)) {
         processDataOne <- data.table::data.table()
     }
@@ -3960,17 +3962,22 @@ formatProcessDataOne <-  function(processDataOne) {
     }
     # If a data.table:
     else if(length(processDataOne) && data.table::is.data.table(processDataOne)) {
-        convertToPosixInDataTable(processDataOne)
         convertStringToNA(processDataOne)
+        
+        convertClassOfDataTable(processDataOne, getRstoxFrameworkDefinitions("processDataColumnTypes")[[processDataName]])
+        
+        convertToPosixInDataTable(processDataOne)
     }
     # Otherwise try to convert to data.table:
     else if(length(processDataOne) && is.convertableToTable(processDataOne)) {
         processDataOne <- simplifyListReadFromJSON(processDataOne)
         processDataOne <- data.table::as.data.table(processDataOne)
         
-        convertToPosixInDataTable(processDataOne)
-        
         convertStringToNA(processDataOne)
+        
+        convertClassOfDataTable(processDataOne, getRstoxFrameworkDefinitions("processDataColumnTypes")[[processDataName]])
+        
+        convertToPosixInDataTable(processDataOne)
     }
     else {
         stop("StoX: ProcessData must be a list of SpatialPolygonsDataFrame or data.table. No other objects are allowed.")
@@ -3991,6 +3998,8 @@ convertStringToNA <- function(x) {
     #x[, (chcols) := lapply(.SD, replace, as.is=TRUE), .SDcols=chcols] # Changed to numeric when not intended
     x[,(chcols) := lapply(.SD, function(x) ifelse(x == "NA", NA, x)), .SDcols = chcols]
 }
+
+
 
 
 #parseParameter <- function(parameter, simplifyVector = TRUE) {

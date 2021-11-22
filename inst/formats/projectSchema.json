@@ -15,14 +15,14 @@
 					"type": "array",
 					"minItems": 3,
 					"items": {
-					 	"type": "string"
+						"type": "string"
 					}
 				},
 				"CertifiedRstoxPackageVersion": {
 					"type": "array",
 					"minItems": 3,
 					"items": {
-					 	"type": "string"
+						"type": "string"
 					}
 				},
 				"AllCertifiedRstoxPackageVersion": {
@@ -35,7 +35,7 @@
 					"type": "array",
 					"minItems": 1,
 					"items": {
-					 	"type": "string"
+						"type": "string"
 					}
 				},
 				"Application": {
@@ -73,63 +73,61 @@
 				"DependentPackageVersion",
 				"Application"
 			],
-            "additionalProperties": false
+			"additionalProperties": false
 		}
 	},
 	
 	"model": {
-	    "type": "array",
-	    "items": {
-		   "$ref": "#/process"
-	    }
+		"type": "array",
+		"items": {
+			"$ref": "#/process"
+		}
 	},
 	
 	
 	"process": {
-	    "type": "object",
-	    "properties": {
-		   "processName": {
-			  "type": "string"
-		   },
-		   "functionName": {
-			  "type": "string"
-		   },
-		   "functionParameters": {},
-		   "functionInputs": {
-			  "type": "object",
-			  "minItems": 0
-		   },
-		   "processParameters": {
-			  "type": "object",
-			  "properties": {
-				 "enabled": {
-					"type": "boolean"
-				 },
-				 "showInMap": {
-					"type": "boolean"
-				 },
-				 "fileOutput": {
-					"type": "boolean"
-				 }
-			  },
-			  "required": [
-				 "enabled",
-				 "showInMap",
-				 "fileOutput"
-			  ]
-		   },
-		   "processData": {
-			  "$ref": "#/processData"
-		   }
-	    },
-	    "required": [
-		   "functionInputs",
-		   "functionName",
-		   "functionParameters",
-		   "processData",
-		   "processName",
-		   "processParameters"
-	    ]
+		"type": "object",
+		"properties": {
+			"processName": {
+				"type": "string"
+			},
+			"functionName": {
+				"type": "string", 
+				"minLength": 0
+			},
+			"functionParameters": {},
+			"functionInputs": {},
+			"processParameters": {
+			    "type": "object",
+			    "properties": {
+			    	"enabled": {
+						"type": "boolean"
+				    },
+				    "showInMap": {
+				    	"type": "boolean"
+			    	},
+			    	"fileOutput": {
+		    			"type": "boolean"
+		    		}
+		    	},
+		    	"required": [
+		   	    	"enabled",
+		 	   		"showInMap",
+			    	"fileOutput"
+			    ]
+			},
+			"processData": {
+				"$ref": "#/processData"
+			}
+		},
+		"required": [
+		"functionInputs",
+		"functionName",
+		"functionParameters",
+		"processData",
+		"processName",
+		"processParameters"
+		]
 	},
 	
 		

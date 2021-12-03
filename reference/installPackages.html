@@ -19,7 +19,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.17</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.18</span>
       </span>
     </div>
 
@@ -54,7 +54,8 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
     <p><code>getNonRstoxDependencies</code> gets all package dependencies ("Depends", "Imports" and "LinkingTo") of the packages given by <code>packageName</code>, excluding any Rstox-packages. <br><br><code>installOfficialRstoxPackagesWithDependencies</code> installs the corrrect versions of Rstox-packages, and other packages that these packages depend on. This function is used by the StoX GUI. <br><br><code>getOfficialRstoxPackageVersion</code> reads the OfficialRstoxFrameworkVersions.txt file for the given StoX GUI version <br><br></p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">getNonRstoxDependencies</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getNonRstoxDependencies</span><span class="op">(</span>
   packageName <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RstoxFramework"</span>, <span class="st">"RstoxBase"</span>, <span class="st">"RstoxData"</span><span class="op">)</span>,
   dependencyTypes <span class="op">=</span> <span class="cn">NA</span>,
   Rstox.repos <span class="op">=</span> <span class="cn">NULL</span>,
@@ -84,8 +85,8 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
   toJSON <span class="op">=</span> <span class="cn">FALSE</span>,
   list.out <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
+    </div>
 
-    <div id="ref-sections">
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>packageName</dt>
@@ -119,7 +120,6 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
 <dt>list.out</dt>
 <dd><p>Logical: If TRUE wrap the output of <code>getOfficialRstoxPackageVersion</code> in a list with packageName and version.</p></dd>
 </dl></div>
-    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -133,7 +133,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.0.9000.</p>
 </div>
 
       </footer></div>

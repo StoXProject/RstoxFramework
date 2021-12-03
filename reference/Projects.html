@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.17</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.18</span>
       </span>
     </div>
 
@@ -52,7 +52,8 @@
     <p>Create a StoX project using <code>createProject</code>; open an existing (un-opened) project using <code>openProject</code>, which involves creating files holding the memory of the project; close a project using  <code>closeProject</code>, which removes the memory files; save the project using <code>saveProject</code>, which saves the memory files to the project description file; make a copy using <code>copyProject</code> or <code>saveAsProject</code>, where the former closes the given project unsaved and opens the copy, or delete a project using <code>deleteProject</code>.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">createProject</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">createProject</span><span class="op">(</span>
   <span class="va">projectPath</span>,
   template <span class="op">=</span> <span class="st">"EmptyTemplate"</span>,
   ow <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -96,8 +97,8 @@
 <span class="fu">copyProject</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">newProjectPath</span>, ow <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="fu">deleteProject</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></code></pre></div>
+    </div>
 
-    <div id="ref-sections">
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>projectPath</dt>
@@ -129,7 +130,6 @@
 <dt>newProjectPath</dt>
 <dd><p>The path to the copied StoX project.</p></dd>
 </dl></div>
-    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -143,7 +143,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.0.9000.</p>
 </div>
 
       </footer></div>

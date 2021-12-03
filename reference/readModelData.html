@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.17</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.18</span>
       </span>
     </div>
 
@@ -52,15 +52,17 @@
     <p>This function reads all or some of the output files of a project, indicated by model and proccess names.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">readModelData</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">readModelData</span><span class="op">(</span>
   <span class="va">projectPath</span>,
   modelName <span class="op">=</span> <span class="cn">NULL</span>,
   processName <span class="op">=</span> <span class="cn">NULL</span>,
   verifyFiles <span class="op">=</span> <span class="cn">FALSE</span>,
-  unlist <span class="op">=</span> <span class="cn">FALSE</span>
+  unlist <span class="op">=</span> <span class="cn">FALSE</span>,
+  emptyStringAsNA <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
+    </div>
 
-    <div id="ref-sections">
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>projectPath</dt>
@@ -73,11 +75,12 @@
 <dd><p>Logical: If TRUE verify that the files are from processes that exist in the project.</p></dd>
 <dt>unlist</dt>
 <dd><p>Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.</p></dd>
+<dt>emptyStringAsNA</dt>
+<dd><p>Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <p>A list of model output.</p>
-    </div>
     </div>
 
   </div>
@@ -92,7 +95,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.0.9000.</p>
 </div>
 
       </footer></div>

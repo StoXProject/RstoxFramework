@@ -9,7 +9,8 @@ readModelData(
   modelName = NULL,
   processName = NULL,
   verifyFiles = FALSE,
-  unlist = FALSE
+  unlist = FALSE,
+  emptyStringAsNA = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ readModelData(
 \item{verifyFiles}{Logical: If TRUE verify that the files are from processes that exist in the project.}
 
 \item{unlist}{Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.}
+
+\item{emptyStringAsNA}{Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.}
 }
 \value{
 A list of model output.

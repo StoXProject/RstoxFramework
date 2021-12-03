@@ -69,11 +69,11 @@ getResamplableProcesses <- function(projectPath) {
 # Function to get a logical vector finding resamplable functions for one data type:
 getValidFunctionsOneResamplableDataType <- function(resamplableDataType, stoxLibrary) {
     hasResamplableDataType <- sapply(stoxLibrary, "[[", "functionOutputDataType")  %in% resamplableDataType
-    functionTypes <- sapply(stoxLibrary[hasResamplableDataType], "[[", "functionType")
-    unequalFunctionTypes <- !all(functionTypes == functionTypes[1])
+    functionTypes <- sapply(stoxLibrary, "[[", "functionType")
+    unequalFunctionTypes <- !RstoxBase::allEqual(functionTypes[hasResamplableDataType])
     if(sum(hasResamplableDataType) > 1 && unequalFunctionTypes) {
-        # Accept only procecss data when both proecss data and model data have the same data type (speicfiaclly DefineBioticAssignment and BioticAssignmentWeighting)
-        hasResamplableDataType[functionTypes != "processData"] <- FALSE
+        # Accept only process data when both process data and model data have the same data type (speicfiaclly DefineBioticAssignment and BioticAssignmentWeighting)
+        hasResamplableDataType <- hasResamplableDataType & functionTypes == "processData"
     }
     return(hasResamplableDataType)
 }

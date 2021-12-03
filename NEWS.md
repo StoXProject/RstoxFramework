@@ -1,3 +1,14 @@
+# RstoxFramework v3.1.18 (2021-12-03)
+* Added option of reading empty strings as NA in readModelData() to support output files from StoX <= 3.1.0. 
+* Added support for hybrid StoX 2.7 and >= 3 projects, using the same project folder. 
+* Fixed bug where only BioticAssignmentWeighting was available for selection in BootstrapMethodTable in Bootstrap() in the GUI, whereas only DefineBioticAssignment is corrrect. U
+* pdated test projects to match changes in RstoxBase.
+
+# RstoxFramework v3.1.17 (2021-11-22)
+* Added therequirement jsonvalidate >= 1.3.2, as per changes in JSON definition.
+* Modified test projects BIAS_19_ICES, cod_19, export_ICESbiotic, haddock_19, tobis_20 and tobis_20_depth for StoX 3.2.0 (ensuring reproducibility to StoX 3.1.0)
+* Added test for SplitNASC versus StoX 2.7s.
+
 # RstoxFramework v3.1.16 (2021-11-08)
 * Added tests comparing results to StoX 2.7 for Barents sea cod 2020 and sandeel 2011.
 

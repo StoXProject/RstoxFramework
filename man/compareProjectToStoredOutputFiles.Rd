@@ -6,13 +6,28 @@
 \usage{
 compareProjectToStoredOutputFiles(
   projectPath,
-  projectPath_original = projectPath
+  projectPath_original = projectPath,
+  emptyStringAsNA = FALSE,
+  intersect.names = TRUE,
+  ignore = NULL,
+  skipNA = FALSE,
+  setNATo0 = FALSE
 )
 }
 \arguments{
 \item{projectPath}{The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.}
 
 \item{projectPath_original}{The project holding the existing output files, defaulted to \code{projectPath}.}
+
+\item{emptyStringAsNA}{Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.}
+
+\item{intersect.names}{Logical: If TRUE, compare only same named columns.}
+
+\item{ignore}{A vector of names of columns to ignore in all.equal().}
+
+\item{skipNA}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
+
+\item{setNATo0}{Logical: If TRUE, set all NAs to 0.}
 }
 \description{
 Function for comparing existing output files with the memory read using runProject()

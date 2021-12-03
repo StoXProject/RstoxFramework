@@ -5251,7 +5251,7 @@ getProcessOutputTextFilePath <- function(
     
     # Create the folder:
     if(!file.exists(folderPath)) {
-        dir.create(folderPath)
+        dir.create(folderPath, recursive = TRUE)
     }
     
     # Define the process output file path:
@@ -5675,7 +5675,7 @@ isValidOutputDataOne <- function(outputDataOne) {
 purgeOutput <- function(projectPath, modelName) {
     folderPath <- getProjectPaths(projectPath = projectPath, name = modelName)
     unlink(folderPath, recursive = TRUE, force = TRUE)
-    dir.create(folderPath)
+    dir.create(folderPath, recursive = TRUE)
 }
 
 #' Run processes of a model.

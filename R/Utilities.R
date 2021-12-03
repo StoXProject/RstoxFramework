@@ -705,12 +705,17 @@ unzipProject <- function(projectPath, exdir = ".") {
 
 #' Function for comparing existing output files with the memory read using runProject()
 #' 
+#' @inheritParams readModelData
 #' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
+#' @param intersect.names Logical: If TRUE, compare only same named columns.
+#' @param ignore A vector of names of columns to ignore in all.equal().
+#' @param skipNA Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
+#' @param setNATo0 Logical: If TRUE, set all NAs to 0.
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNA = FALSE, setNATo0 = FALSE) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -724,13 +729,13 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
     
-    print(projectPath_copy)
+    message(projectPath_copy)
     openProject(projectPath_copy)
     dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE)
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
-    dat_orig <- readModelData(projectPath_original, unlist = 1)
+    dat_orig <- readModelData(projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA)
     
     #browser()
     
@@ -758,7 +763,20 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         data_equal[[name]] <- list()
         for(subname in names(dat_orig[[name]])) {
             if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
-                data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfFirst(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+                if(intersect.names) {
+                    intersectingNames <- intersect(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
+                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfFirst(
+                        dat_orig[[name]][[subname]][, intersectingNames, with = FALSE], 
+                        dat[[name]][[subname]][, intersectingNames, with = FALSE], 
+                        ignore = ignore, 
+                        skipNA = skipNA, 
+                        setNATo0 = setNATo0
+                    )
+                }
+                else {
+                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfFirst(dat_orig[[name]][[subname]], dat[[name]][[subname]], ignore = ignore, skipNA = skipNA, setNATo0 = setNATo0)
+                }
+                
                 # This caused trouble when converting character to POSIXct:
                 #data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfSecond(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
@@ -768,50 +786,26 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             else {
                 data_equal[[name]][[subname]] <- all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
-            
-            if(!isTRUE(data_equal[[name]][[subname]])) {
-                
-                # browser()
-                #print(name)
-                #print(subname)
-                #print(head(dat_orig[[name]][[subname]]))
-                #print(tail(dat_orig[[name]][[subname]]))
-                #print(head(dat[[name]][[subname]]))
-                #print(tail(dat[[name]][[subname]]))
-                #print("___________________________")
-            
-            
-                #warning("888888888888888888888888888888888888")
-                #warning(paste(c(unlist(dat_orig[[name]][[subname]])), collapse = "; "))
-                #warning("999999999999999999999999999999999999")
-                #warning(paste(c(unlist(dat[[name]][[subname]])), collapse = "; "))
-                #warning("777777777777777777777777777777777")
-                
-                #atDiff <- which(dat_orig[[name]][[subname]] != dat[[name]][[subname]], arr.ind = TRUE)
-                #warning(paste(c(atDiff), collapse = "; "))
-                #warning("6666666666666")
-            #
-                #warning(paste(c(dat[[name]][[subname]][atDiff]), collapse = "; "))
-                #warning("555555555555555")
-                #warning(paste(c(dat_orig[[name]][[subname]][atDiff]), collapse = "; "))
-                #warning("44444444444444444")
-                
-            }
         }
     }
     
-    # Compare reports, but only numericc values:
+    #browser()
+    
+    # Compare reports, but only numeric values:
     reports <- startsWith(names(dat_orig), "Report")
     reports_equal <- list()
     
     for(name in names(dat_orig)[reports]) {
         reports_equal[[name]] <- list()
         for(subname in names(dat_orig[[name]])) {
-            reports_equal[[name]][[subname]] <- compareReport(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+            reports_equal[[name]][[subname]] <- compareReport(
+                dat_orig[[name]][[subname]], 
+                dat[[name]][[subname]]
+            )
         }
     }
-    print("reports_equal")
-    print(reports_equal)
+    message("reports_equal")
+    message(reports_equal)
     
     
     allTests <- list(
@@ -847,7 +841,13 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
 }
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOfFirst <- function(x, y) {
+compareDataTablesUsingClassOfFirst <- function(x, y, ignore = NULL, skipNA = FALSE, setNATo0 = FALSE) {
+    if(length(ignore)) {
+        ignore <- intersect(ignore, names(x))
+        x <- x[, (ignore):=NULL]
+        y <- y[, (ignore):=NULL]
+    }
+    
     # Get the classes of the first and second table:
     classes_in_x <- sapply(x, firstClass)
     classes_in_y <- sapply(y, firstClass)
@@ -859,9 +859,29 @@ compareDataTablesUsingClassOfFirst <- function(x, y) {
             data.table::set(x, j = col, value = methods::as(x[[col]], classes_in_y[col]))
         }
     }
+    
+    if(!isFALSE(skipNA)) {
+        if(isTRUE(skipNA)) {
+            skipNA <- 0.5
+        }
+        x <- subset(x, rowMeans(is.na(x)) < skipNA)
+        y <- subset(y, rowMeans(is.na(y)) < skipNA)
+    }
+    
+    if(setNATo0) {
+        #x <- data.table::copy(x)
+        #y <- data.table::copy(y)
+        RstoxBase::replaceNAByReference(x)
+        RstoxBase::replaceNAByReference(y)
+    }
+    
     # Check equality:
     all.equal(x, y, check.attributes = FALSE)
 }
+
+
+
+
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 compareDataTablesUsingClassOfSecond <- function(x, y) {
@@ -880,9 +900,11 @@ compareDataTablesUsingClassOfSecond <- function(x, y) {
 }
 
 compareReport <- function(x, y) {
-    # Set all coclumns of character class to NA:
-    x <- setCharacterColumnsToNA(x)
-    y <- setCharacterColumnsToNA(y)
+    # Set all columns of character class to NA:
+    setCharacterColumnsToNA(x)
+    setCharacterColumnsToNA(y)
+    setLogicalColumnsToNA(x)
+    setLogicalColumnsToNA(y)
     all.equal(x, y, check.attributes = FALSE)
 }
 
@@ -890,8 +912,17 @@ setCharacterColumnsToNA <- function(x) {
     areCharacter <- sapply(x, class) == "character"
     if(any(areCharacter)) {
         characterCols <- names(areCharacter)[areCharacter]
-        x[, (characterCols) := lapply(.SD, function(y) rep(NA, length(y))), .SDcols = characterCols]
+        x[, (characterCols) := lapply(.SD, function(y) rep(NA_real_, length(y))), .SDcols = characterCols]
     }
+    return(x)
+}
+setLogicalColumnsToNA <- function(x) {
+    areLogical <- sapply(x, class) == "logical"
+    if(any(areLogical)) {
+        logicalCols <- names(areLogical)[areLogical]
+        x[, (logicalCols) := lapply(.SD, function(y) rep(NA_real_, length(y))), .SDcols = logicalCols]
+    }
+    return(x)
 }
 
 

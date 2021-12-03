@@ -1,13 +1,10 @@
 # Description of the test projects:
 
-# tobis_20.zip: 
-# This project is an acoustic-trawl project creaetd by reducing an official project for sandeel in 2020 to only contain data in two strata. 50 bootstrap replicates are used. DistributionMethod = "Equal" in SuperIndividuals(). WeightingMethod = "NumberOfLengthSamples" with MaxNumberOfLengthSamples = 100 in BioticAssignmentWeighting().
+# BIAS_19_ICES.zip: 
+# This project is a swept-area project reading ICESBiotic-xml file, where maturity is interpreted and reported on.
 
-# split_18.zip:
-# This project is an acoustic-trawl project where the acoustic data in a mix acoustic category are split using the function SplitMeanNASC().
-
-# haddock_19.zip:
-# This project is a swept-area project with only Baseline, where some hauls in the same stratum have identical TowDistance and number of fish sampled in some length groups, leading to a bug in StoX 3.0.8, where unique() was used in DistributionMethod = "HaulDensity" in SuperIndividuals().
+# catch_99.zip: 
+# This project generates a table with catch weight or number per station in the rows and species in the columns (added info about the hauls in the first columns).
 
 # cod_19.zip: 
 # This project is a swept-area project creaetd by reducing an official project for cod in 2019 to only contain data in two strata. 50 bootstrap rerplicates are used. DistributionMethod = "HaulDenstiy" in SuperIndividuals().
@@ -18,8 +15,17 @@
 # export_ICESbiotic.zip:
 # This project reads an NMDBiotic-xml file (version 3.1) converts to ICESBiotic, modifies the result, and exports ICESBiotic-csv file.
 
-# catch_99.zip: 
-# This project generates a table with catch weight or number per station in the rows and species in the columns (added info about the hauls in the first columns).
+# haddock_19.zip:
+# This project is a swept-area project with only Baseline, where some hauls in the same stratum have identical TowDistance and number of fish sampled in some length groups, leading to a bug in StoX 3.0.8, where unique() was used in DistributionMethod = "HaulDensity" in SuperIndividuals().
 
-# BIAS_19_ICES.zip: 
-# This project is a swept-area project reading ICESBiotic-xml file, where maturity is interpreted and reported on.
+# Haddock2021_StoX_3.1.0.zip
+# This project is a minimum version of the offiical acoustic-trawl project for haddock in the Barents sea winter 2021, run in StoX 3.1.0. The project is intended to secure reproducibility to StoX 3.1.0 in terms of seed in imputation, which in StoX <= 3.2.0 is dependent on the order of the SuperIndividualsData, whihc due to an error is sorted as string instead of 'numeric when possble'.
+
+# splitNASC_18.zip:
+# This project is an acoustic-trawl project where the acoustic data in a mix acoustic category are split using the function SplitMeanNASC().
+
+# tobis_20.zip: 
+# This project is an acoustic-trawl project creaetd by reducing an official project for sandeel in 2020 to only contain data in two strata. 50 bootstrap replicates are used. DistributionMethod = "Equal" in SuperIndividuals(). WeightingMethod = "NumberOfLengthSamples" with MaxNumberOfLengthSamples = 100 in BioticAssignmentWeighting().
+
+# tobis_20_depth.zip
+# Same as tobis_20.zip but with depth dependent acoustic target strength.

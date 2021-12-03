@@ -321,13 +321,14 @@ createNestedListElement <- function(x, namesVector) {
 #' @inheritParams runProject
 #' @param verifyFiles Logical: If TRUE verify that the files are from processes that exist in the project.
 #' @param unlist Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.
+#' @param emptyStringAsNA Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.
 #' 
 #' @return
 #' A list of model output.
 #' 
 #' @export
 #'  
-readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist = FALSE) {
+readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist = FALSE, emptyStringAsNA = FALSE) {
     # List the files of the project:
     if(isProject(projectPath)) {
         outputFolders <- getProjectPaths(projectPath)$outputFolders
@@ -373,7 +374,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         
         # Read the files using the apropriate function:
         #output <- lapply(outputFiles, function(x) lapply(x, readStoxOutputFile))
-        output <- rapply(outputFiles, readStoxOutputFiles, how = "replace")
+        output <- rapply(outputFiles, readStoxOutputFiles, emptyStringAsNA = emptyStringAsNA, how = "replace")
         
         # Drop the list over models:
         if(isTRUE(unlist)) {
@@ -399,8 +400,8 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
 }
 
 
-readStoxOutputFiles <- function(paths) {
-    output <- structure(lapply(paths, readStoxOutputFile), names = basename(tools::file_path_sans_ext(paths)))
+readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE) {
+    output <- structure(lapply(paths, readStoxOutputFile, emptyStringAsNA = emptyStringAsNA), names = basename(tools::file_path_sans_ext(paths)))
     # Unlist the top level of an RData file, as an RData file is a joint file of several outputs, and we do not want the extra BootstrapData level on top of this list:
     areRDataFiles <- tolower(tools::file_ext(paths)) == "rdata"
     # isTRUE is TRUE only for one TRUE:
@@ -411,7 +412,7 @@ readStoxOutputFiles <- function(paths) {
 }
 
 
-readStoxOutputFile <- function(path) {
+readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
     # This function only read one file:
     if(length(path) != 1) {
         stop("Exactly one file required")
@@ -448,6 +449,11 @@ readStoxOutputFile <- function(path) {
     }
     else if(tolower(ext) == "nc") {
         stop("NetCDF4 file not yet implemented.")
+    }
+    
+    if(emptyStringAsNA  && data.table::is.data.table(output)) {
+        characterColumns <- names(output)[sapply(output, firstClass) == "character"]
+        output[, (characterColumns) := lapply(.SD, function(x) replace(x, nchar(x) == 0, NA_character_)), .SDcols = characterColumns]
     }
     
     return(output)

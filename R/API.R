@@ -453,7 +453,9 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
     
     if(emptyStringAsNA  && data.table::is.data.table(output)) {
         characterColumns <- names(output)[sapply(output, firstClass) == "character"]
-        output[, (characterColumns) := lapply(.SD, function(x) replace(x, nchar(x) == 0, NA_character_)), .SDcols = characterColumns]
+        if(length(characterColumns)) {
+            output[, (characterColumns) := lapply(.SD, function(x) replace(x, nchar(x) == 0, NA_character_)), .SDcols = characterColumns]
+        }
     }
     
     return(output)

@@ -11,7 +11,8 @@ compareProjectToStoredOutputFiles(
   intersect.names = TRUE,
   ignore = NULL,
   skipNA = FALSE,
-  setNATo0 = FALSE
+  setNATo0 = FALSE,
+  classOf = c("first", "second")
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ compareProjectToStoredOutputFiles(
 \item{skipNA}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
 
 \item{setNATo0}{Logical: If TRUE, set all NAs to 0.}
+
+\item{classOf}{Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.}
 }
 \description{
 Function for comparing existing output files with the memory read using runProject()

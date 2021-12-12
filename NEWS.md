@@ -1,11 +1,11 @@
 # RstoxFramework v3.1.18 (2021-12-03)
 * Added option of reading empty strings as NA in readModelData() to support output files from StoX <= 3.1.0. 
 * Added support for hybrid StoX 2.7 and >= 3 projects, using the same project folder. 
-* Fixed bug where only BioticAssignmentWeighting was available for selection in BootstrapMethodTable in Bootstrap() in the GUI, whereas only DefineBioticAssignment is corrrect. U
-* pdated test projects to match changes in RstoxBase.
+* Fixed bug where only BioticAssignmentWeighting was available for selection in BootstrapMethodTable in Bootstrap() in the GUI, whereas only DefineBioticAssignment is correct. U
+* Updated test projects to match changes in RstoxBase.
 
 # RstoxFramework v3.1.17 (2021-11-22)
-* Added therequirement jsonvalidate >= 1.3.2, as per changes in JSON definition.
+* Added the requirement jsonvalidate >= 1.3.2, as per changes in JSON definition.
 * Modified test projects BIAS_19_ICES, cod_19, export_ICESbiotic, haddock_19, tobis_20 and tobis_20_depth for StoX 3.2.0 (ensuring reproducibility to StoX 3.1.0)
 * Added test for SplitNASC versus StoX 2.7s.
 
@@ -21,7 +21,7 @@
 * In readProjectDescription(), StratumNameLabel is now set to "StratumName", in case the stratum polygon was added from shapefile or GeoJSON in StoX < 3.2.0.
 
 # RstoxFramework v3.1.11 (2021-10-15)
-* Added support for mixed level function outputs, whereas only a list of tables or a list of lists of tables were preivously allowed. This fixed bug when a two table output process was included as output from Bootstrap.
+* Added support for mixed level function outputs, whereas only a list of tables or a list of lists of tables were previously allowed. This fixed bug when a two table output process was included as output from Bootstrap.
 * Added support for two table output processes in Bootstrap, where only the table "Data" is used.
 
 # RstoxFramework v3.1.10 (2021-10-05)
@@ -30,8 +30,8 @@
 # RstoxFramework v3.1.9 (2021-09-28)
 * Changed output text files (located in the output folder) from un-quoted files for all values (numeric, character, time, logical) to files where all character class values are quoted with ". Also missing values are represented by empty space in the preivous version and NA (un-quoted) in the new version. This ensures equality in class when reading the files back in using RstoxFramework::readModelData(). 
 * Modified Versions.R to support installing from source when on Linux. Also, fixed bug where Rstox packages were not sorted hierarchically when installing with installOfficialRstoxPackagesWithDependencies().
-* Fixed bug where emptying a field in the filter expression bulder caused syntax error. 
-* Fixed bug where acoustic PSUs could be added even if the procecss using DefineAcousticPSU was not active.
+* Fixed bug where emptying a field in the filter expression builder caused syntax error. 
+* Fixed bug where acoustic PSUs could be added even if the process using DefineAcousticPSU was not active.
 * Changed warning to error when processes listed in OutputProcesses in Bootstrap(). 
 * Added warning when UseOutputData or RemoveMissingValues is TRUE. 
 * Added runProject_ReplaceAcousticFiles(). 

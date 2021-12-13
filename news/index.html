@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.18</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.19</span>
       </span>
     </div>
 
@@ -51,12 +51,12 @@
 <h2 class="page-header" data-toc-text="3.1.18" id="rstoxframework-v3118-2021-12-03">RstoxFramework v3.1.18 (2021-12-03)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3118-2021-12-03"></a></h2>
 <ul><li>Added option of reading empty strings as NA in readModelData() to support output files from StoX &lt;= 3.1.0.</li>
 <li>Added support for hybrid StoX 2.7 and &gt;= 3 projects, using the same project folder.</li>
-<li>Fixed bug where only BioticAssignmentWeighting was available for selection in BootstrapMethodTable in Bootstrap() in the GUI, whereas only DefineBioticAssignment is corrrect. U</li>
-<li>pdated test projects to match changes in RstoxBase.</li>
+<li>Fixed bug where only BioticAssignmentWeighting was available for selection in BootstrapMethodTable in Bootstrap() in the GUI, whereas only DefineBioticAssignment is correct. U</li>
+<li>Updated test projects to match changes in RstoxBase.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.17" id="rstoxframework-v3117-2021-11-22">RstoxFramework v3.1.17 (2021-11-22)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3117-2021-11-22"></a></h2>
-<ul><li>Added therequirement jsonvalidate &gt;= 1.3.2, as per changes in JSON definition.</li>
+<ul><li>Added the requirement jsonvalidate &gt;= 1.3.2, as per changes in JSON definition.</li>
 <li>Modified test projects BIAS_19_ICES, cod_19, export_ICESbiotic, haddock_19, tobis_20 and tobis_20_depth for StoX 3.2.0 (ensuring reproducibility to StoX 3.1.0)</li>
 <li>Added test for SplitNASC versus StoX 2.7s.</li>
 </ul></div>
@@ -76,7 +76,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.11" id="rstoxframework-v3111-2021-10-15">RstoxFramework v3.1.11 (2021-10-15)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3111-2021-10-15"></a></h2>
-<ul><li>Added support for mixed level function outputs, whereas only a list of tables or a list of lists of tables were preivously allowed. This fixed bug when a two table output process was included as output from Bootstrap.</li>
+<ul><li>Added support for mixed level function outputs, whereas only a list of tables or a list of lists of tables were previously allowed. This fixed bug when a two table output process was included as output from Bootstrap.</li>
 <li>Added support for two table output processes in Bootstrap, where only the table “Data” is used.</li>
 </ul></div>
     <div class="section level2">
@@ -87,8 +87,8 @@
 <h2 class="page-header" data-toc-text="3.1.9" id="rstoxframework-v319-2021-09-28">RstoxFramework v3.1.9 (2021-09-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v319-2021-09-28"></a></h2>
 <ul><li>Changed output text files (located in the output folder) from un-quoted files for all values (numeric, character, time, logical) to files where all character class values are quoted with ". Also missing values are represented by empty space in the preivous version and NA (un-quoted) in the new version. This ensures equality in class when reading the files back in using RstoxFramework::readModelData().</li>
 <li>Modified Versions.R to support installing from source when on Linux. Also, fixed bug where Rstox packages were not sorted hierarchically when installing with installOfficialRstoxPackagesWithDependencies().</li>
-<li>Fixed bug where emptying a field in the filter expression bulder caused syntax error.</li>
-<li>Fixed bug where acoustic PSUs could be added even if the procecss using DefineAcousticPSU was not active.</li>
+<li>Fixed bug where emptying a field in the filter expression builder caused syntax error.</li>
+<li>Fixed bug where acoustic PSUs could be added even if the process using DefineAcousticPSU was not active.</li>
 <li>Changed warning to error when processes listed in OutputProcesses in Bootstrap().</li>
 <li>Added warning when UseOutputData or RemoveMissingValues is TRUE.</li>
 <li>Added runProject_ReplaceAcousticFiles().</li>
@@ -175,7 +175,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.0.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>

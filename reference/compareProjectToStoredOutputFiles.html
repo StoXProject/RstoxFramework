@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.18</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.19</span>
       </span>
     </div>
 
@@ -60,7 +60,8 @@
   intersect.names <span class="op">=</span> <span class="cn">TRUE</span>,
   ignore <span class="op">=</span> <span class="cn">NULL</span>,
   skipNA <span class="op">=</span> <span class="cn">FALSE</span>,
-  setNATo0 <span class="op">=</span> <span class="cn">FALSE</span>
+  setNATo0 <span class="op">=</span> <span class="cn">FALSE</span>,
+  classOf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"second"</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -80,6 +81,8 @@
 <dd><p>Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.</p></dd>
 <dt>setNATo0</dt>
 <dd><p>Logical: If TRUE, set all NAs to 0.</p></dd>
+<dt>classOf</dt>
+<dd><p>Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.</p></dd>
 </dl></div>
 
   </div>
@@ -94,7 +97,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.0.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>

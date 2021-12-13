@@ -3996,11 +3996,23 @@ simplifyListReadFromJSON <- function(x) {
 convertStringToNA <- function(x) {
     chcols = names(x)[sapply(x, is.character)]
     #x[, (chcols) := lapply(.SD, replace, as.is=TRUE), .SDcols=chcols] # Changed to numeric when not intended
-    x[,(chcols) := lapply(.SD, function(x) ifelse(x == "NA", NA, x)), .SDcols = chcols]
+    x[, (chcols) := lapply(.SD, function(x) ifelse(x == "NA", NA, x)), .SDcols = chcols]
 }
 
 
+escapeTabAndNewline <- function(x) {
+    chcols = names(x)[sapply(x, is.character)]
+    #x[, (chcols) := lapply(.SD, replace, as.is=TRUE), .SDcols=chcols] # Changed to numeric when not intended
+    x[, (chcols) := lapply(.SD, esacpeNewLine), .SDcols = chcols]
+    x[, (chcols) := lapply(.SD, esacpeTab), .SDcols = chcols]
+}
 
+esacpeNewLine <- function(x) {
+    gsub("\n", "\\n", x, fixed = TRUE)
+}
+esacpeTab <- function(x) {
+    gsub("\t", "\\t", x, fixed = TRUE)
+}
 
 #parseParameter <- function(parameter, simplifyVector = TRUE) {
 #    # If the parameter is JSON, convert to list:
@@ -4591,7 +4603,8 @@ runProcess <- function(
         # Write to text files:
         # Use fileOutput if given and process$processParameters$fileOutput otherwise to determine whether to write the output to the output.file.type:
         if(fileOutput) {
-            writeProcessOutputTextFile(processOutput = processOutput, projectPath = projectPath, modelName = modelName, processID = process$processID, output.file.type = "default")
+            # Escape strings when writing to text files:
+            writeProcessOutputTextFile(processOutput = processOutput, projectPath = projectPath, modelName = modelName, processID = process$processID, output.file.type = "default", escape = TRUE)
         }
         
         # Add info of the time spent:
@@ -5366,7 +5379,7 @@ getProcessOutputTextFilePath <- function(
     
     
 # Function to write process output to a text file in the output folder:
-writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, processID, output.file.type = c("default", "text", "RData", "rds")) {
+writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, processID, output.file.type = c("default", "text", "RData", "rds"), escape = TRUE) {
     
     # Get the process name
     processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
@@ -5416,7 +5429,8 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             mapply(
                 reportFunctionOutputOne, 
                 processOutput = processOutput, 
-                filePath = filePath
+                filePath = filePath, 
+                escape = escape
             )
         }
     }
@@ -5434,7 +5448,7 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
 
 
 # Function for writing one element of the function output list:
-reportFunctionOutputOne <- function(processOutputOne, filePath) {
+reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
     
     if("SpatialPolygonsDataFrame" %in% class(processOutputOne)) {
         
@@ -5462,6 +5476,9 @@ reportFunctionOutputOne <- function(processOutputOne, filePath) {
         }
         else {
             # Changed on 2021-09-13 to quote strings, so as to avoid data.table::fread() from conerting numeric strings to numeric class:
+            if(escape) {
+                escapeTabAndNewline(processOutputOne)
+            }
             data.table::fwrite(processOutputOne, filePath, sep = "\t", na = "NA", quote = TRUE, qmethod = "double")
         }
     }

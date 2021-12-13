@@ -565,6 +565,9 @@ resampleOne <- function(subData, seed, varToResample, varToScale) {
 #' @export
 #' 
 ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed) {
+    
+    # This function will be renamed to ResampleBioticPSUsInStratum
+    
     # Resample PSUs within Strata, modifying the weighting variable of MeanLengthDistributionData:
     MeanLengthDistributionData$Data <- resampleDataBy(
         data = MeanLengthDistributionData$Data, 
@@ -612,6 +615,9 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
 #' @export
 #' 
 ResampleBioticAssignment <- function(BioticAssignment, Seed) {
+    
+    # This function will be renamed to ResampleAssignedHaulsInStratum
+    
     # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
     BioticAssignment <- resampleDataBy(
         #data = BioticAssignment$BioticAssignment, 
@@ -636,6 +642,9 @@ ResampleBioticAssignment <- function(BioticAssignment, Seed) {
 #' @export
 #' 
 ResampleMeanNASCData <- function(MeanNASCData, Seed) {
+    
+    # This function will be renamed to ResampleAcousticPSUsInStratum
+    
     # Resample PSUs within Strata, modifying the weighting variable of MeanLengthDistributionData:
     MeanNASCData$Data <- resampleDataBy(
         data = MeanNASCData$Data, 
@@ -648,6 +657,15 @@ ResampleMeanNASCData <- function(MeanNASCData, Seed) {
     
     return(MeanNASCData)
 }
+
+
+
+#ResampleIndividualAge <- function(SuperIndividualsData, AgeErrorMatrix, Seed) {
+#
+#    
+#
+#    return(SuperIndividualsData)
+#}
 
 
 

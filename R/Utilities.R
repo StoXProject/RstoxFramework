@@ -712,10 +712,11 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param ignore A vector of names of columns to ignore in all.equal().
 #' @param skipNA Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
 #' @param setNATo0 Logical: If TRUE, set all NAs to 0.
+#' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNA = FALSE, setNATo0 = FALSE) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNA = FALSE, setNATo0 = FALSE, classOf = c("first", "second")) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -736,8 +737,6 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
     dat_orig <- readModelData(projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA)
-    
-    #browser()
     
     # Compare only those elemens common to the two datasets:
     processNames_present <- all(names(dat_orig) %in% names(dat))
@@ -765,16 +764,17 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
                 if(intersect.names) {
                     intersectingNames <- intersect(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
-                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfFirst(
+                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOf(
                         dat_orig[[name]][[subname]][, intersectingNames, with = FALSE], 
                         dat[[name]][[subname]][, intersectingNames, with = FALSE], 
                         ignore = ignore, 
                         skipNA = skipNA, 
-                        setNATo0 = setNATo0
+                        setNATo0 = setNATo0, 
+                        classOf = classOf
                     )
                 }
                 else {
-                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfFirst(dat_orig[[name]][[subname]], dat[[name]][[subname]], ignore = ignore, skipNA = skipNA, setNATo0 = setNATo0)
+                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOf(dat_orig[[name]][[subname]], dat[[name]][[subname]], ignore = ignore, skipNA = skipNA, setNATo0 = setNATo0, classOf = classOf)
                 }
                 
                 # This caused trouble when converting character to POSIXct:
@@ -841,11 +841,16 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
 }
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOfFirst <- function(x, y, ignore = NULL, skipNA = FALSE, setNATo0 = FALSE) {
+compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNA = FALSE, setNATo0 = FALSE) {
+    
+    classOf <- match.arg(classOf)
+    
     if(length(ignore)) {
         ignore <- intersect(ignore, names(x))
-        x <- x[, (ignore):=NULL]
-        y <- y[, (ignore):=NULL]
+        if(length(ignore)) {
+            x <- x[, (ignore):=NULL]
+            y <- y[, (ignore):=NULL]
+        }
     }
     
     # Get the classes of the first and second table:
@@ -853,10 +858,20 @@ compareDataTablesUsingClassOfFirst <- function(x, y, ignore = NULL, skipNA = FAL
     classes_in_y <- sapply(y, firstClass)
     
     if(!identical(classes_in_x, classes_in_y)) {
-        # Coerce to the class in the memory:
-        differ <- names(x)[classes_in_x != classes_in_y]
-        for(col in differ){
-            data.table::set(x, j = col, value = methods::as(x[[col]], classes_in_y[col]))
+        
+        if(classOf == "first") {
+            # Coerce to the class in the memory:
+            differ <- names(x)[classes_in_x != classes_in_y]
+            for(col in differ){
+                data.table::set(x, j = col, value = methods::as(x[[col]], classes_in_y[col]))
+            }
+        }
+        else if(classOf == "second") {
+            # Coerce to the class in the memory:
+            differ <- names(y)[classes_in_x != classes_in_y]
+            for(col in differ){
+                data.table::set(y, j = col, value = methods::as(y[[col]], classes_in_x[col]))
+            }
         }
     }
     

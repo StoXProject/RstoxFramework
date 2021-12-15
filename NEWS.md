@@ -1,3 +1,6 @@
+# RstoxFramework v3.1.19 (2021-12-13)
+* Added escaping newline and tab when writing output tables to txt, in order to read back in. Fixed bug in readStoxOutputFile() when no character columns are present.
+
 # RstoxFramework v3.1.18 (2021-12-03)
 * Added option of reading empty strings as NA in readModelData() to support output files from StoX <= 3.1.0. 
 * Added support for hybrid StoX 2.7 and >= 3 projects, using the same project folder. 

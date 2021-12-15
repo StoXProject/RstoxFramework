@@ -499,10 +499,13 @@ resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     
     # Get the unique resampleBy, and sort in C-locale for consistensy across platforms:
     #uniqueResampleBy <- unique(data[[resampleBy]])
-    uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "C")
+    #uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "C")
+    
+    # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
+    uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
     
     
-    # Build a table of Stratum and Seed and merge with the MeanLengthDistributionData:
+    # Build a table of (usually) Stratum and Seed and merge with the MeanLengthDistributionData:
     seedTable <- data.table::data.table(
         resampleBy = uniqueResampleBy, 
         seed = RstoxBase::getSeedVector(seed, size = length(uniqueResampleBy))

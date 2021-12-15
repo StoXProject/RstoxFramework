@@ -1219,7 +1219,7 @@ addProjectDescriptionAttributes <- function(projectDescription) {
 
 # Function to get the package version of several packages as strings:
 getPackageVersion <- function(packageNames, only.version = FALSE, sep = "_") {
-    # Cchanged from using utils::packageVersion, which returns a numeric sequence which when converted to character separates with dots only, ignoring any hyphens in the original package version, to getNamespaceVersion(), which gives us exactly what we need:
+    # Changed from using utils::packageVersion, which returns a numeric sequence which when converted to character separates with dots only, ignoring any hyphens in the original package version, to getNamespaceVersion(), which gives us exactly what we need:
     #version <- sapply(packageNames, function(x) as.character(utils::packageVersion(x)))
     version <- sapply(packageNames, getNamespaceVersion)
     

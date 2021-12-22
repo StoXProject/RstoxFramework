@@ -33,7 +33,7 @@ expect_true(mab[, all(abs(Abundance.x - Abundance.y) < tolerance, na.rm =  TRUE)
 
 # Compare super-individuals:
 # Order both results and cbind, as we do not have corresponding keys to merge by (samplenumber (catchpartnumber in NMDBiotic 3) used in StoX 2.7 and catchsampleid used in StoX 3):
-si_new <- subset(si_new, !is.na(SpeciesCategory) & !is.na(Layer))
+si_new <- subset(si_new, !is.na(SpeciesCategory) & !is.na(Layer) & !is.na(Stratum))
 data.table::setorderv(si_new, c("Stratum", "IndividualTotalLength", "HaulKey", "SpeciesCategory", "SampleKey", "IndividualKey"))
 data.table::setorderv(si_old, c("Stratum", "LenGrp", "serialno", "species", "samplenumber", "no"))
 
@@ -78,7 +78,7 @@ expect_true(mab[, all(abs(Abundance.x - Abundance.y) < tolerance, na.rm =  TRUE)
 
 # Compare super-individuals:
 # Order both results and cbind, as we do not have corresponding keys to merge by (samplenumber (catchpartnumber in NMDBiotic 3) used in StoX 2.7 and catchsampleid used in StoX 3):
-si_new <- subset(si_new, !is.na(SpeciesCategory) & !is.na(Layer))
+si_new <- subset(si_new, !is.na(SpeciesCategory) & !is.na(Layer) & !is.na(Stratum))
 data.table::setorderv(si_new, c("Stratum", "IndividualTotalLength", "HaulKey", "SpeciesCategory", "SampleKey", "IndividualKey"))
 data.table::setorderv(si_old, c("Stratum", "LenGrp", "serialno", "species", "samplenumber", "no"))
 

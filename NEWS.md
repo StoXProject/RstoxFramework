@@ -1,3 +1,6 @@
+# RstoxFramework v3.1.21 (2021-12-22)
+* Added coastal cod test project with empty PSUs, stratum names ordered as "Loppa" before "indre", and NA in Beam for certain acoustic PSUs.
+
 # RstoxFramework v3.1.19 (2021-12-13)
 * Added escaping newline and tab when writing output tables to txt, in order to read back in. Fixed bug in readStoxOutputFile() when no character columns are present.
 

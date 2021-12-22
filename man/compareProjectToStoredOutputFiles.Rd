@@ -10,9 +10,11 @@ compareProjectToStoredOutputFiles(
   emptyStringAsNA = FALSE,
   intersect.names = TRUE,
   ignore = NULL,
-  skipNA = FALSE,
+  skipNAFraction = FALSE,
+  skipNAAt = FALSE,
   setNATo0 = FALSE,
-  classOf = c("first", "second")
+  classOf = c("first", "second"),
+  try = TRUE
 )
 }
 \arguments{
@@ -26,11 +28,15 @@ compareProjectToStoredOutputFiles(
 
 \item{ignore}{A vector of names of columns to ignore in all.equal().}
 
-\item{skipNA}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
+\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
+
+\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip.}
 
 \item{setNATo0}{Logical: If TRUE, set all NAs to 0.}
 
 \item{classOf}{Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.}
+
+\item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 }
 \description{
 Function for comparing existing output files with the memory read using runProject()

@@ -18,9 +18,6 @@
 # haddock_19.zip:
 # This project is a swept-area project with only Baseline, where some hauls in the same stratum have identical TowDistance and number of fish sampled in some length groups, leading to a bug in StoX 3.0.8, where unique() was used in DistributionMethod = "HaulDensity" in SuperIndividuals().
 
-# Haddock2021_StoX_3.1.0.zip
-# This project is a minimum version of the offiical acoustic-trawl project for haddock in the Barents sea winter 2021, run in StoX 3.1.0. The project is intended to secure reproducibility to StoX 3.1.0 in terms of seed in imputation, which in StoX <= 3.2.0 is dependent on the order of the SuperIndividualsData, whihc due to an error is sorted as string instead of 'numeric when possble'.
-
 # splitNASC_18.zip:
 # This project is an acoustic-trawl project where the acoustic data in a mix acoustic category are split using the function SplitMeanNASC().
 

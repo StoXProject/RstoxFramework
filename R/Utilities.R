@@ -706,17 +706,19 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' Function for comparing existing output files with the memory read using runProject()
 #' 
 #' @inheritParams readModelData
+#' @inheritParams runProcesses
 #' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @param intersect.names Logical: If TRUE, compare only same named columns.
 #' @param ignore A vector of names of columns to ignore in all.equal().
-#' @param skipNA Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
+#' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
+#' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip.
 #' @param setNATo0 Logical: If TRUE, set all NAs to 0.
 #' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNA = FALSE, setNATo0 = FALSE, classOf = c("first", "second")) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, setNATo0 = FALSE, classOf = c("first", "second"), try = TRUE) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -732,7 +734,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     message(projectPath_copy)
     openProject(projectPath_copy)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, try = try)
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
@@ -768,13 +770,14 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                         dat_orig[[name]][[subname]][, intersectingNames, with = FALSE], 
                         dat[[name]][[subname]][, intersectingNames, with = FALSE], 
                         ignore = ignore, 
-                        skipNA = skipNA, 
+                        skipNAFraction = skipNAFraction, 
+                        skipNAAt = skipNAAt, 
                         setNATo0 = setNATo0, 
                         classOf = classOf
                     )
                 }
                 else {
-                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOf(dat_orig[[name]][[subname]], dat[[name]][[subname]], ignore = ignore, skipNA = skipNA, setNATo0 = setNATo0, classOf = classOf)
+                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOf(dat_orig[[name]][[subname]], dat[[name]][[subname]], ignore = ignore, skipNAFraction = skipNAFraction, skipNAAt = skipNAAt, setNATo0 = setNATo0, classOf = classOf)
                 }
                 
                 # This caused trouble when converting character to POSIXct:
@@ -841,7 +844,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
 }
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNA = FALSE, setNATo0 = FALSE) {
+compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, setNATo0 = FALSE) {
     
     classOf <- match.arg(classOf)
     
@@ -875,12 +878,16 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
         }
     }
     
-    if(!isFALSE(skipNA)) {
-        if(isTRUE(skipNA)) {
-            skipNA <- 0.5
+    if(!isFALSE(skipNAFraction)) {
+        if(isTRUE(skipNAFraction)) {
+            skipNAFraction <- 0.5
         }
-        x <- subset(x, rowMeans(is.na(x)) < skipNA)
-        y <- subset(y, rowMeans(is.na(y)) < skipNA)
+        x <- subset(x, rowMeans(is.na(x)) < skipNAFraction)
+        y <- subset(y, rowMeans(is.na(y)) < skipNAFraction)
+    }
+    if(length(skipNAAt)) {
+        x <- skipRowsAtNA(x, skipNAAt)
+        y <- skipRowsAtNA(y, skipNAAt)
     }
     
     if(setNATo0) {
@@ -894,7 +901,15 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     all.equal(x, y, check.attributes = FALSE)
 }
 
-
+skipRowsAtNA <- function(x, skipNAAt) {
+    skipNAAt <- intersect(skipNAAt, names(x))
+    if(length(skipNAAt)) {
+        toKeep <- rowSums(is.na(x[, ..skipNAAt])) == 0
+        x <- subset(x, toKeep)
+    }
+    
+    return(x)
+}
 
 
 

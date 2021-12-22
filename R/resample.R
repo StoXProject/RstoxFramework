@@ -234,6 +234,9 @@ Bootstrap <- function(
     unlink(NumberOfBootstrapsFile, force = TRUE, recursive = TRUE)
     unlink(bootstrapProgressFile, force = TRUE, recursive = TRUE)
     unlink(projectPath_copies, force = TRUE, recursive = TRUE)
+    if(file.exists(stopBootstrapFile)) {
+        unlink(stopBootstrapFile, force = TRUE, recursive = TRUE)
+    }
     
     return(BootstrapData)
 }
@@ -503,7 +506,6 @@ resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     
     # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
-    
     
     # Build a table of (usually) Stratum and Seed and merge with the MeanLengthDistributionData:
     seedTable <- data.table::data.table(

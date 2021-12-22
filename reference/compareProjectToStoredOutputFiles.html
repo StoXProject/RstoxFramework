@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.20</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.1.21</span>
       </span>
     </div>
 
@@ -59,9 +59,11 @@
   emptyStringAsNA <span class="op">=</span> <span class="cn">FALSE</span>,
   intersect.names <span class="op">=</span> <span class="cn">TRUE</span>,
   ignore <span class="op">=</span> <span class="cn">NULL</span>,
-  skipNA <span class="op">=</span> <span class="cn">FALSE</span>,
+  skipNAFraction <span class="op">=</span> <span class="cn">FALSE</span>,
+  skipNAAt <span class="op">=</span> <span class="cn">FALSE</span>,
   setNATo0 <span class="op">=</span> <span class="cn">FALSE</span>,
-  classOf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"second"</span><span class="op">)</span>
+  classOf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"second"</span><span class="op">)</span>,
+  try <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -77,12 +79,16 @@
 <dd><p>Logical: If TRUE, compare only same named columns.</p></dd>
 <dt>ignore</dt>
 <dd><p>A vector of names of columns to ignore in all.equal().</p></dd>
-<dt>skipNA</dt>
+<dt>skipNAFraction</dt>
 <dd><p>Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.</p></dd>
+<dt>skipNAAt</dt>
+<dd><p>A vector of strings naming the columns in which NA values identifies rows to skip.</p></dd>
 <dt>setNATo0</dt>
 <dd><p>Logical: If TRUE, set all NAs to 0.</p></dd>
 <dt>classOf</dt>
 <dd><p>Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.</p></dd>
+<dt>try</dt>
+<dd><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></dd>
 </dl></div>
 
   </div>

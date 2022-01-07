@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.2.1</span>
       </span>
     </div>
 
@@ -67,7 +67,6 @@
   showWarnings <span class="op">=</span> <span class="cn">FALSE</span>,
   force <span class="op">=</span> <span class="cn">FALSE</span>,
   reset <span class="op">=</span> <span class="cn">FALSE</span>,
-  type <span class="op">=</span> <span class="fu"><a href="getRstoxFrameworkDefinitions.html">getRstoxFrameworkDefinitions</a></span><span class="op">(</span><span class="st">"projectDescriptionFileFormats"</span><span class="op">)</span>,
   saveIfAlreadyOpen <span class="op">=</span> <span class="cn">FALSE</span>,
   verbose <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span>
@@ -81,7 +80,6 @@
 
 <span class="fu">saveProject</span><span class="op">(</span>
   <span class="va">projectPath</span>,
-  type <span class="op">=</span> <span class="fu"><a href="getRstoxFrameworkDefinitions.html">getRstoxFrameworkDefinitions</a></span><span class="op">(</span><span class="st">"projectDescriptionFileFormats"</span><span class="op">)</span>,
   force <span class="op">=</span> <span class="cn">FALSE</span>,
   Application <span class="op">=</span> <span class="va">R.version.string</span>,
   msg <span class="op">=</span> <span class="cn">TRUE</span>
@@ -117,8 +115,6 @@
 <dd><p>Logical: If TRUE reopen (close and then open) the project if already open.</p></dd>
 <dt>reset</dt>
 <dd><p>Logical: If TRUE reset each model to the start of the model.</p></dd>
-<dt>type</dt>
-<dd><p>The type of file to save the project to.</p></dd>
 <dt>saveIfAlreadyOpen</dt>
 <dd><p>Logical: If TRUE save the project before closing if already open and force is TRUE.</p></dd>
 <dt>verbose</dt>

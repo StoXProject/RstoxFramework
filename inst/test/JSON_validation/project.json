@@ -106,9 +106,9 @@
                     },
                     "functionParameters": {
                         "UseProcessData": true,
-                        "DefinitionMethod": "TargetStrengthTable",
-                        "TargetStrengthMethod": "LengthDependent",
-                        "TargetStrengthTable": [
+                        "DefinitionMethod": "Table",
+                        "AcousticTargetStrengthModel": "LengthDependent",
+                        "AcousticTargetStrengthTable": [
                             {
                                 "AcousticCategory": "27",
                                 "Frequency": 38000,
@@ -126,12 +126,12 @@
                         "fileOutput": true
                     },
                     "processData": {
-                        "TargetStrengthMethod": [
+                        "AcousticTargetStrengthModel": [
                             {
-                                "TargetStrengthMethod": "LengthDependent"
+                                "AcousticTargetStrengthModel": "LengthDependent"
                             }
                         ],
-                        "TargetStrengthTable": [
+                        "AcousticTargetStrengthTable": [
                             {
                                 "AcousticCategory": "27",
                                 "Frequency": 38000,

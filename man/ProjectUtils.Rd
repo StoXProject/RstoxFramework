@@ -21,7 +21,6 @@ isOpenProject(projectPath)
 
 readProjectDescription(
   projectPath,
-  type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"),
   verbose = FALSE,
   projectDescriptionFile = NULL,
   applyBackwardCompatibility = TRUE,
@@ -30,9 +29,9 @@ readProjectDescription(
 
 writeProjectDescription(
   projectPath,
-  type = c("JSON", "RData"),
-  Application = R.version.string,
   projectDescription = NULL,
+  projectDescriptionFile = NULL,
+  Application = R.version.string,
   verbose = FALSE
 )
 
@@ -47,8 +46,6 @@ setNotRunning(projectPath, modelName)
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{type}{The type of file to read.}
-
 \item{verbose}{Logical: If TRUE extra messages are printed to console.}
 
 \item{projectDescriptionFile}{The path to the file holding the projectDescription.}
@@ -57,9 +54,9 @@ setNotRunning(projectPath, modelName)
 
 \item{formatProcesses}{Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.}
 
-\item{Application}{A single string naming the application used when saving the project. Defaulted to R.version.string.}
-
 \item{projectDescription}{A list holding the project description, as read using \code{\link{readProjectDescription}}.}
+
+\item{Application}{A single string naming the application used when saving the project. Defaulted to R.version.string.}
 
 \item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
 }

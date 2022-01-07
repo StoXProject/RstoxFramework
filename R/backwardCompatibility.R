@@ -308,6 +308,32 @@ applyRenameProcessData <- function(action, projectDescription, packageName, verb
     return(projectDescription)
 }
 
+
+
+applyRenameColumInProcessDataTable <- function(action, projectDescription, packageName, verbose = FALSE) {
+    
+    # Get the indices at functions to apply the action to:
+    atFunctionName <- getIndicesAtFunctionName(
+        projectDescription = projectDescription, 
+        action = action, 
+        packageName = packageName
+    )
+    
+    for(ind in atFunctionName) {
+        
+        # Rename any relevant function parameter: 
+        projectDescription[[action$modelName]][[ind]]$processData <- renameProcessDataTableColumnInOneProcess(
+            projectDescription[[action$modelName]][[ind]]$processData, 
+            action, 
+            verbose = verbose
+        )
+    }
+    
+    return(projectDescription)
+}
+
+
+
 applyAddParameter <- function(action, projectDescription, packageName, verbose = FALSE) {
     # Get the indices at functions to apply the action to:
     atFunctionName <- getIndicesAtFunctionName(
@@ -418,18 +444,67 @@ translateParameterInOneProcess <- function(list, action, verbose = FALSE) {
 
 renameProcessDataInOneProcess <- function(list, action, verbose = FALSE) {
     # Rename if the processData has the old name:
-    if(names(list) == action$processDataName) {
-        if(verbose) {
-            message("Backward compatibility: Renaming process data ", action$processDataName, " to ", action$newProcessDataName, " in function ", action$functionName)
+    for(name in names(list)) {
+        if(name == action$processDataName) {
+            if(verbose) {
+                message("Backward compatibility: Renaming process data ", action$processDataName, " to ", action$newProcessDataName, " in function ", action$functionName)
+            }
+            
+            # Rename the process data:
+            names(list)[names(list) == name] <- action$newProcessDataName
         }
-        
-        # Rename the process data:
-        names(list) <- action$newProcessDataName
     }
     
     return(list)
 }
 
+# Unsuccessful attempt to format the proecss data before backwardscompatibility, which failed since the formatting requires the correct names of functiions etc.:
+#renameProcessDataTableColumnInOneProcess <- function(list, action, verbose = FALSE) {
+#    # Rename if the processData table column has the old name:
+#    for(name in names(list)) {
+#        if(
+#            name == action$processDataName && 
+#            data.table::is.data.table(list[[name]]) && 
+#            action$processDataColumnName %in% names(list[[name]])
+#        ) {
+#            if(verbose) {
+#                message("Backward compatibility: Renaming process data table", action$processDataColumnName, " to ", action$newProcessDataColumnName, " in function ", action$functionName)
+#            }
+#            # Rename using data.table::setnames():
+#            data.table::setnames(
+#                list[[name]], 
+#                old = action$processDataColumnName, 
+#                new = action$newProcessDataColumnName
+#            )
+#        }
+#    }
+#    
+#    return(list)
+#}
+renameProcessDataTableColumnInOneProcess <- function(list, action, verbose = FALSE) {
+    # Rename if the processData table column has the old name:
+    for(name in names(list)) {
+        if(
+            name == action$processDataName && 
+            action$processDataColumnName %in% names(list[[name]][[1]])
+        ) {
+            if(verbose) {
+                message("Backward compatibility: Renaming process data table", action$processDataColumnName, " to ", action$newProcessDataColumnName, " in function ", action$functionName)
+            }
+            # Rename each row:
+            list[[name]] <- lapply(list[[name]], renameByName, old = action$processDataColumnName, new = action$newProcessDataColumnName)
+        }
+    }
+    
+    return(list)
+}
+
+renameByName <- function(x, old, new) {
+    names(x)[names(x) == old] <- new
+    return(x)
+}
+    
+    
 #splitFunctionInOneProcess <- function(list, action, verbose = FALSE) {
 #    # Find the objects to remove:
 #    toRemove <- names(list) == action$parameterName

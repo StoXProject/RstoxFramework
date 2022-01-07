@@ -385,7 +385,6 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param save              Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.
 #' @param saveIfAlreadyOpen Logical: If TRUE save the project before closing if already open and force is TRUE.
 #' @param newProjectPath    The path to the copied StoX project.
-#' @param type              The type of file to save the project to.
 #' @param verbose           Logical: If TRUE, print information to the console, e.g. about backward compatibility.
 #' 
 #' @name Projects
@@ -465,7 +464,6 @@ openProject <- function(
     showWarnings = FALSE, 
     force = FALSE, 
     reset = FALSE, 
-    type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"), 
     saveIfAlreadyOpen = FALSE, 
     verbose = FALSE
 ) {
@@ -518,7 +516,7 @@ openProject <- function(
     
     # Read the project description file:
     #projectDescription <- readProjectDescription(projectPath, type = type)
-    temp <- readProjectDescription(projectPath, type = type, verbose = verbose)
+    temp <- readProjectDescription(projectPath, verbose = verbose)
     projectDescription <- temp$projectDescription
     saved <- temp$saved
     
@@ -575,7 +573,6 @@ closeProject <- function(
         else if(is.character(save)) {
             saveProject(
                 projectPath, 
-                type = save, 
                 Application = Application, 
                 msg = FALSE
             )
@@ -604,7 +601,6 @@ closeProject <- function(
 #' 
 saveProject <- function(
     projectPath, 
-    type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"), 
     force = FALSE, 
     Application = R.version.string, 
     msg = TRUE
@@ -624,10 +620,9 @@ saveProject <- function(
         return(output)
     }
     
-    # Get the current project description and save it to the project.RData file:
+    # Get the current project description and save it to the project.JSON file:
     writeProjectDescription(
-        projectPath, 
-        type = type, 
+        projectPath = projectPath, 
         Application = Application
     )
     # Set the status of the projcet as saved:
@@ -703,7 +698,6 @@ deleteProject <- function(projectPath) {
 #' Utilities for projects.
 #' 
 #' @inheritParams general_arguments
-#' @param type The type of file to read.
 #' @param projectDescription A list holding the project description, as read using \code{\link{readProjectDescription}}.
 #' @param projectDescriptionFile The path to the file holding the projectDescription.
 #' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
@@ -769,10 +763,11 @@ isOpenProject <- function(projectPath) {
         hasActiveProcessData && length(existsFolders) && all(existsFolders)
     }
     else {
-        warning("StoX: Project ", projectPath, " does not exist.")
+        warning("StoX: Project ", projectPath, " does not exist. Please specify the path to the folder of a StoX project (containing the sub-folders input, output and process).")
         NA
     }
 }
+
 
 
 #' Read the project description.
@@ -780,66 +775,41 @@ isOpenProject <- function(projectPath) {
 #' @export
 #' @rdname ProjectUtils
 #' 
-readProjectDescription <- function(projectPath, type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"), verbose = FALSE, projectDescriptionFile = NULL, applyBackwardCompatibility = TRUE, formatProcesses = TRUE) {
-    # Read the project.RData or json file depending on the 'type':
-    type <- match.arg(type)
+readProjectDescription <- function(
+    projectPath, 
+    verbose = FALSE, 
+    projectDescriptionFile = NULL, 
+    applyBackwardCompatibility = TRUE, 
+    formatProcesses = TRUE
+) {
     
     # Get the projectDescriptionFile path:
     if(!length(projectDescriptionFile)) {
-        projectDescriptionFile <- getProjectPaths(projectPath, paste0("project", type, "File"))
+        projectDescriptionFile <- getProjectPaths(projectPath, "projectJSONFile")
     }
     
     # If it does not exist, search for other project files:
     if(!file.exists(projectDescriptionFile)) {
-        # Get all possible file types, and select those different from that specified in 'type':
-        allTypes <- getRstoxFrameworkDefinitions("projectDescriptionFileFormats")
-        otherTypes <- setdiff(allTypes, type)
-        
-        # Try to find other files:
-        otherProjectDescriptionFiles <- sapply(
-            otherTypes, 
-            function(x) getProjectPaths(projectPath, paste0("project", x, "File"))
-        )
-        atExisting <- which(file.exists(otherProjectDescriptionFiles))
-        
-        # If there are other file formats saved in the process folder, try the first of those:
-        if(length(atExisting)) {
-            message("StoX: The file ", projectDescriptionFile, " does not exist. Opening ", otherProjectDescriptionFiles[atExisting[1]], " instead.")
-            type <- otherTypes[atExisting[1]]
-            projectDescriptionFile <- otherProjectDescriptionFiles[atExisting[1]]
-            # Set the status to not saved, since we are reading the non-expected project desccription file format:
-            saved <- FALSE
-        }
-    }
-
-    if(!file.exists(projectDescriptionFile)) {
         stop("StoX: The project description file ", projectDescriptionFile, " does not exist.")
     }    
     
-    # Run the appropriate reading function:
-    functionName <- paste0("readProjectDescription", type)
-    projectDescription <- do.call(functionName, list(
-        projectDescriptionFile = projectDescriptionFile
-    ))
+    ### # Run the appropriate reading function:
+    ### functionName <- "readProjectDescriptionJSON"
+    ### projectDescription <- do.call(functionName, list(
+    ###     projectDescriptionFile = projectDescriptionFile
+    ### ))
+    ### 
+    # Read the project.json:
+    projectDescription <- readProjectDescriptionJSON(projectDescriptionFile)
     
     # Make sure all models are present (at least as empty models): 
     missingModels <- setdiff(getRstoxFrameworkDefinitions("stoxModelNames"), names(projectDescription))
     for(modelName in missingModels) {
         projectDescription[[modelName]] <- list()
     }
-   # Order the models:
+    # Order the models:
     if(!all(names(projectDescription) == getRstoxFrameworkDefinitions("stoxModelNames"))) {
         projectDescription <- orderProjectDescription(projectDescription)
-    }
-    
-    # Apply backward compatibility:
-    saved <- TRUE
-    if(applyBackwardCompatibility) {
-        projectDescriptionAfterBackwardCompatibility <- applyBackwardCompatibility(projectDescription, verbose = verbose)
-        # Set saved to TRUE if no backward compatibility actions were taken: 
-        saved <- identical(projectDescription, projectDescriptionAfterBackwardCompatibility)
-        #setSavedStatus(projectPath, status = saved)
-        projectDescription <- projectDescriptionAfterBackwardCompatibility
     }
     
     # Warning if not certified Rstox packages:
@@ -852,6 +822,17 @@ readProjectDescription <- function(projectPath, type = getRstoxFrameworkDefiniti
             paste(attr(projectDescription, "CertifiedRstoxPackageVersion"), collapse = ", "), 
             ".)"
         )
+    }
+    
+    
+    # Apply backward compatibility:
+    saved <- TRUE
+    if(applyBackwardCompatibility) {
+        projectDescriptionAfterBackwardCompatibility <- applyBackwardCompatibility(projectDescription, verbose = verbose)
+        # Set saved to TRUE if no backward compatibility actions were taken: 
+        saved <- identical(projectDescription, projectDescriptionAfterBackwardCompatibility)
+        #setSavedStatus(projectPath, status = saved)
+        projectDescription <- projectDescriptionAfterBackwardCompatibility
     }
     
     
@@ -868,6 +849,26 @@ readProjectDescription <- function(projectPath, type = getRstoxFrameworkDefiniti
     # Introduce process IDs: 
     projectDescription <- defineProcessIDs(projectDescription)
     
+    
+    # Validate the project.json here, and try to validate the project.json to be saved if the initial vvalidation fails. 
+    valid <- validateProjectDescriptionFile(projectDescriptionFile)
+    if(!isTRUE(valid)) {
+        # Try writing to a tempfile and validating this file:
+        tempProjectDescriptionFile <- tempfile()
+        writeProjectDescription(
+            projectDescription = projectDescription, 
+            projectDescriptionFile = tempProjectDescriptionFile
+        )
+        valid <- validateProjectDescriptionFile(tempProjectDescriptionFile)
+    }
+    
+    if(!isTRUE(valid)) {
+        # Write the error to a temp file:
+        tempErrorFile <- file.path(tempdir(), "projectJSONValidatorError.rds")
+        saveRDS(valid, tempErrorFile)
+        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. Run the following code to see JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
+    }
+    
     return(
         list(
             projectDescription = projectDescription, 
@@ -877,31 +878,23 @@ readProjectDescription <- function(projectPath, type = getRstoxFrameworkDefiniti
 }
 
 
-readProjectDescriptionRData <- function(projectDescriptionFile) {
-    # Creates/replaces the object 'projectDescription':
-    projectDescription <- NULL
-    load(projectDescriptionFile)
-    
-    return(projectDescription)
-}
-
-
 readProjectDescriptionJSON <- function(projectDescriptionFile) {
     
-    # Validate json object against schema
-    projectValidator <- getRstoxFrameworkDefinitions("projectValidator", engine = "ajv")
-    valid <- projectValidator(projectDescriptionFile, verbose = TRUE)
-    if(!isTRUE(valid)) {
-        message(
-            paste(
-                capture.output(
-                    projectValidator("~/Code/Github/RstoxFramework/RstoxFramework/inst/test/project.json", verbose = TRUE)
-                    ), 
-                collapse = "\n"
-            )
-        )
-        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
-    }
+    ### # Validate json object against schema
+    ### browser()
+    ### projectValidator <- getRstoxFrameworkDefinitions("projectValidator", engine = "ajv")
+    ### valid <- projectValidator(projectDescriptionFile, verbose = TRUE)
+    ### if(!isTRUE(valid)) {
+    ###     message(
+    ###         paste(
+    ###             capture.output(
+    ###                 projectValidator("~/Code/Github/RstoxFramework/RstoxFramework/inst/test/project.json", verbose = TRUE)
+    ###                 ), 
+    ###             collapse = "\n"
+    ###         )
+    ###     )
+    ###     stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file.")
+    ### }
     
     # Read project.json file to R list. Use simplifyVector = FALSE to preserve names:
     projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
@@ -924,30 +917,19 @@ readProjectDescriptionJSON <- function(projectDescriptionFile) {
     return(projectDescription)
 }
 
-removeNamedElement <- function(list, name) {
-    list[!names(list) %in% name]
+
+
+
+
+validateProjectDescriptionFile <- function(projectDescriptionFile, warn = TRUE) {
+    # Validate the project description file against schema
+    projectValidatorAJV <- getRstoxFrameworkDefinitions("projectValidatorAJV")
+    valid <- projectValidatorAJV(projectDescriptionFile, verbose = TRUE)
+    return(valid)
 }
 
 
 
-
-
-
-
-convertListToDataTable <- function(x) {
-    if(length(x) && is.convertableToTable(x)) {
-        # Rbind to a data.table, and convert columns to POSIX:
-        x <- data.table::rbindlist(x)
-        
-        convertableToPOSIX <- unlist(x[, lapply(.SD, is.ConvertableToPOSIX)])
-        if(any(convertableToPOSIX)) {
-            DateTimeColumns <- names(x)[convertableToPOSIX]
-            x[, (DateTimeColumns) := lapply(.SD, convertToPOSIX), .SDcols = DateTimeColumns]
-        }
-    }
-    
-    return(x)
-}
 
 
 convertToPosixInDataTable <- function(x) {
@@ -960,21 +942,6 @@ convertToPosixInDataTable <- function(x) {
 
 
 
-convertListToVector <- function(x) {
-    if(length(x) && is.convertableToVector(x)) {
-        # Unlist and try to convert to numeric and POSIX:
-        x <- unlist(x)
-        
-        if(!is.na(suppressWarnings(as.numeric(x)))) {
-            x <- as.numeric(x)
-        }
-        else if(is.ConvertableToPOSIX(x)){
-            x <- convertToPOSIX(x)
-        }
-    }
-    
-    return(x)
-}
 
 
 is.ConvertableToPOSIX <- function(x) {
@@ -1027,14 +994,18 @@ JSON2processData <- function(JSON) {
 #' @export
 #' @rdname ProjectUtils
 #' 
-writeProjectDescription <- function(projectPath, type = c("JSON", "RData"), Application = R.version.string, projectDescription = NULL, verbose = FALSE) {
+writeProjectDescription <- function(projectPath, projectDescription = NULL, projectDescriptionFile = NULL, Application = R.version.string, verbose = FALSE) {
     
-    # Read the project.RData or project.xml file depending on the 'type':
-    type <- match.arg(type)
-    projectSessionFolder <- getProjectPaths(projectPath, "projectSessionFolder")
-    if(!file.exists(projectSessionFolder)) {
-        stop("StoX: The project memory folder ", projectSessionFolder, " does not exist. Project ", projectPath, " cannot be saved.")
+    # Get the file to write to:
+    if(!length(projectDescriptionFile)) {
+        projectSessionFolder <- getProjectPaths(projectPath, "projectSessionFolder")
+        if(!file.exists(projectSessionFolder)) {
+            stop("StoX: The project memory folder ", projectSessionFolder, " does not exist. Project ", projectPath, " cannot be saved.")
+        }
+        
+        projectDescriptionFile <- getProjectPaths(projectPath, "projectJSONFile")
     }
+    
     
     # Get full project description:
     if(!length(projectDescription)) {
@@ -1042,8 +1013,6 @@ writeProjectDescription <- function(projectPath, type = c("JSON", "RData"), Appl
         projectDescription <- getProjectMemoryData(projectPath, modelName = "all", named.list = TRUE, addAttributes = TRUE)
     }
     
-    # Get the file to write it to:
-    projectDescriptionFile <- getProjectPaths(projectPath, paste0("project", type, "File"))
     
     # Unname the processes (removing processIDs):
     att <- attributes(projectDescription)
@@ -1056,19 +1025,12 @@ writeProjectDescription <- function(projectPath, type = c("JSON", "RData"), Appl
     # Add the attirbutes:
     projectDescription <- addProjectDescriptionAttributes(projectDescription)
     
-    # Run the appropriate saving function:
-    functionName <- paste0("writeProjectDescription", type)
-    do.call(functionName, list(
+    # Save the project.json:
+    writeProjectDescriptionJSON(
         projectDescription = projectDescription, 
         projectDescriptionFile = projectDescriptionFile, 
         Application = Application
-    ))
-}
-
-writeProjectDescriptionRData <- function(projectDescription, projectDescriptionFile, Application) {
-    warning("The input Application is not used then type = RData")
-    # Get the path to the project description file, and save the current project description:
-    save(projectDescription, file = projectDescriptionFile)
+    )
 }
 
 
@@ -2165,7 +2127,7 @@ getStoxFunctionParameterDefaults <- function(functionName) {
     
     functionName <- getFunctionNameFromPackageFunctionName(functionName)
     if(! functionName %in% availableFunctions) {
-        warning("StoX: The function ", functionName, " is not an official StoX function.")
+        stop("StoX: The function ", functionName, " is not an official StoX function.")
         return(list())
     }
     
@@ -5033,6 +4995,7 @@ flattenProcessOutput <- function(processOutput) {
 #' @inheritParams Projects
 #' @inheritParams getProcessOutput
 #' @param onlyTableNames Logical: If TRUE return only table names.
+#' @param type One of c("memory", "output", "text".
 #' @export
 #' 
 getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNames = FALSE, type = "memory") {

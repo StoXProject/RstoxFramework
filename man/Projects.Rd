@@ -25,7 +25,6 @@ openProject(
   showWarnings = FALSE,
   force = FALSE,
   reset = FALSE,
-  type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"),
   saveIfAlreadyOpen = FALSE,
   verbose = FALSE
 )
@@ -39,7 +38,6 @@ closeProject(
 
 saveProject(
   projectPath,
-  type = getRstoxFrameworkDefinitions("projectDescriptionFileFormats"),
   force = FALSE,
   Application = R.version.string,
   msg = TRUE
@@ -72,8 +70,6 @@ deleteProject(projectPath)
 \item{force}{Logical: If TRUE reopen (close and then open) the project if already open.}
 
 \item{reset}{Logical: If TRUE reset each model to the start of the model.}
-
-\item{type}{The type of file to save the project to.}
 
 \item{saveIfAlreadyOpen}{Logical: If TRUE save the project before closing if already open and force is TRUE.}
 

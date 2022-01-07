@@ -1,4 +1,4 @@
-projectValidator <- RstoxFramework::getRstoxFrameworkDefinitions("projectValidator")
+projectValidator <- RstoxFramework::getRstoxFrameworkDefinitions("projectValidatorAJV")
 
 JSON_validationDir <- system.file("test", "JSON_validation", package = "RstoxFramework")
 files <- list.files(JSON_validationDir, full.names = TRUE)

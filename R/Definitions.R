@@ -69,9 +69,6 @@ initiateRstoxFramework <- function(){
        sort = FALSE
    )
 
-    # Define the possible projectDescription file formats:
-    projectDescriptionFileFormats <- c("JSON", "RData")
-    
     # Define formats for files saved by Rstox:
     memoryFileFormat_Empty <- "rds"
     # 2020-06-08: The fst::write_fst() does not retain the encoding, and has been discarded until these problems are fixed:
@@ -157,7 +154,8 @@ initiateRstoxFramework <- function(){
         "renameParameter", 
         "addParameter", 
         "translateParameter", 
-        "renameProcessData"
+        "renameProcessData", 
+        "renameColumInProcessDataTable"
     )
     
     # Get the backward compatibility:
@@ -233,6 +231,8 @@ initiateRstoxFramework <- function(){
     )
     # Create a project.json validator:
     projectValidator <- jsonvalidate::json_validator(schema)
+    projectValidatorIMJV <- jsonvalidate::json_validator(schema, engine = "imjv")
+    projectValidatorAJV <- jsonvalidate::json_validator(schema, engine = "ajv")
     
     getProcessDataColumnTypes <- function(processDataSchemas) {
         # Get the process data which are lists of tables, which are those that have properties:
@@ -566,7 +566,6 @@ initiateRstoxFramework <- function(){
     
     
     #### Project description: ####
-    projectRDataFile <- file.path(stoxFolders["process"], "project.RData")
     projectXMLFile <- file.path(stoxFolders["process"], "project.xml")
     projectJSONFile <- file.path(stoxFolders["process"], "project.json")
     projectSavedStatusFile <- file.path(statusFolder, "projectSavedStatus.txt")
@@ -625,7 +624,6 @@ initiateRstoxFramework <- function(){
             projectSessionFolderStructure = projectSessionFolderStructure, 
             
             # Project description:
-            projectRDataFile = projectRDataFile, 
             projectXMLFile = projectXMLFile, 
             projectJSONFile = projectJSONFile, 
             projectSavedStatusFile = projectSavedStatusFile, 

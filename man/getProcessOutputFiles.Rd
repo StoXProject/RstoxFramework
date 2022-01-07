@@ -21,7 +21,7 @@ getProcessOutputFiles(
 
 \item{onlyTableNames}{Logical: If TRUE return only table names.}
 
-\item{type}{The type of file to save the project to.}
+\item{type}{One of c("memory", "output", "text".}
 }
 \description{
 Function to get all process output memory files of a process:

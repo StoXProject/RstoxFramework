@@ -7,7 +7,7 @@
 ResampleBioticAssignment(BioticAssignment, Seed)
 }
 \arguments{
-\item{BioticAssignment}{The \code{\link[RstoxBase]{BioticAssignment}} data.}
+\item{BioticAssignment}{The \code{\link[RstoxBase]{BioticAssignment}} process data.}
 
 \item{Seed}{The seed, given as a sinigle initeger.}
 }

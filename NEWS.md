@@ -1,3 +1,9 @@
+# RstoxFramework v3.2.2 (2022-01-10)
+* Added ResampleMeanSpeciesCategoryCatchData(). Added test for functioning help-pages. Updated tests.
+
+# RstoxFramework v3.2.1 (2022-01-07)
+* Added renameColumInProcessDataTable as backward compatibility action. Changed to using AJV. Dropped the option of saving and reading project.RData. Added a second json validation after backward compatibility action, in case the first did not pass.
+
 # RstoxFramework v3.1.21 (2021-12-22)
 * Added coastal cod test project with empty PSUs, stratum names ordered as "Loppa" before "indre", and NA in Beam for certain acoustic PSUs.
 

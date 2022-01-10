@@ -260,6 +260,7 @@ initiateRstoxFramework <- function(){
     resamplableDataTypes <- c(
         "MeanNASCData",
         "MeanLengthDistributionData", 
+        "MeanSpeciesCategoryCatchData", 
         "BioticAssignment"
     )
    

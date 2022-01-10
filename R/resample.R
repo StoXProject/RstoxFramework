@@ -516,7 +516,9 @@ resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     data <- merge(data, seedTable, by = resampleBy)
     
     # Resample the data:
-    data[, eval(varToScale) := resampleOne(.SD, seed = seed[1], varToScale = varToScale, varToResample = varToResample), by = resampleBy]
+    for(var in varToScale) {
+        data[, eval(var) := resampleOne(.SD, seed = seed[1], varToScale = var, varToResample = varToResample), by = resampleBy]
+    }
     
     data[, seed := NULL]
     #return(MeanLengthDistributionData)
@@ -551,20 +553,17 @@ resampleOne <- function(subData, seed, varToResample, varToScale) {
     )]
     
     #count[, eval(varToScale) := lapply(get(varToScale), "*", resampledCountWithUniqueName)]
-    
-    for(var in varToScale) {
-        count[, eval(var) := resampledCountWithUniqueName * get(var)]
-    }
+    count[, eval(varToScale) := resampledCountWithUniqueName * get(varToScale)]
     
     return(count[[varToScale]])
 }
 
 
-#' Resamples biotic PSUs
+#' Resamples biotic PSUs within Stratum in MeanLengthDistributionData
 #' 
 #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 #' 
-#' @param MeanLengthDistributionData The \code{\link[RstoxBase]{MeanLengthDistributionData}} data.
+#' @inheritParams RstoxBase::ModelData
 #' @param Seed The seed, given as a sinigle initeger.
 #' 
 #' @export
@@ -585,6 +584,34 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
     
     return(MeanLengthDistributionData)
 }
+
+
+
+#' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
+#' 
+#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' 
+#' @inheritParams RstoxBase::ModelData
+#' @param Seed The seed, given as a sinigle initeger.
+#' 
+#' @export
+#' 
+ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, Seed) {
+    
+    # This function will be renamed to ResampleBioticPSUsInStratum
+    
+    # Resample PSUs within Strata, modifying the weighting variable of MeanSpeciesCategoryCatchData:
+    MeanSpeciesCategoryCatchData$Data <- resampleDataBy(
+        data = MeanSpeciesCategoryCatchData$Data, 
+        seed = Seed, 
+        varToScale = c("TotalCatchWeight", "TotalCatchCount"), 
+        varToResample = "PSU", 
+        resampleBy = "Stratum"
+    )
+    
+    return(MeanSpeciesCategoryCatchData)
+}
+
 
 ### #' Resamples biotic PSUs
 ### #' 
@@ -614,7 +641,7 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
 #' 
 #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 #' 
-#' @param BioticAssignment The \code{\link[RstoxBase]{BioticAssignment}} data.
+#' @inheritParams RstoxBase::ProcessData
 #' @param Seed The seed, given as a sinigle initeger.
 #' 
 #' @export
@@ -641,7 +668,7 @@ ResampleBioticAssignment <- function(BioticAssignment, Seed) {
 #' 
 #' This function resamples acoustic PSUs with replacement within each Stratum, changing the MeanNASC
 #' 
-#' @param MeanNASCData The \code{\link[RstoxBase]{MeanNASCData}} data.
+#' @inheritParams RstoxBase::ModelData
 #' @param Seed The seed, given as a sinigle initeger.
 #' 
 #' @export

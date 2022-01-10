@@ -2,7 +2,7 @@
 % Please edit documentation in R/resample.R
 \name{ResampleMeanLengthDistributionData}
 \alias{ResampleMeanLengthDistributionData}
-\title{Resamples biotic PSUs}
+\title{Resamples biotic PSUs within Stratum in MeanLengthDistributionData}
 \usage{
 ResampleMeanLengthDistributionData(MeanLengthDistributionData, Seed)
 }

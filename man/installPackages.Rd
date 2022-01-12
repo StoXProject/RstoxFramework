@@ -17,7 +17,8 @@ getNonRstoxDependencies(
 
 installOfficialRstoxPackagesWithDependencies(
   StoXGUIVersion,
-  officialRstoxPackageVersionsFile,
+ 
+    officialRstoxPackageVersionsFile = "https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt",
   destdir = NA,
   Rstox.repos = "https://stoxproject.github.io/repo",
   dependency.repos = "https://cloud.r-project.org",

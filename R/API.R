@@ -31,6 +31,13 @@ runModel <- function(
     close = FALSE, 
     ...
 ) {
+    
+    
+    # Close after running if requested:
+    if(close) {
+        on.exit(closeProject(projectPath))
+    }
+    
     # Run the model if required:
     modelData <- NULL
     if(run) {
@@ -73,11 +80,6 @@ runModel <- function(
         else{
             warning("The path ", projectPath, " does not point to a valid StoX project.")
         }
-        
-        # Close after running if requested:
-        if(close) {
-            closeProject(projectPath)
-        }
     }
     
     return(modelData)
@@ -117,6 +119,11 @@ runProject <- function(
     ...
 ) {
     
+    # Close after running if requested:
+    if(close) {
+        on.exit(closeProject(projectPath))
+    }
+    
     projectData <- mapply(
         runModel, 
         modelName = modelNames, 
@@ -140,10 +147,10 @@ runProject <- function(
         ), 
         SIMPLIFY = FALSE
     )
-    # Close after running if requested:
-    if(close) {
-        closeProject(projectPath)
-    }
+    ## Close after running if requested:
+    #if(close) {
+    #    closeProject(projectPath)
+    #}
     
     # Drop the list over models:
     if(unlist.models) {

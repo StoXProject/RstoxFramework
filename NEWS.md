@@ -1,3 +1,7 @@
+# RstoxFramework v3.2.3 (2022-01-12)
+* Updated ResampleMeanLengthDistributionData() and ResampleMeanSpeciesCategoryCatchData() to use number instead of count.
+* Added close of projects in runModel() and runProject() and delting project copies in Bootstrap() on.exit.
+
 # RstoxFramework v3.2.2 (2022-01-10)
 * Added ResampleMeanSpeciesCategoryCatchData(). Added test for functioning help-pages. Updated tests.
 

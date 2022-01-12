@@ -703,6 +703,7 @@ unzipProject <- function(projectPath, exdir = ".") {
 
 
 
+
 #' Function for comparing existing output files with the memory read using runProject()
 #' 
 #' @inheritParams readModelData
@@ -715,10 +716,12 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip.
 #' @param setNATo0 Logical: If TRUE, set all NAs to 0.
 #' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
+#' @param data.out Logical, if TRUE output the original and new data along with the tests.
+#' @param ... Used in runModel().
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, setNATo0 = FALSE, classOf = c("first", "second"), try = TRUE) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, setNATo0 = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -734,7 +737,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     message(projectPath_copy)
     openProject(projectPath_copy)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, try = try)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, try = try, ...)
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
@@ -835,6 +838,17 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         warning(paste(names(out), out, collapse = ",", sep = "-"))
     }
     
+    if(data.out) {
+        out <- list(
+            dat = dat, 
+            dat_orig = dat_orig, 
+            test = out
+        )
+        
+        return(out)
+    }
+        
+        
     if(!ok) {
         return(out)
     }
@@ -842,6 +856,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         return(TRUE)
     }
 }
+
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, setNATo0 = FALSE) {
@@ -970,6 +985,46 @@ compareSPDF <- function(x, y) {
     all.equal(xc, yc)
 }
 
+#' Function for comparing existing output files with the memory read using runProject()
+#' 
+#' @inheritParams readModelData
+#' @inheritParams runProcesses
+#' @inheritParams compareProjectToStoredOutputFiles
+#' @param projectPaths The projects to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
+#' @param projectPaths_original The projects holding the existing output files, defaulted to \code{projectPath}.
+#' 
+#' @export
+#'
+compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_original = projectPaths, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, setNATo0 = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
+    
+    out <- mapply(
+        compareProjectToStoredOutputFiles, 
+        projectPath = projectPaths, 
+        projectPath_original = projectPaths_original, 
+        MoreArgs = list(
+            emptyStringAsNA = emptyStringAsNA, 
+            intersect.names = intersect.names, 
+            ignore = ignore, 
+            skipNAFraction = skipNAFraction, 
+            skipNAAt = skipNAAt, 
+            setNATo0 = setNATo0, 
+            classOf = classOf, 
+            try = try, 
+            data.out = data.out, 
+            ...
+        ), 
+        SIMPLIFY = FALSE
+    )
+    
+    if(data.out) {
+        outNames <- names(out[[1]])
+        out <- lapply(outNames, function(name) lapply(out, "[[", name))
+        names(out) <- outNames
+    }
+    
+    
+    return(out)
+}
 
 
 

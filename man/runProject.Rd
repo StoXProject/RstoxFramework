@@ -23,6 +23,7 @@ runProject(
   try = TRUE,
   close = FALSE,
   unlist.models = TRUE,
+  msg = TRUE,
   ...
 )
 }
@@ -62,6 +63,8 @@ runProject(
 \item{close}{Logical: If TRUE close the project after running and getting the output.}
 
 \item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
+
+\item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
 \item{...}{\code{replaceArgsList} can also be given directly.}
 }

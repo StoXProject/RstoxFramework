@@ -17,8 +17,7 @@ getNonRstoxDependencies(
 
 installOfficialRstoxPackagesWithDependencies(
   StoXGUIVersion,
- 
-    officialRstoxPackageVersionsFile = "https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt",
+  officialRstoxPackageVersionsFile,
   destdir = NA,
   Rstox.repos = "https://stoxproject.github.io/repo",
   dependency.repos = "https://cloud.r-project.org",
@@ -50,7 +49,7 @@ getOfficialRstoxPackageVersion(
 
 \item{StoXGUIVersion}{The version of the StoX GUI defining the combination of official Rstox package versions.}
 
-\item{officialRstoxPackageVersionsFile}{The path to the file holding the link between StoX GUI version and Rstox package versions.}
+\item{officialRstoxPackageVersionsFile}{The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").}
 
 \item{destdir}{The directory to download binaries to, defaulted to NA which implies tempdir().}
 

@@ -55,7 +55,7 @@ Imports:
     stringr (>= 1.0.0),
     stringi (>= 1.4.3),
     RstoxData (>= 1.3.5),
-    RstoxBase (>= 1.5.3)
+    RstoxBase (>= 1.5.4)
 Suggests: 
     remotes (>= 2.0.0),
     testthat (>= 2.0.0)

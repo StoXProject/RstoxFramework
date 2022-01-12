@@ -166,6 +166,13 @@ Bootstrap <- function(
         unlink(stopBootstrapFile, force = TRUE, recursive = TRUE)
     }
     
+    # Delete files on exit:
+    on.exit(unlink(NumberOfBootstrapsFile, force = TRUE, recursive = TRUE))
+    on.exit(unlink(bootstrapProgressFile, force = TRUE, recursive = TRUE), add = TRUE)
+    on.exit(unlink(projectPath_copies, force = TRUE, recursive = TRUE), add = TRUE)
+    on.exit(if(file.exists(stopBootstrapFile)) unlink(stopBootstrapFile, force = TRUE, recursive = TRUE), add = TRUE)
+    
+    
     # Prepare for progress info:
     writeLines(as.character(NumberOfBootstraps), NumberOfBootstrapsFile)
     
@@ -228,15 +235,6 @@ Bootstrap <- function(
         }
     }
     
-    # Special care must be taken here to make sure that the output is a list with the datatype as element, since runProcess will not recognize a list of datatypes as a valid datatype:
-    #BootstrapData <- list(BootstrapData = BootstrapData)
-    
-    unlink(NumberOfBootstrapsFile, force = TRUE, recursive = TRUE)
-    unlink(bootstrapProgressFile, force = TRUE, recursive = TRUE)
-    unlink(projectPath_copies, force = TRUE, recursive = TRUE)
-    if(file.exists(stopBootstrapFile)) {
-        unlink(stopBootstrapFile, force = TRUE, recursive = TRUE)
-    }
     
     return(BootstrapData)
 }
@@ -545,7 +543,7 @@ resampleOne <- function(subData, seed, varToResample, varToScale) {
     # The sort = FALSE is vvery important, as it retains the order of the data. This should probably be replaced by a more robust solution, e.g. by merging in resampleDataBy():
     count <- merge(subData, resampleTable, by = varToResample, all.x = TRUE, sort = FALSE)
     
-    # Insert the new count into WeightedCount (with NAs replaced by 0):
+    # Insert the new count into varToScale (with NAs replaced by 0):
     count[, resampledCountWithUniqueName := ifelse(
         is.na(count$resampledCountWithUniqueName), 
         0, 
@@ -577,7 +575,7 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
         data = MeanLengthDistributionData$Data, 
         seed = Seed, 
         #varToScale = RstoxBase::getRstoxBaseDefinitions("dataTypeDefinition")[["MeanLengthDistributionData"]]$weighting, 
-        varToScale = "WeightedCount", 
+        varToScale = "WeightedNumber", 
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
@@ -604,7 +602,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
     MeanSpeciesCategoryCatchData$Data <- resampleDataBy(
         data = MeanSpeciesCategoryCatchData$Data, 
         seed = Seed, 
-        varToScale = c("TotalCatchWeight", "TotalCatchCount"), 
+        varToScale = c("TotalCatchWeight", "TotalCatchNumber"), 
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
@@ -628,7 +626,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
 ###         data = AssignmentLengthDistributionData, 
 ###         seed = Seed, 
 ###         #varToScale = RstoxBase::getRstoxBaseDefinitions("dataTypeDefinition")[["AssignmentLengthDistributionData"]]$weighting, 
-###         varToScale = "WeightedCount", 
+###         varToScale = "WeightedNumber", 
 ###         varToResample = "PSU", 
 ###         resampleBy = "Stratum"
 ###     )

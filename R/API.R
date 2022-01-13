@@ -116,12 +116,27 @@ runProject <- function(
     try = TRUE, 
     close = FALSE, 
     unlist.models = TRUE, 
+    msg = TRUE, 
     ...
 ) {
+    
+    
+    if(msg) {
+        startTime <- proc.time()[3]
+    }
     
     # Close after running if requested:
     if(close) {
         on.exit(closeProject(projectPath))
+    }
+    
+    if(msg) {
+        message(
+            "StoX: Running project ", 
+            projectPath, 
+            "...", 
+            appendLF = TRUE
+        )
     }
     
     projectData <- mapply(
@@ -155,6 +170,13 @@ runProject <- function(
     # Drop the list over models:
     if(unlist.models) {
         projectData <- unlist(unname(projectData), recursive = FALSE)
+    }
+    
+    if(msg) {
+        timeSpent <- proc.time()[3] - startTime
+        message(
+            "(time used(project) : ", round(timeSpent, digits = 3), " s)"
+        )
     }
     
     

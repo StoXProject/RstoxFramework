@@ -2,7 +2,7 @@
 packageFunctionNames <- RstoxFramework::getRstoxFrameworkDefinitions("availablePackageFunctionNames")
   
 testGetObjectHelpAsHtmlOne <- function(packageFunctionNames) {
-    packageFunctionNames <- strsplit(packageFunctionNames, "::", fixed = TRUE)
+    packageFunctionNames <- strsplit(packageFunctionNames, "::", fixed = TRUE)[[1]]
     html <- tryCatch(
         RstoxFramework::getObjectHelpAsHtml(
             packageName = packageFunctionNames[1], 

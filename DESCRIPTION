@@ -1,6 +1,6 @@
 Package: RstoxFramework
-Version: 3.3.0
-Date: 2022-01-14
+Version: 3.3.1
+Date: 2022-01-25
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
@@ -40,8 +40,6 @@ BugReports: https://github.com/StoXProject/RstoxFramework/issues
 License: LGPL-3
 LazyData: true
 Encoding: UTF-8
-Config/testthat/edition: 3
-Config/testthat/parallel: true
 Imports: 
     geojsonsf (>= 2.0.0),
     data.table (>= 1.12.6),
@@ -54,11 +52,11 @@ Imports:
     xml2 (>= 1.2.2),
     stringr (>= 1.0.0),
     stringi (>= 1.4.3),
-    RstoxData (>= 1.5.0),
-    RstoxBase (>= 1.7.0)
+    RstoxData (>= 1.5.4),
+    RstoxBase (>= 1.7.1)
 Suggests: 
     remotes (>= 2.0.0),
-    testthat (>= 2.0.0)
+    tinytest (>= 1.2.0)
 Additional_repositories: 
 	https://stoxproject.github.io/repo
 RoxygenNote: 7.1.2

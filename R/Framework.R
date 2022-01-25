@@ -1210,7 +1210,7 @@ getDependentPackageVersion <- function(
         Rstox.repos = Rstox.repos, 
         nonRstox.repos = nonRstox.repos, 
         sort = sort
-        )
+    )
     # Remove the specified packcages:
     ###if(only.depedencies) {
     ###    dependencies <- setdiff(

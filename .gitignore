@@ -1,8 +1,5 @@
 inst/lib
 .Rproj.user
-src/*.o
-src/*.so
-src/*.dll
 src/symbols.rds
 .Rhistory
 .RData
@@ -12,3 +9,4 @@ RstoxFramework.Rproj
 NAMESPACE
 README
 DESCRIPTION
+.Rapp.history

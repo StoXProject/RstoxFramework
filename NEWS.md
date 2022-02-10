@@ -1,3 +1,9 @@
+# RstoxFramework v3.3.2 (2022-02-10)
+* Added reshapeParameter and reshapeProcessData as backward compatibility actions.
+* Cleaned up backward compatibility actions and added StoX-messages when verbose = TRUE.
+* Removed applyBackwardCompatibility() at saveProject() as the GUI closes the project when updating Rstox packages.
+* Updated test projects BIAS_19_ICES, catch_99, export_ICESAcoustic, export_ICESbiotic according to the change in RstoxData::DefineTranslation() in (RstoxData v1.5.7), and the change in the output of ICESAcoustic(), ICESBiotic(), where multiple input files are rbinded resulting in non-file-specific output table name.
+
 # RstoxFramework v3.2.3 (2022-01-12)
 * Updated ResampleMeanLengthDistributionData() and ResampleMeanSpeciesCategoryCatchData() to use number instead of count.
 * Added close of projects in runModel() and runProject() and delting project copies in Bootstrap() on.exit.

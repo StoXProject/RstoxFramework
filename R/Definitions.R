@@ -145,17 +145,19 @@ initiateRstoxFramework <- function(){
     availableFunctions <- names(stoxLibrary)
     availablePackageFunctionNames <- unname(sapply(stoxLibrary, "[[", "functionName"))
 
-    # Define the supported backward compatibility actions:
+    # Define the supported backward compatibility actions. The order of the actions is defined here!!!:
     backwardCompatibilityActionNames <- c(
-        "renameAttribute", 
-        "addAttribute", 
-        "renameFunction", 
-        "removeParameter", 
-        "renameParameter", 
-        "addParameter", 
-        "translateParameter", 
-        "renameProcessData", 
-        "renameColumInProcessDataTable"
+        "renameAttribute", # 1
+        "addAttribute", # 2
+        "renameFunction", # 3
+        "removeParameter", # 4
+        "renameParameter", # 5
+        "addParameter", # 6
+        "translateParameter", # 7
+        "reshapeParameter", # 8
+        "renameProcessData", # 9
+        "renameColumInProcessDataTable", # 10
+        "reshapeProcessData" # 11
     )
     
     # Get the backward compatibility:

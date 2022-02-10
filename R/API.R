@@ -525,7 +525,6 @@ unlistSep <- function(x, sep = "/") {
 
 
 
-
 #' General functions to run a function of an Rstox package, modeled by do.call().
 #' 
 #' \code{runFunction} runs a function using the \code{\link[base]{do.call}} syntax, whereas \code{runFunction.JSON} accepts a JSON string conntaining the parameters to pass on to \code{runFunction}.

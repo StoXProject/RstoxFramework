@@ -866,7 +866,7 @@ readProjectDescription <- function(
         # Write the error to a temp file:
         tempErrorFile <- file.path(tempdir(), "projectJSONValidatorError.rds")
         saveRDS(valid, tempErrorFile)
-        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. Run the following code to see JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
+        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. \nRun the following code in R to see the JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
     }
     
     return(
@@ -1019,8 +1019,10 @@ writeProjectDescription <- function(projectPath, projectDescription = NULL, proj
     projectDescription <- lapply(projectDescription, unname)
     attributes(projectDescription) <- att
     
+    
+    # NOTE: This was chanegd in the GUI to close the project and then reopen after installing Rstox packages:
     # Apply backward compatibility also when saving, as one can update the Rstox packages while a project is open(due to the memory files and not in RAM):
-    projectDescription <- applyBackwardCompatibility(projectDescription, verbose = verbose)
+    #projectDescription <- applyBackwardCompatibility(projectDescription, verbose = verbose)
     
     # Add the attirbutes:
     projectDescription <- addProjectDescriptionAttributes(projectDescription)
@@ -3965,14 +3967,14 @@ convertStringToNA <- function(x) {
 escapeTabAndNewline <- function(x) {
     chcols = names(x)[sapply(x, is.character)]
     #x[, (chcols) := lapply(.SD, replace, as.is=TRUE), .SDcols=chcols] # Changed to numeric when not intended
-    x[, (chcols) := lapply(.SD, esacpeNewLine), .SDcols = chcols]
-    x[, (chcols) := lapply(.SD, esacpeTab), .SDcols = chcols]
+    x[, (chcols) := lapply(.SD, escapeNewLine), .SDcols = chcols]
+    x[, (chcols) := lapply(.SD, escapeTab), .SDcols = chcols]
 }
 
-esacpeNewLine <- function(x) {
+escapeNewLine <- function(x) {
     gsub("\n", "\\n", x, fixed = TRUE)
 }
-esacpeTab <- function(x) {
+escapeTab <- function(x) {
     gsub("\t", "\\t", x, fixed = TRUE)
 }
 

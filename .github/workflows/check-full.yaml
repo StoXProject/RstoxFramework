@@ -20,13 +20,15 @@ jobs:
         config:
           - {os: macOS-10.15,   r: 'oldrel',  pkgext: '.tgz'}
           - {os: macOS-10.15,   r: 'release', pkgext: '.tgz'}
+          # Disccarded due to missing package cpp11 on Mac for R 3.6:
           #- {os: macOS-10.15,   r: '3.6',     pkgext: '.tgz'}
           - {os: windows-latest, r: 'oldrel',  pkgext: '.zip'}
           - {os: windows-latest, r: 'release', pkgext: '.zip'}
-          - {os: windows-latest, r: '3.6',     pkgext: '.zip',    rspm: "https://packagemanager.rstudio.com/cran/latest"}
-          #- {os: ubuntu-18.04,   r: 'release', pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          #- {os: ubuntu-18.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          #- {os: ubuntu-18.04,   r: '3.6',     pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          # Disccarded due to jsonvalidate 1.3.2 not available on Windoes for R 3.6:
+          #- {os: windows-latest, r: '3.6',     pkgext: '.zip',    rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-18.04,   r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-18.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-18.04,   r: '3.6',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -56,7 +58,7 @@ jobs:
           echo "PKG_REPO=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
         shell: bash
 
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           rtools-version: ${{ matrix.config.rtools }}
@@ -95,6 +97,17 @@ jobs:
           brew install gdal udunits
         shell: bash
 
+      - name: Prepare for dependencies on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt-get update
+          sudo apt-get install libudunits2-dev libgdal-dev libgeos-dev libproj-dev 
+          #sudo apt-get -y update && sudo apt-get install -y  libudunits2-dev libgdal-dev libgeos-dev libproj-dev
+          #sudo apt-get install -y libproj-dev
+          #sudo apt-get install libgdal-dev
+        shell: bash
+      
       - name: Install dependencies on Linux
         if: runner.os == 'Linux'
         run: |
@@ -105,6 +118,7 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           # First try binary and then possibly source:
+          options(install.packages.check.source = "no")
           remotes::install_deps(dependencies = TRUE, type = "binary")
           installed <- utils::installed.packages()[, "Package"]
           needed <- remotes::dev_package_deps()

@@ -5694,7 +5694,7 @@ runProcesses <- function(
     # Open the project if not open:
     if(!isOpenProject(projectPath)) {
         # No need for Application here as runProcesses() should be used after opening the project in a Application:
-        openProject(projectPath)
+        openProject(projectPath, ...)
     }
     
     # Save both before and after for safety:

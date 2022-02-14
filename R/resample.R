@@ -727,6 +727,7 @@ ReportBootstrap <- function(
     AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE), 
     BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE), 
     GroupingVariables = character(), 
+    InformationVariables = character(), 
     RemoveMissingValues = FALSE, 
     AggregationWeightingVariable = character(), 
     BootstrapReportWeightingVariable = character()
@@ -739,7 +740,13 @@ ReportBootstrap <- function(
     }
     
     if(! BaselineProcess %in% names(BootstrapData)) {
-        stop("The BaselineProcess ", BaselineProcess, " is not one of the outputs of the Bootstrap. Possible values are ", paste(names(BootstrapData), collapse = ", "), ".")
+        # If the BootstrapData is empty, stop:
+        if(!length(BootstrapData)) {
+            warning("Empty BootstrapData.")
+        }
+        else {
+            stop("The BaselineProcess ", BaselineProcess, " is not one of the outputs of the Bootstrap. Possible values are ", paste(names(BootstrapData), collapse = ", "), ".")
+        }
     }
     else if(
         is.list(BootstrapData[[BaselineProcess]]) && 
@@ -755,6 +762,7 @@ ReportBootstrap <- function(
         TargetVariable = TargetVariable, 
         aggregationFunction = AggregationFunction, 
         GroupingVariables = c(GroupingVariables, "BootstrapID"), 
+        InformationVariables = InformationVariables, 
         na.rm = RemoveMissingValues, 
         WeightingVariable = AggregationWeightingVariable
     )
@@ -773,6 +781,7 @@ ReportBootstrap <- function(
         TargetVariable = TargetVariableAfterInitialAggregation, 
         aggregationFunction = BootstrapReportFunction, 
         GroupingVariables = GroupingVariables, 
+        InformationVariables = InformationVariables, 
         na.rm = RemoveMissingValues, 
         padWithZerosOn = "BootstrapID", 
         WeightingVariable = BootstrapReportWeightingVariable

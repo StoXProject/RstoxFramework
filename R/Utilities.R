@@ -113,7 +113,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         }
         
         # Right pad with spaecs:
-        x <- apply(x, 2, function(y) stringr::str_pad(y, max(nchar(y)), pad = " "))
+        x <- apply(x, 2, function(y) stringi::stri_pad_right(y, max(nchar(y)), pad = " "))
         
         # Collapse to lines:
         x <- apply(x, 1, paste, collapse = columnSeparator)
@@ -128,7 +128,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         # Add the column names:
         x <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))
         # Right pad with spaecs:
-        x <- x[, lapply(.SD, function(y) stringr::str_pad(y, max(nchar(y)), pad = " "))]
+        x <- x[, lapply(.SD, function(y) stringi::stri_pad_right(y, max(nchar(y)), pad = " "))]
         
         #for(name in names(x)) {
         #    x[, eval(name) := lapply(get(name), function(y) paste0(y, paste(rep(" ", max(nchar(get(name))) - nchar(y)), collapse = "")))]

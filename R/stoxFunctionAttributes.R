@@ -25,7 +25,8 @@ stoxFunctionAttributes <- list(
         # This is an example of using an expression to determine when to show a parameter:
         functionParameterFormat = list(
             #TargetVariable = "targetVariable_ReportBootstrap", 
-            GroupingVariables = "groupingVariables_ReportBootstrap"
+            GroupingVariables = "groupingVariables_ReportBootstrap", 
+            InformationVariables = "informationVariables_ReportBootstrap"
         ), 
         functionArgumentHierarchy = list(
             AggregationWeightingVariable = list(
@@ -177,6 +178,16 @@ processPropertyFormats <- list(
             possibleValues = as.list(processIndexTable$processName)
         }, 
         variableTypes <- "character"
+    ), 
+    
+    informationVariables_ReportBootstrap = list(
+        class = "vector", 
+        title = "One or more columns to inlcude in ReportBootstrapData", 
+        possibleValues = function(BootstrapData, BaselineProcess, GroupingVariables) {
+            sort(setdiff(names(BootstrapData[[BaselineProcess]]), GroupingVariables))
+        }, 
+        variableTypes <- "character"
     )
+    
 )
 

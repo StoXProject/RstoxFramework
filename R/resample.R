@@ -727,6 +727,7 @@ ReportBootstrap <- function(
     AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE), 
     BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE), 
     GroupingVariables = character(), 
+    InformationVariables = character(), 
     RemoveMissingValues = FALSE, 
     AggregationWeightingVariable = character(), 
     BootstrapReportWeightingVariable = character()
@@ -761,6 +762,7 @@ ReportBootstrap <- function(
         TargetVariable = TargetVariable, 
         aggregationFunction = AggregationFunction, 
         GroupingVariables = c(GroupingVariables, "BootstrapID"), 
+        InformationVariables = InformationVariables, 
         na.rm = RemoveMissingValues, 
         WeightingVariable = AggregationWeightingVariable
     )
@@ -779,6 +781,7 @@ ReportBootstrap <- function(
         TargetVariable = TargetVariableAfterInitialAggregation, 
         aggregationFunction = BootstrapReportFunction, 
         GroupingVariables = GroupingVariables, 
+        InformationVariables = InformationVariables, 
         na.rm = RemoveMissingValues, 
         padWithZerosOn = "BootstrapID", 
         WeightingVariable = BootstrapReportWeightingVariable

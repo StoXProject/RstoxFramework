@@ -739,7 +739,13 @@ ReportBootstrap <- function(
     }
     
     if(! BaselineProcess %in% names(BootstrapData)) {
-        stop("The BaselineProcess ", BaselineProcess, " is not one of the outputs of the Bootstrap. Possible values are ", paste(names(BootstrapData), collapse = ", "), ".")
+        # If the BootstrapData is empty, stop:
+        if(!length(BootstrapData)) {
+            warning("Empty BootstrapData.")
+        }
+        else {
+            stop("The BaselineProcess ", BaselineProcess, " is not one of the outputs of the Bootstrap. Possible values are ", paste(names(BootstrapData), collapse = ", "), ".")
+        }
     }
     else if(
         is.list(BootstrapData[[BaselineProcess]]) && 

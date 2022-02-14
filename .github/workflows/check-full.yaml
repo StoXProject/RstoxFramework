@@ -23,10 +23,10 @@ jobs:
           #- {os: macOS-10.15,   r: '3.6',     pkgext: '.tgz'}
           - {os: windows-latest, r: 'oldrel',  pkgext: '.zip'}
           - {os: windows-latest, r: 'release', pkgext: '.zip'}
-          - {os: windows-latest, r: '3.6',     pkgext: '.zip',    rspm: "https://packagemanager.rstudio.com/cran/latest"}
-          - {os: ubuntu-18.04,   r: 'release', pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
-          - {os: ubuntu-18.04,   r: '3.6',     pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__linux__/bionic/latest"}
+          - {os: windows-latest, r: '3.6',     pkgext: '.zip',    rspm: "https://cloud.r-project.org"}              |            - {os: windows-latest, r: '3.6',     pkgext: '.zip',    rspm: "https://packagemanager.rstudio.com/cran/la
+          - {os: ubuntu-18.04,   r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}              |            - {os: ubuntu-18.04,   r: 'release', pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__
+          - {os: ubuntu-18.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}              |            - {os: ubuntu-18.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://packagemanager.rstudio.com/cran/__
+          - {os: ubuntu-18.04,   r: '3.6',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"} 
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -56,7 +56,7 @@ jobs:
           echo "PKG_REPO=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
         shell: bash
 
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
           rtools-version: ${{ matrix.config.rtools }}
@@ -116,6 +116,7 @@ jobs:
         if: runner.os != 'Linux'
         run: |
           # First try binary and then possibly source:
+          options(install.packages.check.source = "no")
           remotes::install_deps(dependencies = TRUE, type = "binary")
           installed <- utils::installed.packages()[, "Package"]
           needed <- remotes::dev_package_deps()

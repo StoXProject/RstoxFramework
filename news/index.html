@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.4</span>
       </span>
     </div>
 
@@ -47,6 +47,21 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.3.4" id="rstoxframework-v334-2022-02-28">RstoxFramework v3.3.4 (2022-02-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v334-2022-02-28"></a></h2>
+<ul><li>Reduced time of ReportBootstrap() to a few percent.</li>
+<li>Changed all sd and cv in reports from 0 to NA. Standard deviation = 0 is no longer accepted by StoX, as it implies either insufficient number of bootstraps or only one value to sample from in the bootstrapping.</li>
+<li>Fixed bug where the blue dot marking processes as ‘run’ was turned on on a newly modified process when immediately modifying a later process.</li>
+<li>Moved setting precision to runProcess() instead of each StoX function.</li>
+<li>Fixed bug when working with a DefineStratumPolygon procecss with no polygons defined (readProcessOutputFile() did nor read deal properly with the empty SpatialPolygonsDataFrame with jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data))), but ok when using replaceSpatialFileReference(buildSpatialFileReferenceString(data)) instead).</li>
+<li>Changed to using StratumName instead of the old polygonName in stratum polygons throughout RstoxFramework and the StoX GUI.</li>
+<li>Changed to using RstoxData::firstClass instead of a copy.</li>
+<li>Added order of backward compatibility actions to package first (alphabetically), then change version (numerically), and finally action type with order as given by RstoxFramework::getRstoxFrameworkDefinitions(“backwardCompatibilityActionNames”).</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.3.3" id="rstoxframework-v333-2022-02-14">RstoxFramework v3.3.3 (2022-02-14)<a class="anchor" aria-label="anchor" href="#rstoxframework-v333-2022-02-14"></a></h2>
+<ul><li>Added InformationVariables to ReportBootstrap().</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.2" id="rstoxframework-v332-2022-02-10">RstoxFramework v3.3.2 (2022-02-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v332-2022-02-10"></a></h2>
 <ul><li>Added reshapeParameter and reshapeProcessData as backward compatibility actions.</li>

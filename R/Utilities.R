@@ -37,15 +37,6 @@ merge2 <- function(x, y, var=c("distance", "weight", "lengthsampleweight", "leng
     }
 }
 
-# Function to get the first element of class(x):
-firstClass <- function(x) {
-    out <- class(x)[1]
-    if(out == "double") {
-        out <- "numeric"
-    }
-    return(out)
-}
-
 # Function to select valid elements by name
 selectValidElements <- function(x, names) {
     validNames <- intersect(names, names(x))
@@ -113,7 +104,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         }
         
         # Right pad with spaecs:
-        x <- apply(x, 2, function(y) stringi::stri_pad_right(y, max(nchar(y)), pad = " "))
+        x <- apply(x, 2, function(y) stringi::stri_pad_left(y, max(nchar(y)), pad = " "))
         
         # Collapse to lines:
         x <- apply(x, 1, paste, collapse = columnSeparator)
@@ -128,7 +119,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         # Add the column names:
         x <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))
         # Right pad with spaecs:
-        x <- x[, lapply(.SD, function(y) stringi::stri_pad_right(y, max(nchar(y)), pad = " "))]
+        x <- x[, lapply(.SD, function(y) stringi::stri_pad_left(y, max(nchar(y)), pad = " "))]
         
         #for(name in names(x)) {
         #    x[, eval(name) := lapply(get(name), function(y) paste0(y, paste(rep(" ", max(nchar(get(name))) - nchar(y)), collapse = "")))]
@@ -551,7 +542,7 @@ writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
 writeMemoryFiles <- function(objects, filePathsSansExt, writeOrderFile = TRUE) {
     
     # Write the files, in an mapply loop if not a valid class at the top level (for outputDepth 2):
-    if(firstClass(objects) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
+    if(RstoxData::firstClass(objects) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
         filePaths <- writeMemoryFile(objects, filePathsSansExt)
     }
     else {
@@ -795,7 +786,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         }
     }
     
-    #browser()
+    browser()
     
     # Compare reports, but only numeric values:
     reports <- startsWith(names(dat_orig), "Report")
@@ -872,8 +863,8 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     }
     
     # Get the classes of the first and second table:
-    classes_in_x <- sapply(x, firstClass)
-    classes_in_y <- sapply(y, firstClass)
+    classes_in_x <- sapply(x, RstoxData::firstClass)
+    classes_in_y <- sapply(y, RstoxData::firstClass)
     
     if(!identical(classes_in_x, classes_in_y)) {
         
@@ -931,8 +922,8 @@ skipRowsAtNA <- function(x, skipNAAt) {
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 compareDataTablesUsingClassOfSecond <- function(x, y) {
     # Get the classes of the first and second table:
-    classes_in_x <- sapply(x, firstClass)
-    classes_in_y <- sapply(y, firstClass)
+    classes_in_x <- sapply(x, RstoxData::firstClass)
+    classes_in_y <- sapply(y, RstoxData::firstClass)
     if(!identical(classes_in_x, classes_in_y)) {
         # Coerce to the class in the memory:
         differ <- names(x)[classes_in_x != classes_in_y]

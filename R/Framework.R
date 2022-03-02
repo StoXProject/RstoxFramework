@@ -487,6 +487,7 @@ openProject <- function(
         # Reset the active process if requested:
         if(reset) {
             stoxModelNames <- getRstoxFrameworkDefinitions("stoxModelNames")
+            # When processID is not given, the model is reset to the start:
             lapply(stoxModelNames, function(modelName) resetModel(
                 projectPath = projectPath, 
                 modelName = modelName
@@ -824,7 +825,6 @@ readProjectDescription <- function(
         )
     }
     
-    
     # Apply backward compatibility:
     saved <- TRUE
     if(applyBackwardCompatibility) {
@@ -850,7 +850,7 @@ readProjectDescription <- function(
     projectDescription <- defineProcessIDs(projectDescription)
     
     
-    # Validate the project.json here, and try to validate the project.json to be saved if the initial vvalidation fails. 
+    # Validate the project.json here, and try to validate the project.json to be saved if the initial validation fails. 
     valid <- validateProjectDescriptionFile(projectDescriptionFile)
     if(!isTRUE(valid)) {
         # Try writing to a tempfile and validating this file:
@@ -1479,7 +1479,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' 
 #' @inheritParams general_arguments
 #' @inheritParams unReDoProject
-#' @param processDirty Logical: Indicates whether the model has been modified when reseting.
+#' @param processDirty Logical: Indicates whether the model has been modified when resetting. Tf the process to reset to is after the active process, 
 #' @param delete A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.
 #' @param purgeOutputFiles Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted eevn though the process was deleted.
 #' 
@@ -1518,17 +1518,29 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         }
         else {
             # Reset only if the input process ID is before that of the active:
-            if(processIndex < currentActiveProcessIndex) {
+            if(processIndex <= currentActiveProcessIndex) {
                     newActiveProcessID <- processIndexTable$processID[processIndex]
                 }
             else {
-                newActiveProcessID <- currentActiveProcessID
+                #newActiveProcessID <- currentActiveProcessID
+                # Return a list of the active process and the process table:
+                output <- list(
+                    activeProcess = getActiveProcess(projectPath = projectPath, modelName = modelName)
+                )
+                if(returnProcessTable) {
+                    output <- c(
+                        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName)), 
+                        output
+                    )
+                }
+                
+                return(output)
             }
         }
         
         # Write the active process ID:
         #if(is.na(newActiveProcessID) || newActiveProcessID != currentActiveProcessID) {
-            writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = newActiveProcessID, processDirty = processDirty)
+        writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = newActiveProcessID, processDirty = processDirty)
         #}
         
         ##### (2) Delete process output of the processes from the new active process and onwards: #####
@@ -2153,7 +2165,7 @@ getStoxFunctionParameterPrimitiveTypes <- function(functionName) {
     # Get the possible values of the parameters of a function:
     functionParameterDefault <- getStoxFunctionParameterDefault(functionName)
     # The default is the first value:
-    primitiveType <- lapply(functionParameterDefault, firstClass)
+    primitiveType <- lapply(functionParameterDefault, RstoxData::firstClass)
     return(primitiveType)
 }
 # Function which gets the primitive types of the parameters of a function:
@@ -3842,9 +3854,9 @@ formatFunctionParameters <-  function(functionParameters, functionName) {
                     NULLDefinedAndEmptyProperty <- 
                         is.null(parameterDefaults[[this]]) && 
                         length(functionParameters[[this]]) == 0
-                    table <- identical(firstClass(parameterDefaults[[this]]), "data.table")
+                    table <- identical(RstoxData::firstClass(parameterDefaults[[this]]), "data.table")
                     emptyTable <- table && length(functionParameters[[this]]) == 0
-                    differingClass <- firstClass(functionParameters[[this]]) != firstClass(parameterDefaults[[this]])
+                    differingClass <- RstoxData::firstClass(functionParameters[[this]]) != RstoxData::firstClass(parameterDefaults[[this]])
                     
                     # Special case for NULL:
                     if(NULLDefinedAndEmptyProperty) {
@@ -3860,7 +3872,7 @@ formatFunctionParameters <-  function(functionParameters, functionName) {
                     }
                     # Set class to the defined class:
                     else if(classIsDefined && differingClass) {
-                        class(functionParameters[[this]]) <- firstClass(parameterDefaults[[this]])
+                        class(functionParameters[[this]]) <- RstoxData::firstClass(parameterDefaults[[this]])
                     }
                 }
             }
@@ -4527,24 +4539,45 @@ runProcess <- function(
         processOutput <- replaceData
     }
     
-    # Return the process output:
-    if(returnProcessOutput) {
-        return(processOutput)
-    }
+    
     
     if(failed){
         return(FALSE)
     }
     # If the processOutput has length (or is an empty SpatialPolygonsDataFrame) or empty data.table:
-    else if(length(processOutput) || any(c("data.table", "SpatialPolygonsDataFrame") %in% class(processOutput))){
+    else if(length(processOutput) || any(c("data.table", "SpatialPolygonsDataFrame") %in% RstoxData::firstClass(processOutput))){
         
         # Update the active process ID:
         writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = processID, processDirty = FALSE)
         
         # If a valid output class, wrap the function output to a list named with the data type:
-        if(firstClass(processOutput) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
+        if(RstoxData::firstClass(processOutput) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
             processOutput <- list(processOutput)
             names(processOutput) <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
+        }
+        
+        # Set the precision of the processOutput:
+        # Is the output a list of lists (such as that from ReadBiotic())?
+        if(is.list(processOutput[[1]]) && !data.table::is.data.table(processOutput[[1]])){
+            # Set presicion by reference for data.table:
+            if(RstoxData::firstClass(processOutput[[1]]) == "data.table") {
+                RstoxData::setRstoxPrecisionLevel(processOutput)
+            }
+            # Round off each polygon:
+            else if(RstoxData::firstClass(processOutput[[1]]) == "SpatialPolygonsDataFrame") {
+                processOutput[[1]] <- RstoxData::roundSignifSPDF(processOutput[[1]])
+            }
+        }
+        else {
+            # List of lists is always data.table:
+            for(listIndex in seq_along(processOutput)) {
+                RstoxData::setRstoxPrecisionLevel(processOutput[[listIndex]])
+            }
+        }
+        
+        # Return the process output if requested:
+        if(returnProcessOutput) {
+            return(processOutput)
         }
         
         # Store the processData:
@@ -4899,9 +4932,16 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
     
     if(pretty) {
         # If a SpatialPolygonsDataFrame, prettify and convert to character
-        if(firstClass(data) == "SpatialPolygonsDataFrame") {
+        if(RstoxData::firstClass(data) == "SpatialPolygonsDataFrame") {
             #geojsonio::geojson_json(processOutput, pretty = TRUE)
-            data <- jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data)))
+            #data <- jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data)))
+            data <- jsonlite::prettify(
+                replaceSpatialFileReference(
+                    buildSpatialFileReferenceString(
+                        data
+                    )
+                )
+            )
             
             # We need to split into a vector of lines:
             data <- strsplit(data, "\n", fixed = TRUE)[[1]]
@@ -4973,18 +5013,18 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
 
 
 flattenProcessOutput <- function(processOutput) {
-    #if(firstClass(processOutput) == "SpatialPolygons") {
-    if(firstClass(processOutput) == "SpatialPolygonsDataFrame") {
+    #if(RstoxData::firstClass(processOutput) == "SpatialPolygons") {
+    if(RstoxData::firstClass(processOutput) == "SpatialPolygonsDataFrame") {
         #geojsonio::geojson_json(processOutput, pretty = TRUE)
         jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(processOutput)))
     }
-    else if(firstClass(processOutput) == "data.table") {
+    else if(RstoxData::firstClass(processOutput) == "data.table") {
         # Check whether the table is rugged:
         if(isDataTableRugged(processOutput)) {
             flattenDataTable(processOutput)
         }
     }
-    else if(firstClass(processOutput) %in% c("matrix", "character")) {
+    else if(RstoxData::firstClass(processOutput) %in% c("matrix", "character")) {
         processOutput
     }
     else {
@@ -5512,7 +5552,7 @@ unlistOneStep <- function(processOutput) {
 # Function to check that all the output elements are of the valid classes:
 areAllValidOutputDataClasses <- function(processOutput) {
     validOutputDataClasses <- getRstoxFrameworkDefinitions("validOutputDataClasses")
-    classes <- sapply(processOutput, firstClass)
+    classes <- sapply(processOutput, RstoxData::firstClass)
     #classes <- unlist(lapply(classes, "[[", 1))
     all(classes %in% validOutputDataClasses)
 }
@@ -5638,10 +5678,10 @@ getFolderDepth <- function(folderPath) {
 # A valid process output (from running the process in runProcess()) must be a pure list with class not in the valid classes, and where the first element of the list HAS a valid class:
 #isValidOutputData <- function(x) {
 #    validOutputDataClasses <- getRstoxFrameworkDefinitions("validOutputDataClasses")
-#    is.list(x) && !firstClass(x) %in% validOutputDataClasses && firstClass(x[[1]]) %in% validOutputDataClasses
+#    is.list(x) && !RstoxData::firstClass(x) %in% validOutputDataClasses && RstoxData::firstClass(x[[1]]) %in% validOutputDataClasses
 #}
 isValidOutputDataOne <- function(outputDataOne) {
-    firstClass(outputDataOne) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")
+    RstoxData::firstClass(outputDataOne) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")
 }
 
 
@@ -5736,7 +5776,7 @@ runProcesses <- function(
     
     # Chech that none of the models of the project are running:
     if(isRunning(projectPath, modelName) && !force.restart) {
-        warning("StoX: The project is running (", projectPath, "). Use force.restart = TRUE in runModel() to force restart the project, or close and open the project.")
+        warning("StoX: The project is running (", projectPath, "). Close and open the project (or use force.restart = TRUE in runModel() in R).")
         return(failedVector)
     }
     else {
@@ -5844,7 +5884,21 @@ hasBeenRun <- function(projectPath, modelName, processID) {
         )$processID
     )
     # TRUE if the process is not later than the active process:
-    processIndex <= activeProcessIndex
+    if(processIndex < activeProcessIndex) {
+        out <- TRUE
+    }
+    # If the active process, whech whether it is ditry:
+    else if(processIndex == activeProcessIndex) {
+        out <- getActiveProcess(
+            projectPath = projectPath, 
+            modelName = modelName
+        )$processDirty
+    }
+    else {
+        out <- FALSE
+    }
+    
+    return(out)
 }
 
 

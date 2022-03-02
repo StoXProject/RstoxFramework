@@ -53,8 +53,13 @@ applyBackwardCompatibility <- function(projectDescription, verbose = FALSE) {
     backwardCompatibilityActionNames <- getRstoxFrameworkDefinitions("backwardCompatibilityActionNames")
     
     # Run the backward compatibility actions:
-    projectDescription <- applyBackwardCompatibilityActions(
-        backwardCompatibilityActionNames = backwardCompatibilityActionNames, 
+    #projectDescription <- applyBackwardCompatibilityActions(
+    #    backwardCompatibilityActionNames = backwardCompatibilityActionNames, 
+    #    backwardCompatibility = backwardCompatibility, 
+    #    projectDescription = projectDescription, 
+    #    verbose = verbose
+    #)
+    projectDescription <- applyBackwardCompatibilityActionsReordered(
         backwardCompatibility = backwardCompatibility, 
         projectDescription = projectDescription, 
         verbose = verbose
@@ -65,7 +70,7 @@ applyBackwardCompatibility <- function(projectDescription, verbose = FALSE) {
 
 
 # Apply one BWC action category:
-applyBackwardCompatibilityActions <- function(
+applyBackwardCompatibilityActionsOldBByActionName <- function(
     backwardCompatibilityActionNames, 
     backwardCompatibility, 
     projectDescription, 
@@ -103,6 +108,73 @@ applyBackwardCompatibilityActions <- function(
     
     return(projectDescription)
 }
+
+
+
+# Apply one BWC action category:
+applyBackwardCompatibilityActionsReordered <- function(
+    backwardCompatibility, 
+    projectDescription, 
+    verbose = FALSE
+) {
+    
+    # First add the package name and action type:
+    for(packageName in names(backwardCompatibility)) {
+        for(actionName in names(backwardCompatibility[[packageName]])) {
+            for(actionIndex in seq_along(backwardCompatibility [[packageName]] [[actionName]])) {
+                backwardCompatibility [[packageName]] [[actionName]] [[actionIndex]] [["packageName"]] <- packageName
+                backwardCompatibility [[packageName]] [[actionName]] [[actionIndex]] [["actionName"]] <- actionName
+            }
+        }
+    }
+    # The unlist down to the actions:
+    for(ind in seq_len(2)) {
+        backwardCompatibility <- unlist(backwardCompatibility, recursive = FALSE)
+    }
+    
+    # Now, order by version first, then by action name, and finally by package:
+    #official <- RstoxFramework:::readOfficialRstoxPackageVersionsFile(toTable = TRUE)
+    packageNames <- sapply(backwardCompatibility, "[[", "packageName")
+    actionNames <- sapply(backwardCompatibility, "[[", "actionName")
+    changeVersions <- sapply(backwardCompatibility, "[[", "changeVersion")
+    newOrder <- order(
+        packageNames, 
+        RstoxData:::createOrderKey(changeVersions, split = "."), 
+        match(actionNames, getRstoxFrameworkDefinitions("backwardCompatibilityActionNames"))
+    )
+    backwardCompatibility <- backwardCompatibility[newOrder]
+    
+    
+    
+    # Run through the supported backward compatibility action names:
+    for(backwardCompatibilityAction in backwardCompatibility) {
+        
+        packageName <- backwardCompatibilityAction$packageName
+        actionName <- backwardCompatibilityAction$actionName
+        
+        run <- checkBackwardCompatibilityVersion(
+            backwardCompatibilityAction = backwardCompatibilityAction, 
+            projectDescription = projectDescription, 
+            packageName = packageName
+        )
+        
+        if(run) {
+            # Apply the backwardCompatibilityAction:
+            projectDescription <- applyBackwardCompatibilityAction(
+                backwardCompatibilityActionName = actionName, 
+                backwardCompatibilityAction = backwardCompatibilityAction, 
+                projectDescription = projectDescription, 
+                packageName = packageName, 
+                verbose = verbose
+            )
+        }
+    }
+    
+    return(projectDescription)
+}
+
+
+
 
 # Apply one specific BWC action:
 applyBackwardCompatibilityAction <- function(

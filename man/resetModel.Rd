@@ -22,7 +22,7 @@ resetModel(
 
 \item{processID}{The ID of the process.}
 
-\item{processDirty}{Logical: Indicates whether the model has been modified when reseting.}
+\item{processDirty}{Logical: Indicates whether the model has been modified when resetting. Tf the process to reset to is after the active process,}
 
 \item{shift}{The position relative to the current memory status to un/redo to.}
 

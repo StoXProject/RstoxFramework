@@ -42,8 +42,14 @@ ReportBootstrap(
 A \code{\link{ReportBootstrapData}} object.
 }
 \description{
-Reports the sum, mean or other functions on a variable of the \code{\link{BootstrapData}}.
+Reports the sum, mean or other statistics on a variable of the \code{\link{BootstrapData}}.
 }
 \details{
-This function is useful to, e.g, sum Biomass for each SpeciesCategory and IndividualTotalLenght, or average IndividualTotalLenght for each IndiivdualAge and Stratum.
+This function works in two steps. First, the \code{AggregationFunction} is applied to the \code{TargetVariable} of the table given by \code{BaselineProcess} for each unique combination of the \code{GroupingVariables} and for each bootstrap run. Second, a grid of all possible combinations of the \code{GroupingVariables} is formed and the result from the first step placed onto the grid. This creates 0 for each position in the grid where data from the first step are not present. E.g., if a particularly large fish is found in only one haul, and this haul by random is not selected in a bootstrap run, the \code{TargetVariable} will be 0 to reflect the variability in the data. To complete the second step, the \code{BootstrapReportFunction} is applied over the bootstrap runs for each cell in the grid.
+
+The parameter \code{RemoveMissingValues} should be used with extreme caution. The effect of setting \code{RemoveMissingValues} to TRUE is that missing values (NAs) are removed in both the first and second step. This can be dangerous both in the first and in the second step. E.g., if the Abundance of \code{\link{SuperIndividualsData}} is positive for super-individuals with missing IndividualWeight, then the Biomass of those super-individuals will be missing as well. If one the wants to sum the Biomass by using \code{AggregationFunction} = "sum" one will get NA if \code{RemoveMissingValues} = FALSE. If \code{RemoveMissingValues} = TRUE one will ignore the missing Biomass, and the summed Biomass will only include the super-individuals that have non-missing IndividualWeight, effectively discarding a portion of the observed abundance. The summed Biomass will in this case be underestimated!
+
+In the second step, setting \code{RemoveMissingValues} to TRUE can be even more dangerous, as the only option currently available for the \code{BootstrapReportFunction} is the function RstoxBase::summaryStox(), which includes average and standard deivation which are highly influenced by removing missing data.
+
+Instead of setting \code{RemoveMissingValues} to TRUE, it is advised to apply the function \code{\link{ImputeSuperIndividuals}} to fill in e.g. IndividualWeight where missing. Missing values in the output from \code{\link{ReportBootstrap}} can also be avoided by adding variables to \code{GroupingVariables}, such as adding "Stratum" e.g. if there are strata that are known from Baseline to contain no fish. These strata will then be present but with missing values, but these missing values will not affect other strata if "Stratum" is included in \code{GroupingVariables}. It is also  recommended to include "Survey" and "SpeciesCategory" in the \code{GroupingVariables}, as these are key variables for which summary statistics should rarely be computed across.
 }

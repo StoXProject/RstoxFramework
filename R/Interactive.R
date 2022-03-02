@@ -464,7 +464,7 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
         #stratum <- rgdal::readOGR(stratum, stringsAsFactors = FALSE)
         stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
         
-        stratum <- copyPolygonNameToID(stratum)
+        stratum <- copyStratumNameToID(stratum)
         # Add "x", "y" as column names of the coords, since readOGR() does not do this:
         stratum <- addCoordsNames(stratum)
         # added by aasmund: Set projection to empty by default, rbind will then work.
@@ -649,19 +649,19 @@ addCoordsNames <- function(stratum, names = c("x", "y")) {
     return(stratum)
 }
 
-# Function to rename the IDs to the column polygonNames of a SpatialPolygonsDataFrame:
-copyPolygonNameToID <- function(stratum) {
+# Function to rename the IDs to the column StratumName of a SpatialPolygonsDataFrame:
+copyStratumNameToID <- function(stratum) {
     
     # Get the polygon names and IDs:
-    polygonName <- stratum$polygonName
+    StratumName <- stratum$StratumName
     
     # Rename all IDs to the polygon names:
     for (ind in seq_along(stratum@polygons)) {
-        stratum@polygons[[ind]]@ID <- polygonName[ind]
+        stratum@polygons[[ind]]@ID <- StratumName[ind]
     }
     
     # Update rownames of the data slot:
-    rownames(methods::slot(stratum, "data")) <- polygonName
+    rownames(methods::slot(stratum, "data")) <- StratumName
     
     return(stratum)
 }

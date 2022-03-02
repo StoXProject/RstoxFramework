@@ -1,3 +1,16 @@
+# RstoxFramework v3.3.4 (2022-02-28)
+* Reduced time of ReportBootstrap() to a few percent.
+* Changed all sd and cv in reports from 0 to NA. Standard deviation = 0 is no longer accepted by StoX, as it implies either insufficient number of bootstraps or only one value to sample from in the bootstrapping.
+* Fixed bug where the blue dot marking processes as 'run' was turned on on a newly modified process when immediately modifying a later process.
+* Moved setting precision to runProcess() instead of each StoX function.
+* Fixed bug when working with a DefineStratumPolygon procecss with no polygons defined (readProcessOutputFile() did nor read deal properly with the empty SpatialPolygonsDataFrame with jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data))), but ok when using replaceSpatialFileReference(buildSpatialFileReferenceString(data)) instead).
+* Changed to using StratumName instead of the old polygonName in stratum polygons throughout RstoxFramework and the StoX GUI.
+* Changed to using RstoxData::firstClass instead of a copy.
+* Added order of backward compatibility actions to package first (alphabetically), then change version (numerically), and finally action type with order as given by RstoxFramework::getRstoxFrameworkDefinitions("backwardCompatibilityActionNames"). 
+
+# RstoxFramework v3.3.3 (2022-02-14)
+* Added InformationVariables to ReportBootstrap().
+
 # RstoxFramework v3.3.2 (2022-02-10)
 * Added reshapeParameter and reshapeProcessData as backward compatibility actions.
 * Cleaned up backward compatibility actions and added StoX-messages when verbose = TRUE.

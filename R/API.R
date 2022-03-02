@@ -464,7 +464,7 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
         
         # If here are any keys that are time (such as LogKey of the StoxAcoustic format), convert these to character with 3 digits:
         areKeys <- endsWith(names(output), "Key")
-        areDateTime <- sapply(output, firstClass) %in% "POSIXct"
+        areDateTime <- sapply(output, RstoxData::firstClass) %in% "POSIXct"
         toConvertToCharacter <- areKeys & areDateTime
         if(any(toConvertToCharacter)) {
             for(col in names(output)[toConvertToCharacter]) {
@@ -481,7 +481,7 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
     }
     
     if(emptyStringAsNA  && data.table::is.data.table(output)) {
-        characterColumns <- names(output)[sapply(output, firstClass) == "character"]
+        characterColumns <- names(output)[sapply(output, RstoxData::firstClass) == "character"]
         if(length(characterColumns)) {
             output[, (characterColumns) := lapply(.SD, function(x) replace(x, nchar(x) == 0, NA_character_)), .SDcols = characterColumns]
         }
@@ -583,9 +583,9 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     list(
         #value = if(!is.list(value)) as.list(value) else value, 
         value = value, 
-        message = as.list(msg), 
-        warning = as.list(warn), 
-        error = as.list(err)
+        message = as.list(unique(msg)), 
+        warning = as.list(unique(warn)), 
+        error = as.list(unique(err))
     )
 }
 #' @export

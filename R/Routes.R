@@ -271,8 +271,8 @@ getStratumData <- function(projectPath, modelName, processID) {
         return(NULL)
     }
     
-    # Add polygonname, as this is used by the GUI (as per tradition):
-    processData$StratumPolygon$polygonName <- getStratumNames(processData$StratumPolygon)
+    # Add StratumName, as this is used by the GUI:
+    processData$StratumPolygon$StratumName <- getStratumNames(processData$StratumPolygon)
     
     # Create the objects EDSU_PSU, PSU_Stratum and Stratum
     # On 2020-12-21 changed to using geojsonsf to reduce depencdencies:
@@ -800,7 +800,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         type = as.list(c(
             "character", 
             "character", 
-            sapply(processParameters, firstClass)
+            sapply(processParameters, RstoxData::firstClass)
         )), 
         # 5a. format:
         # The number 2 is functionName and processName:
@@ -898,7 +898,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         if(length(functionParameters)) {
             # Get the names of the function parameters:
             functionParameterNames <- names(functionParameters)
-            
+
             format <- getFunctionParameterFormats(functionName)[functionParameterNames]
             
             # Define the function parameters:
@@ -1154,11 +1154,12 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        processDirty = hasBeenRun(
-            projectPath = projectPath, 
-            modelName = modelName, 
-            processID = processID
-        ), 
+        #processDirty = hasBeenRun(
+        #    projectPath = projectPath, 
+        #    modelName = modelName, 
+        #    processID = processID
+        #), 
+        processDirty = TRUE, 
         shift = 0, 
         delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text")
     )
@@ -1451,7 +1452,7 @@ getFilterOptionsAll <- function(projectPath, modelName, processID, include.numer
     name <- lapply(processOutput, names)
     
     # Get the data types:
-    type <- lapply(processOutput, function(x) sapply(x, firstClass))
+    type <- lapply(processOutput, function(x) sapply(x, RstoxData::firstClass))
     
     # Get the operators:
     operators <- lapply(type, function(x) if(length(x)) getRstoxFrameworkDefinitions("filterOperators")[x] else NULL)

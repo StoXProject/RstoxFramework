@@ -1,3 +1,6 @@
+# RstoxFramework v3.3.5 (2022-03-03)
+* Modified tests export_ICESbiotic.zip and export_ICESAcoustic.zip for the new ICES formats.
+
 # RstoxFramework v3.3.4 (2022-02-28)
 * Reduced time of ReportBootstrap() to a few percent.
 * Changed all sd and cv in reports from 0 to NA. Standard deviation = 0 is no longer accepted by StoX, as it implies either insufficient number of bootstraps or only one value to sample from in the bootstrapping.

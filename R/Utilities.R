@@ -786,7 +786,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         }
     }
     
-    browser()
+    #browser()
     
     # Compare reports, but only numeric values:
     reports <- startsWith(names(dat_orig), "Report")

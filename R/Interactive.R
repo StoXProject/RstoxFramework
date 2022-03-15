@@ -263,7 +263,7 @@ removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
     # Get the process data of the process:
     AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
-    # Remove the acsoutic PSU:
+    # Remove the acoustic PSUs:
     PSUsToKeepInStratum_PSU <- !AcousticPSU$Stratum_PSU$PSU %in% PSU
     PSUsToSetToNAInEDSU_PSU <- AcousticPSU$EDSU_PSU$PSU %in% PSU
     
@@ -393,7 +393,7 @@ removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     
     # Set the PSU column to empty string for the given EDSUs:
     atEDSUs <- AcousticPSU$EDSU_PSU$EDSU %in% EDSU
-    AcousticPSU$EDSU_PSU[atEDSUs, PSU := ""]
+    AcousticPSU$EDSU_PSU[atEDSUs, PSU := NA]
     
     # Format the output:
     RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)

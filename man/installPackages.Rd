@@ -3,6 +3,7 @@
 \name{installPackages}
 \alias{installPackages}
 \alias{getNonRstoxDependencies}
+\alias{getStoxDependencies}
 \alias{installOfficialRstoxPackagesWithDependencies}
 \alias{getOfficialRstoxPackageVersion}
 \title{Tools to download and install Rstox packages and dependen packages.}
@@ -13,6 +14,16 @@ getNonRstoxDependencies(
   Rstox.repos = NULL,
   nonRstox.repos = "https://cloud.r-project.org",
   sort = FALSE
+)
+
+getStoxDependencies(
+  StoXGUIVersion,
+  officialRstoxPackageVersionsFile,
+  Rstox.repos = "https://stoxproject.github.io/repo",
+  dependency.repos = "https://cloud.r-project.org",
+  dependencyTypes = NA,
+  platform = NA,
+  quiet = FALSE
 )
 
 installOfficialRstoxPackagesWithDependencies(
@@ -51,9 +62,17 @@ getOfficialRstoxPackageVersion(
 
 \item{officialRstoxPackageVersionsFile}{The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").}
 
-\item{destdir}{The directory to download binaries to, defaulted to NA which implies tempdir().}
-
 \item{dependency.repos}{The repository to download from.}
+
+\item{platform}{The platform to download binaries for, defaulted to the current platform, but with the option to download for other platforms (possible values are "windows" and "macosx").}
+
+\item{quiet}{
+    logical: if true, reduce the amount of output.  This is \emph{not}
+    passed to \code{\link[utils]{available.packages}()} in case that is called, on
+    purpose.
+  }
+
+\item{destdir}{The directory to download binaries to, defaulted to NA which implies tempdir().}
 
 \item{lib}{
     character vector giving the library directories where to
@@ -61,15 +80,7 @@ getOfficialRstoxPackageVersion(
     the first element of \code{\link{.libPaths}()}.
   }
 
-\item{platform}{The platform to download binaries for, defaulted to the current platform, but with the option to download for other platforms (possible values are "windows" and "macosx").}
-
 \item{toJSON}{Logical: If TRUE output a JSON string.}
-
-\item{quiet}{
-    logical: if true, reduce the amount of output.  This is \emph{not}
-    passed to \code{\link[utils]{available.packages}()} in case that is called, on
-    purpose.
-  }
 
 \item{list.out}{Logical: If TRUE wrap the output of \code{getOfficialRstoxPackageVersion} in a list with packageName and version.}
 }

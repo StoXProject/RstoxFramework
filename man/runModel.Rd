@@ -63,7 +63,7 @@ runModel(
 
 \item{close}{Logical: If TRUE close the project after running and getting the output.}
 
-\item{...}{\code{replaceArgsList} can also be given directly.}
+\item{...}{Arguments passed on to \code{\link{openProject}}, \code{\link{closeProject}} and \code{\link{runProcesses}}.}
 }
 \value{
 A list of model output.

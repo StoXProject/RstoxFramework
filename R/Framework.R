@@ -8,6 +8,7 @@
 #' @param modelName,modelNames The name of the model(s) (possible values are "baseline", "analysis" and "report").
 #' @param processID The ID of the process.
 #' @param processName,processes The name of the process(es).
+#' @param functionName The name of the function used by the process. 
 #' @param tableName The name of the output table to get from the process.
 #' @param startProcess,endProcess The process index, name or ID at which to start and stop the model run.
 #' @param afterProcessID,beforeProcessID The ID of the process after or before which to get the procecss table (place a process or in the case of afterProcessID).
@@ -826,6 +827,7 @@ readProjectDescription <- function(
     }
     
     # Apply backward compatibility:
+    #browser()
     saved <- TRUE
     if(applyBackwardCompatibility) {
         projectDescriptionAfterBackwardCompatibility <- applyBackwardCompatibility(projectDescription, verbose = verbose)
@@ -4016,6 +4018,11 @@ parseParameter <- function(parameter, simplifyVector = TRUE) {
         return(NULL)
     }
     
+    
+    if(is.list(parameter)) {
+        return(parameter)
+    }
+    
     # Parse the JSON:
     out <- jsonlite::fromJSON(parameter, simplifyVector = simplifyVector)
     # If data.frame, convert to data.table:
@@ -5196,6 +5203,12 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
     return(folderPath)
 }
 
+#' Function to get process ID from process name
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @export
+#' 
 getProcessIDFromProcessName <- function(projectPath, modelName, processName) {
     # Get the table linking process names and IDs:
     processIndexTable <- readProcessIndexTable(
@@ -5208,6 +5221,12 @@ getProcessIDFromProcessName <- function(projectPath, modelName, processName) {
 }
 
 
+#' Function to get process index from process ID
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @export
+#' 
 getProcessIndexFromProcessID <- function(projectPath, modelName, processID) {
     # Get the table linking process names and IDs:
     processIndexTable <- readProcessIndexTable(
@@ -5222,6 +5241,12 @@ getProcessIndexFromProcessID <- function(projectPath, modelName, processID) {
     processIndex
 }
 
+#' Function to get process name from process ID
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @export
+#' 
 getProcessNameFromProcessID <- function(projectPath, modelName, processID) {
     # Get the table linking process names and IDs:
     processIndexTable <- readProcessIndexTable(
@@ -5908,6 +5933,12 @@ hasBeenRun <- function(projectPath, modelName, processID) {
 
 
 
+#' Find a processes from processName or functionName
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @export
+#' 
 findProcess <- function(projectPath, modelName, processName = NULL, functionName = NULL) {
     
     # Get the table of baseline processes:

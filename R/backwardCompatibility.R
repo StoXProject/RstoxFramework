@@ -139,7 +139,7 @@ applyBackwardCompatibilityActionsReordered <- function(
     changeVersions <- sapply(backwardCompatibility, "[[", "changeVersion")
     newOrder <- order(
         packageNames, 
-        RstoxData:::createOrderKey(changeVersions, split = "."), 
+        RstoxData::createOrderKey(changeVersions, split = "."), 
         match(actionNames, getRstoxFrameworkDefinitions("backwardCompatibilityActionNames"))
     )
     backwardCompatibility <- backwardCompatibility[newOrder]

@@ -1,3 +1,7 @@
+# RstoxFramework v3.3.6 (2022-03-15)
+* Fixed bug in removeEDSU(), where EDSUs to remove were assigned empty string instead of NA as PSU.
+* Added export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=false in check-full.yaml to prevent Homebrew from re-installing R with .Platform$pkgType = "source" on Mac.
+
 # RstoxFramework v3.3.5 (2022-03-03)
 * Modified tests export_ICESbiotic.zip and export_ICESAcoustic.zip for the new ICES formats.
 

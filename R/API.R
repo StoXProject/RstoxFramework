@@ -12,6 +12,7 @@
 #' @param force.restart Logical: If TRUE restart the model before running.
 #' @param close Logical: If TRUE close the project after running and getting the output.
 #' @param returnModelData Logical: If TRUE return the output of the model runs.
+#' @param ... Arguments passed on to \code{\link{openProject}}, \code{\link{closeProject}} and \code{\link{runProcesses}}.
 #' 
 #' @return
 #' A list of model output.
@@ -35,7 +36,7 @@ runModel <- function(
     
     # Close after running if requested:
     if(close) {
-        on.exit(closeProject(projectPath))
+        on.exit(closeProject(projectPath, save = save, ...))
     }
     
     # Run the model if required:

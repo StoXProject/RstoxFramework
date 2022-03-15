@@ -12,6 +12,8 @@
 
 \item{processName, processes}{The name of the process(es).}
 
+\item{functionName}{The name of the function used by the process.}
+
 \item{tableName}{The name of the output table to get from the process.}
 
 \item{startProcess, endProcess}{The process index, name or ID at which to start and stop the model run.}

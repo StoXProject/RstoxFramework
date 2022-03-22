@@ -1070,3 +1070,40 @@ convertClassOfDataTable <- function(x, classes) {
     }
 }
 
+##################################################
+##################################################
+#' Get IDs of bad Hauls or Samples
+#' 
+#' @param errorString A error string (as returned from \code{\link{runFunction}}).
+#' @param bullet A character string giving the prefix used when listing bad Hauls or Samples.
+#' @param sep A character string markingg the start of the reported ID.
+#' @param collapse A character string separator between ID lines.
+#'
+#' 
+#' @return
+#' An list of IDs.
+#' 
+#' @export
+#' 
+extractErrorIDs <- function(errorString, bullet = "* ", sep = ": ", collapse = "\n") {
+    key1 <- escapeForRegex(bullet)
+    key2 <- escapeForRegex(sep)
+    regex <- paste0("(?<=", key1, ").*(?=", key2, ")")
+    errorNames <- unique(regmatches(errorString, gregexpr(regex, errorString, perl = TRUE))[[1]])
+    out <- lapply(errorNames, extractErrorIDsOne, errorString = errorString, bullet = bullet, sep = sep, collapse = collapse)
+    names(out) <- errorNames
+    return(out)
+}
+
+extractErrorIDsOne <- function(errorName, errorString, bullet = "* ", sep = ": ", collapse = "\n") {
+    key1 <- paste0(escapeForRegex(bullet), errorName, escapeForRegex(sep))
+    key2 <- escapeForRegex(collapse)
+    regex <- paste0("(?<=", key1, ").*(?=", key2, ")")
+    errorIDs <- regmatches(errorString, gregexpr(regex, errorString, perl = TRUE))[[1]]
+    return(errorIDs)
+}
+
+escapeForRegex <- function(x) {
+    gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\\1", x)
+}
+

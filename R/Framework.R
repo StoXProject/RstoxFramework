@@ -4304,6 +4304,77 @@ addProcess <- function(projectPath, modelName, values = NULL, returnProcessTable
         return(TRUE)
     }
 }
+#' Insert a StoX process after a specific process
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams addProcess
+#' 
+#' @export
+#' 
+expandProcess <- function(projectPath, modelName, processName, values = NULL, returnProcessTable = TRUE) {
+    
+    if(!length(values$processName)) {
+        values$processName <- checkProcessName(
+            paste0(processName, "_expand"), 
+            projectPath, 
+            strict = FALSE
+        )
+    }
+    
+    # Add an AddToStoxBiotic process which inputs the firstStoxBioticProcess 
+    suppressWarnings(
+        RstoxFramework::addProcess(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            values = values
+        )
+    )
+    # Move the new process to immediately after the existing:
+    processID_toMove <- RstoxFramework::getProcessIDFromProcessName(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processName = values$processName
+    )
+    afterProcessID <- RstoxFramework::getProcessIDFromProcessName(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processName = processName
+    )
+    RstoxFramework::rearrangeProcesses(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID_toMove$processID, 
+        afterProcessID = afterProcessID$processID
+    )
+    
+    # Modify all processes to using the new process as input:
+    modifyProcessNameInFunctionInputs(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processName = processName, 
+        newProcessName = values$processName
+    )
+    
+    # Set the status as not saved (saving is done when running a process):
+    setSavedStatus(projectPath, status = FALSE)
+    
+    # Return the process table if requested:
+    if(returnProcessTable) {
+        processTable <- getProcessTable(projectPath = projectPath, modelName = modelName)
+        activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+        return(
+            list(
+                processTable = processTable, 
+                activeProcess = activeProcess, 
+                saved = isSaved(projectPath)
+            )
+        )
+    }
+    else {
+        return(TRUE)
+    }
+}
+    
 #' Remove a StoX process
 #' 
 #' @inheritParams general_arguments

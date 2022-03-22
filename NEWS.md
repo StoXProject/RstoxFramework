@@ -1,3 +1,6 @@
+# RstoxFramework v3.3.7 (2022-03-22)
+* Added expandProcess() and extractErrorIDs()
+
 # RstoxFramework v3.3.6 (2022-03-15)
 * Fixed bug in removeEDSU(), where EDSUs to remove were assigned empty string instead of NA as PSU.
 * Added export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=false in check-full.yaml to prevent Homebrew from re-installing R with .Platform$pkgType = "source" on Mac.

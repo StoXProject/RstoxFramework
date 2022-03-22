@@ -19,7 +19,7 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.3.7</span>
       </span>
     </div>
 
@@ -63,6 +63,16 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
   sort <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span>
 
+<span class="fu">getStoxDependencies</span><span class="op">(</span>
+  <span class="va">StoXGUIVersion</span>,
+  <span class="va">officialRstoxPackageVersionsFile</span>,
+  Rstox.repos <span class="op">=</span> <span class="st">"https://stoxproject.github.io/repo"</span>,
+  dependency.repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span>,
+  dependencyTypes <span class="op">=</span> <span class="cn">NA</span>,
+  platform <span class="op">=</span> <span class="cn">NA</span>,
+  quiet <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span>
+
 <span class="fu">installOfficialRstoxPackagesWithDependencies</span><span class="op">(</span>
   <span class="va">StoXGUIVersion</span>,
   <span class="va">officialRstoxPackageVersionsFile</span>,
@@ -101,22 +111,22 @@ getOfficialRstoxPackageVersion reads the OfficialRstoxFrameworkVersions.txt file
 <dd><p>The version of the StoX GUI defining the combination of official Rstox package versions.</p></dd>
 <dt>officialRstoxPackageVersionsFile</dt>
 <dd><p>The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").</p></dd>
-<dt>destdir</dt>
-<dd><p>The directory to download binaries to, defaulted to NA which implies tempdir().</p></dd>
 <dt>dependency.repos</dt>
 <dd><p>The repository to download from.</p></dd>
-<dt>lib</dt>
-<dd><p>character vector giving the library directories where to
-    install the packages.  Recycled as needed.  If missing, defaults to
-    the first element of <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths</a>()</code>.</p></dd>
 <dt>platform</dt>
 <dd><p>The platform to download binaries for, defaulted to the current platform, but with the option to download for other platforms (possible values are "windows" and "macosx").</p></dd>
-<dt>toJSON</dt>
-<dd><p>Logical: If TRUE output a JSON string.</p></dd>
 <dt>quiet</dt>
 <dd><p>logical: if true, reduce the amount of output.  This is <em>not</em>
     passed to <code><a href="https://rdrr.io/r/utils/available.packages.html" class="external-link">available.packages</a>()</code> in case that is called, on
     purpose.</p></dd>
+<dt>destdir</dt>
+<dd><p>The directory to download binaries to, defaulted to NA which implies tempdir().</p></dd>
+<dt>lib</dt>
+<dd><p>character vector giving the library directories where to
+    install the packages.  Recycled as needed.  If missing, defaults to
+    the first element of <code><a href="https://rdrr.io/r/base/libPaths.html" class="external-link">.libPaths</a>()</code>.</p></dd>
+<dt>toJSON</dt>
+<dd><p>Logical: If TRUE output a JSON string.</p></dd>
 <dt>list.out</dt>
 <dd><p>Logical: If TRUE wrap the output of <code>getOfficialRstoxPackageVersion</code> in a list with packageName and version.</p></dd>
 </dl></div>

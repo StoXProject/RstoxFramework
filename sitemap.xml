@@ -85,7 +85,16 @@
     <loc>/reference/expandDT.html</loc>
   </url>
   <url>
+    <loc>/reference/expandProcess.html</loc>
+  </url>
+  <url>
     <loc>/reference/expression2list.html</loc>
+  </url>
+  <url>
+    <loc>/reference/extractErrorIDs.html</loc>
+  </url>
+  <url>
+    <loc>/reference/findProcess.html</loc>
   </url>
   <url>
     <loc>/reference/fixedWidthTable.html</loc>
@@ -104,6 +113,15 @@
   </url>
   <url>
     <loc>/reference/getModelData.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getProcessIDFromProcessName.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getProcessIndexFromProcessID.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getProcessNameFromProcessID.html</loc>
   </url>
   <url>
     <loc>/reference/getProcessOutput.html</loc>

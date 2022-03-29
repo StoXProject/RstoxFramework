@@ -112,3 +112,44 @@ m <- merge(sn_old, sn_new, by.x = c("AcoCat", "SampleUnit", "Layer"), by.y = c("
 tolerance <- 5e-5
 expect_true(m[, max(abs(NASC.y - NASC.x) / NASC.y, na.rm = TRUE)] < tolerance)
 
+
+
+
+
+#### 4. Capelin 2021: ####
+
+# Define path to the project, which contains both StoX 2.7 and 3:
+projectPath3_capelin <- system.file("test", "versus_2.7", "capelin_21.zip", package = "RstoxFramework")
+projectPath3_capelin <- unzipProject(projectPath3_capelin, exdir = tempdir())
+
+# Run the capelin_21 in current StoX:
+new_capelin <- runModel(projectPath3_capelin, modelName = "baseline")
+
+# Get the new results:
+# Abundance:
+ab_new <- new_capelin$Abundance$Data
+
+# Read old results:
+# Abundance:
+ab_old <- readStoX2.7OutputFile(file.path(projectPath3_capelin, "output", "baseline", "data", "19_Abundance_Abundance.txt"))
+
+
+# Compare abundance:
+mab <- merge(ab_new, ab_old, by.x = c("Stratum", "IndividualTotalLength"), by.y = c("SampleUnit", "LengthGroup"), all = TRUE)
+suppressWarnings(diff <- mab[, .( diff = max(abs(Abundance.y - Abundance.x) / Abundance.y, na.rm = TRUE)), by = "Stratum"])
+
+
+# Test:
+tolerance <- data.table::data.table(
+    Stratum = c(
+        "Shelf edge", 
+        "Spitzbergen bank"
+    ), 
+    tolerance = c(
+        5e-11, # No diff.
+        6.9e-02 # Difff due to different projection in 2.7 and >= 3.0.0, kicking in close to the turns.
+    )
+)
+diff <- merge(diff, tolerance, by = "Stratum")
+expect_true(diff[, all(diff < tolerance)])
+

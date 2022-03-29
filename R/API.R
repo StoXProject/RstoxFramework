@@ -159,6 +159,7 @@ runProject <- function(
             purge.processData = purge.processData, 
             try = try, 
             close = FALSE, 
+            msg = msg, 
             ...
         ), 
         SIMPLIFY = FALSE

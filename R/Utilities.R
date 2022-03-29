@@ -728,7 +728,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     message(projectPath_copy)
     openProject(projectPath_copy)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, try = try, ...)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, try = try, msg = FALSE, ...)
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
@@ -786,7 +786,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         }
     }
     
-    browser()
+    #browser()
     
     # Compare reports, but only numeric values:
     reports <- startsWith(names(dat_orig), "Report")

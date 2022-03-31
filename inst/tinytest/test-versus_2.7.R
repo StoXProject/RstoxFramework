@@ -153,3 +153,30 @@ tolerance <- data.table::data.table(
 diff <- merge(diff, tolerance, by = "Stratum")
 expect_true(diff[, all(diff < tolerance)])
 
+
+
+
+
+
+#### 5. CoastalCod 2020: ####
+
+# Define path to the project, which contains both StoX 2.7 and 3:
+projectPath3_coastalCod <- system.file("test", "versus_2.7", "coastalCod_21.zip", package = "RstoxFramework")
+projectPath3_coastalCod <- unzipProject(projectPath3_coastalCod, exdir = tempdir())
+
+# Run the coastalCod_21 in current StoX:
+new_coastalCod <- runModel(projectPath3_coastalCod, modelName = "baseline")
+
+# Get the new results:
+# Abundance:
+si_new <- new_coastalCod$SuperIndividuals
+
+# Read old results:
+# Abundance:
+si_old <- readStoX2.7OutputFile(file.path(projectPath3_coastalCod, "output", "baseline", "data", "25_SuperIndAbundance_SuperIndividuals.txt"))
+
+# Compare super-individual abundance:
+data.table::setorderv(si_new,c( "HaulKey",  "IndividualTotalLength"))
+data.table::setorderv(si_old, c("serialno",   "LenGrp"))
+expect_true(all(si_old$Abundance == si_old$Abundance))
+

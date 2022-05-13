@@ -111,7 +111,13 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
     }
     else if(data.table::is.data.table(x)) {
         # First convert all columns to character:
-        x <- x[, (colnames(x)) := lapply(.SD, as.character), .SDcols = names(x)]
+        ### # Take special care of datetime:
+        ### isDateTime <- startsWith(sapply(x, RstoxData::firstClass), "POSIX")
+        ### POSIXCols  <- colnames(x)[isDateTime]
+        ### if(any(isDateTime)) {
+        ###     x[, (POSIXCols) := lapply(.SD, function(datetime) format(datetime, format = "%Y-%m-%dT%H:%M:%OS3Z")), .SDcols = POSIXCols]
+        ### }
+        x[, (colnames(x)) := lapply(.SD, as.character), .SDcols = names(x)]
         
         # Replace all NA with the user specified na:
         x[is.na(x)] <- na
@@ -787,6 +793,9 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     #browser()
+    # unlist(data_equal)[!unlist(data_equal) == "TRUE"]
+    # unlist(columnNames_identical)[!unlist(columnNames_identical) == "TRUE"]
+    # unlist(tableNames_identical)[!unlist(tableNames_identical) == "TRUE"]
     
     # Compare reports, but only numeric values:
     reports <- startsWith(names(dat_orig), "Report")

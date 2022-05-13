@@ -387,6 +387,7 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param saveIfAlreadyOpen Logical: If TRUE save the project before closing if already open and force is TRUE.
 #' @param newProjectPath    The path to the copied StoX project.
 #' @param verbose           Logical: If TRUE, print information to the console, e.g. about backward compatibility.
+#' @param empty.output      Logical: If TRUE, do not include the output files when copying.
 #' 
 #' @name Projects
 #' 
@@ -668,14 +669,22 @@ saveAsProject <- function(
 #' @export
 #' @rdname Projects
 #' 
-copyProject <- function(projectPath, newProjectPath, ow = FALSE) {
+copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE) {
     if(ow) {
         unlink(newProjectPath, force = TRUE, recursive = TRUE)
     }
-    suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
+    #suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
+    createProjectSkeleton(newProjectPath, ow = ow)
+    
+    foldersToCopy <- getProjectPaths(projectPath, "stoxFolders")
+    if(empty.output) {
+        foldersToCopy <- foldersToCopy[basename(foldersToCopy) != "output"]
+    }
+    
+    
     
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
-    lapply(getProjectPaths(projectPath, "stoxFolders"), file.copy, newProjectPath, recursive = TRUE)
+    lapply(foldersToCopy, file.copy, newProjectPath, recursive = TRUE)
     #file.copy(projectPath, newProjectPath, recursive=TRUE)
 }
 #' 
@@ -3981,8 +3990,10 @@ convertStringToNA <- function(x) {
 escapeTabAndNewline <- function(x) {
     chcols = names(x)[sapply(x, is.character)]
     #x[, (chcols) := lapply(.SD, replace, as.is=TRUE), .SDcols=chcols] # Changed to numeric when not intended
-    x[, (chcols) := lapply(.SD, escapeNewLine), .SDcols = chcols]
-    x[, (chcols) := lapply(.SD, escapeTab), .SDcols = chcols]
+    if(length(chcols)) {
+        x[, (chcols) := lapply(.SD, escapeNewLine), .SDcols = chcols]
+        x[, (chcols) := lapply(.SD, escapeTab), .SDcols = chcols]
+    }
 }
 
 escapeNewLine <- function(x) {

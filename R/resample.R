@@ -146,12 +146,21 @@ Bootstrap <- function(
     # Get the number of cores to open:
     NumberOfCores <- RstoxData::getNumberOfCores(NumberOfCores, n  = NumberOfBootstraps)
     
-    # Copy the projec to the tempdir for each core:
+    # Copy the project to the tempdir for each core:
     projecName <- basename(projectPath)
     # As of 2021-05-27 (v3.0.23) make a copy even if running on only one core. This for safety:
     #if(NumberOfCores > 1)  {
-        projectPath_copies <- file.path(tempdir(), paste0(projecName, seq_len(NumberOfCores)))
-        temp <- RstoxData::mapplyOnCores(copyProject, MoreArgs = list(ow = TRUE, projectPath = projectPath), projectPath_copies, NumberOfCores = NumberOfCores)
+    projectPath_copies <- file.path(tempdir(), paste0(projecName, seq_len(NumberOfCores)))
+    temp <- RstoxData::mapplyOnCores(
+        copyProject, 
+        projectPath = projectPath, 
+        newProjectPath = projectPath_copies, 
+        MoreArgs = list(
+            ow = TRUE, 
+            empty.output = TRUE
+        ), 
+        NumberOfCores = NumberOfCores
+    )
     #}
     #else {
     #    projectPath_copies <- projectPath
@@ -310,6 +319,7 @@ runOneBootstrapSaveOutput <- function(ind, replaceArgsList, replaceDataList, pro
         save = FALSE, 
         # Be sure to not touch the process data and file output, the latter mostly for speed if the bootstrap is run on a copy of the project (see if this is the case in the code of Bootstrap()):
         saveProcessData = FALSE, 
+        #  Do not save the output (text) files:
         fileOutput = FALSE, 
         setUseProcessDataToTRUE = FALSE, 
         replaceArgsList = replaceArgsList, 

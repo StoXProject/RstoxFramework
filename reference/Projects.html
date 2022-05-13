@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
       </span>
     </div>
 
@@ -92,7 +92,7 @@
   Application <span class="op">=</span> <span class="va">R.version.string</span>
 <span class="op">)</span>
 
-<span class="fu">copyProject</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">newProjectPath</span>, ow <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+<span class="fu">copyProject</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">newProjectPath</span>, ow <span class="op">=</span> <span class="cn">FALSE</span>, empty.output <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 
 <span class="fu">deleteProject</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></code></pre></div>
     </div>
@@ -125,6 +125,8 @@
 <dd><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></dd>
 <dt>newProjectPath</dt>
 <dd><p>The path to the copied StoX project.</p></dd>
+<dt>empty.output</dt>
+<dd><p>Logical: If TRUE, do not include the output files when copying.</p></dd>
 </dl></div>
 
   </div>
@@ -139,7 +141,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
 </div>
 
       </footer></div>

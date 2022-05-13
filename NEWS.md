@@ -1,3 +1,9 @@
+# RstoxFramework v3.4.1 (2022-05-13)
+* Fixed bug in Versions.R, which is used by StoX for the tool "Install Rstox packages". The bug was that the package data.table was used but not installed. Also, added support for installing Rstox package binaries built with older R versions than the one installed, allowing for installation of Rstox packages in existing StoX versions even when a new R version is released and installed. In R 4.2. the location of the folder in which user installed packages are saved has changed from the Documents folder to the AppData > Local folder of the user, which is now included in Versions.R.
+* Added the parameters onlyStoxWarnings and onlyStoxErrors to runFunction().
+* Added the parameter empty.output in copyProject().
+* Updated test projects coastalCod_20, export_ICESbiotic, splitNASC_18, tobis_20 and tobis_20_depth according to the change in RstoxBase where AssignmentLengthDistribution now outputs WeightedNumber normalized to 100 per PSU.
+
 # RstoxFramework v3.3.7 (2022-03-22)
 * Added expandProcess() and extractErrorIDs()
 

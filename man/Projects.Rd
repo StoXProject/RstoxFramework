@@ -50,7 +50,7 @@ saveAsProject(
   Application = R.version.string
 )
 
-copyProject(projectPath, newProjectPath, ow = FALSE)
+copyProject(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE)
 
 deleteProject(projectPath)
 }
@@ -80,6 +80,8 @@ deleteProject(projectPath)
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
 \item{newProjectPath}{The path to the copied StoX project.}
+
+\item{empty.output}{Logical: If TRUE, do not include the output files when copying.}
 }
 \description{
 Create a StoX project using \code{createProject}; open an existing (un-opened) project using \code{openProject}, which involves creating files holding the memory of the project; close a project using  \code{closeProject}, which removes the memory files; save the project using \code{saveProject}, which saves the memory files to the project description file; make a copy using \code{copyProject} or \code{saveAsProject}, where the former closes the given project unsaved and opens the copy, or delete a project using \code{deleteProject}.

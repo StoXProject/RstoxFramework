@@ -30,6 +30,7 @@ runModel <- function(
     returnModelData = TRUE, 
     try = TRUE, 
     close = FALSE, 
+    msg = TRUE, 
     ...
 ) {
     
@@ -62,6 +63,7 @@ runModel <- function(
                 setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
                 purge.processData = purge.processData, 
                 try = try, 
+                msg = msg, 
                 ...
             )
             # Get the model data:
@@ -351,7 +353,7 @@ createNestedListElement <- function(x, namesVector) {
 #' @inheritParams general_arguments
 #' @inheritParams runProject
 #' @param verifyFiles Logical: If TRUE verify that the files are from processes that exist in the project.
-#' @param unlist Either 1 to unlist the models, 2 to unlist the models and the proecss. TRUE is interpreted as 2.
+#' @param unlist Either 1 to unlist the models, 2 to unlist the models and the process. TRUE is interpreted as 2.
 #' @param emptyStringAsNA Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.
 #' 
 #' @return
@@ -412,7 +414,10 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
             unlist <- 2
         }
         if(unlist > 1) {
-            output <- lapply(output, function(x) unlist(unname(x), recursive = FALSE))
+            #output <- lapply(output, function(x) if(hasOnlyOneTabble(x)) unlist(unname(x), recursive = FALSE) else x)
+            # Changed to equal the output from runProject():
+            output <- lapply(output, function(x) lapply(x, function(y) if(hasOnlyOneTabble(y)) y[[1]] else y))
+            # Still the processes with 2 levels are output in a flat list with names separated by underscore, as there is no secure way to determine from those file names that there actually are 2 levels:
         }
         if(unlist > 0) {
             output <- unlist(unname(output), recursive = FALSE)
@@ -430,6 +435,9 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
     
 }
 
+hasOnlyOneTabble <- function(x) {
+    is.list(x) && !data.table::is.data.table(x) && length(x) == 1
+}
 
 readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE) {
     output <- structure(lapply(paths, readStoxOutputFile, emptyStringAsNA = emptyStringAsNA), names = basename(tools::file_path_sans_ext(paths)))
@@ -535,11 +543,13 @@ unlistSep <- function(x, sep = "/") {
 #' @param package The name of the package holding the function given by \code{what}.
 #' @param removeCall Logical: If FALSE, keep the call in the error message.
 #' @param onlyStoxMessages Logical: If TRUE show only the StoX messages, which are those starting with "StoX: ".
+#' @param onlyStoxWarnings Logical: If TRUE show only the StoX warnings, which are those starting with "StoX: ".
+#' @param onlyStoxErrors Logical: If TRUE show only the StoX errors, which are those starting with "StoX: ".
 #' @param cmd A JSON string containing parameters listed above.
 #' 
 #' @export
 #' 
-runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE) {
+runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE) {
     
     # Parse the args if given as a JSON string:
     args <- parseParameter(args)
@@ -573,8 +583,45 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     if(length(err)) {
         err <- as.character(err)
     }
-    if(onlyStoxMessages) {
-        msg <- trimws(sub("StoX:", "", msg[startsWith(msg, "StoX:")], fixed = TRUE))
+    
+    
+    
+    
+    
+    # Get only the StoX-messages, and add "> "
+    if(length(msg)) {
+        if(onlyStoxMessages) {
+            msg <- msg[startsWith(msg, "StoX:")]
+            msg <- trimws(sub("StoX: ", "> ", msg, fixed = TRUE))
+        }
+        else {
+            msg <- trimws(sub("StoX: ", "", msg, fixed = TRUE))
+            msg <- paste0("> ", msg)
+        }
+    }
+    
+    # Get only the StoX-warnings, and add "> "
+    if(length(warn)) {
+        if(onlyStoxWarnings) {
+            warn <- warn[startsWith(warn, "StoX:")]
+            warn <- trimws(sub("StoX: ", "> ", warn, fixed = TRUE))
+        }
+        else {
+            warn <- trimws(sub("StoX: ", "", warn, fixed = TRUE))
+            warn <- paste0("> ", warn)
+        }
+    }
+    
+    # Get only the StoX-errors, and add "> "
+    if(length(err)) {
+        if(onlyStoxErrors) {
+            err <- err[startsWith(err, "StoX:")]
+            err <- trimws(sub("StoX: ", "> ", err, fixed = TRUE))
+        }
+        else {
+            err <- trimws(sub("StoX: ", "", err, fixed = TRUE))
+            err <- paste0("> ", err)
+        }
     }
     
     

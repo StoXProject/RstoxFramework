@@ -10,7 +10,9 @@ runFunction(
   args,
   package = "RstoxFramework",
   removeCall = TRUE,
-  onlyStoxMessages = TRUE
+  onlyStoxMessages = TRUE,
+  onlyStoxWarnings = TRUE,
+  onlyStoxErrors = FALSE
 )
 
 runFunction.JSON(cmd)
@@ -27,6 +29,10 @@ runFunction.JSON(cmd)
 \item{removeCall}{Logical: If FALSE, keep the call in the error message.}
 
 \item{onlyStoxMessages}{Logical: If TRUE show only the StoX messages, which are those starting with "StoX: ".}
+
+\item{onlyStoxWarnings}{Logical: If TRUE show only the StoX warnings, which are those starting with "StoX: ".}
+
+\item{onlyStoxErrors}{Logical: If TRUE show only the StoX errors, which are those starting with "StoX: ".}
 
 \item{cmd}{A JSON string containing parameters listed above.}
 }

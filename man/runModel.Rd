@@ -23,6 +23,7 @@ runModel(
   returnModelData = TRUE,
   try = TRUE,
   close = FALSE,
+  msg = TRUE,
   ...
 )
 }
@@ -62,6 +63,8 @@ runModel(
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
 \item{close}{Logical: If TRUE close the project after running and getting the output.}
+
+\item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
 \item{...}{Arguments passed on to \code{\link{openProject}}, \code{\link{closeProject}} and \code{\link{runProcesses}}.}
 }

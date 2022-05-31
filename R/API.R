@@ -399,7 +399,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
                 unlistSep(processNames)
             )
             
-            if(any(invalidProcesses)) {
+            if(length(invalidProcesses)) {
                 warning("The following folders of the output are not present as processes in the project description file, and were discarded from the output:", paste(invalidProcesses, collapse = ", "))
                 outputFiles <- lapply(outputFiles, function(x) x[!names(x) %in% basename(invalidProcesses)])
             }
@@ -489,6 +489,9 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
     else if(tolower(ext) == "nc") {
         stop("NetCDF4 file not yet implemented.")
     }
+    else {
+        stop("Unknown file extension for StoX output file: ", ext, ". Path: ", path, ".")
+    }
     
     if(emptyStringAsNA  && data.table::is.data.table(output)) {
         characterColumns <- names(output)[sapply(output, RstoxData::firstClass) == "character"]
@@ -530,7 +533,7 @@ listOutputfiles <- function(modelPath) {
 
 
 unlistSep <- function(x, sep = "/") {
-    paste(rep(names(processNames), lengths(processNames)), unlist(processNames), sep = sep)
+    paste(rep(names(x), lengths(x)), unlist(x), sep = sep)
 }
 
 

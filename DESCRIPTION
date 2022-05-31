@@ -1,6 +1,6 @@
 Package: RstoxFramework
-Version: 3.4.1
-Date: 2022-05-13
+Version: 3.4.2
+Date: 2022-05-31
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
@@ -46,8 +46,8 @@ Imports:
     jsonlite (>= 1.6),
     jsonvalidate (>= 1.3.2),
     methods (>= 3.6.2),
-    RstoxBase (>= 1.9.1),
-    RstoxData (>= 1.6.2),
+    RstoxBase (>= 1.9.2),
+    RstoxData (>= 1.6.3),
     sf (>= 0.9.0),
     sp (>= 1.3.2),
     stringi (>= 1.4.3)

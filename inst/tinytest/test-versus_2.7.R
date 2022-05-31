@@ -27,7 +27,12 @@ si_old <- readStoX2.7OutputFile(file.path(projectPath3_cod, "output", "baseline"
 mab <- merge(ab_new, ab_old, by.x = c("Stratum", "IndividualTotalLength"), by.y = c("SampleUnit", "LengthGroup"), all = TRUE)
 
 # Test:
-tolerance <- 3e-3
+# mab[, summary(abs(Abundance.x - Abundance.y))]
+# From 3.5.0 and onwards:
+# Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+# 0.000000 0.000121 0.000260 0.000282 0.000411 0.001242       25 
+
+tolerance <- 2e-3
 expect_true(mab[, all(abs(Abundance.x - Abundance.y) < tolerance, na.rm =  TRUE)])
 
 
@@ -38,7 +43,11 @@ data.table::setorderv(si_new, c("Stratum", "IndividualTotalLength", "HaulKey", "
 data.table::setorderv(si_old, c("Stratum", "LenGrp", "serialno", "species", "samplenumber", "no"))
 
 # Test:
-tolerance <- 1e-4
+# summary(abs(si_new$Abundance - si_old$Abundance))
+# From 3.5.0 and onwards:
+# Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+# 3.190e-09 1.230e-05 2.526e-05 2.555e-05 3.884e-05 1.232e-04 
+tolerance <- 2e-4
 expect_true(all(abs(si_new$Abundance - si_old$Abundance) < tolerance))
 
 

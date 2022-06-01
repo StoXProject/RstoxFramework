@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
       </span>
     </div>
 
@@ -47,6 +47,11 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.4.1" id="rstoxframework-v341-2022-05-31">RstoxFramework v3.4.1 (2022-05-31)<a class="anchor" aria-label="anchor" href="#rstoxframework-v341-2022-05-31"></a></h2>
+<ul><li>Added R 4.2. as supported version.</li>
+<li>Changed tolerance in test-versus_2.7.R as per slight differences in StratumArea due to move from rgeos to sf in RstoxBase, forced by <a href="https://www.r-bloggers.com/2022/04/r-spatial-evolution-retirement-of-rgdal-rgeos-and-maptools/" class="external-link uri">https://www.r-bloggers.com/2022/04/r-spatial-evolution-retirement-of-rgdal-rgeos-and-maptools/</a>.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.4.1" id="rstoxframework-v341-2022-05-13">RstoxFramework v3.4.1 (2022-05-13)<a class="anchor" aria-label="anchor" href="#rstoxframework-v341-2022-05-13"></a></h2>
 <ul><li>Fixed bug in Versions.R, which is used by StoX for the tool “Install Rstox packages”. The bug was that the package data.table was used but not installed. Also, added support for installing Rstox package binaries built with older R versions than the one installed, allowing for installation of Rstox packages in existing StoX versions even when a new R version is released and installed. In R 4.2. the location of the folder in which user installed packages are saved has changed from the Documents folder to the AppData &gt; Local folder of the user, which is now included in Versions.R.</li>

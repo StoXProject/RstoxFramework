@@ -469,7 +469,8 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
         stratum <- addCoordsNames(stratum)
         # added by aasmund: Set projection to empty by default, rbind will then work.
         #stratum@proj4string <- sp::CRS()
-        suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
+        suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
+        #suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
     }
     
     # Add the new strata, but check that the stratum names are not in use:
@@ -584,6 +585,7 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
 #' 
 modifyStratum <- function(stratum, projectPath, modelName, processID) {
     
+    browser()
     # Check that the process returns StratumPolygon process data:
     checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
     

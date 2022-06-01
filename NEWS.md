@@ -1,3 +1,7 @@
+# RstoxFramework v3.4.1 (2022-05-31)
+* Added R 4.2. as supported version.
+* Changed tolerance in test-versus_2.7.R as per slight differences in StratumArea due to move from rgeos to sf in RstoxBase, forced by https://www.r-bloggers.com/2022/04/r-spatial-evolution-retirement-of-rgdal-rgeos-and-maptools/.
+
 # RstoxFramework v3.4.1 (2022-05-13)
 * Fixed bug in Versions.R, which is used by StoX for the tool "Install Rstox packages". The bug was that the package data.table was used but not installed. Also, added support for installing Rstox package binaries built with older R versions than the one installed, allowing for installation of Rstox packages in existing StoX versions even when a new R version is released and installed. In R 4.2. the location of the folder in which user installed packages are saved has changed from the Documents folder to the AppData > Local folder of the user, which is now included in Versions.R.
 * Added the parameters onlyStoxWarnings and onlyStoxErrors to runFunction().

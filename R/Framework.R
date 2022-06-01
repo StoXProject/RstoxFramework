@@ -3936,7 +3936,8 @@ formatProcessDataOne <-  function(processDataName, processDataOne) {
         
         #sp::proj4string(processDataOne) <- as.character(NA)
         if(length(processDataOne)) {
-            suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
+            suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
+            #suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
         }
         
         
@@ -3944,7 +3945,8 @@ formatProcessDataOne <-  function(processDataName, processDataOne) {
     }
     # Support for project.RData files, which contained SpatialPolygonsDataFrame for the stratum polygons:
     else if("SpatialPolygonsDataFrame" %in% class(processDataOne)) {
-        suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
+        suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
+        #suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
         
     }
     # If a data.table:

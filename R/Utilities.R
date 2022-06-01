@@ -738,7 +738,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
-    dat_orig <- readModelData(projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA)
+    dat_orig <- readModelData(projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA, verifyFiles = TRUE)
     
     # Compare only those elemens common to the two datasets:
     processNames_present <- all(names(dat_orig) %in% names(dat))

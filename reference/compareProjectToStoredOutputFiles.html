@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.3</span>
       </span>
     </div>
 
@@ -73,28 +73,51 @@
     <h2>Arguments</h2>
     <dl><dt>projectPath</dt>
 <dd><p>The project to be run and tested against the existing output files of the project gievn by <code>projectPath_original</code>.</p></dd>
+
+
 <dt>projectPath_original</dt>
 <dd><p>The project holding the existing output files, defaulted to <code>projectPath</code>.</p></dd>
+
+
 <dt>emptyStringAsNA</dt>
 <dd><p>Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.</p></dd>
+
+
 <dt>intersect.names</dt>
 <dd><p>Logical: If TRUE, compare only same named columns.</p></dd>
+
+
 <dt>ignore</dt>
 <dd><p>A vector of names of columns to ignore in all.equal().</p></dd>
+
+
 <dt>skipNAFraction</dt>
 <dd><p>Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.</p></dd>
+
+
 <dt>skipNAAt</dt>
 <dd><p>A vector of strings naming the columns in which NA values identifies rows to skip.</p></dd>
+
+
 <dt>setNATo0</dt>
 <dd><p>Logical: If TRUE, set all NAs to 0.</p></dd>
+
+
 <dt>classOf</dt>
 <dd><p>Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.</p></dd>
+
+
 <dt>try</dt>
 <dd><p>Logical: If FALSE do not run the process in a <code>tryCatch</code>. Set this to FALSE when debugging, as the <code>tryCatch</code> masks the errors in the <code>traceback</code>.</p></dd>
+
+
 <dt>data.out</dt>
 <dd><p>Logical, if TRUE output the original and new data along with the tests.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Used in runModel().</p></dd>
+
 </dl></div>
 
   </div>
@@ -109,7 +132,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.9000.</p>
 </div>
 
       </footer></div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.3</span>
       </span>
     </div>
 
@@ -57,42 +57,79 @@
     <h2>Arguments</h2>
     <dl><dt>projectPath</dt>
 <dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+
+
 <dt>modelName, modelNames</dt>
 <dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+
+
 <dt>processID</dt>
 <dd><p>The ID of the process.</p></dd>
+
+
 <dt>processName, processes</dt>
 <dd><p>The name of the process(es).</p></dd>
+
+
 <dt>functionName</dt>
 <dd><p>The name of the function used by the process.</p></dd>
+
+
 <dt>tableName</dt>
 <dd><p>The name of the output table to get from the process.</p></dd>
+
+
 <dt>startProcess, endProcess</dt>
 <dd><p>The process index, name or ID at which to start and stop the model run.</p></dd>
+
+
 <dt>afterProcessID, beforeProcessID</dt>
 <dd><p>The ID of the process after or before which to get the procecss table (place a process or in the case of afterProcessID).</p></dd>
+
+
 <dt>warn</dt>
 <dd><p>Logical: If TRUE show warnings that are not highly important.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>Logical: If TRUE extra messages are printed to console.</p></dd>
+
+
 <dt>msg</dt>
 <dd><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></dd>
+
+
 <dt>archive</dt>
 <dd><p>Logical: Should the project memory state be archived using <code>archiveProject</code>? This stores one step in the history.</p></dd>
+
+
 <dt>template</dt>
 <dd><p>A string naming the template to use when generating the project. See <code>getAvaiableTemplates</code> for a list of available templates.</p></dd>
+
+
 <dt>ow</dt>
 <dd><p>Logical: If TRUE overwrite the project.</p></dd>
+
+
 <dt>showWarnings</dt>
 <dd><p>Logical: If TRUE display warninigs when creting the project folders.</p></dd>
+
+
 <dt>Application</dt>
 <dd><p>A single string naming the application used when saving the project. Defaulted to R.version.string.</p></dd>
+
+
 <dt>argumentFilePaths</dt>
 <dd><p>A nested list of paths to argument files of a model, as returned from <code>getArgumentFilePaths</code>. This is used to speed up some functions.</p></dd>
+
+
 <dt>only.valid</dt>
 <dd><p>Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).</p></dd>
+
+
 <dt>returnProcessTable</dt>
 <dd><p>Logical: If TRUE return the process table (much used in functions used by the GUI).</p></dd>
+
 </dl></div>
 
   </div>
@@ -107,7 +144,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.9000.</p>
 </div>
 
       </footer></div>

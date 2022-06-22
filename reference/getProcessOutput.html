@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.3</span>
       </span>
     </div>
 
@@ -76,34 +76,63 @@
     <h2>Arguments</h2>
     <dl><dt>projectPath</dt>
 <dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+
+
 <dt>modelName</dt>
 <dd><p>The name of the model (one of "baseline", "analysis" and "report").</p></dd>
+
+
 <dt>processID</dt>
 <dd><p>The ID of the process.</p></dd>
+
+
 <dt>tableName</dt>
 <dd><p>The name of the table to extract from the process.</p></dd>
+
+
 <dt>subFolder</dt>
 <dd><p>If the process returns subfolders (ReadBiotic and ReadAcoustic, where the subfolders represent files), specify the name of the folder with this parameter.</p></dd>
+
+
 <dt>flatten</dt>
 <dd><p>Logical: Should the output tables that contain cells of length &gt; 1 be expanded to that the other columns are repeated, resulting in a regular table.</p></dd>
+
+
 <dt>pretty</dt>
 <dd><p>Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.</p></dd>
+
+
 <dt>pageindex</dt>
 <dd><p>A vevctor of the pages to return with <code>linesPerPage</code> number of lines (rows). Default is to not split into pages.</p></dd>
+
+
 <dt>linesPerPage</dt>
 <dd><p>The number of lines per page if <code>pageindex</code> is given.</p></dd>
+
+
 <dt>columnSeparator</dt>
 <dd><p>The string to separate columns by, defaulted to a single space.</p></dd>
+
+
 <dt>lineSeparator</dt>
 <dd><p>The string to separate lines by, defaulted to a NULL, which keeps the output as a vector of strings.</p></dd>
+
+
 <dt>na</dt>
 <dd><p>The string to replace NAs by, defaulted to "-".</p></dd>
+
+
 <dt>enable.auto_unbox</dt>
 <dd><p>Logical: If TRUE wrap the output in a list if  <code>pretty</code> is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p>Logical: If TRUE drop the list if only one element.</p></dd>
+
+
 <dt>drop.datatype</dt>
 <dd><p>Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.</p></dd>
+
 </dl></div>
 
   </div>
@@ -118,7 +147,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.9000.</p>
 </div>
 
       </footer></div>

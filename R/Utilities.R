@@ -793,9 +793,26 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     #browser()
-    # unlist(data_equal)[!unlist(data_equal) == "TRUE"]
-    # unlist(columnNames_identical)[!unlist(columnNames_identical) == "TRUE"]
-    # unlist(tableNames_identical)[!unlist(tableNames_identical) == "TRUE"]
+    diffWarning <- function(x) {
+        x_info <- unlist(x)[!unlist(x) == "TRUE"]
+        if(length(x_info)) {
+            x_info <- paste0("\n", names(x_info), ": ", x_info, collapse = "\n")
+            msg <- paste0(
+                "projectPath:\n", 
+                projectPath, 
+                "\n", 
+                deparse(substitute(x)), 
+                ":\n===========================================>>>>>\n", 
+                x_info, 
+                "\n<<<<<==========================================="
+            )
+            warning(msg)
+            message(msg)
+        }
+    }
+    diffWarning(data_equal)
+    diffWarning(columnNames_identical)
+    diffWarning(tableNames_identical)
     
     # Compare reports, but only numeric values:
     reports <- startsWith(names(dat_orig), "Report")
@@ -831,12 +848,12 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     out <- uallTests[atNotTRUE]
     
-    if(any(atNotTRUE)) {
-        #print(allTests)
-        #tmp <- file.path(path.expand("~"), paste0("ErrorLog_", basename(projectPath), ".txt"))
-        #writeLines(paste(names(out), out, sep = "-"), tmp)
-        warning(paste(names(out), out, collapse = ",", sep = "-"))
-    }
+    # if(any(atNotTRUE)) {
+    #     #print(allTests)
+    #     #tmp <- file.path(path.expand("~"), paste0("ErrorLog_", basename(projectPath), ".txt"))
+    #     #writeLines(paste(names(out), out, sep = "-"), tmp)
+    #     warning(paste(names(out), out, collapse = ",", sep = "-"))
+    # }
     
     if(data.out) {
         out <- list(
@@ -1043,6 +1060,7 @@ toJSON_Rstox <- function(x, ...) {
     # Changed on 2021-04-21 to supports NA strings:
     #na <- "null"
     na <- "string"
+    na <- "null"
     null <- "null"
     
     # Override by ...:

@@ -585,7 +585,6 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
 #' 
 modifyStratum <- function(stratum, projectPath, modelName, processID) {
     
-    browser()
     # Check that the process returns StratumPolygon process data:
     checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
     

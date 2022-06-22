@@ -236,12 +236,12 @@ initiateRstoxFramework <- function(){
     projectValidatorIMJV <- jsonvalidate::json_validator(schema, engine = "imjv")
     projectValidatorAJV <- jsonvalidate::json_validator(schema, engine = "ajv")
     
-    getProcessDataColumnTypes <- function(processDataSchemas) {
+    getProcessDataColumnTypes <- function(processDataSchemas, onlyFirst = TRUE) {
         # Get the process data which are lists of tables, which are those that have properties:
         atMultiTableProcessData <- which(sapply(processDataSchemas, function(x) "properties" %in% names(x)))
         atSingleTableProcessData <- setdiff(seq_along(processDataSchemas), atMultiTableProcessData)
         # Find column types of the process data tables:
-        columnTypes <- lapply(processDataSchemas[atSingleTableProcessData], function(x) sapply(x$items[[1]]$properties, "[[", "type"))
+        columnTypes <- lapply(processDataSchemas[atSingleTableProcessData], function(x) sapply(x$items[[1]]$properties, function(x) utils::head(x$type, if(onlyFirst) 1 else Inf)))
         columnTypes <- rapply(columnTypes, function(x) replace(x, x == "string", "character"), how = "replace")
         columnTypes <- rapply(columnTypes, function(x) replace(x, x == "number", "double"), how = "replace")
         return(columnTypes)
@@ -322,6 +322,9 @@ initiateRstoxFramework <- function(){
     #### Fundamental settings of StoX: ####
     # The time format used in the project.json:
     StoxDateTimeFormat <- "%Y-%m-%dT%H:%M:%OS"
+    
+    # Value of numeric NA in processData stored in the project.json:
+    #jsonNA <- -999999
     
     # Define the permitted classes for individual outputs from StoX functions:
     validOutputDataClasses <- c(

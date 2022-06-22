@@ -1,3 +1,10 @@
+# RstoxFramework v3.4.3 (2022-06-22)
+* Changed to using null to denote missing values (NAs) in the project.json, instead of "string" in jsonlite::toJSON().
+* Added formatting of parameter tables read from the GUI.
+* Changed to using only the first primitive type of a table column defined in a process data JSON schema, when formatting process data.
+* Modified the test project splitNASC_18.zip according to the correction of the error in "DateTime" in StoxAcoustic (seconds dropped for ICESAcoustic data).
+
+
 # RstoxFramework v3.4.1 (2022-05-31)
 * Added R 4.2. as supported version.
 * Changed tolerance in test-versus_2.7.R as per slight differences in StratumArea due to move from rgeos to sf in RstoxBase, forced by https://www.r-bloggers.com/2022/04/r-spatial-evolution-retirement-of-rgdal-rgeos-and-maptools/.

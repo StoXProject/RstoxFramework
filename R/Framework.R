@@ -836,7 +836,6 @@ readProjectDescription <- function(
     }
     
     # Apply backward compatibility:
-    #browser()
     saved <- TRUE
     if(applyBackwardCompatibility) {
         projectDescriptionAfterBackwardCompatibility <- applyBackwardCompatibility(projectDescription, verbose = verbose)
@@ -1062,6 +1061,16 @@ writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFi
     # Order the argument of each process:
     projectDescription <- orderEachProcess(projectDescription)
     
+    ## Drop non-character columns that contain NA, as these will be written as the string "NA" by toJSON_Rstox():
+    #for(modelName in names(projectDescription)) {
+    #    for(processIndex in seq_along(projectDescription[[modelName]])) {
+    #        temp <- recodeNumericNAOneProcessData(
+    #            projectDescription[[modelName]][[processIndex]]$processData, 
+    #            na = getRstoxFrameworkDefinitions("jsonNA")
+    #        )
+    #    }
+    #}
+    
     # Convert spatial to geojson string, and write to temporary files for modifying the project.json to have geojson instead of geojson string: 
     projectDescription <- convertProcessDataToGeojson(projectDescription)
     
@@ -1104,6 +1113,62 @@ writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFi
     # 5. Write the validated json to file: 
     write(json, projectDescriptionFile) 
 }
+
+#recodeNumericNAOneProcessData <- function(x, na = -999) {
+#    if(is.list(x) && !data.table::is.data.table(x)) {
+#        lapply(x, recodeNumericNAOneTable, na = na)
+#    }
+#    else if(data.table::is.data.table(x)) {
+#        recodeNumericNAOneTable(x, na = na)
+#    }
+#    else if(length(x)){
+#        stop("Supported procecss data types are data.table and list of data.tables.")
+#    }
+#}
+#
+#recodeNumericNAOneTable <- function(x, na = -999) {
+#    if(data.table::is.data.table(x)) {
+#        toRecode <- sapply(x, hasNumericNA)
+#        if(any(toRecode)) {
+#            namesToRecode <- names(toRecode)[toRecode]
+#            for(name in namesToRecode) {
+#                x[is.na(get(name)), eval(name) := na]
+#            }
+#        }
+#    }
+#}
+#
+#hasNumericNA <- function(x) {
+#    is.numeric(x) && any(is.na(x))
+#}
+
+#decodeNumericNAOneProcessData <- function(x, na = -999) {
+#    if(is.list(x) && !data.table::is.data.table(x)) {
+#        lapply(x, decodeNumericNAOneTable, na = na)
+#    }
+#    else if(data.table::is.data.table(x)) {
+#        decodeNumericNAOneTable(x, na = na)
+#    }
+#    else if(length(x)){
+#        stop("Supported procecss data types are data.table and list of data.tables.")
+#    }
+#}
+#
+#decodeNumericNAOneTable <- function(x, na = -999) {
+#    if(data.table::is.data.table(x)) {
+#        toRecode <- sapply(x, hasNumericNACode, na = na)
+#        if(any(toRecode)) {
+#            namesToRecode <- names(toRecode)[toRecode]
+#            for(name in namesToRecode) {
+#                x[get(name) == na, eval(name) := NA_real_]
+#            }
+#        }
+#    }
+#}
+
+#hasNumericNACode <- function(x, na = -999) {
+#    is.numeric(x) && any(x == na)
+#}
 
 
 isOfficialRstoxFrameworkVersion <- function() {
@@ -3832,7 +3897,7 @@ formatFunctionInputs <-  function(functionInputs) {
     return(functionInputs)
 }
 
-formatFunctionParameters <-  function(functionParameters, functionName) {
+formatFunctionParameters <-  function(functionParameters, functionName, projectPath = NULL, modelName = NULL, processID = NULL) {
     
     # Simplify vectors, matrices and data.frames using the jsonlite package:
     functionParameters <- simplifyListReadFromJSON(functionParameters)
@@ -3880,6 +3945,37 @@ formatFunctionParameters <-  function(functionParameters, functionName) {
                     }
                     else if(table) {
                         functionParameters[[this]] <- data.table::as.data.table(functionParameters[[this]])
+                        
+                        # If read from the GUI, format using the functionParameterFormats:
+                        if(length(projectPath) && length(modelName) && length(processID)) {
+                            thisFormat <- getFunctionParameterFormats(functionName)[[this]]
+                            
+                            variableTypes <- getParameterFormatElement(projectPath = projectPath, modelName = modelName, processID = processID, format = thisFormat, "variableTypes")
+                            names(variableTypes) <- getParameterFormatElement(projectPath = projectPath, modelName = modelName, processID = processID, format = thisFormat, "columnNames")
+                            
+                            #ord <- match(columnNames, names(functionParameters[[this]]))
+                            #typesTable <- data.table::data.table(
+                            #    columnNames = columnNames, 
+                            #    variableTypes = variableTypes
+                            #)[ord, ]
+                            
+                            
+                            RstoxData::setColumnClasses(functionParameters[[this]], classes = variableTypes)
+                                
+                            
+                            #
+                            #
+                            #
+                            ## Set column classes:
+                            #for(ind in seq_along(columnNames)) {
+                            #    if(RstoxData::firstClass(functionParameters[[this]][[ind]]) != variableTypes[ind]) {
+                            #        thisColName <- columnNames[ind]
+                            #        functionParameters[[this]][, (thisColName) := do.call(variableTypesFunctions[ind], )]
+                            #    }
+                            #}
+                            
+                            
+                        }
                     }
                     # Set class to the defined class:
                     else if(classIsDefined && differingClass) {
@@ -3951,7 +4047,11 @@ formatProcessDataOne <-  function(processDataName, processDataOne) {
     }
     # If a data.table:
     else if(length(processDataOne) && data.table::is.data.table(processDataOne)) {
+        
         convertStringToNA(processDataOne)
+        ## Set numeric NAs:
+        #jsonNA <- getRstoxFrameworkDefinitions("jsonNA")
+        #decodeNumericNAOneProcessData(processDataOne, na = jsonNA)
         
         convertClassOfDataTable(processDataOne, getRstoxFrameworkDefinitions("processDataColumnTypes")[[processDataName]])
         
@@ -3962,7 +4062,11 @@ formatProcessDataOne <-  function(processDataName, processDataOne) {
         processDataOne <- simplifyListReadFromJSON(processDataOne)
         processDataOne <- data.table::as.data.table(processDataOne)
         
+        
         convertStringToNA(processDataOne)
+        ## Set numeric NAs:
+        #jsonNA <- getRstoxFrameworkDefinitions("jsonNA")
+        #decodeNumericNAOneProcessData(processDataOne, na = jsonNA)
         
         convertClassOfDataTable(processDataOne, getRstoxFrameworkDefinitions("processDataColumnTypes")[[processDataName]])
         

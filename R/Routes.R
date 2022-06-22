@@ -271,6 +271,11 @@ getStratumData <- function(projectPath, modelName, processID) {
         return(NULL)
     }
     
+    # Return if the StratumPolygon is empty:
+    if(!length(processData$StratumPolygon)) {
+        return(processData$StratumPolygon)
+    }
+    
     # Add StratumName, as this is used by the GUI:
     processData$StratumPolygon$StratumName <- getStratumNames(processData$StratumPolygon)
     
@@ -1245,7 +1250,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         
         # Format the function parameters:
         functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID)
-        newFunctionParameters <- formatFunctionParameters(newFunctionParameters, functionName = functionName)
+        newFunctionParameters <- formatFunctionParameters(newFunctionParameters, functionName = functionName, projectPath = projectPath, modelName = modelName, processID = processID)
         
         # Modify the process parameter:
         modifyFunctionParameters(

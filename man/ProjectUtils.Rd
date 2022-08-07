@@ -24,7 +24,8 @@ readProjectDescription(
   verbose = FALSE,
   projectDescriptionFile = NULL,
   applyBackwardCompatibility = TRUE,
-  formatProcesses = TRUE
+  formatProcesses = TRUE,
+  validateJSON = TRUE
 )
 
 writeProjectDescription(
@@ -53,6 +54,8 @@ setNotRunning(projectPath, modelName)
 \item{applyBackwardCompatibility}{Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.}
 
 \item{formatProcesses}{Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.}
+
+\item{validateJSON}{Logical: If  TRUE validate the project.json.}
 
 \item{projectDescription}{A list holding the project description, as read using \code{\link{readProjectDescription}}.}
 

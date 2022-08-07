@@ -1,3 +1,8 @@
+# RstoxFramework v3.4.4 (2022-08-07)
+* Added optional validation of the project.jsos in readProjectDescription(). 
+* Added options to compareProjectToStoredOutputFiles() (setNATo0 replaecd by NAReplacement, ignoreEqual to ignore columns where all values are equal, mergeWhenDifferentNumberOfRows to use all.equal_mergeIfDifferentNumberOfRows instead of all.equal, and sort to sort the tables). 
+* Added the diffData as output from compareProjectToStoredOutputFiles() to assist identifying the diffs.
+
 # RstoxFramework v3.4.3 (2022-06-22)
 * Changed to using null to denote missing values (NAs) in the project.json, instead of "string" in jsonlite::toJSON().
 * Added formatting of parameter tables read from the GUI.

@@ -130,7 +130,7 @@ runProject <- function(
     
     # Close after running if requested:
     if(close) {
-        on.exit(closeProject(projectPath))
+        on.exit(closeProject(projectPath, save = save, ...))
     }
     
     if(msg) {
@@ -389,7 +389,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         
         
         if(verifyFiles) {
-            projectDescription <- readProjectDescription(projectPath, applyBackwardCompatibility = FALSE, formatProcesses = FALSE)$projectDescription
+            projectDescription <- readProjectDescription(projectPath, applyBackwardCompatibility = FALSE, formatProcesses = FALSE, validateJSON = FALSE)$projectDescription
             
             processNames <- lapply(projectDescription, function(x) unname(sapply(x, "[[", "processName")))
             outputFolderNames <- lapply(outputFiles, names)

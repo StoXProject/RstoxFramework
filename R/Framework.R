@@ -388,6 +388,7 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param newProjectPath    The path to the copied StoX project.
 #' @param verbose           Logical: If TRUE, print information to the console, e.g. about backward compatibility.
 #' @param empty.output      Logical: If TRUE, do not include the output files when copying.
+#' @param close Logical: (In \code{copyProject}) If TRUE, close the project after copying.
 #' 
 #' @name Projects
 #' 
@@ -669,7 +670,7 @@ saveAsProject <- function(
 #' @export
 #' @rdname Projects
 #' 
-copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE) {
+copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, close = FALSE, msg = TRUE) {
     if(ow) {
         unlink(newProjectPath, force = TRUE, recursive = TRUE)
     }
@@ -686,6 +687,10 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
     lapply(foldersToCopy, file.copy, newProjectPath, recursive = TRUE)
     #file.copy(projectPath, newProjectPath, recursive=TRUE)
+    
+    if(close) {
+        closeProject(newProjectPath, save = FALSE, msg = msg)
+    }
 }
 #' 
 #' @export
@@ -713,6 +718,7 @@ deleteProject <- function(projectPath) {
 #' @param projectDescriptionFile The path to the file holding the projectDescription.
 #' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
 #' @param formatProcesses Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.
+#' @param validateJSON Logical: If  TRUE validate the project.json.
 #' 
 #' @name ProjectUtils
 #' 
@@ -791,7 +797,8 @@ readProjectDescription <- function(
     verbose = FALSE, 
     projectDescriptionFile = NULL, 
     applyBackwardCompatibility = TRUE, 
-    formatProcesses = TRUE
+    formatProcesses = TRUE, 
+    validateJSON = TRUE
 ) {
     
     # Get the projectDescriptionFile path:
@@ -861,23 +868,26 @@ readProjectDescription <- function(
     
     
     # Validate the project.json here, and try to validate the project.json to be saved if the initial validation fails. 
-    valid <- validateProjectDescriptionFile(projectDescriptionFile)
-    if(!isTRUE(valid)) {
-        # Try writing to a tempfile and validating this file:
-        tempProjectDescriptionFile <- tempfile()
-        writeProjectDescription(
-            projectDescription = projectDescription, 
-            projectDescriptionFile = tempProjectDescriptionFile
-        )
-        valid <- validateProjectDescriptionFile(tempProjectDescriptionFile)
+    if(validateJSON) {
+        valid <- validateProjectDescriptionFile(projectDescriptionFile)
+        if(!isTRUE(valid)) {
+            # Try writing to a tempfile and validating this file:
+            tempProjectDescriptionFile <- tempfile()
+            writeProjectDescription(
+                projectDescription = projectDescription, 
+                projectDescriptionFile = tempProjectDescriptionFile
+            )
+            valid <- validateProjectDescriptionFile(tempProjectDescriptionFile)
+        }
+        
+        if(!isTRUE(valid)) {
+            # Write the error to a temp file:
+            tempErrorFile <- file.path(tempdir(), "projectJSONValidatorError.rds")
+            saveRDS(valid, tempErrorFile)
+            stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. \nRun the following code in R to see the JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
+        }
     }
     
-    if(!isTRUE(valid)) {
-        # Write the error to a temp file:
-        tempErrorFile <- file.path(tempdir(), "projectJSONValidatorError.rds")
-        saveRDS(valid, tempErrorFile)
-        stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. \nRun the following code in R to see the JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
-    }
     
     return(
         list(

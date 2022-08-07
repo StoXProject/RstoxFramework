@@ -12,10 +12,13 @@ compareProjectToStoredOutputFiles(
   ignore = NULL,
   skipNAFraction = FALSE,
   skipNAAt = FALSE,
-  setNATo0 = FALSE,
+  NAReplacement = NULL,
+  ignoreEqual = FALSE,
   classOf = c("first", "second"),
   try = TRUE,
   data.out = FALSE,
+  mergeWhenDifferentNumberOfRows = FALSE,
+  sort = TRUE,
   ...
 )
 }
@@ -34,13 +37,19 @@ compareProjectToStoredOutputFiles(
 
 \item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip.}
 
-\item{setNATo0}{Logical: If TRUE, set all NAs to 0.}
+\item{NAReplacement}{List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.}
+
+\item{ignoreEqual}{Logical: If TRUE, ignore columns where all values are equal.}
 
 \item{classOf}{Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.}
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
 \item{data.out}{Logical, if TRUE output the original and new data along with the tests.}
+
+\item{mergeWhenDifferentNumberOfRows}{Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.}
+
+\item{sort}{Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.}
 
 \item{...}{Used in runModel().}
 }

@@ -12,7 +12,7 @@ compareProjectToStoredOutputFilesAll(
   ignore = NULL,
   skipNAFraction = FALSE,
   skipNAAt = FALSE,
-  setNATo0 = FALSE,
+  NAReplacement = NULL,
   classOf = c("first", "second"),
   try = TRUE,
   data.out = FALSE,
@@ -34,7 +34,7 @@ compareProjectToStoredOutputFilesAll(
 
 \item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip.}
 
-\item{setNATo0}{Logical: If TRUE, set all NAs to 0.}
+\item{NAReplacement}{List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.}
 
 \item{classOf}{Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.}
 

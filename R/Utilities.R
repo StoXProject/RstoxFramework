@@ -711,14 +711,17 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param ignore A vector of names of columns to ignore in all.equal().
 #' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
 #' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip.
-#' @param setNATo0 Logical: If TRUE, set all NAs to 0.
+#' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
+#' @param ignoreEqual Logical: If TRUE, ignore columns where all values are equal.
 #' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
 #' @param data.out Logical, if TRUE output the original and new data along with the tests.
+#' @param mergeWhenDifferentNumberOfRows Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.
+#' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
 #' @param ... Used in runModel().
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, setNATo0 = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -730,15 +733,19 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     # Run the test project:
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
-    temp <- copyProject(projectPath, projectPath_copy, ow = TRUE)
+    temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
     
     message(projectPath_copy)
     openProject(projectPath_copy)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, try = try, msg = FALSE, ...)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = FALSE, try = try, msg = FALSE, ...)
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
     dat_orig <- readModelData(projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA, verifyFiles = TRUE)
+    
+    # Reorder the original data to the order of the new data:
+    newOrder <- c(intersect(names(dat), names(dat_orig)), setdiff(names(dat_orig), names(dat)))
+    dat_orig <- dat_orig[newOrder]
     
     # Compare only those elemens common to the two datasets:
     processNames_present <- all(names(dat_orig) %in% names(dat))
@@ -758,6 +765,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     # Check the actual data:
     data_equal <- list()
+    diffData <- list()
     
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
     for(name in names(dat_orig)) {
@@ -766,18 +774,38 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
             if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
                 if(intersect.names) {
                     intersectingNames <- intersect(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
-                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOf(
+                    result <- compareDataTablesUsingClassOf(
                         dat_orig[[name]][[subname]][, intersectingNames, with = FALSE], 
                         dat[[name]][[subname]][, intersectingNames, with = FALSE], 
                         ignore = ignore, 
                         skipNAFraction = skipNAFraction, 
                         skipNAAt = skipNAAt, 
-                        setNATo0 = setNATo0, 
-                        classOf = classOf
+                        NAReplacement = NAReplacement, 
+                        ignoreEqual = ignoreEqual,
+                        classOf = classOf, 
+                        mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
+                        sort = sort
                     )
+                    
+                    data_equal[[name]][[subname]] <- result$warn
+                    diffData[[name]][[subname]] <- result$diffData
                 }
                 else {
-                    data_equal[[name]][[subname]] <- compareDataTablesUsingClassOf(dat_orig[[name]][[subname]], dat[[name]][[subname]], ignore = ignore, skipNAFraction = skipNAFraction, skipNAAt = skipNAAt, setNATo0 = setNATo0, classOf = classOf)
+                    result <- compareDataTablesUsingClassOf(
+                        dat_orig[[name]][[subname]], 
+                        dat[[name]][[subname]], 
+                        ignore = ignore, 
+                        skipNAFraction = skipNAFraction, 
+                        skipNAAt = skipNAAt, 
+                        NAReplacement = NAReplacement, 
+                        ignoreEqual = ignoreEqual, 
+                        classOf = classOf, 
+                        mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
+                        sort = sort
+                    )
+                    
+                    data_equal[[name]][[subname]] <- result$warn
+                    diffData[[name]][[subname]] <- result$diffData
                 }
                 
                 # This caused trouble when converting character to POSIXct:
@@ -787,14 +815,21 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                 data_equal[[name]][[subname]] <- compareSPDF(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
             else {
-                data_equal[[name]][[subname]] <- all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+                data_equal[[name]][[subname]] <- paste(all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]], check.attributes = FALSE), collapse = "\n")
+                #all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
         }
     }
     
+    unlistDiff <- function(x) {
+        unlist(x)[!unlist(x) == "TRUE"]
+    }
+    
+    
     #browser()
+    
     diffWarning <- function(x) {
-        x_info <- unlist(x)[!unlist(x) == "TRUE"]
+        x_info <- unlistDiff(x)
         if(length(x_info)) {
             x_info <- paste0("\n", names(x_info), ": ", x_info, collapse = "\n")
             msg <- paste0(
@@ -830,7 +865,6 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     message("reports_equal")
     message(reports_equal)
     
-    
     allTests <- list(
         processNames_present = processNames_present,
         tableNames_identical = tableNames_identical,
@@ -841,25 +875,15 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
 
     ok <- all(unlist(allTests) %in% TRUE)
     
+    out <- lapply(allTests, formatDiffs)
     
-    uallTests <- unlist(allTests)
-    
-    atNotTRUE <- !uallTests %in% TRUE
-    
-    out <- uallTests[atNotTRUE]
-    
-    # if(any(atNotTRUE)) {
-    #     #print(allTests)
-    #     #tmp <- file.path(path.expand("~"), paste0("ErrorLog_", basename(projectPath), ".txt"))
-    #     #writeLines(paste(names(out), out, sep = "-"), tmp)
-    #     warning(paste(names(out), out, collapse = ",", sep = "-"))
-    # }
-    
+     
     if(data.out) {
         out <- list(
             dat = dat, 
             dat_orig = dat_orig, 
-            test = out
+            test = out, 
+            diffData = diffData
         )
         
         return(out)
@@ -875,8 +899,168 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
 }
 
 
+# Function to keep only diffs.
+formatDiffs <- function(x) {
+    
+    x <- unlist(x)
+    
+    atNotTRUE <- !x %in% TRUE
+    
+    out <- x[atNotTRUE]
+    
+    out <- lapply(out, function(x) if(is.character(x)) strsplit(x, "\n")[[1]] else x)
+    
+    return(out)
+}
+
+all.equal_mergeIfDifferentNumberOfRows <- function(x, y, check.attributes = FALSE, sort = TRUE, NAReplacement = NULL, ignoreEqual = FALSE, ...) {
+    
+    if(length(x) == 0 && length(y) == 0 ) {
+        return(TRUE)
+    }
+    
+    xyList <- getListOfXYByMerging(x, y, sort = sort, ignoreEqual = ignoreEqual, NAReplacement = NAReplacement, ...)
+    
+    
+    #all.equal(xy$x, xy$y, check.attributes = check.attributes)
+    test <- all.equal(as.data.frame(xyList$xy$x), as.data.frame(xyList$xy$y), check.attributes = FALSE)
+    testPlus <-all.equal(as.data.frame(xyList$xyPlus$x), as.data.frame(xyList$xyPlus$y), check.attributes = FALSE)
+    
+    if(isTRUE(test) && isTRUE(testPlus)) {
+        warn <- NULL
+        xyList <- NULL
+    }
+    else if(isTRUE(testPlus)) {
+        warn <- paste(c("From merging with all = FALSE:", test), collapse = "\n")
+        xyList$xyPlus <- NULL
+    }
+    else if(isTRUE(test)) {
+        warn <- paste(c("From merging with all = TRUE antijoined with merging with all = FALSE:", testPlus), collapse = "\n")
+        xyList$xy <- NULL
+    }
+    else {
+        warn <- c(
+            paste(c("From merging with all = FALSE:", test), collapse = "\n"), 
+            paste(c("From merging with all = TRUE antijoined with merging with all = FALSE:", testPlus), collapse = "\n")
+        )
+    }
+    
+    return(list(
+        warn = warn, 
+        diffData = xyList
+    ))
+}
+
+
+getListOfXYByMerging <- function(x, y, sort = TRUE, ignoreEqual = FALSE, NAReplacement = NULL, ...) {
+    x <- data.table::copy(x)
+    y <- data.table::copy(y)
+    if(data.table::is.data.table(x) && data.table::is.data.table(y) && NROW(x) != NROW(y)) {
+        # Locate keys of each table:
+        keys_x <- locateUniqueKeys(x, requireNextPositive = TRUE)
+        keys_y <- locateUniqueKeys(y, requireNextPositive = TRUE)
+        
+        if(identical(sort(keys_x), sort(keys_y))) {
+            keys <- keys_x
+            
+            merged <- merge(x, y, by = keys, all = FALSE)
+            mergedAll <- merge(x, y, by = keys, all = TRUE)
+            mergedPlus <- mergedAll[!merged, on = keys]
+            
+            
+            # Split into x and y again:
+            xy <- splitMergedTable(merged, keys = keys, names = c("x", "y"))
+            xyPlus <- splitMergedTable(mergedPlus, keys = keys, names = c("x", "y"))
+            
+            if(ignoreEqual) {
+                xy <- subsetByAllEqual(xy, keys)
+                xyPlus <- subsetByAllEqual(xyPlus, keys)
+            }
+            
+            lapply(xy, RstoxBase::replaceNAByReference, replacement = NAReplacement)
+            lapply(xyPlus, RstoxBase::replaceNAByReference, replacement = NAReplacement)
+        }
+    }
+    
+    # Order the tables:
+    if(sort && data.table::is.data.table(x) && data.table::is.data.table(y)) {
+        lapply(xy, data.table::setorder)
+        lapply(xyPlus, data.table::setorder)
+    }
+    
+    return(list(xy = xy, xyPlus = xyPlus))
+}
+
+subsetByAllEqual <- function(xy, keys) {
+    # The x and y are assumed to have the same column names:
+    nonKeys <- setdiff(names(xy$x), keys)
+    
+    allEqualX <- sapply(xy$x[, -keys, with = FALSE], RstoxBase::allEqual, na.rm = TRUE)
+    allEqualY <- sapply(xy$y[, -keys, with = FALSE], RstoxBase::allEqual, na.rm = TRUE)
+    allEqualXY <- allEqualX & allEqualY
+    
+    if(any(allEqualXY)) {
+        variablesToIgnore <- nonKeys[allEqualX & allEqualY]
+        xy$x <- xy$x[, !variablesToIgnore, with = FALSE]
+        xy$y <- xy$y[, !variablesToIgnore, with = FALSE]
+    }
+    
+    return(xy)
+}
+
+splitMergedTable <- function(DT, keys, names = c("x", "y")) {
+    keyTable <- DT[, keys, with = FALSE]
+    data1 <- getColumnsEndingWith(DT, paste0(".", names[1]), fill = TRUE, stripSuffixInNames = TRUE)
+    data2 <- getColumnsEndingWith(DT, paste0(".", names[2]), fill = TRUE, stripSuffixInNames = TRUE)
+    x <- cbind(keyTable, data1)
+    y <- cbind(keyTable, data2)
+    out <- list(x = x,  y = y)
+    return(out)
+}
+
+
+getColumnsEndingWith <- function(x, suffix, fill = FALSE, stripSuffixInNames = FALSE) {
+    atSuffix <- which(endsWith(names(x), suffix))
+    if(stripSuffixInNames) {
+        oldNames <- names(x)[atSuffix]
+        newNames <- substr(oldNames, 1, nchar(oldNames) - nchar(suffix))
+    }
+    if(fill) {
+        atSuffix <- seq(min(atSuffix), max(atSuffix))
+    }
+    out <- x[, atSuffix, with = FALSE]
+    if(stripSuffixInNames) {
+        data.table::setnames(out, oldNames, newNames)
+    }
+    return(out)
+}
+
+
+locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
+    if(any(duplicated(x))) {
+        warning("Cannot locate keys if there are duplicated rows of the entire table.")
+        return(NULL)
+    }
+    for(ind in seq_along(x)) {
+        if(!any(duplicated(x[, seq_len(ind), with = FALSE]))) {
+            return(names(x)[seq_len(ind)])
+        }
+        else if(requireNextPositive) {
+            atPositive <- x[[ind + 1]] > 0
+            afterRemovingNonPositive <- subset(x, atPositive)
+            if(!any(duplicated(afterRemovingNonPositive[, seq_len(ind), with = FALSE]))) {
+                return(names(x)[seq_len(ind)])
+            }
+        }
+    }
+    warning("Could not locate keys (unknown error).")
+    return(NULL)
+}
+
+
+
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, setNATo0 = FALSE) {
+compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE) {
     
     classOf <- match.arg(classOf)
     
@@ -922,15 +1106,33 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
         y <- skipRowsAtNA(y, skipNAAt)
     }
     
-    if(setNATo0) {
-        #x <- data.table::copy(x)
-        #y <- data.table::copy(y)
-        RstoxBase::replaceNAByReference(x)
-        RstoxBase::replaceNAByReference(y)
-    }
+    
     
     # Check equality:
-    all.equal(x, y, check.attributes = FALSE)
+    if(mergeWhenDifferentNumberOfRows && NROW(x) != NROW(y)) {
+        out <- all.equal_mergeIfDifferentNumberOfRows(x, y, check.attributes = FALSE, all = TRUE, sort = sort, NAReplacement = NAReplacement, ignoreEqual = ignoreEqual)
+        
+        return(out)
+    }
+    else {
+        RstoxBase::replaceNAByReference(x, replacement = NAReplacement)
+        RstoxBase::replaceNAByReference(y, replacement = NAReplacement)
+        
+        # Try first all.equal on the tables, and if not TRUE try again after reordering:
+        testAllEqual <- all.equal(as.data.frame(x), as.data.frame(y), check.attributes = FALSE, all = TRUE)
+        if(sort && !isTRUE(testAllEqual) && data.table::is.data.table(x) && data.table::is.data.table(y)) {
+            data.table::setorder(x)
+            data.table::setorder(y)
+            testAllEqual <- all.equal(as.data.frame(x), as.data.frame(y), check.attributes = FALSE, all = TRUE)
+        }
+        
+        warn <- paste(testAllEqual, collapse = "\n")
+        
+        return(list(
+            warn = warn, 
+            diffData = NULL
+        ))
+    }
 }
 
 skipRowsAtNA <- function(x, skipNAAt) {
@@ -946,20 +1148,20 @@ skipRowsAtNA <- function(x, skipNAAt) {
 
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOfSecond <- function(x, y) {
-    # Get the classes of the first and second table:
-    classes_in_x <- sapply(x, RstoxData::firstClass)
-    classes_in_y <- sapply(y, RstoxData::firstClass)
-    if(!identical(classes_in_x, classes_in_y)) {
-        # Coerce to the class in the memory:
-        differ <- names(x)[classes_in_x != classes_in_y]
-        for(col in differ){
-            data.table::set(y, j = col, value = methods::as(y[[col]], classes_in_x[col]))
-        }
-    }
-    # Check equality:
-    all.equal(x, y, check.attributes = FALSE)
-}
+#compareDataTablesUsingClassOfSecond <- function(x, y) {
+#    # Get the classes of the first and second table:
+#    classes_in_x <- sapply(x, RstoxData::firstClass)
+#    classes_in_y <- sapply(y, RstoxData::firstClass)
+#    if(!identical(classes_in_x, classes_in_y)) {
+#        # Coerce to the class in the memory:
+#        differ <- names(x)[classes_in_x != classes_in_y]
+#        for(col in differ){
+#            data.table::set(y, j = col, value = methods::as(y[[col]], classes_in_x[col]))
+#        }
+#    }
+#    # Check equality:
+#    all.equal(x, y, check.attributes = FALSE)
+#}
 
 compareReport <- function(x, y) {
     # Set all columns of character class to NA:
@@ -967,7 +1169,8 @@ compareReport <- function(x, y) {
     setCharacterColumnsToNA(y)
     setLogicalColumnsToNA(x)
     setLogicalColumnsToNA(y)
-    all.equal(x, y, check.attributes = FALSE)
+    #all.equal(x, y, check.attributes = FALSE)
+    paste(all.equal(as.data.frame(x), as.data.frame(y), check.attributes = FALSE), collapse = "\n")
 }
 
 setCharacterColumnsToNA <- function(x) {
@@ -1012,7 +1215,7 @@ compareSPDF <- function(x, y) {
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_original = projectPaths, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, setNATo0 = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
+compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_original = projectPaths, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
     
     out <- mapply(
         compareProjectToStoredOutputFiles, 
@@ -1024,7 +1227,7 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
             ignore = ignore, 
             skipNAFraction = skipNAFraction, 
             skipNAAt = skipNAAt, 
-            setNATo0 = setNATo0, 
+            NAReplacement = NAReplacement, 
             classOf = classOf, 
             try = try, 
             data.out = data.out, 

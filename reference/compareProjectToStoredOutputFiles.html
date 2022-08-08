@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.5</span>
       </span>
     </div>
 
@@ -53,20 +53,23 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">compareProjectToStoredOutputFiles</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  projectPath_original <span class="op">=</span> <span class="va">projectPath</span>,
-  emptyStringAsNA <span class="op">=</span> <span class="cn">FALSE</span>,
-  intersect.names <span class="op">=</span> <span class="cn">TRUE</span>,
-  ignore <span class="op">=</span> <span class="cn">NULL</span>,
-  skipNAFraction <span class="op">=</span> <span class="cn">FALSE</span>,
-  skipNAAt <span class="op">=</span> <span class="cn">FALSE</span>,
-  setNATo0 <span class="op">=</span> <span class="cn">FALSE</span>,
-  classOf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"second"</span><span class="op">)</span>,
-  try <span class="op">=</span> <span class="cn">TRUE</span>,
-  data.out <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compareProjectToStoredOutputFiles</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  projectPath_original <span class="op">=</span> <span class="va">projectPath</span>,</span>
+<span>  emptyStringAsNA <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  intersect.names <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ignore <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  skipNAFraction <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  skipNAAt <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  NAReplacement <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ignoreEqual <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  classOf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first"</span>, <span class="st">"second"</span><span class="op">)</span>,</span>
+<span>  try <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  data.out <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mergeWhenDifferentNumberOfRows <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  sort <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -99,8 +102,12 @@
 <dd><p>A vector of strings naming the columns in which NA values identifies rows to skip.</p></dd>
 
 
-<dt>setNATo0</dt>
-<dd><p>Logical: If TRUE, set all NAs to 0.</p></dd>
+<dt>NAReplacement</dt>
+<dd><p>List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.</p></dd>
+
+
+<dt>ignoreEqual</dt>
+<dd><p>Logical: If TRUE, ignore columns where all values are equal.</p></dd>
 
 
 <dt>classOf</dt>
@@ -113,6 +120,14 @@
 
 <dt>data.out</dt>
 <dd><p>Logical, if TRUE output the original and new data along with the tests.</p></dd>
+
+
+<dt>mergeWhenDifferentNumberOfRows</dt>
+<dd><p>Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.</p></dd>
+
+
+<dt>sort</dt>
+<dd><p>Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.</p></dd>
 
 
 <dt>...</dt>
@@ -132,7 +147,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

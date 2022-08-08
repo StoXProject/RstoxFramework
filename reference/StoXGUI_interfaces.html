@@ -25,7 +25,7 @@ getParameterTableInfo and getParameterVectorInfo get information of a parameter 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.5</span>
       </span>
     </div>
 
@@ -61,62 +61,62 @@ getParameterTableInfo and getParameterVectorInfo get information of a parameter 
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getModelNames</span><span class="op">(</span><span class="op">)</span>
-
-<span class="fu">getModelInfo</span><span class="op">(</span><span class="op">)</span>
-
-<span class="fu">getInteractiveMode</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span>
-
-<span class="fu">getInteractiveData</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span>
-
-<span class="fu">getMapData</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span>
-
-<span class="fu">getEDSUColours</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span>, as.rgb <span class="op">=</span> <span class="cn">FALSE</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pink"</span>, <span class="st">"red4"</span>, <span class="st">"darkorange2"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">getStationColours</span><span class="op">(</span>
-  n <span class="op">=</span> <span class="fl">5</span>,
-  as.rgb <span class="op">=</span> <span class="cn">FALSE</span>,
-  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"steelblue2"</span>, <span class="st">"darkblue"</span>, <span class="st">"mediumvioletred"</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="fu">getProcessPropertySheet</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span>
-
-<span class="fu">setProcessPropertyValue</span><span class="op">(</span>
-  <span class="va">groupName</span>,
-  <span class="va">name</span>,
-  <span class="va">value</span>,
-  <span class="va">projectPath</span>,
-  <span class="va">modelName</span>,
-  <span class="va">processID</span>
-<span class="op">)</span>
-
-<span class="fu">getFunctionHelpAsHtml</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span>, stylesheet <span class="op">=</span> <span class="st">""</span><span class="op">)</span>
-
-<span class="fu">getObjectHelpAsHtml</span><span class="op">(</span><span class="va">packageName</span>, <span class="va">objectName</span>, stylesheet <span class="op">=</span> <span class="st">""</span><span class="op">)</span>
-
-<span class="fu">getFilterOptionsAll</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  <span class="va">modelName</span>,
-  <span class="va">processID</span>,
-  include.numeric <span class="op">=</span> <span class="cn">TRUE</span>,
-  stopIfEmptyPossibleValues <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">getParameterTableInfo</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  <span class="va">modelName</span>,
-  <span class="va">processID</span>,
-  <span class="va">format</span>,
-  stopIfEmptyPossibleValues <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">getParameterVectorInfo</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  <span class="va">modelName</span>,
-  <span class="va">processID</span>,
-  <span class="va">format</span>,
-  stopIfEmptyPossibleValues <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getModelNames</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getModelInfo</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getInteractiveMode</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getInteractiveData</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getMapData</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getEDSUColours</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span>, as.rgb <span class="op">=</span> <span class="cn">FALSE</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pink"</span>, <span class="st">"red4"</span>, <span class="st">"darkorange2"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getStationColours</span><span class="op">(</span></span>
+<span>  n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  as.rgb <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"steelblue2"</span>, <span class="st">"darkblue"</span>, <span class="st">"mediumvioletred"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getProcessPropertySheet</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">setProcessPropertyValue</span><span class="op">(</span></span>
+<span>  <span class="va">groupName</span>,</span>
+<span>  <span class="va">name</span>,</span>
+<span>  <span class="va">value</span>,</span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">modelName</span>,</span>
+<span>  <span class="va">processID</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFunctionHelpAsHtml</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span>, stylesheet <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getObjectHelpAsHtml</span><span class="op">(</span><span class="va">packageName</span>, <span class="va">objectName</span>, stylesheet <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getFilterOptionsAll</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">modelName</span>,</span>
+<span>  <span class="va">processID</span>,</span>
+<span>  include.numeric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  stopIfEmptyPossibleValues <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getParameterTableInfo</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">modelName</span>,</span>
+<span>  <span class="va">processID</span>,</span>
+<span>  <span class="va">format</span>,</span>
+<span>  stopIfEmptyPossibleValues <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">getParameterVectorInfo</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">modelName</span>,</span>
+<span>  <span class="va">processID</span>,</span>
+<span>  <span class="va">format</span>,</span>
+<span>  stopIfEmptyPossibleValues <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -195,7 +195,7 @@ help as html for.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

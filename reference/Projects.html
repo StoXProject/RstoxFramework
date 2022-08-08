@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.5</span>
       </span>
     </div>
 
@@ -53,48 +53,55 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">createProject</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  template <span class="op">=</span> <span class="st">"EmptyTemplate"</span>,
-  ow <span class="op">=</span> <span class="cn">FALSE</span>,
-  showWarnings <span class="op">=</span> <span class="cn">FALSE</span>,
-  open <span class="op">=</span> <span class="cn">TRUE</span>,
-  Application <span class="op">=</span> <span class="va">R.version.string</span>
-<span class="op">)</span>
-
-<span class="fu">openProject</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  showWarnings <span class="op">=</span> <span class="cn">FALSE</span>,
-  force <span class="op">=</span> <span class="cn">FALSE</span>,
-  reset <span class="op">=</span> <span class="cn">FALSE</span>,
-  saveIfAlreadyOpen <span class="op">=</span> <span class="cn">FALSE</span>,
-  verbose <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">closeProject</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  save <span class="op">=</span> <span class="cn">NULL</span>,
-  Application <span class="op">=</span> <span class="va">R.version.string</span>,
-  msg <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
-
-<span class="fu">saveProject</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  force <span class="op">=</span> <span class="cn">FALSE</span>,
-  Application <span class="op">=</span> <span class="va">R.version.string</span>,
-  msg <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span>
-
-<span class="fu">saveAsProject</span><span class="op">(</span>
-  <span class="va">projectPath</span>,
-  <span class="va">newProjectPath</span>,
-  ow <span class="op">=</span> <span class="cn">FALSE</span>,
-  Application <span class="op">=</span> <span class="va">R.version.string</span>
-<span class="op">)</span>
-
-<span class="fu">copyProject</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">newProjectPath</span>, ow <span class="op">=</span> <span class="cn">FALSE</span>, empty.output <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">deleteProject</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createProject</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  template <span class="op">=</span> <span class="st">"EmptyTemplate"</span>,</span>
+<span>  ow <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  showWarnings <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  open <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  Application <span class="op">=</span> <span class="va">R.version.string</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">openProject</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  showWarnings <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  reset <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  saveIfAlreadyOpen <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">closeProject</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  save <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  Application <span class="op">=</span> <span class="va">R.version.string</span>,</span>
+<span>  msg <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">saveProject</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  force <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  Application <span class="op">=</span> <span class="va">R.version.string</span>,</span>
+<span>  msg <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">saveAsProject</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">newProjectPath</span>,</span>
+<span>  ow <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  Application <span class="op">=</span> <span class="va">R.version.string</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">copyProject</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">newProjectPath</span>,</span>
+<span>  ow <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  empty.output <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  close <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  msg <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">deleteProject</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -154,6 +161,10 @@
 <dt>empty.output</dt>
 <dd><p>Logical: If TRUE, do not include the output files when copying.</p></dd>
 
+
+<dt>close</dt>
+<dd><p>Logical: (In <code>copyProject</code>) If TRUE, close the project after copying.</p></dd>
+
 </dl></div>
 
   </div>
@@ -168,7 +179,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>

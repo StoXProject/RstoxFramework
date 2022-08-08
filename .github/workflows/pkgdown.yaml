@@ -38,13 +38,6 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
-      - name: Install dependencies
-        run: |
-          install.packages("remotes")
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_dev("pkgdown")
-        shell: Rscript {0}
-
       - name: Install MacOS dependencies
         if: runner.os == 'macOS'
         run: |
@@ -53,6 +46,13 @@ jobs:
           export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=false # This prevents Homebrew from re-installing R, which will lead to .Platform$pkgType = "source".
           brew install gdal udunits
         shell: bash
+
+      - name: Install dependencies
+        run: |
+          install.packages("remotes")
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_dev("pkgdown")
+        shell: Rscript {0}
 
       - name: Install package
         run: R CMD INSTALL .

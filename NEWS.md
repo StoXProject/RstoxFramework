@@ -1,3 +1,6 @@
+# RstoxFramework v3.4.6 (2022-08-10)
+* Added truncation to 1000 characters for messages, warnings and errors
+
 # RstoxFramework v3.4.4 (2022-08-07)
 * Added optional validation of the project.jsos in readProjectDescription(). 
 * Added options to compareProjectToStoredOutputFiles() (setNATo0 replaecd by NAReplacement, ignoreEqual to ignore columns where all values are equal, mergeWhenDifferentNumberOfRows to use all.equal_mergeIfDifferentNumberOfRows instead of all.equal, and sort to sort the tables). 
@@ -8,7 +11,6 @@
 * Added formatting of parameter tables read from the GUI.
 * Changed to using only the first primitive type of a table column defined in a process data JSON schema, when formatting process data.
 * Modified the test project splitNASC_18.zip according to the correction of the error in "DateTime" in StoxAcoustic (seconds dropped for ICESAcoustic data).
-
 
 # RstoxFramework v3.4.1 (2022-05-31)
 * Added R 4.2. as supported version.

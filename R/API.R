@@ -548,11 +548,12 @@ unlistSep <- function(x, sep = "/") {
 #' @param onlyStoxMessages Logical: If TRUE show only the StoX messages, which are those starting with "StoX: ".
 #' @param onlyStoxWarnings Logical: If TRUE show only the StoX warnings, which are those starting with "StoX: ".
 #' @param onlyStoxErrors Logical: If TRUE show only the StoX errors, which are those starting with "StoX: ".
+#' @param maxLength.Message,maxLength.Warning,maxLength.Error The maximum number of characters to return for messages, warnings and errors, respectively (with allowed values 100...8170, default 1000).
 #' @param cmd A JSON string containing parameters listed above.
 #' 
 #' @export
 #' 
-runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE) {
+runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE, maxLength.Message = 1000, maxLength.Warning = 1000, maxLength.Error = 1000) {
     
     # Parse the args if given as a JSON string:
     args <- parseParameter(args)
@@ -574,7 +575,7 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
                 }
             ), 
             warning=function(w) {
-                warn <<- append(warn, if(removeCall) conditionMessage(w) else w)
+                    warn <<- append(warn, if(removeCall) conditionMessage(w) else w)
                 invokeRestart("muffleWarning")
             }
         )
@@ -627,6 +628,17 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
         }
     }
     
+    if(length(msg)) {
+        msg <- sapply(msg, truncateString, maxLength.Message)
+    }
+    
+    if(length(warn)) {
+        warn <- sapply(warn, truncateString, maxLength.Warning)
+    }
+    
+    if(length(err)) {
+        err <- sapply(err, truncateString, maxLength.Error)
+    }
     
     # Clean the warnings:
     #warn <- unname(unlist(warn[names(warn) == "message"]))
@@ -640,6 +652,15 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
         error = as.list(unique(err))
     )
 }
+
+truncateString <- function(string, length) {
+    if(nchar(string) > length) {
+        string <- paste0(substr(string, 1, length), " [... truncated]")
+    }
+    return(string)
+}
+
+
 #' @export
 #' @rdname runFunction
 #' 

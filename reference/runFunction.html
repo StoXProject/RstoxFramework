@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.4.6</span>
       </span>
     </div>
 
@@ -60,7 +60,10 @@
 <span>  removeCall <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  onlyStoxMessages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  onlyStoxWarnings <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  onlyStoxErrors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  onlyStoxErrors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  maxLength.Message <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  maxLength.Warning <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  maxLength.Error <span class="op">=</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">runFunction.JSON</span><span class="op">(</span><span class="va">cmd</span><span class="op">)</span></span></code></pre></div>
@@ -96,6 +99,10 @@
 
 <dt>onlyStoxErrors</dt>
 <dd><p>Logical: If TRUE show only the StoX errors, which are those starting with "StoX: ".</p></dd>
+
+
+<dt>maxLength.Message, maxLength.Warning, maxLength.Error</dt>
+<dd><p>The maximum number of characters to return for messages, warnings and errors, respectively (with allowed values 100...8170, default 1000).</p></dd>
 
 
 <dt>cmd</dt>

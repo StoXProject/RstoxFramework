@@ -1369,7 +1369,7 @@ hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRU
         
         
         if(!file.exists(folderPath) || !isTRUE(file.info(folderPath)$isdir)) {
-            folderPath <- FALSE
+            fileOutput <- FALSE
         }
     }
     

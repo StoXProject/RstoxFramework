@@ -5,13 +5,17 @@
 #' All functions referring to a project, a model, a process or an output table use the same parameters, listed here.
 #' 
 #' @param projectPath The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.
-#' @param modelName,modelNames The name of the model(s) (possible values are "baseline", "analysis" and "report").
+#' @param modelName The name of the model (possible values are "baseline", "analysis" and "report").
+#' @param modelNames The name of the models (possible values are "baseline", "analysis" and "report").
 #' @param processID The ID of the process.
-#' @param processName,processes The name of the process(es).
+#' @param processName The name of the process.
+#' @param processes The name of the processes.
 #' @param functionName The name of the function used by the process. 
 #' @param tableName The name of the output table to get from the process.
-#' @param startProcess,endProcess The process index, name or ID at which to start and stop the model run.
-#' @param afterProcessID,beforeProcessID The ID of the process after or before which to get the procecss table (place a process or in the case of afterProcessID).
+#' @param startProcess The process index, name or ID at which to start the model run.
+#' @param endProcess The process index, name or ID at which to stop the model run.
+#' @param beforeProcessID The ID of the process before which to get the process table.
+#' @param afterProcessID The ID of the process after which to get the process table or to place a process.
 #' @param warn Logical: If TRUE show warnings that are not highly important.
 #' @param verbose Logical: If TRUE extra messages are printed to console.
 #' @param msg Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).
@@ -19,7 +23,7 @@
 #' @param template A string naming the template to use when generating the project. See \code{getAvaiableTemplates} for a list of available templates.
 #' @param ow Logical: If TRUE overwrite the project.
 #' @param showWarnings Logical: If TRUE display warninigs when creting the project folders.
-#' @param Application       A single string naming the application used when saving the project. Defaulted to R.version.string.
+#' @param Application A single string naming the application used when saving the project. Defaulted to R.version.string.
 #' @param argumentFilePaths A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.
 #' @param only.valid Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).
 #' @param returnProcessTable Logical: If TRUE return the process table (much used in functions used by the GUI).

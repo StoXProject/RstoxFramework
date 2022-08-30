@@ -6,27 +6,27 @@
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
-\item{modelNames}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
 \item{processID}{The ID of the process.}
 
-\item{processName}{The name of the process(es).}
+\item{processName}{The name of the process.}
 
-\item{processes}{The name of the process(es).}
+\item{processes}{The name of the processes.}
 
 \item{functionName}{The name of the function used by the process.}
 
 \item{tableName}{The name of the output table to get from the process.}
 
-\item{startProcess}{The process index, name or ID at which to start and stop the model run.}
+\item{startProcess}{The process index, name or ID at which to start the model run.}
 
-\item{endProcess}{The process index, name or ID at which to start and stop the model run.}
+\item{endProcess}{The process index, name or ID at which to stop the model run.}
 
-\item{afterProcessID}{The ID of the process after or before which to get the procecss table (place a process or in the case of afterProcessID).}
+\item{beforeProcessID}{The ID of the process before which to get the process table.}
 
-\item{beforeProcessID}{The ID of the process after or before which to get the procecss table (place a process or in the case of afterProcessID).}
+\item{afterProcessID}{The ID of the process after which to get the process table or to place a process.}
 
 \item{warn}{Logical: If TRUE show warnings that are not highly important.}
 

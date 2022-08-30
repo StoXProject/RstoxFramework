@@ -29,13 +29,13 @@ runProjects(
 \arguments{
 \item{projectPaths}{The paths to the projects to run.}
 
-\item{modelNames}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
-\item{processes}{The name of the process(es).}
+\item{processes}{The name of the processes.}
 
-\item{startProcess}{The process index, name or ID at which to start and stop the model run.}
+\item{startProcess}{The process index, name or ID at which to start the model run.}
 
-\item{endProcess}{The process index, name or ID at which to start and stop the model run.}
+\item{endProcess}{The process index, name or ID at which to stop the model run.}
 
 \item{drop.datatype}{Logical: If TRUE, drop the top level of the output list if it has length 1 and that single element is named by the datatype name.}
 

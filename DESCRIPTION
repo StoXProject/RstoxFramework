@@ -1,6 +1,6 @@
 Package: RstoxFramework
-Version: 3.5.0
-Date: 2022-08-12
+Version: 3.5.1
+Date: 2022-08-29
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
@@ -56,4 +56,4 @@ Suggests:
     tinytest (>= 1.2.0)
 Additional_repositories: 
 	https://stoxproject.github.io/repo
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1

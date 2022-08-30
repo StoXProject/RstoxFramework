@@ -586,6 +586,7 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
         seed = Seed, 
         #varToScale = RstoxBase::getRstoxBaseDefinitions("dataTypeDefinition")[["MeanLengthDistributionData"]]$weighting, 
         varToScale = "WeightedNumber", 
+        # If any other values than varToResample = "PSU" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
@@ -613,6 +614,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
         data = MeanSpeciesCategoryCatchData$Data, 
         seed = Seed, 
         varToScale = c("TotalCatchWeight", "TotalCatchNumber"), 
+        # If any other values than varToResample = "PSU" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
@@ -664,6 +666,7 @@ ResampleBioticAssignment <- function(BioticAssignment, Seed) {
         data = BioticAssignment, 
         seed = Seed, 
         varToScale = "WeightingFactor", 
+        # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "Haul", 
         resampleBy = "Stratum"
     )

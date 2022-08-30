@@ -79,12 +79,14 @@ getValidFunctionsOneResamplableDataType <- function(resamplableDataType, stoxLib
     return(hasResamplableDataType)
 }
 
-#' Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:
+#' Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:
 #' 
 #' @export
 #' 
 getResampleFunctions <- function() {
-    paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
+    #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
+    resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
+    unlist(getRstoxFrameworkDefinitions("resampleFunctions")[resamplableDataTypes])
 }
 
 #' Process property formats for RstoxFramework

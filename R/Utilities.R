@@ -1337,3 +1337,43 @@ escapeForRegex <- function(x) {
     gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\\1", x)
 }
 
+
+
+#' Does the process store output files?:
+#' 
+#' @inheritParams general_arguments
+#' @param requireExists Logical: Should the existence of the output folder be checked.
+#' @export
+#' 
+hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRUE) {
+    
+    functionArguments <- getFunctionArguments(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID
+    )
+    
+    # Extract the process and the function arguments:
+    process <- functionArguments$process
+    
+    fileOutput <- process$processParameters$fileOutput
+    
+    # If the process is supposed to have a file output, check that it exists as a folder:
+    if(fileOutput && requireExists) {
+        folderPath <- getProcessOutputFolder(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            type = "output"
+        )
+        
+        
+        if(!file.exists(folderPath) || !isTRUE(file.info(folderPath)$isdir)) {
+            folderPath <- FALSE
+        }
+    }
+    
+    
+    return(fileOutput)
+}
+

@@ -258,14 +258,22 @@ initiateRstoxFramework <- function(){
     
     
     
-    # Get the functions that cacn be resampled in bootstrapping:
+    # Get the functions that can be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",
         "MeanLengthDistributionData", 
         "MeanSpeciesCategoryCatchData", 
         "BioticAssignment"
     )
-   
+    # ... and the reample functions, 
+    resampleFunctions <- list(
+        MeanNASCData = "ResampleMeanNASCData",
+        MeanLengthDistributionData = "ResampleMeanLengthDistributionData", 
+        MeanSpeciesCategoryCatchData = "ResampleMeanSpeciesCategoryCatchData", 
+        # This will be replaced by c("ResampleBioticAssignmentByStratum", "ResampleBioticAssignmentByPSU", where the first corresponds to the existing one):
+        BioticAssignment = "ResampleBioticAssignment" 
+    )
+    
     
     #### Data types: ####
     oldStoxModelDataTypes <- c(

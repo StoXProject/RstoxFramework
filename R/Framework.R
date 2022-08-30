@@ -5362,31 +5362,25 @@ deleteProcessOutput <- function(projectPath, modelName, processID, type = c("mem
 
 
 
-
+#' Find the output folder of a process 
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams getProcessOutput
+#' @param type The type of output folder, one of "memory", to point to the memory output (files that only live while the project in open), or "output" or "text to point to the output folder holding files that continue living after the project is closed (written when Write output to file is checked in the GUI).
+#' @export
+#' 
 getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("memory", "output", "text"), subfolder = NULL) {
     type <- match.arg(type)
     if(type == "memory") {
         folderPath <- file.path(getProjectPaths(projectPath, "dataModelsFolder"), modelName, processID)
     }
-    else if(type == "output") {
+    else if(type %in% c("output", "text")) {
         # Get the processName and build the folderPath:
-        processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
-        folderPath <- file.path(
-            getProjectPaths(
-                projectPath, 
-                "output"
-            ), 
-            modelName, 
-            processName
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
         )
-        # Add subfolder:
-        if(length(subfolder)) {
-            folderPath <- file.path(folderPath, subfolder)
-        }
-    }
-    else if(type == "text") {
-        # Get the processName and build the folderPath:
-        processName <- getProcessNameFromProcessID(projectPath, modelName, processID)
         folderPath <- file.path(
             getProjectPaths(
                 projectPath = projectPath, 
@@ -5394,9 +5388,13 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
             ), 
             processName
         )
+        # Add subfolder:
+        if(length(subfolder)) {
+            folderPath <- file.path(folderPath, subfolder)
+        }
     }
     else {
-        stop("typetype must be one of \"memory\" and \"output\"")
+        stop("typetype must be one of \"memory\" and \"output\"/\"text\"")
     }
     return(folderPath)
 }

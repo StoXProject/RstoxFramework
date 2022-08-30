@@ -600,7 +600,15 @@ getStartMiddleEndPosition <- function(Log, positionOrigins = c("start", "middle"
     }
     
     presentNames <- c(outer(Log[1, c(LogOrigin, LogOrigin2)], c("Longitude", "Latitude"), paste0))
-    positionsNA[, presentNames] <- Log[, .(Longitude, Longitude2, Latitude, Latitude2)]
+    presentVariables <- c("Longitude", "Longitude2", "Latitude", "Latitude2")
+    # Do not add the presentNames that start with NA:
+    startingWithNA <- startsWith(presentNames, "NA")
+    if(any(startingWithNA)) {
+        presentNames <- presentNames[!startingWithNA]
+        presentVariables <- presentVariables[!startingWithNA]
+    }
+    # Fill in the positions:
+    positionsNA[, presentNames] <- Log[, ..presentVariables]
     
     # Add the missing positions to the Log:
     Log <- cbind(Log, positionsNA)

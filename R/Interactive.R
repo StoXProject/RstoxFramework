@@ -576,9 +576,6 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
         )
     )
 }
-
-
-
 #' 
 #' @export
 #' @rdname Stratum
@@ -637,6 +634,58 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
         )
     )
 }
+#' 
+#' @export
+#' @rdname Stratum
+#' 
+renameStratum <- function(stratumName, newStratumName, projectPath, modelName, processID) {
+    
+    # Check that the process returns StratumPolygon process data:
+    checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
+    
+    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
+    StratumPolygon <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
+    
+    # Add the coordinates:
+    # Modify the coordinates:
+    atRename <- match( 
+        stratumName, 
+        RstoxBase::getStratumNames(StratumPolygon$StratumPolygon)
+    )
+    if(!any(is.na(atRename))) {
+        StratumPolygon$StratumPolygon$StratumName[atRename] <- newStratumName
+    }
+    
+    # Set the StratumPolygon back to the process data of the process:
+    setProcessMemory(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        argumentName = "processData", 
+        argumentValue = list(StratumPolygon) # We need to list this to make it correspond to the single value of the argumentName parameter.
+    )
+    
+    # Remove PSUs in all subsequent PSU processes:
+    #removePSUsByStratum(
+    #    stratumName = stratumName, 
+    #    projectPath = projectPath, 
+    #    modelName = modelName, 
+    #    processID = processID
+    #)
+    
+    # Revert the active process ID to the previous process:
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    
+    # Return the active process:
+    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+    return(
+        list(
+            activeProcess = activeProcess, 
+            saved = isSaved(projectPath)
+        )
+    )
+}
+
 
 # Function to add colnames to the coords slot of a SpatialPolygonsDataFrame:
 addCoordsNames <- function(stratum, names = c("x", "y")) {

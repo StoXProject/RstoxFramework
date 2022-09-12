@@ -2448,7 +2448,7 @@ getDataType <- function(projectPath, modelName, processID, argumentFilePaths = N
 
 checkDataType <- function(dataType, projectPath, modelName, processID) {
     #dataType %in% getDataType(projectPath, modelName, processID)
-    if(!dataType %in% getDataType(projectPath = projectPath, modelName = modelName, processID = processID)) {
+        if(!dataType %in% getDataType(projectPath = projectPath, modelName = modelName, processID = processID)) {
         stop("StoX: The process ", getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), " does not return ", dataType, " data.")
     }
 }
@@ -4748,7 +4748,7 @@ runProcess <- function(
         processOutput <- replaceData
     }
     
-    
+    #browser()
     
     if(failed){
         return(FALSE)
@@ -4760,7 +4760,7 @@ runProcess <- function(
         writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = processID, processDirty = FALSE)
         
         # If a valid output class, wrap the function output to a list named with the data type:
-        if(RstoxData::firstClass(processOutput) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
+        if(isValidOutputDataClass(processOutput)) {
             processOutput <- list(processOutput)
             names(processOutput) <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
         }
@@ -4777,7 +4777,8 @@ runProcess <- function(
                 processOutput[[1]] <- RstoxData::roundSignifSPDF(processOutput[[1]])
             }
         }
-        else {
+        # No need to set precision to a ggplot object:
+        else if(! "ggplot" %in% class(processOutput)){
             # List of lists is always data.table:
             for(listIndex in seq_along(processOutput)) {
                 RstoxData::setRstoxPrecisionLevel(processOutput[[listIndex]])
@@ -4968,6 +4969,7 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
 #' 
 #' @inheritParams fixedWidthTable
 #' @inheritParams readProcessOutputFile
+#' @inheritParams Projects
 #' @param modelName The name of the model (one of "baseline", "analysis" and "report").
 #' @param processID The ID of the process.
 #' @param tableName The name of the table to extract from the process.
@@ -4975,9 +4977,6 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
 #' @param drop Logical: If TRUE drop the list if only one element.
 #' @param drop.datatype Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.
 #' 
-#' @export
-#' 
-#' @inheritParams Projects
 #' @export
 #' 
 getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE) {
@@ -5125,7 +5124,7 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param filePath The file path of the process output file to read.
 #' @param flatten Logical: Should the output tables that contain cells of length > 1 be expanded to that the other columns are repeated, resulting in a regular table.
 #' @param pretty Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.
-#' @param pageindex A vevctor of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
+#' @param pageindex A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
 #' 
 readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE) {
@@ -5373,7 +5372,7 @@ deleteProcessOutput <- function(projectPath, modelName, processID, type = c("mem
 #' @param type The type of output folder, one of "memory", to point to the memory output (files that only live while the project in open), or "output" or "text to point to the output folder holding files that continue living after the project is closed (written when Write output to file is checked in the GUI).
 #' @export
 #' 
-getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("memory", "output", "text"), subfolder = NULL) {
+getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("memory", "output", "text"), subFolder = NULL) {
     type <- match.arg(type)
     if(type == "memory") {
         folderPath <- file.path(getProjectPaths(projectPath, "dataModelsFolder"), modelName, processID)
@@ -5392,9 +5391,9 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
             ), 
             processName
         )
-        # Add subfolder:
-        if(length(subfolder)) {
-            folderPath <- file.path(folderPath, subfolder)
+        # Add subFolder:
+        if(length(subFolder)) {
+            folderPath <- file.path(folderPath, subFolder)
         }
     }
     else {
@@ -5453,6 +5452,10 @@ getProcessNameFromProcessID <- function(projectPath, modelName, processID) {
         projectPath = projectPath, 
         modelName = modelName
     )
+    if(!NROW(processIndexTable)) {
+        stop("Project ", projectPath, " is not open.")
+    }
+    
     # Extract the requested process names:
     thisProcessID <- processID
     processIndexTable[processID == thisProcessID, processName]
@@ -5483,13 +5486,13 @@ getProcessOutputTextFilePath <- function(
         output.file.type <- getRstoxFrameworkDefinitions("default.output.file.type")[[modelName]]
     }
     
-    # Get the folder to place the output files in (added subfolder named by the process on 2020-10-21):
+    # Get the folder to place the output files in (added subFolder named by the process on 2020-10-21):
     folderPath <- getProcessOutputFolder(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
         type = "text", 
-        subfolder = NULL
+        subFolder = NULL
     )
     
     # Create the folder:
@@ -5536,6 +5539,10 @@ getProcessOutputTextFilePath <- function(
                 else if("matrix" %in% class(processOutput[[1]]) || any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutput[[1]]))) {
                     # Set file extension:
                     ext <- "csv"
+                }
+                else if("ggplot" %in% class(processOutput[[1]])) {
+                    # Set file extension:
+                    ext <- "png" # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
                 }
                 else {
                     stop("Unknown process output: ", class(processOutput[[1]]))
@@ -5730,6 +5737,20 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
             writeLines(as.character(processOutputOne), filePath)
         }
     }
+    else if("ggplot" %in% class(processOutputOne)) {
+        # Write the plot file:
+        att <- attributes(processOutputOne)
+        arguments <- list(
+            plot = processOutputOne, 
+            device = if("Format"      %in% names(att)) attr(processOutputOne, "Format")      else getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
+            width  = if("Width"       %in% names(att)) attr(processOutputOne, "Width")       else getRstoxBaseDefinitions("defaultPlotOptions")$Width,
+            height   = if("Height"      %in% names(att)) attr(processOutputOne, "Height")      else getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
+            dpi    = if("DotsPerInch" %in% names(att)) attr(processOutputOne, "DotsPerInch") else getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch
+        )
+        arguments$filename <- paste(tools::file_path_sans_ext(filePath), arguments$device, sep = ".")
+        
+        do.call(ggplot2::ggsave, arguments)
+    }
     else {
         stop("Unknown process output: ", class(processOutputOne))
     }
@@ -5760,7 +5781,7 @@ unlistOneStep <- function(processOutput) {
     # Unlist and add the names:
     if(!areAllValidOutputDataClasses(processOutput)){
         # A trick to prepare for unlist(). Add one list level to all elements which are valid class:
-        validClass <- sapply(processOutput, isValidOutputDataOne)
+        validClass <- sapply(processOutput, isValidOutputDataClass)
         processOutput[validClass] <- lapply(processOutput[validClass], list)
         
         # Define the names of the files first, by pasting the level and the sub-level names separated by underscore:
@@ -5775,19 +5796,27 @@ unlistOneStep <- function(processOutput) {
 }
 
 # Function to check that all the output elements are of the valid classes:
-areAllValidOutputDataClasses <- function(processOutput) {
+areAllValidOutputDataClasses <- function(x) {
+    all(sapply(x, isValidOutputDataClass))
+}
+
+# Function to check that all the output elements are of the valid classes:
+isValidOutputDataClass <- function(x) {
     validOutputDataClasses <- getRstoxFrameworkDefinitions("validOutputDataClasses")
-    classes <- sapply(processOutput, RstoxData::firstClass)
-    #classes <- unlist(lapply(classes, "[[", 1))
-    all(classes %in% validOutputDataClasses)
+    
+    isValid <- RstoxData::firstClass(x) %in% validOutputDataClasses
+    # ggplot objects have "gg" as first class and "gpglot" as second. RstoxFramework wishes to specify "ggplot" as vvalid class for clarity (and since "gg" seems to be a wider class). So using only first class as the most relevant class fails in this respect. Thus we add a specific check on the existence of "ggplot" in the classes of the object:
+    isGgplot <- "ggplot" %in% class(x)
+    
+    isValid || isGgplot
 }
 
 
 # Function to write process output to a memory file:
-writeProcessOutputMemoryFiles <- function(processOutput, projectPath, modelName, processID, type = c("memory", "output"), subfolder = NULL) {
+writeProcessOutputMemoryFiles <- function(processOutput, projectPath, modelName, processID, type = c("memory", "output"), subFolder = NULL) {
     if(length(processOutput)) {
         # Get the path to the folder to place the memory file in:
-        folderPath <- getProcessOutputFolder(projectPath = projectPath, modelName = modelName, processID = processID, type = type, subfolder = subfolder)
+        folderPath <- getProcessOutputFolder(projectPath = projectPath, modelName = modelName, processID = processID, type = type, subFolder = subFolder)
         writeProcessOutputTables(
             processOutput, 
             folderPath = folderPath, 
@@ -5852,7 +5881,7 @@ writeProcessOutput2 <- function(processOutput, folderPath, writeOrderFile = TRUE
     # Create the file names and add the folder paths to the file names (flattening the output):
     fileNamesSansExt <- vector("list", length(processOutput))
     # Add names of the elements which are lists of valid output data types (typically table):
-    areValid <- sapply(processOutput, isValidOutputDataOne)
+    areValid <- sapply(processOutput, isValidOutputDataClass)
     fileNamesSansExt[areValid] <- as.list(names(processOutput)[areValid])
     
     # Add the names of the list for lists of valid output data types:
@@ -5870,12 +5899,12 @@ getOutputDepth <- function(outputData) {
 }
 getOutputDepthOne <- function(outputDataOne) {
     # If the outputDataOne has length 0 or is of valid output data classes, set outputDepth to 1:
-    if(!length(outputDataOne) || isValidOutputDataOne(outputDataOne)) {
+    if(!length(outputDataOne) || isValidOutputDataClass(outputDataOne)) {
         outputDepth <- 1
     }
     # Else if outputDataOne is a list, check all elements:
     else if(length(outputDataOne) && is.list(outputDataOne)) {
-        areValid <- sapply(outputDataOne, isValidOutputDataOne) | lengths(outputDataOne) == 0
+        areValid <- sapply(outputDataOne, isValidOutputDataClass) | lengths(outputDataOne) == 0
         if(all(areValid)) {
             outputDepth <- 2
         }
@@ -5897,16 +5926,6 @@ getFolderDepth <- function(folderPath) {
         folderDepth <- 2
     }
     folderDepth
-}
-
-
-# A valid process output (from running the process in runProcess()) must be a pure list with class not in the valid classes, and where the first element of the list HAS a valid class:
-#isValidOutputData <- function(x) {
-#    validOutputDataClasses <- getRstoxFrameworkDefinitions("validOutputDataClasses")
-#    is.list(x) && !RstoxData::firstClass(x) %in% validOutputDataClasses && RstoxData::firstClass(x[[1]]) %in% validOutputDataClasses
-#}
-isValidOutputDataOne <- function(outputDataOne) {
-    RstoxData::firstClass(outputDataOne) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")
 }
 
 

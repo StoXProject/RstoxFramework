@@ -23,7 +23,7 @@ readProcessOutputFile(
 
 \item{pretty}{Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.}
 
-\item{pageindex}{A vevctor of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
+\item{pageindex}{A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
 
 \item{linesPerPage}{The number of lines per page if \code{pageindex} is given.}
 

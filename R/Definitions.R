@@ -342,9 +342,10 @@ initiateRstoxFramework <- function(){
         "numeric", 
         "integer", 
         "logical", 
-        "SpatialPolygonsDataFrame"#, 
+        "SpatialPolygonsDataFrame", 
         #"StoX_multipolygon_WKT", 
         #"StoX_shapefile"
+        "ggplot"
     )
     vectorClasses <- c(
         "character", 

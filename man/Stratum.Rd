@@ -5,6 +5,7 @@
 \alias{addStratum}
 \alias{removeStratum}
 \alias{modifyStratum}
+\alias{renameStratum}
 \title{Stratum manipulation}
 \usage{
 addStratum(stratum, projectPath, modelName, processID)
@@ -12,6 +13,8 @@ addStratum(stratum, projectPath, modelName, processID)
 removeStratum(stratumName, projectPath, modelName, processID)
 
 modifyStratum(stratum, projectPath, modelName, processID)
+
+renameStratum(stratumName, newStratumName, projectPath, modelName, processID)
 }
 \arguments{
 \item{stratum}{The SpatialPolygonsDataFrame object defining the stratum to add.}

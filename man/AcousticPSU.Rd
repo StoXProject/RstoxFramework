@@ -7,6 +7,7 @@
 \alias{renameAcousticPSU}
 \alias{addEDSU}
 \alias{removeEDSU}
+\alias{removeAllAcousticPSUsOfStratum}
 \title{Add or remove acoustic PSUs and EDSUs}
 \usage{
 addAcousticPSU(Stratum, PSU = NULL, projectPath, modelName, processID)
@@ -18,6 +19,8 @@ renameAcousticPSU(PSU, newPSUName, projectPath, modelName, processID)
 addEDSU(PSU, EDSU, projectPath, modelName, processID)
 
 removeEDSU(EDSU, projectPath, modelName, processID)
+
+removeAllAcousticPSUsOfStratum(Stratum, projectPath, modelName, processID)
 }
 \arguments{
 \item{Stratum}{The name of a stratum.}

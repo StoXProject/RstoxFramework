@@ -813,7 +813,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         type = as.list(c(
             "character", 
             "character", 
-            sapply(processParameters, RstoxData::firstClass)
+            sapply(processParameters, getRelevantClass)
         )), 
         # 5a. format:
         # The number 2 is functionName and processName:
@@ -1465,7 +1465,7 @@ getFilterOptionsAll <- function(projectPath, modelName, processID, include.numer
     name <- lapply(processOutput, names)
     
     # Get the data types:
-    type <- lapply(processOutput, function(x) sapply(x, RstoxData::firstClass))
+    type <- lapply(processOutput, function(x) sapply(x, getRelevantClass))
     
     # Get the operators:
     operators <- lapply(type, function(x) if(length(x)) getRstoxFrameworkDefinitions("filterOperators")[x] else NULL)

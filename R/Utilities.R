@@ -112,7 +112,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
     else if(data.table::is.data.table(x)) {
         # First convert all columns to character:
         ### # Take special care of datetime:
-        ### isDateTime <- startsWith(sapply(x, RstoxData::firstClass), "POSIX")
+        ### isDateTime <- startsWith(sapply(x, getRelevantClass), "POSIX")
         ### POSIXCols  <- colnames(x)[isDateTime]
         ### if(any(isDateTime)) {
         ###     x[, (POSIXCols) := lapply(.SD, function(datetime) format(datetime, format = "%Y-%m-%dT%H:%M:%OS3Z")), .SDcols = POSIXCols]
@@ -1073,8 +1073,8 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     }
     
     # Get the classes of the first and second table:
-    classes_in_x <- sapply(x, RstoxData::firstClass)
-    classes_in_y <- sapply(y, RstoxData::firstClass)
+    classes_in_x <- sapply(x, getRelevantClass)
+    classes_in_y <- sapply(y, getRelevantClass)
     
     if(!identical(classes_in_x, classes_in_y)) {
         
@@ -1150,8 +1150,8 @@ skipRowsAtNA <- function(x, skipNAAt) {
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 #compareDataTablesUsingClassOfSecond <- function(x, y) {
 #    # Get the classes of the first and second table:
-#    classes_in_x <- sapply(x, RstoxData::firstClass)
-#    classes_in_y <- sapply(y, RstoxData::firstClass)
+#    classes_in_x <- sapply(x, getRelevantClass)
+#    classes_in_y <- sapply(y, getRelevantClass)
 #    if(!identical(classes_in_x, classes_in_y)) {
 #        # Coerce to the class in the memory:
 #        differ <- names(x)[classes_in_x != classes_in_y]

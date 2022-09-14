@@ -2,9 +2,47 @@
 % Please edit documentation in R/Framework.R
 \name{getProcessOutput}
 \alias{getProcessOutput}
+\alias{getProcessTableOutput}
+\alias{getProcessGeoJsonOutput}
 \title{Get output of a StoX process.}
 \usage{
 getProcessOutput(
+  projectPath,
+  modelName,
+  processID,
+  tableName = NULL,
+  subFolder = NULL,
+  flatten = FALSE,
+  pretty = FALSE,
+  pageindex = integer(0),
+  linesPerPage = 1000L,
+  columnSeparator = " ",
+  lineSeparator = NULL,
+  na = "-",
+  enable.auto_unbox = TRUE,
+  drop = FALSE,
+  drop.datatype = TRUE
+)
+
+getProcessTableOutput(
+  projectPath,
+  modelName,
+  processID,
+  tableName = NULL,
+  subFolder = NULL,
+  flatten = FALSE,
+  pretty = FALSE,
+  pageindex = integer(0),
+  linesPerPage = 1000L,
+  columnSeparator = " ",
+  lineSeparator = NULL,
+  na = "-",
+  enable.auto_unbox = TRUE,
+  drop = FALSE,
+  drop.datatype = TRUE
+)
+
+getProcessGeoJsonOutput(
   projectPath,
   modelName,
   processID,

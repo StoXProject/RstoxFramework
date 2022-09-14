@@ -590,6 +590,14 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
         #StratumPolygon$StratumPolygon@polygons <- StratumPolygon$StratumPolygon@polygons[-atRemove]
         StratumPolygon$StratumPolygon <- StratumPolygon$StratumPolygon[-atRemove, ]
     }
+    else {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        warning("StoX: The stratum with name ", stratumName, " does not exist for the process ", processName, ". No stratum deleted.")
+    }
     
     # Set the StratumPolygon back to the process data of the process:
     setProcessMemory(
@@ -643,19 +651,32 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     }
     
     # Modify the coordinates:
+    if(length(RstoxBase::getStratumNames(stratum)) > 1) {
+        stop("Only one stratum can be modified.")
+    }
+    
     atModify <- match( 
         RstoxBase::getStratumNames(stratum), 
         RstoxBase::getStratumNames(StratumPolygon$StratumPolygon)
     )
-    if(length(atModify)) {
-        # Set ID of the new strata:
+    if(!any(is.na(atModify))) {
+        # Set ID of the modified strata:
         for(ind in seq_along(stratum@polygons)) {
             stratum@polygons[[ind]]@ID <- StratumPolygon$StratumPolygon@polygons[[atModify[ind]]]@ID
         }
         
-        # Insert the new strata
+        # Insert the modified strata
         StratumPolygon$StratumPolygon@polygons[atModify] <- stratum@polygons
     }
+    else {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        warning("StoX: The stratum with name ", RstoxBase::getStratumNames(stratum), " does not exist for the process ", processName, ". No stratum modified.")
+    }
+    
     
     # Set the StratumPolygon back to the process data of the process:
     setProcessMemory(
@@ -698,6 +719,14 @@ renameStratum <- function(stratumName, newStratumName, projectPath, modelName, p
     )
     if(!any(is.na(atRename))) {
         StratumPolygon$StratumPolygon$StratumName[atRename] <- newStratumName
+    }
+    else {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        warning("StoX: The stratum with name ", stratumName, " does not exist for the process ", processName, ". No stratum renamed.")
     }
     
     # Set the StratumPolygon back to the process data of the process:

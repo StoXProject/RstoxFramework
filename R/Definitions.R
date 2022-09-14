@@ -347,12 +347,26 @@ initiateRstoxFramework <- function(){
         #"StoX_shapefile"
         "ggplot"
     )
+    
+    outputTypes <- list(
+        data.table = "table", 
+        matrix = "table", 
+        character = "table", 
+        numeric = "table", 
+        integer = "table", 
+        logical = "table", 
+        SpatialPolygonsDataFrame = "geojson", 
+        ggplot = "filePath"
+    )
+    
     vectorClasses <- c(
         "character", 
         "numeric", 
         "integer", 
         "logical"
     )
+    
+    
     
     # Define code words for the start and end of files to write geojson data to, which are read into the project.json after being written for a project:
     spatialFileReferenceCodeStart <- "<stratumpolygontempfile:"

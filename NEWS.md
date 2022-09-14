@@ -4,6 +4,22 @@
 * Added renameStratum() for use by the GUI.
 * Added removeAllAcousticPSUsOfStratum().
 * Disalowed empty string stratum name from the GUI.
+* Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.
+* Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().
+
+
+##################################################
+##################################################
+#' Get output of a StoX process.
+#' 
+#' Gets the output of a process that has been run.
+#' 
+#' @inheritParams general_arguments
+#' @param plotName The name of the plot.
+#' 
+#' @export
+#' 
+getProcessPlotOutput
 
 # RstoxFramework v3.5.0 (2022-08-12)
 * Start of using semantic versioning (https://semver.org/). Before this release the two first version numbers represented the major and minor release number, in accordance with semantic versioning, whereas the third version number identified test versions. The major and minor releases (versions ending with 0.0 or 0) were considered as official versions. From this release and onwards, the third version number will represent patches (bug fixes), and are to be considered equally official as the major and minor releases. In fact, as patches are restricted to fixing bugs and not adding new functionality, the latest patch will be the recommended version.

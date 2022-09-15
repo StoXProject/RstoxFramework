@@ -356,7 +356,7 @@ initiateRstoxFramework <- function(){
         integer = "table", 
         logical = "table", 
         SpatialPolygonsDataFrame = "geojson", 
-        ggplot = "filePath"
+        ggplot = "plot"
     )
     
     vectorClasses <- c(

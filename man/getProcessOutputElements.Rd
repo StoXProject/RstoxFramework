@@ -4,7 +4,7 @@
 \alias{getProcessOutputElements}
 \title{Get the names of the output tables of a process}
 \usage{
-getProcessOutputElements(projectPath, modelName, processID)
+getProcessOutputElements(projectPath, modelName, processID, full.names = FALSE)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}

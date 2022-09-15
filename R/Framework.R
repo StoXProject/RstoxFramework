@@ -5417,9 +5417,17 @@ getProcessOutputTableNames <- function(projectPath, modelName, processID) {
 #' @inheritParams general_arguments
 #' @export
 #' 
-getProcessOutputElements <- function(projectPath, modelName, processID) {
+getProcessOutputElements <- function(projectPath, modelName, processID, full.names = FALSE) {
     # Get the output file names, and add the process name:
     elementName <- getProcessOutputFiles(projectPath = projectPath, modelName = modelName, processID = processID, onlyTableNames = TRUE)
+    if(full.names)  {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        elementName <- paste0(processName, "(", elementName, ")")
+    }
     # Get the element types:
     outputClass <- readOutputClass(projectPath, modelName, processID)
     elementType <- getOutputElementType(outputClass)

@@ -14,6 +14,7 @@ getProcessOutput(
   subFolder = NULL,
   flatten = FALSE,
   pretty = FALSE,
+  pretty.json = FALSE,
   pageindex = integer(0),
   linesPerPage = 1000L,
   columnSeparator = " ",
@@ -30,25 +31,20 @@ getProcessTableOutput(
   modelName,
   processID,
   tableName = NULL,
-  subFolder = NULL,
   flatten = FALSE,
   pretty = FALSE,
   pageindex = integer(0),
   linesPerPage = 1000L,
   columnSeparator = " ",
-  lineSeparator = NULL,
   na = "-",
-  enable.auto_unbox = TRUE,
-  drop = FALSE,
-  drop.datatype = TRUE,
-  splitGeoJson = TRUE
+  drop = FALSE
 )
 
 getProcessGeoJsonOutput(
   projectPath,
   modelName,
   processID,
-  geojsonName = NULL,
+  geoJsonName = NULL,
   pretty = FALSE,
   splitGeoJson = TRUE
 )

@@ -8,6 +8,7 @@ readProcessOutputFile(
   filePath,
   flatten = FALSE,
   pretty = FALSE,
+  pretty.json = TRUE,
   pageindex = integer(0),
   linesPerPage = 1000L,
   columnSeparator = " ",

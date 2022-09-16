@@ -4979,7 +4979,7 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
 #' 
 #' @export
 #' 
-getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE) {
+getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE) {
     
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
@@ -5032,6 +5032,7 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         readProcessOutputFile, 
         flatten = flatten, 
         pretty = pretty, 
+        pretty.json = pretty.json, 
         linesPerPage = linesPerPage, 
         pageindex = pageindex, 
         columnSeparator = columnSeparator, 
@@ -5061,13 +5062,35 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
 #' @rdname getProcessOutput
 #' @export
 #' 
-getProcessTableOutput <- getProcessOutput
+getProcessTableOutput <- function(projectPath, modelName, processID, tableName = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", na = "-", drop = FALSE) {
+    getProcessOutput(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        tableName = tableName, 
+        flatten = flatten, 
+        pretty = pretty, 
+        pageindex = pageindex, 
+        linesPerPage = linesPerPage, 
+        columnSeparator = columnSeparator, 
+        na = na, 
+        drop = drop
+    )
+}
 #' 
 #' @rdname getProcessOutput
 #' @export
 #' 
-getProcessGeoJsonOutput <- function(projectPath, modelName, processID, geojsonName = NULL, pretty = FALSE, splitGeoJson = TRUE) {
-    getProcessOutput(projectPath, modelName, processID, tableName = geojsonName, pretty = pretty, splitGeoJson = splitGeoJson)
+getProcessGeoJsonOutput <- function(projectPath, modelName, processID, geoJsonName = NULL, pretty = FALSE, splitGeoJson = TRUE) {
+    getProcessOutput(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        tableName = geoJsonName, 
+        pretty = TRUE, # Whether to return a list with data, numberOfLines and numberOfPages.
+        pretty.json = pretty, 
+        splitGeoJson = splitGeoJson
+    )
 }
 
 
@@ -5185,7 +5208,7 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param pageindex A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
 #' 
-readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE) {
+readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE) {
     
     
     # Read the process output file:
@@ -5201,13 +5224,15 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
         if(getRelevantClass(data) == "SpatialPolygonsDataFrame") {
             #geojsonio::geojson_json(processOutput, pretty = TRUE)
             #data <- jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data)))
-            data <- jsonlite::prettify(
-                replaceSpatialFileReference(
-                    buildSpatialFileReferenceString(
-                        data
-                    )
+            data <- replaceSpatialFileReference(
+                buildSpatialFileReferenceString(
+                    data
                 )
             )
+            
+            if(pretty.json || splitGeoJson) {
+                data <- jsonlite::prettify(data)
+            }
             
             # We need to split into a vector of lines:
             if(splitGeoJson) {

@@ -4979,7 +4979,7 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
 #' 
 #' @export
 #' 
-getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE) {
+getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE) {
     
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
@@ -5038,7 +5038,8 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         lineSeparator = lineSeparator, 
         na = na, 
         enable.auto_unbox = enable.auto_unbox, 
-        how = "replace"
+        how = "replace", 
+        splitGeoJson = splitGeoJson
     )
 
     # Unlist the top level if a single tabled data type is wrapped in a list:
@@ -5065,7 +5066,9 @@ getProcessTableOutput <- getProcessOutput
 #' @rdname getProcessOutput
 #' @export
 #' 
-getProcessGeoJsonOutput <- getProcessOutput
+getProcessGeoJsonOutput <- function(projectPath, modelName, processID, geojsonName = NULL, pretty = FALSE, splitGeoJson = TRUE) {
+    getProcessOutput(projectPath, modelName, processID, tableName = geojsonName, pretty = pretty, splitGeoJson = splitGeoJson)
+}
 
 
 ##################################################
@@ -5182,7 +5185,7 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param pageindex A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
 #' 
-readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE) {
+readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE) {
     
     
     # Read the process output file:
@@ -5207,11 +5210,17 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
             )
             
             # We need to split into a vector of lines:
-            data <- strsplit(data, "\n", fixed = TRUE)[[1]]
-            
-            # Extract the requested lines:
-            numberOfLines <- length(data)
-            numberOfPages <- ceiling(numberOfLines / linesPerPage)
+            if(splitGeoJson) {
+                data <- strsplit(data, "\n", fixed = TRUE)[[1]]
+                # Extract the requested lines:
+                numberOfLines <- length(data)
+                numberOfPages <- ceiling(numberOfLines / linesPerPage)
+            }
+            else {
+                data <- as.character(data)
+                numberOfLines <- 1
+                numberOfPages <- 1
+            }
             
             data <- list(
                 data = data, 
@@ -5239,6 +5248,22 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
                 na = na, 
                 enable.auto_unbox = enable.auto_unbox
             )
+            
+            # Add a line "... truncated" if the page is not first and not the last:
+            if(pageindex > 1) {
+                data <- c(
+                    "... truncated", 
+                    data
+                )
+            }
+            if(pageindex < numberOfPages) {
+                data <- c(
+                    data,
+                    "... truncated"
+                )
+            }
+            
+            
                 
             # In the pretty model, output a list containing the number of lines and the number of pages:
             data <- list(
@@ -5248,7 +5273,7 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
             )
         }
         else {
-            # Add numberOfLines = 1 and numberOfPages = 1 to conform to the output used for tables in the GUI:
+            # Add numberOfLines = 0 and numberOfPages = 0 to conform to the output used for tables in the GUI:
             if(length(data)) {
                 # Extract the requested lines:
                 numberOfLines <- length(data)
@@ -5269,6 +5294,8 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
             }
         }
     }
+    
+    
     
     return(data)
 }

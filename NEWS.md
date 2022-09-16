@@ -6,6 +6,7 @@
 * Disalowed empty string stratum name from the GUI.
 * Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.
 * Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().
+* Added a line "... truncated" if a table in Preview does not contain all rows (the GUI shows at most 200000 rows).
 
 
 ##################################################

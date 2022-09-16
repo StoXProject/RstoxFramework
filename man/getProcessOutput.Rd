@@ -21,7 +21,8 @@ getProcessOutput(
   na = "-",
   enable.auto_unbox = TRUE,
   drop = FALSE,
-  drop.datatype = TRUE
+  drop.datatype = TRUE,
+  splitGeoJson = TRUE
 )
 
 getProcessTableOutput(
@@ -39,25 +40,17 @@ getProcessTableOutput(
   na = "-",
   enable.auto_unbox = TRUE,
   drop = FALSE,
-  drop.datatype = TRUE
+  drop.datatype = TRUE,
+  splitGeoJson = TRUE
 )
 
 getProcessGeoJsonOutput(
   projectPath,
   modelName,
   processID,
-  tableName = NULL,
-  subFolder = NULL,
-  flatten = FALSE,
+  geojsonName = NULL,
   pretty = FALSE,
-  pageindex = integer(0),
-  linesPerPage = 1000L,
-  columnSeparator = " ",
-  lineSeparator = NULL,
-  na = "-",
-  enable.auto_unbox = TRUE,
-  drop = FALSE,
-  drop.datatype = TRUE
+  splitGeoJson = TRUE
 )
 }
 \arguments{

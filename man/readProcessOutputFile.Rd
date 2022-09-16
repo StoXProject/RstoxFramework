@@ -13,7 +13,8 @@ readProcessOutputFile(
   columnSeparator = " ",
   lineSeparator = NULL,
   na = "-",
-  enable.auto_unbox = FALSE
+  enable.auto_unbox = FALSE,
+  splitGeoJson = TRUE
 )
 }
 \arguments{

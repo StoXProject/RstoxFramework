@@ -125,7 +125,8 @@ initiateRstoxFramework <- function(){
         "functionOutputDataType", 
         "functionParameterType", 
         "functionParameterFormat", 
-        "functionArgumentHierarchy"
+        "functionArgumentHierarchy", 
+        "functionParameterDefaults"
     )
     
     # Define parameters that are needed to run processData functions or bootstrap functions (or other kinds of special functions):
@@ -889,10 +890,10 @@ extractStoxFunctionParameterPossibleValues <- function(functionName, systemParam
             assign(names(f[i]), 
                 if(!is.null(f[[i]])) 
                     output[[i]] <- eval(f[[i]], envir = 
-                                            list(
-                                                environment(), 
-                                                as.environment(paste("package", packageName, sep = ":"))
-                                            )
+                        list(
+                            environment(), 
+                            as.environment(paste("package", packageName, sep = ":"))
+                        )
                     ) 
                 else 
                     eval(f[[i]], envir = list(

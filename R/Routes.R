@@ -911,7 +911,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         if(length(functionParameters)) {
             # Get the names of the function parameters:
             functionParameterNames <- names(functionParameters)
-
+            
             format <- getFunctionParameterFormats(functionName)[functionParameterNames]
             
             # Define the function parameters:
@@ -1208,7 +1208,9 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
                 projectPath = projectPath, 
                 modelName = modelName, 
                 processID = processID, 
-                newFunctionName = newFunctionName
+                newFunctionName = newFunctionName, 
+                # As of RstoxFramework 3.6.0 defaults are supported:
+                add.defaults = TRUE
             )
         }
         # Modify process parameter:

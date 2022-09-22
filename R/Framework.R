@@ -2113,49 +2113,32 @@ getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePa
     
     # Get the function name and arguments:
     functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionArguments <- c(functionInputs, functionParameters)
-    
     # Get the function argument hierarchy:
     functionArgumentHierarchy <- getStoxFunctionMetaData(functionName, "functionArgumentHierarchy", showWarnings = FALSE)
     
-    # Loop through the arguments given by parent tags in the functionArgumentHierarchy, and set toShow to FALSE if not any of the criterias are fulfilled:
-    toShow <- logical(length(functionArguments))
-    names(toShow) <- names(functionArguments)
-    for(argumentName in names(toShow)) {
-        # Check whether the argument is given in the functionArgumentHierarchy. If not, it will be shown:
-        atArgumentName <- which(argumentName == names(functionArgumentHierarchy))
-        if(length(atArgumentName)) {
-            # Loop through the occurrences of the argumentName in the functionArgumentHierarchy, applying &&:
-            hitsOr <- logical(length(atArgumentName))
-            for(ind in seq_along(atArgumentName)) {
-                # Loop through the conditions and set hitsAnd to TRUE if at least one condition is fullfilled:
-                conditionNames <- names(functionArgumentHierarchy[[atArgumentName[ind]]])
-                hitsAnd <- logical(length(conditionNames))
-                names(hitsAnd) <- conditionNames
-                for(conditionName in conditionNames) {
-                    # Added requirement that functionArguments[[conditionName]] has positie length:
-                    if(length(functionArguments[[conditionName]]) && functionArguments[[conditionName]] %in% eval(functionArgumentHierarchy[[atArgumentName[ind]]][[conditionName]])) {
-                        hitsAnd[conditionName] <- TRUE
-                    }
-                }
-                # Apply the AND condition, implying that hitsAnd is TRUE if all are TRUE:
-                hitsOr[ind] <- all(hitsAnd)
-            }
-            toShow[[argumentName]] <- any(hitsOr)
-        }
-        else {
-            toShow[[argumentName]] <- TRUE
-        }
-    }
+    # Get the function inputs and the function parameters:
+    functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
+    functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
     
-    # Return only the names of the arguments to show:
-    if(return.only.names) {
-        toShow <- names(toShow)[toShow]
+    if(length(functionArgumentHierarchy) && any(rapply(functionArgumentHierarchy, is.function))) {
+        
+        # Get the actual function input data, as it is needed when functionArgumentHierarchy is a function:
+        functionInputs <- getFunctionInputData(
+            functionInputProcessNames = functionInputs, 
+            projectPath = projectPath, 
+            # Do not stop if the input is not specified, as we may not yet have defined the parameters:
+            strict = FALSE
+        )
+        
     }
+    functionArguments <- c(functionInputs, functionParameters)
     
-    return(toShow)
+    
+    RstoxData::applyFunctionArgumentHierarchy(
+        functionArgumentHierarchy = functionArgumentHierarchy, 
+        functionArguments = functionArguments, 
+        return.only.names = return.only.names
+    )
 }
 
 # Function to extract the actual the arguments to show from the arguments:
@@ -2198,7 +2181,7 @@ isBootstrapFunction <- function(functionName) {
 getStoxFunctionParameterPossibleValues <- function(functionName, fill.logical = TRUE) {
     
     # Get all defaults:
-    output <- getStoxFunctionParameterDefaults(functionName)
+    output <- getStoxFunctionParameterFormals(functionName)
     
     # Get the parameter (primitive) type to enable the treatments of logicals and numerics:
     parameterType <- unlist(getStoxFunctionParameterTypes(functionName))
@@ -2225,7 +2208,7 @@ getStoxFunctionParameterPossibleValues <- function(functionName, fill.logical = 
 
 
 # Function which gets the default values of a function:
-getStoxFunctionParameterDefaults <- function(functionName) {
+getStoxFunctionParameterFormals <- function(functionName) {
     # Get the available functions:
     availableFunctions <- getRstoxFrameworkDefinitions("availableFunctions")
     
@@ -2236,24 +2219,27 @@ getStoxFunctionParameterDefaults <- function(functionName) {
     }
     
     # Get all possible values:
-    defaults <- getRstoxFrameworkDefinitions("availableFunctionPossibleValues")[[functionName]]
-    return(defaults)
+    possibleValues <- getRstoxFrameworkDefinitions("availableFunctionPossibleValues")[[functionName]]
+    return(possibleValues)
 }
 
 
 # Function which gets the default values of a function:
-getStoxFunctionParameterDefault <- function(functionName) {
+getStoxFunctionParameterDefaults <- function(functionName) {
     # Get the possible values of the parameters of a function:
-    defaults <- getStoxFunctionParameterDefaults(functionName)
-    # The default is the first value:
-    default <- lapply(defaults, utils::head, 1)
-    return(default)
+    StoxFunctionParameterFormals <- getStoxFunctionParameterFormals(functionName)
+    
+    # Keep only logicals:
+    setTo0Length <- !lapply(StoxFunctionParameterFormals, getRelevantClass) %in% "logical" & lengths(StoxFunctionParameterFormals) > 0
+    StoxFunctionParameterFormals[setTo0Length] <- lapply(sapply(StoxFunctionParameterFormals[setTo0Length],  RstoxData::firstClass), do.call, list(0))
+    
+    return(StoxFunctionParameterFormals)
 }
 
 # Function which gets the primitive types of the parameters of a function:
 getStoxFunctionParameterPrimitiveTypes <- function(functionName) {
     # Get the possible values of the parameters of a function:
-    functionParameterDefault <- getStoxFunctionParameterDefault(functionName)
+    functionParameterDefault <- getStoxFunctionParameterFormals(functionName)
     # The default is the first value:
     primitiveType <- lapply(functionParameterDefault, getRelevantClass)
     return(primitiveType)
@@ -3213,17 +3199,28 @@ setFunctionName <- function(process, newFunctionName, add.defaults = FALSE) {
         # Insert the function name:
         process$functionName <- newFunctionName
         # Get the parameters to display, and their defaults:
-        defaults <- getStoxFunctionParameterDefault(process$functionName)
+        defaults <- getStoxFunctionParameterDefaults(process$functionName)
         
         # Detect which parameters are data types, which identifies them as function inputs (outputs from other processes):
         areInputs <- isFunctionInput(names(defaults))
         
         if(!add.defaults) {
-            areNonEmptyString <- sapply(defaults, function(x) length(x) && is.character(x))
-            if(any(areNonEmptyString)) {
-                defaults[areNonEmptyString] <- lapply(defaults[areNonEmptyString], function(x) character(0))
+            #areNonEmptyString <- sapply(defaults, function(x) length(x) && is.character(x))
+            #if(any(areNonEmptyString)) {
+            #    defaults[areNonEmptyString] <- lapply(defaults[areNonEmptyString], function(x) character(0))
+            #}
+            #
+        }
+        else {
+            # Add also defaults from the stoxFunctionAttributes:
+            functionParameterDefaults <- getStoxFunctionMetaData(newFunctionName, "functionParameterDefaults", showWarnings = FALSE)
+            if(length(functionParameterDefaults)) {
+                for(name in names(functionParameterDefaults)) {
+                    defaults[[name]] <- functionParameterDefaults[[name]]
+                }
             }
         }
+        
         # Split the defaults into function parameters and function inputs:
         process$functionParameters <- defaults[!areInputs]
         process$functionInputs <- defaults[areInputs]
@@ -3360,16 +3357,16 @@ modifyFunctionName <- function(projectPath, modelName, processID, newFunctionNam
     }
     #process
 }
-emptyFunctionName <- function(projectPath, modelName, processID, archive = TRUE, add.defaults = FALSE) {
-    modifyFunctionName(
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = processID, 
-        newFunctionName = list(), 
-        archive = archive, 
-        add.defaults = add.defaults
-    )
-}
+#emptyFunctionName <- function(projectPath, modelName, processID, archive = TRUE) {
+#    modifyFunctionName(
+#        projectPath = projectPath, 
+#        modelName = modelName, 
+#        processID = processID, 
+#        newFunctionName = list(), 
+#        archive = archive, 
+#        add.defaults = FALSE
+#    )
+#}
 modifyProcessName <- function(projectPath, modelName, processID, newProcessName, archive = TRUE, strict = TRUE, update.functionInputs = TRUE) {
     
     # Get the current process name:
@@ -3918,17 +3915,17 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
     
     if(length(functionParameters)) {
         
-        parameterDefaults <- getStoxFunctionParameterDefault(functionName)
+        StoxFunctionParameterFormals <- getStoxFunctionParameterFormals(functionName)
         
         if(is.list(functionParameters)) {
             # Get present and invalid function parameters:
             present <- intersect(
                 names(functionParameters), 
-                names(parameterDefaults)
+                names(StoxFunctionParameterFormals)
             )
             invalid <- setdiff(
                 names(functionParameters), 
-                names(parameterDefaults)
+                names(StoxFunctionParameterFormals)
             )
             
             # Warning if there are parameters not specified in the function definition:
@@ -3940,13 +3937,13 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
                 for(this in present) {
                     # If the defined class is not NULL, or if it is NULL and the property has length 0, apply the defined class:
                     
-                    classIsDefined <- !is.null(parameterDefaults[[this]])
+                    classIsDefined <- !is.null(StoxFunctionParameterFormals[[this]])
                     NULLDefinedAndEmptyProperty <- 
-                        is.null(parameterDefaults[[this]]) && 
+                        is.null(StoxFunctionParameterFormals[[this]]) && 
                         length(functionParameters[[this]]) == 0
-                    table <- identical(getRelevantClass(parameterDefaults[[this]]), "data.table")
+                    table <- identical(getRelevantClass(StoxFunctionParameterFormals[[this]]), "data.table")
                     emptyTable <- table && length(functionParameters[[this]]) == 0
-                    differingClass <- getRelevantClass(functionParameters[[this]]) != getRelevantClass(parameterDefaults[[this]])
+                    differingClass <- getRelevantClass(functionParameters[[this]]) != getRelevantClass(StoxFunctionParameterFormals[[this]])
                     
                     # Special case for NULL:
                     if(NULLDefinedAndEmptyProperty) {
@@ -3993,7 +3990,7 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
                     }
                     # Set class to the defined class:
                     else if(classIsDefined && differingClass) {
-                        class(functionParameters[[this]]) <- getRelevantClass(parameterDefaults[[this]])
+                        class(functionParameters[[this]]) <- getRelevantClass(StoxFunctionParameterFormals[[this]])
                     }
                 }
             }
@@ -4921,6 +4918,33 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     functionInputNames <- functionInputNames[lengths(functionArguments[functionInputNames]) > 0L]
     
     functionInputProcessNames <- unlist(functionArguments[functionInputNames])
+    
+    # Add the function input data:
+    functionInputData <- getFunctionInputData(
+        functionInputProcessNames = functionInputProcessNames, 
+        projectPath = projectPath
+    ) 
+    
+    if(length(functionInputData)) {
+        # Get the actual function inputs from the functionInputsProcessIDs:
+        functionArguments[functionInputNames] <- functionInputData
+    }
+    
+    
+    return(
+        list(
+            functionArguments = functionArguments, 
+            process = process
+        )
+    )
+    functionArguments
+}
+
+
+
+
+getFunctionInputData <- function(functionInputProcessNames, projectPath, strict = TRUE) {
+    
     if(length(functionInputProcessNames)) {
         # Get the function input process IDs (returned as a data.table due to the rbindlist()):
         functionInputsProcessIDs <- data.table::rbindlist(mapply(
@@ -4933,13 +4957,15 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             SIMPLIFY = FALSE
         ))
         
-        if(nrow(functionInputsProcessIDs) != length(functionInputProcessNames)) {
+        functionInputData <- structure(vector("list", length(functionInputProcessNames)), names = names(functionInputProcessNames))
+            
+        if(strict && nrow(functionInputsProcessIDs) != length(functionInputProcessNames)) {
             stop("Some function inputs are not specified: ", paste(setdiff(functionInputProcessNames, names(functionInputsProcessIDs)), collapse = ", "))
             
         }
         
         # Get the actual function inputs from the functionInputsProcessIDs:
-        functionArguments[functionInputNames] <- mapply(
+        presentFunctionInputData <- mapply(
             getProcessOutput, 
             projectPath = projectPath, 
             modelName = functionInputsProcessIDs$modelName, 
@@ -4947,18 +4973,17 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             SIMPLIFY = FALSE
         )
         
-        #names(functionArguments) <- names(functionInputProcessNames)
+        if(length(presentFunctionInputData)) {
+            functionInputData[names(functionInputProcessNames)] <- presentFunctionInputData
+            #names(functionInputData) <- functionInputProcessNames
+        }
+        
+        return(functionInputData)
     }
-    
-    return(
-        list(
-            functionArguments = functionArguments, 
-            process = process
-        )
-    )
-    functionArguments
+    else {
+        return(list())
+    }
 }
-
 
 
 ##################################################
@@ -5118,7 +5143,7 @@ getProcessPlotOutput <- function(projectPath, modelName, processID, plotName = N
     }
     
     if(length(plotName)) {
-        processOutputFiles <- selectValidElements(processOutputFiles, plotNames)
+        processOutputFiles <- selectValidElements(processOutputFiles, plotName)
     }
     
     # Read the files recursively:
@@ -5319,7 +5344,6 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
             }
         }
     }
-    
     
     
     return(data)

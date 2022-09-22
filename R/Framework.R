@@ -4970,7 +4970,8 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
             projectPath = projectPath, 
             modelName = functionInputsProcessIDs$modelName, 
             processID = functionInputsProcessIDs$processID, 
-            SIMPLIFY = FALSE
+            SIMPLIFY = FALSE, 
+            warn = strict
         )
         
         if(length(presentFunctionInputData)) {
@@ -5004,7 +5005,7 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
 #' 
 #' @export
 #' 
-getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE) {
+getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE, warn = TRUE) {
     
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
@@ -5017,7 +5018,8 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
     processOutputFiles <- getProcessOutputFiles(
         projectPath = projectPath, 
         modelName = modelName, 
-        processID = processID
+        processID = processID, 
+        warn = warn
     )
     if(!length(processOutputFiles)) {
         return(NULL)
@@ -5379,7 +5381,7 @@ flattenProcessOutput <- function(processOutput) {
 #' @param type One of c("memory", "output", "text".
 #' @export
 #' 
-getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNames = FALSE, type = "memory") {
+getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNames = FALSE, type = "memory", warn = TRUE) {
     
     # Get the directory holding the output files:
     folderPath <- getProcessOutputFolder(
@@ -5397,7 +5399,10 @@ getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNa
     if(length(folderPath) == 0 || !file.exists(folderPath)) {
         #processName <- getProcessName(projectPath, modelName, processID)
         #stop("Has the previous processes been run? The folder ", folderPath, " does not exist.")
-        warning("StoX: Process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " of the model ", modelName, " has not been run.")
+        if(warn) {
+            warning("StoX: Process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " of the model ", modelName, " has not been run.")
+        }
+        
         return(NULL)
     }
     
@@ -5928,7 +5933,8 @@ ggsaveApplyDefaults <- function(x, filePath, ignoreAttributes = FALSE) {
             device = if("Format"      %in% names(att)) attr(x, "Format")      else getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
             width  = if("Width"       %in% names(att)) attr(x, "Width")       else getRstoxBaseDefinitions("defaultPlotOptions")$Width,
             height = if("Height"      %in% names(att)) attr(x, "Height")      else getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
-            dpi    = if("DotsPerInch" %in% names(att)) attr(x, "DotsPerInch") else getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch
+            dpi    = if("DotsPerInch" %in% names(att)) attr(x, "DotsPerInch") else getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch, 
+            units = "cm"
         )
     }
     

@@ -9,7 +9,8 @@ getProcessOutputFiles(
   modelName,
   processID,
   onlyTableNames = FALSE,
-  type = "memory"
+  type = "memory",
+  warn = TRUE
 )
 }
 \arguments{

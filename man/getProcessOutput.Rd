@@ -23,7 +23,8 @@ getProcessOutput(
   enable.auto_unbox = TRUE,
   drop = FALSE,
   drop.datatype = TRUE,
-  splitGeoJson = TRUE
+  splitGeoJson = TRUE,
+  warn = TRUE
 )
 
 getProcessTableOutput(

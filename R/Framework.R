@@ -5923,7 +5923,8 @@ ggsaveApplyDefaults <- function(x, filePath, ignoreAttributes = FALSE) {
             device = getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
             width  = getRstoxBaseDefinitions("defaultPlotOptions")$Width,
             height = getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
-            dpi    = getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch
+            dpi    = getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch, 
+            units = "cm"
         )
     }
     else {

@@ -1,4 +1,5 @@
 # RstoxFramework v3.5.1 (2022-08-12)
+* Added the parameter deleteCurrent in resetModel() to facilitate deleting the output of the current process, used by all functions that modify processData interactively, and by setProcessPropertyValue().
 * Fixed bug where EDSUs for StoX projects with data from ICESAcoustic data with and without end position given by Longitude2 resulted in EDSUs not being shown.
 * Added support for saving output files frorm plotting functions.
 * Added renameStratum() for use by the GUI.

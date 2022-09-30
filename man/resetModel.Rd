@@ -12,6 +12,7 @@ resetModel(
   shift = 0,
   returnProcessTable = FALSE,
   delete = c("memory", "text"),
+  deleteCurrent = FALSE,
   purgeOutputFiles = FALSE
 )
 }

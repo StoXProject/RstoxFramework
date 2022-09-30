@@ -1575,7 +1575,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' 
 #' @export
 #'
-resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), purgeOutputFiles = FALSE) {
+resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE) {
     
     # Get the process ID to reset the model to:
     processIndexTable <- readProcessIndexTable(projectPath, modelName)
@@ -1634,6 +1634,9 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         #}
         
         ##### (2) Delete process output of the processes from the new active process and onwards: #####
+        if(deleteCurrent) {
+            processIndex <- processIndex - 1
+        }
         if(currentActiveProcessIndex > processIndex) {
             # Get all processes from the process to reset to and onwards:
             allProcessIndex <- getProcessIndexFromProcessID(

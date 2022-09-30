@@ -1358,6 +1358,9 @@ hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRU
     
     fileOutput <- process$processParameters$fileOutput
     
+    if(!length(fileOutput)) {
+        fileOutput <- FALSE
+    }
     # If the process is supposed to have a file output, check that it exists as a folder:
     if(fileOutput && requireExists) {
         folderPath <- getProcessOutputFolder(

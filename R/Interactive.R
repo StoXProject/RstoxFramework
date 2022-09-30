@@ -89,7 +89,7 @@ modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, process
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -239,7 +239,7 @@ addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processI
     )
     
     # Revert the active process ID to the current process (currently it is a requirement that the process is the active process for the GUI to allow modification, so resetting the active process is not effective here) and set it as dirty:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -284,7 +284,7 @@ removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -327,7 +327,7 @@ renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -368,7 +368,7 @@ addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -413,7 +413,7 @@ removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -458,7 +458,7 @@ removeAllAcousticPSUsOfStratum <- function(Stratum, projectPath, modelName, proc
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -557,7 +557,7 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -617,7 +617,7 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
     #)
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -688,7 +688,7 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -747,7 +747,7 @@ renameStratum <- function(stratumName, newStratumName, projectPath, modelName, p
     #)
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)

@@ -1174,7 +1174,8 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         #), 
         processDirty = TRUE, 
         shift = 0, 
-        delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text")
+        delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
+        deleteCurrent = TRUE
     )
     
     # If the process property 'processArguments' is given, modify the process name, function name or process parameters:

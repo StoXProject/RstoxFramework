@@ -775,7 +775,7 @@ ReportBootstrap <- function(
     }
     
     # Run the initial aggregation (only applicable for single output functions):
-    AggregationFunction <- match.arg(AggregationFunction)
+    AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
     out <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = BootstrapData[[BaselineProcess]], 
         TargetVariable = TargetVariable, 
@@ -794,7 +794,7 @@ ReportBootstrap <- function(
     )
     
     # Run the report function of the bootstraps:
-    BootstrapReportFunction <- match.arg(BootstrapReportFunction)
+    BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
     out <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = out, 
         TargetVariable = TargetVariableAfterInitialAggregation, 

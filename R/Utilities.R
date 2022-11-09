@@ -1062,7 +1062,7 @@ locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE) {
     
-    classOf <- match.arg(classOf)
+    classOf <- RstoxData::match_arg_informative(classOf)
     
     if(length(ignore)) {
         ignore <- intersect(ignore, names(x))

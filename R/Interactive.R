@@ -486,6 +486,7 @@ removeAllAcousticPSUsOfStratum <- function(Stratum, projectPath, modelName, proc
 #' @inheritParams getProcessOutput
 #' @param stratum The SpatialPolygonsDataFrame object defining the stratum to add.
 #' @param stratumName The name of the stratum.
+#' @param newStratumName The new name of the stratum.
 #' 
 #' @name Stratum
 #' 

@@ -1,4 +1,5 @@
-# RstoxFramework v3.5.1 (2022-08-12)
+# RstoxFramework v3.5.1-9001 (2022-11-10)
+* Removed warning when a preview is open in the GUI and the process is changed (setting warn to FALSE in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput()).
 * Added the parameter deleteCurrent in resetModel() to facilitate deleting the output of the current process, used by all functions that modify processData interactively, and by setProcessPropertyValue().
 * Fixed bug where EDSUs for StoX projects with data from ICESAcoustic data with and without end position given by Longitude2 resulted in EDSUs not being shown.
 * Added support for saving output files frorm plotting functions.
@@ -8,6 +9,11 @@
 * Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.
 * Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().
 * Added a line "... truncated" if a table in Preview does not contain all rows (the GUI shows at most 200000 rows).
+* Cleaned up JSON validation test files to enhance the expected error.
+* Improved error message when readProjectDescriptionJSON() fails to read project.json.
+* Disabled warning in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput() occuring when changing a parameter of the process.
+* Changed to ignoreAttributes = FALSE in getProcessPlotOutput().
+
 
 
 ##################################################

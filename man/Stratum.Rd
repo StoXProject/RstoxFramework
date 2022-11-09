@@ -26,6 +26,8 @@ renameStratum(stratumName, newStratumName, projectPath, modelName, processID)
 \item{processID}{The ID of the process.}
 
 \item{stratumName}{The name of the stratum.}
+
+\item{newStratumName}{The new name of the stratum.}
 }
 \description{
 The functions \code{addStations} and \code{removeStations} adds or removes biotic stations from the BioticAssignment process data of the specified process.

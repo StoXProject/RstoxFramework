@@ -921,7 +921,13 @@ readProjectDescriptionJSON <- function(projectDescriptionFile) {
     ### }
     
     # Read project.json file to R list. Use simplifyVector = FALSE to preserve names:
-    projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
+    #projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
+    projectDescriptionList <- tryCatch(
+        jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE), 
+        error = function(err) {
+            stop("Unable to parse the StoX description file ", projectDescriptionFile, ", as jsonlite::read_json reported the error \n\n", err)
+        }
+    )
     
     # Add the headers as attributes:
     projectDescription <- projectDescriptionList$project$models
@@ -1571,6 +1577,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' @inheritParams unReDoProject
 #' @param processDirty Logical: Indicates whether the model has been modified when resetting. Tf the process to reset to is after the active process, 
 #' @param delete A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.
+#' @param deleteCurrent Logical: If TRUE delete process output also of the process given by processID.
 #' @param purgeOutputFiles Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted eevn though the process was deleted.
 #' 
 #' @export
@@ -4748,7 +4755,6 @@ runProcess <- function(
         processOutput <- replaceData
     }
     
-    #browser()
     
     if(failed){
         return(FALSE)
@@ -5104,7 +5110,8 @@ getProcessTableOutput <- function(projectPath, modelName, processID, tableName =
         linesPerPage = linesPerPage, 
         columnSeparator = columnSeparator, 
         na = na, 
-        drop = drop
+        drop = drop, 
+        warn = FALSE
     )
 }
 #' 
@@ -5119,7 +5126,8 @@ getProcessGeoJsonOutput <- function(projectPath, modelName, processID, geoJsonNa
         tableName = geoJsonName, 
         pretty = TRUE, # Whether to return a list with data, numberOfLines and numberOfPages.
         pretty.json = pretty, 
-        splitGeoJson = splitGeoJson
+        splitGeoJson = splitGeoJson, 
+        warn = FALSE
     )
 }
 
@@ -5141,7 +5149,8 @@ getProcessPlotOutput <- function(projectPath, modelName, processID, plotName = N
     processOutputFiles <- getProcessOutputFiles(
         projectPath = projectPath, 
         modelName = modelName, 
-        processID = processID
+        processID = processID, 
+        warn = FALSE
     )
     if(!length(processOutputFiles)) {
         return(NULL)
@@ -5163,7 +5172,7 @@ getProcessPlotOutput <- function(projectPath, modelName, processID, plotName = N
     tempFilePaths <- file.path(tempdir(), tempFileNames)
     
     # The file paths are updated in ggsaveApplyDefaultss:
-    tempFilePaths <- mapply(ggsaveApplyDefaults, processOutput, tempFilePaths, ignoreAttributes = TRUE)
+    tempFilePaths <- mapply(ggsaveApplyDefaults, processOutput, tempFilePaths, ignoreAttributes = FALSE)
 
     return(tempFilePaths)
 }
@@ -5235,8 +5244,10 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param filePath The file path of the process output file to read.
 #' @param flatten Logical: Should the output tables that contain cells of length > 1 be expanded to that the other columns are repeated, resulting in a regular table.
 #' @param pretty Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.
+#' @param pretty.json Logical: If TRUE prettify the geojson.
 #' @param pageindex A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
+#' @param splitGeoJson Logical: If TRUE split the geojson into a vector of separate lines.
 #' 
 readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE) {
     
@@ -5503,7 +5514,11 @@ getProcessOutputTableNames <- function(projectPath, modelName, processID) {
 #' 
 getProcessOutputElements <- function(projectPath, modelName, processID) {
     # Get the output file names, and add the process name:
-    elementName <- getProcessOutputFiles(projectPath = projectPath, modelName = modelName, processID = processID, onlyTableNames = TRUE)
+    elementName <- getProcessOutputFiles(projectPath = projectPath, modelName = modelName, processID = processID, onlyTableNames = TRUE, warn = FALSE)
+    
+    if(!length(elementName)) {
+        return(NULL)
+    }
     
     processName <- getProcessNameFromProcessID(
         projectPath = projectPath, 
@@ -5543,7 +5558,7 @@ deleteProcessOutput <- function(projectPath, modelName, processID, type = c("mem
 #' @export
 #' 
 getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("memory", "output", "text"), subFolder = NULL) {
-    type <- match.arg(type)
+    type <- RstoxData::match_arg_informative(type)
     if(type == "memory") {
         folderPath <- file.path(getProjectPaths(projectPath, "dataModelsFolder"), modelName, processID)
     }
@@ -5793,7 +5808,7 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
     processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
     
     # Get the output.file.type:
-    output.file.type <- match.arg(output.file.type)
+    output.file.type <- RstoxData::match_arg_informative(output.file.type)
     # Apply the default output.file.type if specified:
     if(output.file.type == "default") {
         output.file.type <- getRstoxFrameworkDefinitions("default.output.file.type")[[modelName]]
@@ -5918,15 +5933,16 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
 }
 
 
+
 ggsaveApplyDefaults <- function(x, filePath, ignoreAttributes = FALSE) {
     
     if(ignoreAttributes) {
         arguments <- list(
             plot = x, 
-            device = getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
-            width  = getRstoxBaseDefinitions("defaultPlotOptions")$Width,
-            height = getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
-            dpi    = getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch, 
+            device = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format, 
+            width  = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Width,
+            height = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Height, 
+            dpi    = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$DotsPerInch, 
             units = "cm"
         )
     }
@@ -5934,10 +5950,10 @@ ggsaveApplyDefaults <- function(x, filePath, ignoreAttributes = FALSE) {
         att <- attributes(x)
         arguments <- list(
             plot = x, 
-            device = if("Format"      %in% names(att)) attr(x, "Format")      else getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
-            width  = if("Width"       %in% names(att)) attr(x, "Width")       else getRstoxBaseDefinitions("defaultPlotOptions")$Width,
-            height = if("Height"      %in% names(att)) attr(x, "Height")      else getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
-            dpi    = if("DotsPerInch" %in% names(att)) attr(x, "DotsPerInch") else getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch, 
+            device = if("Format"      %in% names(att)) attr(x, "Format")      else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
+            width  = if("Width"       %in% names(att)) attr(x, "Width")       else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$Width,
+            height = if("Height"      %in% names(att)) attr(x, "Height")      else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
+            dpi    = if("DotsPerInch" %in% names(att)) attr(x, "DotsPerInch") else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch, 
             units = "cm"
         )
     }

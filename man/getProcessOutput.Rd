@@ -65,6 +65,8 @@ getProcessGeoJsonOutput(
 
 \item{pretty}{Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.}
 
+\item{pretty.json}{Logical: If TRUE prettify the geojson.}
+
 \item{pageindex}{A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
 
 \item{linesPerPage}{The number of lines per page if \code{pageindex} is given.}
@@ -80,6 +82,8 @@ getProcessGeoJsonOutput(
 \item{drop}{Logical: If TRUE drop the list if only one element.}
 
 \item{drop.datatype}{Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.}
+
+\item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
 }
 \description{
 Gets the output of a process that has been run.

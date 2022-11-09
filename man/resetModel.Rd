@@ -31,6 +31,8 @@ resetModel(
 
 \item{delete}{A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.}
 
+\item{deleteCurrent}{Logical: If TRUE delete process output also of the process given by processID.}
+
 \item{purgeOutputFiles}{Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted eevn though the process was deleted.}
 }
 \description{

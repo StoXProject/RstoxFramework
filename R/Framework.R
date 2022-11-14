@@ -5004,10 +5004,10 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
 #' 
 #' @inheritParams fixedWidthTable
 #' @inheritParams readProcessOutputFile
-#' @inheritParams Projects
-#' @param modelName The name of the model (one of "baseline", "analysis" and "report").
-#' @param processID The ID of the process.
+#' @inheritParams getProcessOutputFiles
+#' @inheritParams general_arguments
 #' @param tableName The name of the table to extract from the process.
+#' @param geoJsonName The name of the GeoJSON object to extract from the process.
 #' @param subFolder If the process returns subfolders (ReadBiotic and ReadAcoustic, where the subfolders represent files), specify the name of the folder with this parameter.
 #' @param drop Logical: If TRUE drop the list if only one element.
 #' @param drop.datatype Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.
@@ -5168,11 +5168,11 @@ getProcessPlotOutput <- function(projectPath, modelName, processID, plotName = N
     )
     
     # Define temp file paths:
-    tempFileNames <-  paste(basename(tools::file_path_sans_ext(processOutputFiles)), getRstoxBaseDefinitions("defaultPlotOptions")$Format, sep = ".")
+    tempFileNames <-  paste(basename(tools::file_path_sans_ext(processOutputFiles)), "png", sep = ".")
     tempFilePaths <- file.path(tempdir(), tempFileNames)
     
-    # The file paths are updated in ggsaveApplyDefaultss:
-    tempFilePaths <- mapply(ggsaveApplyDefaults, processOutput, tempFilePaths, ignoreAttributes = FALSE)
+    # The file paths are updated in ggsaveApplyDefaults (the GUI expects png):
+    tempFilePaths <- mapply(ggsaveApplyDefaults, processOutput, tempFilePaths, MoreArgs = list(overrideAttributes = list(Format = "png")))
 
     return(tempFilePaths)
 }
@@ -5389,10 +5389,10 @@ flattenProcessOutput <- function(processOutput) {
 
 #' Function to get all process output memory files of a process:
 #' 
-#' @inheritParams Projects
-#' @inheritParams getProcessOutput
+#' @inheritParams general_arguments
 #' @param onlyTableNames Logical: If TRUE return only table names.
 #' @param type One of c("memory", "output", "text".
+#' @param warn Logical: If TRUE warn if the process has not bee run.
 #' @export
 #' 
 getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNames = FALSE, type = "memory", warn = TRUE) {
@@ -5727,7 +5727,7 @@ getProcessOutputTextFilePath <- function(
                 }
                 else if("ggplot" %in% class(processOutput[[1]])) {
                     # Set file extension:
-                    ext <- getRstoxBaseDefinitions("defaultPlotOptions")$Format # "png" 
+                    ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
                     # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
                 }
                 else {
@@ -5934,29 +5934,27 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
 
 
 
-ggsaveApplyDefaults <- function(x, filePath, ignoreAttributes = FALSE) {
+ggsaveApplyDefaults <- function(x, filePath, overrideAttributes = list()) {
     
-    if(ignoreAttributes) {
-        arguments <- list(
-            plot = x, 
-            device = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format, 
-            width  = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Width,
-            height = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Height, 
-            dpi    = RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$DotsPerInch, 
-            units = "cm"
-        )
+    # Replace any attributes given in the overrideAttributes:
+    att <- attributes(x)
+    attToOverride <- intersect(names(att), names(overrideAttributes))
+    if(length(attToOverride)) {
+        att[attToOverride] <- overrideAttributes[attToOverride]
     }
-    else {
-        att <- attributes(x)
-        arguments <- list(
-            plot = x, 
-            device = if("Format"      %in% names(att)) attr(x, "Format")      else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$Format, 
-            width  = if("Width"       %in% names(att)) attr(x, "Width")       else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$Width,
-            height = if("Height"      %in% names(att)) attr(x, "Height")      else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$Height, 
-            dpi    = if("DotsPerInch" %in% names(att)) attr(x, "DotsPerInch") else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$DotsPerInch, 
-            units = "cm"
-        )
-    }
+    
+    arguments <- list(
+        plot = x, 
+        device = if("Format"      %in% names(att)) att$Format      
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format, 
+        width  = if("Width"       %in% names(att)) att$Width
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Width,
+        height = if("Height"      %in% names(att)) att$Height
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Height, 
+        dpi    = if("DotsPerInch" %in% names(att)) att$DotsPerInch
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$DotsPerInch, 
+        units = "cm"
+    )
     
     # Set the file extension to the format:
     arguments$filename <- paste(tools::file_path_sans_ext(filePath), arguments$device, sep = ".")

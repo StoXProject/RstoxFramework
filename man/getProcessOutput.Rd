@@ -53,7 +53,7 @@ getProcessGeoJsonOutput(
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model (one of "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
 \item{processID}{The ID of the process.}
 
@@ -84,6 +84,10 @@ getProcessGeoJsonOutput(
 \item{drop.datatype}{Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.}
 
 \item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
+
+\item{warn}{Logical: If TRUE warn if the process has not bee run.}
+
+\item{geoJsonName}{The name of the GeoJSON object to extract from the process.}
 }
 \description{
 Gets the output of a process that has been run.

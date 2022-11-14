@@ -1,3 +1,7 @@
+# RstoxFramework v3.5.1 (2022-11-14)
+* Fixed bug when the GUI expects png.
+* Completed some docs.
+
 # RstoxFramework v3.5.1-9001 (2022-11-10)
 * Removed warning when a preview is open in the GUI and the process is changed (setting warn to FALSE in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput()).
 * Added the parameter deleteCurrent in resetModel() to facilitate deleting the output of the current process, used by all functions that modify processData interactively, and by setProcessPropertyValue().

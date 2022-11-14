@@ -412,7 +412,11 @@ readOfficialRstoxPackageVersionsFile <- function(officialRstoxPackageVersionsFil
     if(toTable) {
         dependencies <- strsplit(official$Dependencies, "[,]")
         dependencies <- lapply(dependencies, extractPackageNameAsNames)
-        official <- data.table::data.table(RstoxFramework = official$RstoxFramework, data.table::rbindlist(dependencies))
+        official <- data.table::data.table(
+            RstoxFramework = official$RstoxFramework, 
+            data.table::rbindlist(dependencies),
+            Official = official$Official
+        )
     }
     
     return(official)

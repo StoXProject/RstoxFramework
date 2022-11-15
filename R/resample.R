@@ -586,6 +586,7 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
         seed = Seed, 
         #varToScale = RstoxBase::getRstoxBaseDefinitions("dataTypeDefinition")[["MeanLengthDistributionData"]]$weighting, 
         varToScale = "WeightedNumber", 
+        # If any other values than varToResample = "PSU" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
@@ -613,6 +614,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
         data = MeanSpeciesCategoryCatchData$Data, 
         seed = Seed, 
         varToScale = c("TotalCatchWeight", "TotalCatchNumber"), 
+        # If any other values than varToResample = "PSU" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
@@ -664,6 +666,7 @@ ResampleBioticAssignment <- function(BioticAssignment, Seed) {
         data = BioticAssignment, 
         seed = Seed, 
         varToScale = "WeightingFactor", 
+        # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "Haul", 
         resampleBy = "Stratum"
     )
@@ -772,7 +775,7 @@ ReportBootstrap <- function(
     }
     
     # Run the initial aggregation (only applicable for single output functions):
-    AggregationFunction <- match.arg(AggregationFunction)
+    AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
     out <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = BootstrapData[[BaselineProcess]], 
         TargetVariable = TargetVariable, 
@@ -791,7 +794,7 @@ ReportBootstrap <- function(
     )
     
     # Run the report function of the bootstraps:
-    BootstrapReportFunction <- match.arg(BootstrapReportFunction)
+    BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
     out <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = out, 
         TargetVariable = TargetVariableAfterInitialAggregation, 

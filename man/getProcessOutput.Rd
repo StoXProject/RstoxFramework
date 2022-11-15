@@ -2,6 +2,8 @@
 % Please edit documentation in R/Framework.R
 \name{getProcessOutput}
 \alias{getProcessOutput}
+\alias{getProcessTableOutput}
+\alias{getProcessGeoJsonOutput}
 \title{Get output of a StoX process.}
 \usage{
 getProcessOutput(
@@ -12,6 +14,7 @@ getProcessOutput(
   subFolder = NULL,
   flatten = FALSE,
   pretty = FALSE,
+  pretty.json = FALSE,
   pageindex = integer(0),
   linesPerPage = 1000L,
   columnSeparator = " ",
@@ -19,13 +22,38 @@ getProcessOutput(
   na = "-",
   enable.auto_unbox = TRUE,
   drop = FALSE,
-  drop.datatype = TRUE
+  drop.datatype = TRUE,
+  splitGeoJson = TRUE,
+  warn = TRUE
+)
+
+getProcessTableOutput(
+  projectPath,
+  modelName,
+  processID,
+  tableName = NULL,
+  flatten = FALSE,
+  pretty = FALSE,
+  pageindex = integer(0),
+  linesPerPage = 1000L,
+  columnSeparator = " ",
+  na = "-",
+  drop = FALSE
+)
+
+getProcessGeoJsonOutput(
+  projectPath,
+  modelName,
+  processID,
+  geoJsonName = NULL,
+  pretty = FALSE,
+  splitGeoJson = TRUE
 )
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model (one of "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
 \item{processID}{The ID of the process.}
 
@@ -37,7 +65,9 @@ getProcessOutput(
 
 \item{pretty}{Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.}
 
-\item{pageindex}{A vevctor of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
+\item{pretty.json}{Logical: If TRUE prettify the geojson.}
+
+\item{pageindex}{A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
 
 \item{linesPerPage}{The number of lines per page if \code{pageindex} is given.}
 
@@ -52,6 +82,12 @@ getProcessOutput(
 \item{drop}{Logical: If TRUE drop the list if only one element.}
 
 \item{drop.datatype}{Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.}
+
+\item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
+
+\item{warn}{Logical: If TRUE warn if the process has not bee run.}
+
+\item{geoJsonName}{The name of the GeoJSON object to extract from the process.}
 }
 \description{
 Gets the output of a process that has been run.

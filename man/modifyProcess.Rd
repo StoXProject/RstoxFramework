@@ -19,9 +19,9 @@ modifyProcess(
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
-\item{processName}{The name of the process(es).}
+\item{processName}{The name of the process.}
 
 \item{newValues}{A list named by the elements to modify (see getRstoxFrameworkDefinitions("processProperties") for possible elements), holding the values to modify to (e.g., list(functionParameter = list(DefinitionMethod = "Stratum"))).}
 

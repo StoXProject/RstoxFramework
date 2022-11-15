@@ -12,13 +12,14 @@ resetModel(
   shift = 0,
   returnProcessTable = FALSE,
   delete = c("memory", "text"),
+  deleteCurrent = FALSE,
   purgeOutputFiles = FALSE
 )
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
 \item{processID}{The ID of the process.}
 
@@ -29,6 +30,8 @@ resetModel(
 \item{returnProcessTable}{Logical: If TRUE return the process table (much used in functions used by the GUI).}
 
 \item{delete}{A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.}
+
+\item{deleteCurrent}{Logical: If TRUE delete process output also of the process given by processID.}
 
 \item{purgeOutputFiles}{Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted eevn though the process was deleted.}
 }

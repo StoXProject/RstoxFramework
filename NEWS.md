@@ -1,3 +1,38 @@
+# RstoxFramework v3.5.1 (2022-11-14)
+* Fixed bug when the GUI expects png.
+* Completed some docs.
+
+# RstoxFramework v3.5.1-9001 (2022-11-10)
+* Removed warning when a preview is open in the GUI and the process is changed (setting warn to FALSE in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput()).
+* Added the parameter deleteCurrent in resetModel() to facilitate deleting the output of the current process, used by all functions that modify processData interactively, and by setProcessPropertyValue().
+* Fixed bug where EDSUs for StoX projects with data from ICESAcoustic data with and without end position given by Longitude2 resulted in EDSUs not being shown.
+* Added support for saving output files frorm plotting functions.
+* Added renameStratum() for use by the GUI.
+* Added removeAllAcousticPSUsOfStratum().
+* Disalowed empty string stratum name from the GUI.
+* Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.
+* Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().
+* Added a line "... truncated" if a table in Preview does not contain all rows (the GUI shows at most 200000 rows).
+* Cleaned up JSON validation test files to enhance the expected error.
+* Improved error message when readProjectDescriptionJSON() fails to read project.json.
+* Disabled warning in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput() occuring when changing a parameter of the process.
+* Changed to ignoreAttributes = FALSE in getProcessPlotOutput().
+
+
+
+##################################################
+##################################################
+#' Get output of a StoX process.
+#' 
+#' Gets the output of a process that has been run.
+#' 
+#' @inheritParams general_arguments
+#' @param plotName The name of the plot.
+#' 
+#' @export
+#' 
+getProcessPlotOutput
+
 # RstoxFramework v3.5.0 (2022-08-12)
 * Start of using semantic versioning (https://semver.org/). Before this release the two first version numbers represented the major and minor release number, in accordance with semantic versioning, whereas the third version number identified test versions. The major and minor releases (versions ending with 0.0 or 0) were considered as official versions. From this release and onwards, the third version number will represent patches (bug fixes), and are to be considered equally official as the major and minor releases. In fact, as patches are restricted to fixing bugs and not adding new functionality, the latest patch will be the recommended version.
 

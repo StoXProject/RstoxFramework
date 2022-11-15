@@ -112,7 +112,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
     else if(data.table::is.data.table(x)) {
         # First convert all columns to character:
         ### # Take special care of datetime:
-        ### isDateTime <- startsWith(sapply(x, RstoxData::firstClass), "POSIX")
+        ### isDateTime <- startsWith(sapply(x, getRelevantClass), "POSIX")
         ### POSIXCols  <- colnames(x)[isDateTime]
         ### if(any(isDateTime)) {
         ###     x[, (POSIXCols) := lapply(.SD, function(datetime) format(datetime, format = "%Y-%m-%dT%H:%M:%OS3Z")), .SDcols = POSIXCols]
@@ -548,7 +548,7 @@ writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
 writeMemoryFiles <- function(objects, filePathsSansExt, writeOrderFile = TRUE) {
     
     # Write the files, in an mapply loop if not a valid class at the top level (for outputDepth 2):
-    if(RstoxData::firstClass(objects) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
+    if(isValidOutputDataClass(objects)) {
         filePaths <- writeMemoryFile(objects, filePathsSansExt)
     }
     else {
@@ -1062,7 +1062,7 @@ locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE) {
     
-    classOf <- match.arg(classOf)
+    classOf <- RstoxData::match_arg_informative(classOf)
     
     if(length(ignore)) {
         ignore <- intersect(ignore, names(x))
@@ -1073,8 +1073,8 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     }
     
     # Get the classes of the first and second table:
-    classes_in_x <- sapply(x, RstoxData::firstClass)
-    classes_in_y <- sapply(y, RstoxData::firstClass)
+    classes_in_x <- sapply(x, getRelevantClass)
+    classes_in_y <- sapply(y, getRelevantClass)
     
     if(!identical(classes_in_x, classes_in_y)) {
         
@@ -1150,8 +1150,8 @@ skipRowsAtNA <- function(x, skipNAAt) {
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 #compareDataTablesUsingClassOfSecond <- function(x, y) {
 #    # Get the classes of the first and second table:
-#    classes_in_x <- sapply(x, RstoxData::firstClass)
-#    classes_in_y <- sapply(y, RstoxData::firstClass)
+#    classes_in_x <- sapply(x, getRelevantClass)
+#    classes_in_y <- sapply(y, getRelevantClass)
 #    if(!identical(classes_in_x, classes_in_y)) {
 #        # Coerce to the class in the memory:
 #        differ <- names(x)[classes_in_x != classes_in_y]
@@ -1335,5 +1335,48 @@ extractErrorIDsOne <- function(errorName, errorString, bullet = "* ", sep = ": "
 
 escapeForRegex <- function(x) {
     gsub("([.|()\\^{}+$*?]|\\[|\\])", "\\\\\\1", x)
+}
+
+
+
+#' Does the process store output files?:
+#' 
+#' @inheritParams general_arguments
+#' @param requireExists Logical: Should the existence of the output folder be checked.
+#' @export
+#' 
+hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRUE) {
+    
+    functionArguments <- getFunctionArguments(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID
+    )
+    
+    # Extract the process and the function arguments:
+    process <- functionArguments$process
+    
+    fileOutput <- process$processParameters$fileOutput
+    
+    if(!length(fileOutput)) {
+        fileOutput <- FALSE
+    }
+    # If the process is supposed to have a file output, check that it exists as a folder:
+    if(fileOutput && requireExists) {
+        folderPath <- getProcessOutputFolder(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            type = "output"
+        )
+        
+        
+        if(!file.exists(folderPath) || !isTRUE(file.info(folderPath)$isdir)) {
+            fileOutput <- FALSE
+        }
+    }
+    
+    
+    return(fileOutput)
 }
 

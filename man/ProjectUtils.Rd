@@ -61,7 +61,7 @@ setNotRunning(projectPath, modelName)
 
 \item{Application}{A single string naming the application used when saving the project. Defaulted to R.version.string.}
 
-\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 }
 \description{
 Utilities for projects.

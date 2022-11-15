@@ -125,7 +125,8 @@ initiateRstoxFramework <- function(){
         "functionOutputDataType", 
         "functionParameterType", 
         "functionParameterFormat", 
-        "functionArgumentHierarchy"
+        "functionArgumentHierarchy", 
+        "functionParameterDefaults"
     )
     
     # Define parameters that are needed to run processData functions or bootstrap functions (or other kinds of special functions):
@@ -258,14 +259,22 @@ initiateRstoxFramework <- function(){
     
     
     
-    # Get the functions that cacn be resampled in bootstrapping:
+    # Get the functions that can be resampled in bootstrapping:
     resamplableDataTypes <- c(
         "MeanNASCData",
         "MeanLengthDistributionData", 
         "MeanSpeciesCategoryCatchData", 
         "BioticAssignment"
     )
-   
+    # ... and the reample functions, 
+    resampleFunctions <- list(
+        MeanNASCData = "ResampleMeanNASCData",
+        MeanLengthDistributionData = "ResampleMeanLengthDistributionData", 
+        MeanSpeciesCategoryCatchData = "ResampleMeanSpeciesCategoryCatchData", 
+        # This will be replaced by c("ResampleBioticAssignmentByStratum", "ResampleBioticAssignmentByPSU", where the first corresponds to the existing one):
+        BioticAssignment = "ResampleBioticAssignment" 
+    )
+    
     
     #### Data types: ####
     oldStoxModelDataTypes <- c(
@@ -334,16 +343,31 @@ initiateRstoxFramework <- function(){
         "numeric", 
         "integer", 
         "logical", 
-        "SpatialPolygonsDataFrame"#, 
+        "SpatialPolygonsDataFrame", 
         #"StoX_multipolygon_WKT", 
         #"StoX_shapefile"
+        "ggplot"
     )
+    
+    outputTypes <- list(
+        data.table = "table", 
+        matrix = "table", 
+        character = "table", 
+        numeric = "table", 
+        integer = "table", 
+        logical = "table", 
+        SpatialPolygonsDataFrame = "geojson", 
+        ggplot = "plot"
+    )
+    
     vectorClasses <- c(
         "character", 
         "numeric", 
         "integer", 
         "logical"
     )
+    
+    
     
     # Define code words for the start and end of files to write geojson data to, which are read into the project.json after being written for a project:
     spatialFileReferenceCodeStart <- "<stratumpolygontempfile:"
@@ -866,10 +890,10 @@ extractStoxFunctionParameterPossibleValues <- function(functionName, systemParam
             assign(names(f[i]), 
                 if(!is.null(f[[i]])) 
                     output[[i]] <- eval(f[[i]], envir = 
-                                            list(
-                                                environment(), 
-                                                as.environment(paste("package", packageName, sep = ":"))
-                                            )
+                        list(
+                            environment(), 
+                            as.environment(paste("package", packageName, sep = ":"))
+                        )
                     ) 
                 else 
                     eval(f[[i]], envir = list(

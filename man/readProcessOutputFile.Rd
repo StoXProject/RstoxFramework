@@ -8,12 +8,14 @@ readProcessOutputFile(
   filePath,
   flatten = FALSE,
   pretty = FALSE,
+  pretty.json = TRUE,
   pageindex = integer(0),
   linesPerPage = 1000L,
   columnSeparator = " ",
   lineSeparator = NULL,
   na = "-",
-  enable.auto_unbox = FALSE
+  enable.auto_unbox = FALSE,
+  splitGeoJson = TRUE
 )
 }
 \arguments{
@@ -23,7 +25,9 @@ readProcessOutputFile(
 
 \item{pretty}{Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.}
 
-\item{pageindex}{A vevctor of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
+\item{pretty.json}{Logical: If TRUE prettify the geojson.}
+
+\item{pageindex}{A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.}
 
 \item{linesPerPage}{The number of lines per page if \code{pageindex} is given.}
 
@@ -34,6 +38,8 @@ readProcessOutputFile(
 \item{na}{The string to replace NAs by, defaulted to "-".}
 
 \item{enable.auto_unbox}{Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.}
+
+\item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
 }
 \description{
 Function to read a single process output file, possibly by pages and in flattened and pretty view:

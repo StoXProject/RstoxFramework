@@ -790,7 +790,7 @@ getPackageBinaryURL <- function(packageName, version = NULL, repos = "https://cl
 
 getPackageFileExt <- function(platform = NA, type = c("binary", "source")) {
     
-    type <- RstoxData::match_arg(type)
+    type <- match_arg(type)
     platform <- getPlatform(platform)
     
     if (platform == "windows") {

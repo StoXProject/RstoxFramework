@@ -1,6 +1,7 @@
-# RstoxFramework v3.5.1 (2022-11-14)
+# RstoxFramework v3.5.2 (2022-11-14)
 * Added the parameter TargetVariableUnit in ReportBootstrap().
 * Added the memory file "dataType.txt" to save the data types for bootstrap output (the Bootstrap functions sets the data types as attributes to the individual baseline process outputs, and then this is picked up by writeProcessOutputElements()). 
+* Removed warning when a PSU to be added assignment to is not present in the BioticAssignment (this should be no problem, as PSUs are added with).
 
 # RstoxFramework v3.5.1 (2022-11-14)
 * Fixed bug when the GUI expects png.

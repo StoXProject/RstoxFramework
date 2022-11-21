@@ -5054,13 +5054,24 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         # Also select the tables of each sub folder:
         if(length(tableName)) {
             # Warning: This selection ignores the file extension by the partial matching of R:
-            processOutputFiles <- lapply(processOutputFiles, selectValidElements, tableName)
+            #processOutputFiles <- lapply(processOutputFiles, selectValidElements, tableName)
+            
+            # Make sure the tableName is present among the files:
+            for(ind in seq_along(processOutputFiles)) {
+                temp <- selectValidElements(processOutputFiles[[ind]], tableName)
+                if(length(temp) || names(processOutputFiles)[ind] != tableName) {
+                    processOutputFiles[[ind]] <- temp
+                }
+            }
+            
+            processOutputFiles <- processOutputFiles[lengths(processOutputFiles) > 0]
         }
     }
     
     if(length(processOutputFiles) == 0) {
         warning("StoX: Invalid specification of projectPath, modelName, processID or tableName (most likely tableName).")
     }
+    
     
     # Read the files recursively:
     processOutput <- rapply(
@@ -5079,6 +5090,15 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         splitGeoJson = splitGeoJson
     )
 
+    # Add data type as attribute if the file is present (currentlly only for boostrap):
+    dataTypeFileName <- file.path(folderPath, "dataType.txt")
+    if(is.list(processOutput) && file.exists(dataTypeFileName)) {
+        dataType <- data.table::fread(dataTypeFileName)
+        for(name in names(processOutput)) {
+            attr(processOutput[[name]], "dataType") <- dataType[name == processName, dataType]
+        }
+    }
+    
     # Unlist the top level if a single tabled data type is wrapped in a list:
     if(drop.datatype && is.list(processOutput) && length(processOutput) == 1 && names(processOutput) %in% getRstoxFrameworkDefinitions("stoxDataTypes")$functionOutputDataType) {
         processOutput <- processOutput[[1]]
@@ -5590,10 +5610,11 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
 #' Function to get process ID from process name
 #' 
 #' @inheritParams general_arguments
+#' @param only.processID Logical: If TRUE return only the processID (not a table of processName and processID).
 #' 
 #' @export
 #' 
-getProcessIDFromProcessName <- function(projectPath, modelName, processName) {
+getProcessIDFromProcessName <- function(projectPath, modelName, processName, only.processID = FALSE) {
     # Get the table linking process names and IDs:
     processIndexTable <- readProcessIndexTable(
         projectPath = projectPath, 
@@ -5601,7 +5622,12 @@ getProcessIDFromProcessName <- function(projectPath, modelName, processName) {
     )
     # Extract the requested process ID:
     validRow <- processIndexTable$processName == processName
-    processIndexTable[validRow, ]
+    if(only.processID) {
+        processIndexTable[validRow, processID]
+    }
+    else {
+        processIndexTable[validRow, ]
+    }
 }
 
 
@@ -6078,6 +6104,16 @@ writeProcessOutputElements <- function(processOutput, folderPath, writeOrderFile
                 outputClassFileName <- file.path(folderPath, "outputClass.txt")
                 write(outputClass, outputClassFileName)
             }
+        }
+        
+        # Write the data types for bootstrap processes (which sets the dataType attribute to each process output, so we check the first). The Bootstrap functions sets the data types as attributes to the individual baseline process outputs, and then this is picked up by writeProcessOutputElements()):
+        if("dataType" %in% names(attributes(processOutput[[1]]))) {
+            dataType <- data.table::data.table(
+                processName = names(processOutput), 
+                dataType = sapply(processOutput, attr, "dataType")
+            )
+            dataTypeFileName <- file.path(folderPath, "dataType.txt")
+            data.table::fwrite(dataType, dataTypeFileName)
         }
     }
     else {

@@ -1,4 +1,8 @@
 # RstoxFramework v3.5.1 (2022-11-14)
+* Added the parameter TargetVariableUnit in ReportBootstrap().
+* Added the memory file "dataType.txt" to save the data types for bootstrap output (the Bootstrap functions sets the data types as attributes to the individual baseline process outputs, and then this is picked up by writeProcessOutputElements()). 
+
+# RstoxFramework v3.5.1 (2022-11-14)
 * Fixed bug when the GUI expects png.
 * Completed some docs.
 

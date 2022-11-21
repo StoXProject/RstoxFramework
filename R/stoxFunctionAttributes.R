@@ -26,7 +26,8 @@ stoxFunctionAttributes <- list(
         functionParameterFormat = list(
             #TargetVariable = "targetVariable_ReportBootstrap", 
             GroupingVariables = "groupingVariables_ReportBootstrap", 
-            InformationVariables = "informationVariables_ReportBootstrap"
+            InformationVariables = "informationVariables_ReportBootstrap", 
+            TargetVariableUnit = "targetVariableUnit_ReportBootstrap"
         ), 
         functionArgumentHierarchy = list(
             AggregationWeightingVariable = list(
@@ -189,6 +190,26 @@ processPropertyFormats <- list(
             sort(setdiff(names(BootstrapData[[BaselineProcess]]), GroupingVariables))
         }, 
         variableTypes <- "character"
+    ), 
+    
+    targetVariableUnit_ReportBootstrap = list(
+        class = "vector", 
+        title = "Select Unit for the TargetVariable", 
+        possibleValues = function(BootstrapData, BaselineProcess, TargetVariable) {
+            # If the specified process name does not exist in the BootstrapData:
+            if(!BaselineProcess %in% names(BootstrapData)) {
+                return(list())
+            }
+            
+            dataType <- attr(BootstrapData[[BaselineProcess]], "dataType")
+            quantity <- RstoxBase::getBaseUnit(dataType = dataType, variableName = TargetVariable, element = "quantity")
+            if(is.na(quantity)) {
+                list()
+            }
+            else {
+                RstoxData::getUnitOptions(quantity)
+            }
+        }
     )
     
 )

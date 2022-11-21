@@ -31,6 +31,12 @@ backwardCompatibility <- list(
                 ProcessName = "ImputeSuperIndividuals", 
                 Seed = 1
             )
+        ), 
+        list(
+            changeVersion = "3.5.2", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "TargetVariableUnit"
         )
     )
 )

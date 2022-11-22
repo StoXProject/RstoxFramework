@@ -62,10 +62,11 @@ modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, process
     ## Get the process data of the process, a table of PSU, Layer, Haul and HaulWeight:
     BioticAssignment <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)$BioticAssignment
     
-    # Check for existing PSU:
-    if(!PSU %in% BioticAssignment$PSU) {
-        warning("StoX: The acoustic PSU with name ", PSU, " does not exist. Please choose a different PSU name or add the PSU using DefineAcousticPSU.")
-    }
+    # PSUs are added in assignment_addHaul, so we do not need this warnning. Since most projects at IMR use Stratum, we have not discovered that this warning is false.
+    ## Check for existing PSU:
+    #if(!PSU %in% BioticAssignment$PSU) {
+    #    warning("StoX: The acoustic PSU with name ", PSU, " does not exist. Please choose a different PSU name or add the PSU using DefineAcousticPSU.")
+    #}
     
     # Add or remove the hauls (either using assignment_addHaul() or assignment_removeHaul()):
     utilityFunctionName <- paste0("assignment_", action[1], "Haul")

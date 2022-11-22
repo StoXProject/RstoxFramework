@@ -232,17 +232,56 @@ Bootstrap <- function(
     #    fileOutput = FALSE
     #)
     
-    # Get the data types to return:
-    dataTypeNames <- names(BootstrapData[[1]])
-    BootstrapData <- lapply(dataTypeNames, rbindlistByName, x = BootstrapData)
-    names(BootstrapData) <- dataTypeNames
+    
+    
+    
+    
+    
+    processNames <- names(BootstrapData[[1]])
+    processIDs <- unlist(
+        mapply(
+            getProcessIDFromProcessName, 
+            processName = processNames, 
+            MoreArgs = list(
+                projectPath = projectPath, 
+                modelName = "baseline"
+            ), 
+            only.processID = TRUE, 
+            SIMPLIFY = FALSE
+        )
+    )
+    dataTypes <- unlist(
+        mapply(
+            getDataType, 
+            processID = processIDs, 
+            MoreArgs = list(
+                projectPath = projectPath, 
+                modelName = "baseline"
+            ), 
+            SIMPLIFY = FALSE
+        )
+    )
+    
+    
+    
+    # Add the process names after rbinding each output:
+    bootstrapDataNames <- names(BootstrapData[[1]])
+    BootstrapData <- lapply(bootstrapDataNames, rbindlistByName, x = BootstrapData)
+    names(BootstrapData) <- bootstrapDataNames
     
     # Drop the list for data types with only one table:
-    for(dataType in names(BootstrapData)) {
-        if(isProcessOutputDataType(BootstrapData[[dataType]])) {
-            BootstrapData[[dataType]] <- BootstrapData[[dataType]][[1]]
+    for(bootstrapDataName in names(BootstrapData)) {
+        if(isProcessOutputDataType(BootstrapData[[bootstrapDataName]])) {
+            BootstrapData[[bootstrapDataName]] <- BootstrapData[[bootstrapDataName]][[1]]
         }
     }
+    
+    # Set the dataTypes as attributes:
+    for(bootstrapDataName in names(BootstrapData)) {
+        attr(BootstrapData[[bootstrapDataName]], "dataType") <- dataTypes[[bootstrapDataName]]
+    }
+    
+    
     
     
     return(BootstrapData)
@@ -743,6 +782,7 @@ ReportBootstrap <- function(
     BootstrapData, 
     BaselineProcess = character(), 
     TargetVariable = character(), 
+    TargetVariableUnit = character(), 
     AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE), 
     BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE), 
     GroupingVariables = character(), 
@@ -752,6 +792,8 @@ ReportBootstrap <- function(
     BootstrapReportWeightingVariable = character()
 ) 
 {
+    # Store any dataType attribute:
+    dataType <- attr(BootstrapData[[BaselineProcess]], "dataType")
     
     # Issue a warning if RemoveMissingValues = TRUE:
     if(isTRUE(RemoveMissingValues)) {
@@ -774,9 +816,67 @@ ReportBootstrap <- function(
         BootstrapData[[BaselineProcess]] <- BootstrapData[[BaselineProcess]]$Data
     }
     
+    ### # Run the initial aggregation (only applicable for single output functions):
+    ### AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
+    ### out <- RstoxBase::aggregateBaselineDataOneTable(
+    ###     stoxData = BootstrapData[[BaselineProcess]], 
+    ###     TargetVariable = TargetVariable, 
+    ###     aggregationFunction = AggregationFunction, 
+    ###     GroupingVariables = c(GroupingVariables, "BootstrapID"), 
+    ###     InformationVariables = InformationVariables, 
+    ###     na.rm = RemoveMissingValues, 
+    ###     WeightingVariable = AggregationWeightingVariable
+    ### )
+    ### 
+    ### 
+    ### # Get the name of the new TargetVariable:
+    ### TargetVariableAfterInitialAggregation <- RstoxBase::getReportFunctionVariableName(
+    ###     functionName = AggregationFunction, 
+    ###     TargetVariable = TargetVariable
+    ### )
+    ### 
+    ### # Run the report function of the bootstraps:
+    ### BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
+    ### out <- RstoxBase::aggregateBaselineDataOneTable(
+    ###     stoxData = out, 
+    ###     TargetVariable = TargetVariableAfterInitialAggregation, 
+    ###     aggregationFunction = BootstrapReportFunction, 
+    ###     GroupingVariables = GroupingVariables, 
+    ###     InformationVariables = InformationVariables, 
+    ###     na.rm = RemoveMissingValues, 
+    ###     padWithZerosOn = "BootstrapID", 
+    ###     WeightingVariable = BootstrapReportWeightingVariable
+    ### )
+    ### 
+    ### return(out)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    BootstrapData[[BaselineProcess]][[TargetVariable]] <- setUnitRstoxBase(
+        BootstrapData[[BaselineProcess]][[TargetVariable]], 
+        dataType =  dataType, 
+        variableName = TargetVariable, 
+        unit = TargetVariableUnit
+    )
+    
     # Run the initial aggregation (only applicable for single output functions):
     AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
-    out <- RstoxBase::aggregateBaselineDataOneTable(
+    output <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = BootstrapData[[BaselineProcess]], 
         TargetVariable = TargetVariable, 
         aggregationFunction = AggregationFunction, 
@@ -795,8 +895,8 @@ ReportBootstrap <- function(
     
     # Run the report function of the bootstraps:
     BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
-    out <- RstoxBase::aggregateBaselineDataOneTable(
-        stoxData = out, 
+    output <- RstoxBase::aggregateBaselineDataOneTable(
+        stoxData = output, 
         TargetVariable = TargetVariableAfterInitialAggregation, 
         aggregationFunction = BootstrapReportFunction, 
         GroupingVariables = GroupingVariables, 
@@ -806,6 +906,11 @@ ReportBootstrap <- function(
         WeightingVariable = BootstrapReportWeightingVariable
     )
     
-    return(out)
+    if(RstoxData::hasUnit(BootstrapData[[BaselineProcess]][[TargetVariable]], property = "shortname")) {
+        unit <- RstoxData::getUnit(BootstrapData[[BaselineProcess]][[TargetVariable]], property = "shortname")
+        output <- cbind(output, Unit = unit)
+    }
+    
+    return(output)
 }
 

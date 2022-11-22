@@ -8,6 +8,7 @@ ReportBootstrap(
   BootstrapData,
   BaselineProcess = character(),
   TargetVariable = character(),
+  TargetVariableUnit = character(),
   AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE),
   BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE),
   GroupingVariables = character(),
@@ -23,6 +24,8 @@ ReportBootstrap(
 \item{BaselineProcess}{A strings naming the baseline process to report from the boostrap output.}
 
 \item{TargetVariable}{The variable to report.}
+
+\item{TargetVariableUnit}{The unit to use for the \code{TargetVariable}.}
 
 \item{AggregationFunction}{The function to apply to each bootstrap run. This must be a function returning a single value.}
 

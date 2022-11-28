@@ -5,6 +5,7 @@
 \alias{addStratum}
 \alias{removeStratum}
 \alias{modifyStratum}
+\alias{renameStratum}
 \title{Stratum manipulation}
 \usage{
 addStratum(stratum, projectPath, modelName, processID)
@@ -12,17 +13,21 @@ addStratum(stratum, projectPath, modelName, processID)
 removeStratum(stratumName, projectPath, modelName, processID)
 
 modifyStratum(stratum, projectPath, modelName, processID)
+
+renameStratum(stratumName, newStratumName, projectPath, modelName, processID)
 }
 \arguments{
 \item{stratum}{The SpatialPolygonsDataFrame object defining the stratum to add.}
 
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model (one of "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
 \item{processID}{The ID of the process.}
 
 \item{stratumName}{The name of the stratum.}
+
+\item{newStratumName}{The new name of the stratum.}
 }
 \description{
 The functions \code{addStations} and \code{removeStations} adds or removes biotic stations from the BioticAssignment process data of the specified process.

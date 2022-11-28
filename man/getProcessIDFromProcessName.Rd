@@ -4,14 +4,21 @@
 \alias{getProcessIDFromProcessName}
 \title{Function to get process ID from process name}
 \usage{
-getProcessIDFromProcessName(projectPath, modelName, processName)
+getProcessIDFromProcessName(
+  projectPath,
+  modelName,
+  processName,
+  only.processID = FALSE
+)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
-\item{modelName}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
-\item{processName}{The name of the process(es).}
+\item{processName}{The name of the process.}
+
+\item{only.processID}{Logical: If TRUE return only the processID (not a table of processName and processID).}
 }
 \description{
 Function to get process ID from process name

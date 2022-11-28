@@ -2,10 +2,10 @@
 % Please edit documentation in R/stoxFunctionAttributes.R
 \name{getResampleFunctions}
 \alias{getResampleFunctions}
-\title{Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:}
+\title{Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:}
 \usage{
 getResampleFunctions()
 }
 \description{
-Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:
+Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:
 }

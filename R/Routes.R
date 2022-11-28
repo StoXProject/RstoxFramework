@@ -600,7 +600,15 @@ getStartMiddleEndPosition <- function(Log, positionOrigins = c("start", "middle"
     }
     
     presentNames <- c(outer(Log[1, c(LogOrigin, LogOrigin2)], c("Longitude", "Latitude"), paste0))
-    positionsNA[, presentNames] <- Log[, .(Longitude, Longitude2, Latitude, Latitude2)]
+    presentVariables <- c("Longitude", "Longitude2", "Latitude", "Latitude2")
+    # Do not add the presentNames that start with NA:
+    startingWithNA <- startsWith(presentNames, "NA")
+    if(any(startingWithNA)) {
+        presentNames <- presentNames[!startingWithNA]
+        presentVariables <- presentVariables[!startingWithNA]
+    }
+    # Fill in the positions:
+    positionsNA[, presentNames] <- Log[, ..presentVariables]
     
     # Add the missing positions to the Log:
     Log <- cbind(Log, positionsNA)
@@ -805,7 +813,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         type = as.list(c(
             "character", 
             "character", 
-            sapply(processParameters, RstoxData::firstClass)
+            sapply(processParameters, getRelevantClass)
         )), 
         # 5a. format:
         # The number 2 is functionName and processName:
@@ -903,7 +911,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         if(length(functionParameters)) {
             # Get the names of the function parameters:
             functionParameterNames <- names(functionParameters)
-
+            
             format <- getFunctionParameterFormats(functionName)[functionParameterNames]
             
             # Define the function parameters:
@@ -1166,7 +1174,8 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         #), 
         processDirty = TRUE, 
         shift = 0, 
-        delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text")
+        delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
+        deleteCurrent = TRUE
     )
     
     # If the process property 'processArguments' is given, modify the process name, function name or process parameters:
@@ -1200,7 +1209,9 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
                 projectPath = projectPath, 
                 modelName = modelName, 
                 processID = processID, 
-                newFunctionName = newFunctionName
+                newFunctionName = newFunctionName, 
+                # As of RstoxFramework 3.6.0 defaults are supported:
+                add.defaults = TRUE
             )
         }
         # Modify process parameter:
@@ -1457,7 +1468,7 @@ getFilterOptionsAll <- function(projectPath, modelName, processID, include.numer
     name <- lapply(processOutput, names)
     
     # Get the data types:
-    type <- lapply(processOutput, function(x) sapply(x, RstoxData::firstClass))
+    type <- lapply(processOutput, function(x) sapply(x, getRelevantClass))
     
     # Get the operators:
     operators <- lapply(type, function(x) if(length(x)) getRstoxFrameworkDefinitions("filterOperators")[x] else NULL)

@@ -5,13 +5,17 @@
 #' All functions referring to a project, a model, a process or an output table use the same parameters, listed here.
 #' 
 #' @param projectPath The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.
-#' @param modelName,modelNames The name of the model(s) (possible values are "baseline", "analysis" and "report").
+#' @param modelName The name of the model (possible values are "baseline", "analysis" and "report").
+#' @param modelNames The name of the models (possible values are "baseline", "analysis" and "report").
 #' @param processID The ID of the process.
-#' @param processName,processes The name of the process(es).
+#' @param processName The name of the process.
+#' @param processes The name of the processes.
 #' @param functionName The name of the function used by the process. 
 #' @param tableName The name of the output table to get from the process.
-#' @param startProcess,endProcess The process index, name or ID at which to start and stop the model run.
-#' @param afterProcessID,beforeProcessID The ID of the process after or before which to get the procecss table (place a process or in the case of afterProcessID).
+#' @param startProcess The process index, name or ID at which to start the model run.
+#' @param endProcess The process index, name or ID at which to stop the model run.
+#' @param beforeProcessID The ID of the process before which to get the process table.
+#' @param afterProcessID The ID of the process after which to get the process table or to place a process.
 #' @param warn Logical: If TRUE show warnings that are not highly important.
 #' @param verbose Logical: If TRUE extra messages are printed to console.
 #' @param msg Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).
@@ -19,7 +23,7 @@
 #' @param template A string naming the template to use when generating the project. See \code{getAvaiableTemplates} for a list of available templates.
 #' @param ow Logical: If TRUE overwrite the project.
 #' @param showWarnings Logical: If TRUE display warninigs when creting the project folders.
-#' @param Application       A single string naming the application used when saving the project. Defaulted to R.version.string.
+#' @param Application A single string naming the application used when saving the project. Defaulted to R.version.string.
 #' @param argumentFilePaths A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.
 #' @param only.valid Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).
 #' @param returnProcessTable Logical: If TRUE return the process table (much used in functions used by the GUI).
@@ -917,7 +921,13 @@ readProjectDescriptionJSON <- function(projectDescriptionFile) {
     ### }
     
     # Read project.json file to R list. Use simplifyVector = FALSE to preserve names:
-    projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
+    #projectDescriptionList <- jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE)
+    projectDescriptionList <- tryCatch(
+        jsonlite::read_json(projectDescriptionFile, simplifyVector = FALSE), 
+        error = function(err) {
+            stop("Unable to parse the StoX description file ", projectDescriptionFile, ", as jsonlite::read_json reported the error \n\n", err)
+        }
+    )
     
     # Add the headers as attributes:
     projectDescription <- projectDescriptionList$project$models
@@ -1567,11 +1577,12 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' @inheritParams unReDoProject
 #' @param processDirty Logical: Indicates whether the model has been modified when resetting. Tf the process to reset to is after the active process, 
 #' @param delete A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.
+#' @param deleteCurrent Logical: If TRUE delete process output also of the process given by processID.
 #' @param purgeOutputFiles Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted eevn though the process was deleted.
 #' 
 #' @export
 #'
-resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), purgeOutputFiles = FALSE) {
+resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE) {
     
     # Get the process ID to reset the model to:
     processIndexTable <- readProcessIndexTable(projectPath, modelName)
@@ -1630,6 +1641,9 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         #}
         
         ##### (2) Delete process output of the processes from the new active process and onwards: #####
+        if(deleteCurrent) {
+            processIndex <- processIndex - 1
+        }
         if(currentActiveProcessIndex > processIndex) {
             # Get all processes from the process to reset to and onwards:
             allProcessIndex <- getProcessIndexFromProcessID(
@@ -2109,49 +2123,32 @@ getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePa
     
     # Get the function name and arguments:
     functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionArguments <- c(functionInputs, functionParameters)
-    
     # Get the function argument hierarchy:
     functionArgumentHierarchy <- getStoxFunctionMetaData(functionName, "functionArgumentHierarchy", showWarnings = FALSE)
     
-    # Loop through the arguments given by parent tags in the functionArgumentHierarchy, and set toShow to FALSE if not any of the criterias are fulfilled:
-    toShow <- logical(length(functionArguments))
-    names(toShow) <- names(functionArguments)
-    for(argumentName in names(toShow)) {
-        # Check whether the argument is given in the functionArgumentHierarchy. If not, it will be shown:
-        atArgumentName <- which(argumentName == names(functionArgumentHierarchy))
-        if(length(atArgumentName)) {
-            # Loop through the occurrences of the argumentName in the functionArgumentHierarchy, applying &&:
-            hitsOr <- logical(length(atArgumentName))
-            for(ind in seq_along(atArgumentName)) {
-                # Loop through the conditions and set hitsAnd to TRUE if at least one condition is fullfilled:
-                conditionNames <- names(functionArgumentHierarchy[[atArgumentName[ind]]])
-                hitsAnd <- logical(length(conditionNames))
-                names(hitsAnd) <- conditionNames
-                for(conditionName in conditionNames) {
-                    # Added requirement that functionArguments[[conditionName]] has positie length:
-                    if(length(functionArguments[[conditionName]]) && functionArguments[[conditionName]] %in% eval(functionArgumentHierarchy[[atArgumentName[ind]]][[conditionName]])) {
-                        hitsAnd[conditionName] <- TRUE
-                    }
-                }
-                # Apply the AND condition, implying that hitsAnd is TRUE if all are TRUE:
-                hitsOr[ind] <- all(hitsAnd)
-            }
-            toShow[[argumentName]] <- any(hitsOr)
-        }
-        else {
-            toShow[[argumentName]] <- TRUE
-        }
-    }
+    # Get the function inputs and the function parameters:
+    functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
+    functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
     
-    # Return only the names of the arguments to show:
-    if(return.only.names) {
-        toShow <- names(toShow)[toShow]
+    if(length(functionArgumentHierarchy) && any(rapply(functionArgumentHierarchy, is.function))) {
+        
+        # Get the actual function input data, as it is needed when functionArgumentHierarchy is a function:
+        functionInputs <- getFunctionInputData(
+            functionInputProcessNames = functionInputs, 
+            projectPath = projectPath, 
+            # Do not stop if the input is not specified, as we may not yet have defined the parameters:
+            strict = FALSE
+        )
+        
     }
+    functionArguments <- c(functionInputs, functionParameters)
     
-    return(toShow)
+    
+    RstoxData::applyFunctionArgumentHierarchy(
+        functionArgumentHierarchy = functionArgumentHierarchy, 
+        functionArguments = functionArguments, 
+        return.only.names = return.only.names
+    )
 }
 
 # Function to extract the actual the arguments to show from the arguments:
@@ -2194,7 +2191,7 @@ isBootstrapFunction <- function(functionName) {
 getStoxFunctionParameterPossibleValues <- function(functionName, fill.logical = TRUE) {
     
     # Get all defaults:
-    output <- getStoxFunctionParameterDefaults(functionName)
+    output <- getStoxFunctionParameterFormals(functionName)
     
     # Get the parameter (primitive) type to enable the treatments of logicals and numerics:
     parameterType <- unlist(getStoxFunctionParameterTypes(functionName))
@@ -2221,7 +2218,7 @@ getStoxFunctionParameterPossibleValues <- function(functionName, fill.logical = 
 
 
 # Function which gets the default values of a function:
-getStoxFunctionParameterDefaults <- function(functionName) {
+getStoxFunctionParameterFormals <- function(functionName) {
     # Get the available functions:
     availableFunctions <- getRstoxFrameworkDefinitions("availableFunctions")
     
@@ -2232,26 +2229,29 @@ getStoxFunctionParameterDefaults <- function(functionName) {
     }
     
     # Get all possible values:
-    defaults <- getRstoxFrameworkDefinitions("availableFunctionPossibleValues")[[functionName]]
-    return(defaults)
+    possibleValues <- getRstoxFrameworkDefinitions("availableFunctionPossibleValues")[[functionName]]
+    return(possibleValues)
 }
 
 
 # Function which gets the default values of a function:
-getStoxFunctionParameterDefault <- function(functionName) {
+getStoxFunctionParameterDefaults <- function(functionName) {
     # Get the possible values of the parameters of a function:
-    defaults <- getStoxFunctionParameterDefaults(functionName)
-    # The default is the first value:
-    default <- lapply(defaults, utils::head, 1)
-    return(default)
+    StoxFunctionParameterFormals <- getStoxFunctionParameterFormals(functionName)
+    
+    # Keep only logicals:
+    setTo0Length <- !lapply(StoxFunctionParameterFormals, getRelevantClass) %in% "logical" & lengths(StoxFunctionParameterFormals) > 0
+    StoxFunctionParameterFormals[setTo0Length] <- lapply(sapply(StoxFunctionParameterFormals[setTo0Length],  RstoxData::firstClass), do.call, list(0))
+    
+    return(StoxFunctionParameterFormals)
 }
 
 # Function which gets the primitive types of the parameters of a function:
 getStoxFunctionParameterPrimitiveTypes <- function(functionName) {
     # Get the possible values of the parameters of a function:
-    functionParameterDefault <- getStoxFunctionParameterDefault(functionName)
+    functionParameterDefault <- getStoxFunctionParameterFormals(functionName)
     # The default is the first value:
-    primitiveType <- lapply(functionParameterDefault, RstoxData::firstClass)
+    primitiveType <- lapply(functionParameterDefault, getRelevantClass)
     return(primitiveType)
 }
 # Function which gets the primitive types of the parameters of a function:
@@ -2444,7 +2444,7 @@ getDataType <- function(projectPath, modelName, processID, argumentFilePaths = N
 
 checkDataType <- function(dataType, projectPath, modelName, processID) {
     #dataType %in% getDataType(projectPath, modelName, processID)
-    if(!dataType %in% getDataType(projectPath = projectPath, modelName = modelName, processID = processID)) {
+        if(!dataType %in% getDataType(projectPath = projectPath, modelName = modelName, processID = processID)) {
         stop("StoX: The process ", getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), " does not return ", dataType, " data.")
     }
 }
@@ -3209,17 +3209,28 @@ setFunctionName <- function(process, newFunctionName, add.defaults = FALSE) {
         # Insert the function name:
         process$functionName <- newFunctionName
         # Get the parameters to display, and their defaults:
-        defaults <- getStoxFunctionParameterDefault(process$functionName)
+        defaults <- getStoxFunctionParameterDefaults(process$functionName)
         
         # Detect which parameters are data types, which identifies them as function inputs (outputs from other processes):
         areInputs <- isFunctionInput(names(defaults))
         
         if(!add.defaults) {
-            areNonEmptyString <- sapply(defaults, function(x) length(x) && is.character(x))
-            if(any(areNonEmptyString)) {
-                defaults[areNonEmptyString] <- lapply(defaults[areNonEmptyString], function(x) character(0))
+            #areNonEmptyString <- sapply(defaults, function(x) length(x) && is.character(x))
+            #if(any(areNonEmptyString)) {
+            #    defaults[areNonEmptyString] <- lapply(defaults[areNonEmptyString], function(x) character(0))
+            #}
+            #
+        }
+        else {
+            # Add also defaults from the stoxFunctionAttributes:
+            functionParameterDefaults <- getStoxFunctionMetaData(newFunctionName, "functionParameterDefaults", showWarnings = FALSE)
+            if(length(functionParameterDefaults)) {
+                for(name in names(functionParameterDefaults)) {
+                    defaults[[name]] <- functionParameterDefaults[[name]]
+                }
             }
         }
+        
         # Split the defaults into function parameters and function inputs:
         process$functionParameters <- defaults[!areInputs]
         process$functionInputs <- defaults[areInputs]
@@ -3356,16 +3367,16 @@ modifyFunctionName <- function(projectPath, modelName, processID, newFunctionNam
     }
     #process
 }
-emptyFunctionName <- function(projectPath, modelName, processID, archive = TRUE, add.defaults = FALSE) {
-    modifyFunctionName(
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = processID, 
-        newFunctionName = list(), 
-        archive = archive, 
-        add.defaults = add.defaults
-    )
-}
+#emptyFunctionName <- function(projectPath, modelName, processID, archive = TRUE) {
+#    modifyFunctionName(
+#        projectPath = projectPath, 
+#        modelName = modelName, 
+#        processID = processID, 
+#        newFunctionName = list(), 
+#        archive = archive, 
+#        add.defaults = FALSE
+#    )
+#}
 modifyProcessName <- function(projectPath, modelName, processID, newProcessName, archive = TRUE, strict = TRUE, update.functionInputs = TRUE) {
     
     # Get the current process name:
@@ -3914,17 +3925,17 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
     
     if(length(functionParameters)) {
         
-        parameterDefaults <- getStoxFunctionParameterDefault(functionName)
+        StoxFunctionParameterFormals <- getStoxFunctionParameterFormals(functionName)
         
         if(is.list(functionParameters)) {
             # Get present and invalid function parameters:
             present <- intersect(
                 names(functionParameters), 
-                names(parameterDefaults)
+                names(StoxFunctionParameterFormals)
             )
             invalid <- setdiff(
                 names(functionParameters), 
-                names(parameterDefaults)
+                names(StoxFunctionParameterFormals)
             )
             
             # Warning if there are parameters not specified in the function definition:
@@ -3936,13 +3947,13 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
                 for(this in present) {
                     # If the defined class is not NULL, or if it is NULL and the property has length 0, apply the defined class:
                     
-                    classIsDefined <- !is.null(parameterDefaults[[this]])
+                    classIsDefined <- !is.null(StoxFunctionParameterFormals[[this]])
                     NULLDefinedAndEmptyProperty <- 
-                        is.null(parameterDefaults[[this]]) && 
+                        is.null(StoxFunctionParameterFormals[[this]]) && 
                         length(functionParameters[[this]]) == 0
-                    table <- identical(RstoxData::firstClass(parameterDefaults[[this]]), "data.table")
+                    table <- identical(getRelevantClass(StoxFunctionParameterFormals[[this]]), "data.table")
                     emptyTable <- table && length(functionParameters[[this]]) == 0
-                    differingClass <- RstoxData::firstClass(functionParameters[[this]]) != RstoxData::firstClass(parameterDefaults[[this]])
+                    differingClass <- getRelevantClass(functionParameters[[this]]) != getRelevantClass(StoxFunctionParameterFormals[[this]])
                     
                     # Special case for NULL:
                     if(NULLDefinedAndEmptyProperty) {
@@ -3978,7 +3989,7 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
                             #
                             ## Set column classes:
                             #for(ind in seq_along(columnNames)) {
-                            #    if(RstoxData::firstClass(functionParameters[[this]][[ind]]) != variableTypes[ind]) {
+                            #    if(getRelevantClass(functionParameters[[this]][[ind]]) != variableTypes[ind]) {
                             #        thisColName <- columnNames[ind]
                             #        functionParameters[[this]][, (thisColName) := do.call(variableTypesFunctions[ind], )]
                             #    }
@@ -3989,7 +4000,7 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
                     }
                     # Set class to the defined class:
                     else if(classIsDefined && differingClass) {
-                        class(functionParameters[[this]]) <- RstoxData::firstClass(parameterDefaults[[this]])
+                        class(functionParameters[[this]]) <- getRelevantClass(StoxFunctionParameterFormals[[this]])
                     }
                 }
             }
@@ -4745,18 +4756,17 @@ runProcess <- function(
     }
     
     
-    
     if(failed){
         return(FALSE)
     }
     # If the processOutput has length (or is an empty SpatialPolygonsDataFrame) or empty data.table:
-    else if(length(processOutput) || any(c("data.table", "SpatialPolygonsDataFrame") %in% RstoxData::firstClass(processOutput))){
+    else if(length(processOutput) || any(c("data.table", "SpatialPolygonsDataFrame") %in% getRelevantClass(processOutput))){
         
         # Update the active process ID:
         writeActiveProcessID(projectPath = projectPath, modelName = modelName, activeProcessID = processID, processDirty = FALSE)
         
         # If a valid output class, wrap the function output to a list named with the data type:
-        if(RstoxData::firstClass(processOutput) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")) {
+        if(isValidOutputDataClass(processOutput)) {
             processOutput <- list(processOutput)
             names(processOutput) <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
         }
@@ -4765,15 +4775,16 @@ runProcess <- function(
         # Is the output a list of lists (such as that from ReadBiotic())?
         if(is.list(processOutput[[1]]) && !data.table::is.data.table(processOutput[[1]])){
             # Set presicion by reference for data.table:
-            if(RstoxData::firstClass(processOutput[[1]]) == "data.table") {
+            if(getRelevantClass(processOutput[[1]]) == "data.table") {
                 RstoxData::setRstoxPrecisionLevel(processOutput)
             }
             # Round off each polygon:
-            else if(RstoxData::firstClass(processOutput[[1]]) == "SpatialPolygonsDataFrame") {
+            else if(getRelevantClass(processOutput[[1]]) == "SpatialPolygonsDataFrame") {
                 processOutput[[1]] <- RstoxData::roundSignifSPDF(processOutput[[1]])
             }
         }
-        else {
+        # No need to set precision to a ggplot object:
+        else if(! "ggplot" %in% class(processOutput)){
             # List of lists is always data.table:
             for(listIndex in seq_along(processOutput)) {
                 RstoxData::setRstoxPrecisionLevel(processOutput[[listIndex]])
@@ -4916,34 +4927,18 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     functionInputNames <- functionInputNames[lengths(functionArguments[functionInputNames]) > 0L]
     
     functionInputProcessNames <- unlist(functionArguments[functionInputNames])
-    if(length(functionInputProcessNames)) {
-        # Get the function input process IDs (returned as a data.table due to the rbindlist()):
-        functionInputsProcessIDs <- data.table::rbindlist(mapply(
-            getProcessIDFromProcessName, 
-            projectPath = projectPath, 
-            processName = functionInputProcessNames, 
-            MoreArgs = list(
-                modelName = NULL
-            ), 
-            SIMPLIFY = FALSE
-        ))
-        
-        if(nrow(functionInputsProcessIDs) != length(functionInputProcessNames)) {
-            stop("Some function inputs are not specified: ", paste(setdiff(functionInputProcessNames, names(functionInputsProcessIDs)), collapse = ", "))
-            
-        }
-        
+    
+    # Add the function input data:
+    functionInputData <- getFunctionInputData(
+        functionInputProcessNames = functionInputProcessNames, 
+        projectPath = projectPath
+    ) 
+    
+    if(length(functionInputData)) {
         # Get the actual function inputs from the functionInputsProcessIDs:
-        functionArguments[functionInputNames] <- mapply(
-            getProcessOutput, 
-            projectPath = projectPath, 
-            modelName = functionInputsProcessIDs$modelName, 
-            processID = functionInputsProcessIDs$processID, 
-            SIMPLIFY = FALSE
-        )
-        
-        #names(functionArguments) <- names(functionInputProcessNames)
+        functionArguments[functionInputNames] <- functionInputData
     }
+    
     
     return(
         list(
@@ -4956,6 +4951,51 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
 
 
 
+
+getFunctionInputData <- function(functionInputProcessNames, projectPath, strict = TRUE) {
+    
+    if(length(functionInputProcessNames)) {
+        # Get the function input process IDs (returned as a data.table due to the rbindlist()):
+        functionInputsProcessIDs <- data.table::rbindlist(mapply(
+            getProcessIDFromProcessName, 
+            projectPath = projectPath, 
+            processName = functionInputProcessNames, 
+            MoreArgs = list(
+                modelName = NULL
+            ), 
+            SIMPLIFY = FALSE
+        ))
+        
+        functionInputData <- structure(vector("list", length(functionInputProcessNames)), names = names(functionInputProcessNames))
+            
+        if(strict && nrow(functionInputsProcessIDs) != length(functionInputProcessNames)) {
+            stop("Some function inputs are not specified: ", paste(setdiff(functionInputProcessNames, names(functionInputsProcessIDs)), collapse = ", "))
+            
+        }
+        
+        # Get the actual function inputs from the functionInputsProcessIDs:
+        presentFunctionInputData <- mapply(
+            getProcessOutput, 
+            projectPath = projectPath, 
+            modelName = functionInputsProcessIDs$modelName, 
+            processID = functionInputsProcessIDs$processID, 
+            SIMPLIFY = FALSE, 
+            warn = strict
+        )
+        
+        if(length(presentFunctionInputData)) {
+            functionInputData[names(functionInputProcessNames)] <- presentFunctionInputData
+            #names(functionInputData) <- functionInputProcessNames
+        }
+        
+        return(functionInputData)
+    }
+    else {
+        return(list())
+    }
+}
+
+
 ##################################################
 ##################################################
 #' Get output of a StoX process.
@@ -4964,19 +5004,17 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
 #' 
 #' @inheritParams fixedWidthTable
 #' @inheritParams readProcessOutputFile
-#' @param modelName The name of the model (one of "baseline", "analysis" and "report").
-#' @param processID The ID of the process.
+#' @inheritParams getProcessOutputFiles
+#' @inheritParams general_arguments
 #' @param tableName The name of the table to extract from the process.
+#' @param geoJsonName The name of the GeoJSON object to extract from the process.
 #' @param subFolder If the process returns subfolders (ReadBiotic and ReadAcoustic, where the subfolders represent files), specify the name of the folder with this parameter.
 #' @param drop Logical: If TRUE drop the list if only one element.
 #' @param drop.datatype Logical: If TRUE drop the top level of the output if in a list, which is the level named by the data type.
 #' 
 #' @export
 #' 
-#' @inheritParams Projects
-#' @export
-#' 
-getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE) {
+getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE, warn = TRUE) {
     
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
@@ -4989,7 +5027,8 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
     processOutputFiles <- getProcessOutputFiles(
         projectPath = projectPath, 
         modelName = modelName, 
-        processID = processID
+        processID = processID, 
+        warn = warn
     )
     if(!length(processOutputFiles)) {
         return(NULL)
@@ -5015,7 +5054,17 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         # Also select the tables of each sub folder:
         if(length(tableName)) {
             # Warning: This selection ignores the file extension by the partial matching of R:
-            processOutputFiles <- lapply(processOutputFiles, selectValidElements, tableName)
+            #processOutputFiles <- lapply(processOutputFiles, selectValidElements, tableName)
+            
+            # Make sure the tableName is present among the files:
+            for(ind in seq_along(processOutputFiles)) {
+                temp <- selectValidElements(processOutputFiles[[ind]], tableName)
+                if(length(temp) || names(processOutputFiles)[ind] != tableName) {
+                    processOutputFiles[[ind]] <- temp
+                }
+            }
+            
+            processOutputFiles <- processOutputFiles[lengths(processOutputFiles) > 0]
         }
     }
     
@@ -5023,21 +5072,33 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         warning("StoX: Invalid specification of projectPath, modelName, processID or tableName (most likely tableName).")
     }
     
+    
     # Read the files recursively:
     processOutput <- rapply(
         processOutputFiles, 
         readProcessOutputFile, 
         flatten = flatten, 
         pretty = pretty, 
+        pretty.json = pretty.json, 
         linesPerPage = linesPerPage, 
         pageindex = pageindex, 
         columnSeparator = columnSeparator, 
         lineSeparator = lineSeparator, 
         na = na, 
         enable.auto_unbox = enable.auto_unbox, 
-        how = "replace"
+        how = "replace", 
+        splitGeoJson = splitGeoJson
     )
 
+    # Add data type as attribute if the file is present (currentlly only for boostrap):
+    dataTypeFileName <- file.path(folderPath, "dataType.txt")
+    if(is.list(processOutput) && file.exists(dataTypeFileName)) {
+        dataType <- data.table::fread(dataTypeFileName)
+        for(name in names(processOutput)) {
+            attr(processOutput[[name]], "dataType") <- dataType[name == processName, dataType]
+        }
+    }
+    
     # Unlist the top level if a single tabled data type is wrapped in a list:
     if(drop.datatype && is.list(processOutput) && length(processOutput) == 1 && names(processOutput) %in% getRstoxFrameworkDefinitions("stoxDataTypes")$functionOutputDataType) {
         processOutput <- processOutput[[1]]
@@ -5052,6 +5113,88 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
     }
     
     return(processOutput)
+}
+#' 
+#' @rdname getProcessOutput
+#' @export
+#' 
+getProcessTableOutput <- function(projectPath, modelName, processID, tableName = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", na = "-", drop = FALSE) {
+    getProcessOutput(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        tableName = tableName, 
+        flatten = flatten, 
+        pretty = pretty, 
+        pageindex = pageindex, 
+        linesPerPage = linesPerPage, 
+        columnSeparator = columnSeparator, 
+        na = na, 
+        drop = drop, 
+        warn = FALSE
+    )
+}
+#' 
+#' @rdname getProcessOutput
+#' @export
+#' 
+getProcessGeoJsonOutput <- function(projectPath, modelName, processID, geoJsonName = NULL, pretty = FALSE, splitGeoJson = TRUE) {
+    getProcessOutput(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        tableName = geoJsonName, 
+        pretty = TRUE, # Whether to return a list with data, numberOfLines and numberOfPages.
+        pretty.json = pretty, 
+        splitGeoJson = splitGeoJson, 
+        warn = FALSE
+    )
+}
+
+
+##################################################
+##################################################
+#' Get output of a StoX process.
+#' 
+#' Gets the output of a process that has been run.
+#' 
+#' @inheritParams general_arguments
+#' @param plotName The name of the plot.
+#' 
+#' @export
+#' 
+getProcessPlotOutput <- function(projectPath, modelName, processID, plotName = NULL) {
+    
+    # Get the files 
+    processOutputFiles <- getProcessOutputFiles(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        warn = FALSE
+    )
+    if(!length(processOutputFiles)) {
+        return(NULL)
+    }
+    
+    if(length(plotName)) {
+        processOutputFiles <- selectValidElements(processOutputFiles, plotName)
+    }
+    
+    # Read the files recursively:
+    processOutput <- rapply(
+        processOutputFiles, 
+        readMemoryFile, 
+        how = "replace"
+    )
+    
+    # Define temp file paths:
+    tempFileNames <-  paste(basename(tools::file_path_sans_ext(processOutputFiles)), "png", sep = ".")
+    tempFilePaths <- file.path(tempdir(), tempFileNames)
+    
+    # The file paths are updated in ggsaveApplyDefaults (the GUI expects png):
+    tempFilePaths <- mapply(ggsaveApplyDefaults, processOutput, tempFilePaths, MoreArgs = list(overrideAttributes = list(Format = "png")))
+
+    return(tempFilePaths)
 }
 
 
@@ -5121,10 +5264,12 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param filePath The file path of the process output file to read.
 #' @param flatten Logical: Should the output tables that contain cells of length > 1 be expanded to that the other columns are repeated, resulting in a regular table.
 #' @param pretty Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.
-#' @param pageindex A vevctor of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
+#' @param pretty.json Logical: If TRUE prettify the geojson.
+#' @param pageindex A vector of the pages to return with \code{linesPerPage} number of lines (rows). Default is to not split into pages.
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
+#' @param splitGeoJson Logical: If TRUE split the geojson into a vector of separate lines.
 #' 
-readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE) {
+readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE) {
     
     
     # Read the process output file:
@@ -5137,23 +5282,31 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
     
     if(pretty) {
         # If a SpatialPolygonsDataFrame, prettify and convert to character
-        if(RstoxData::firstClass(data) == "SpatialPolygonsDataFrame") {
+        if(getRelevantClass(data) == "SpatialPolygonsDataFrame") {
             #geojsonio::geojson_json(processOutput, pretty = TRUE)
             #data <- jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data)))
-            data <- jsonlite::prettify(
-                replaceSpatialFileReference(
-                    buildSpatialFileReferenceString(
-                        data
-                    )
+            data <- replaceSpatialFileReference(
+                buildSpatialFileReferenceString(
+                    data
                 )
             )
             
-            # We need to split into a vector of lines:
-            data <- strsplit(data, "\n", fixed = TRUE)[[1]]
+            if(pretty.json || splitGeoJson) {
+                data <- jsonlite::prettify(data)
+            }
             
-            # Extract the requested lines:
-            numberOfLines <- length(data)
-            numberOfPages <- ceiling(numberOfLines / linesPerPage)
+            # We need to split into a vector of lines:
+            if(splitGeoJson) {
+                data <- strsplit(data, "\n", fixed = TRUE)[[1]]
+                # Extract the requested lines:
+                numberOfLines <- length(data)
+                numberOfPages <- ceiling(numberOfLines / linesPerPage)
+            }
+            else {
+                data <- as.character(data)
+                numberOfLines <- 1
+                numberOfPages <- 1
+            }
             
             data <- list(
                 data = data, 
@@ -5181,6 +5334,22 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
                 na = na, 
                 enable.auto_unbox = enable.auto_unbox
             )
+            
+            # Add a line "... truncated" if the page is not first and not the last:
+            if(pageindex > 1) {
+                data <- c(
+                    "... truncated", 
+                    data
+                )
+            }
+            if(pageindex < numberOfPages) {
+                data <- c(
+                    data,
+                    "... truncated"
+                )
+            }
+            
+            
                 
             # In the pretty model, output a list containing the number of lines and the number of pages:
             data <- list(
@@ -5190,7 +5359,7 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
             )
         }
         else {
-            # Add numberOfLines = 1 and numberOfPages = 1 to conform to the output used for tables in the GUI:
+            # Add numberOfLines = 0 and numberOfPages = 0 to conform to the output used for tables in the GUI:
             if(length(data)) {
                 # Extract the requested lines:
                 numberOfLines <- length(data)
@@ -5212,24 +5381,25 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pag
         }
     }
     
+    
     return(data)
 }
 
 
 
 flattenProcessOutput <- function(processOutput) {
-    #if(RstoxData::firstClass(processOutput) == "SpatialPolygons") {
-    if(RstoxData::firstClass(processOutput) == "SpatialPolygonsDataFrame") {
+    #if(getRelevantClass(processOutput) == "SpatialPolygons") {
+    if(getRelevantClass(processOutput) == "SpatialPolygonsDataFrame") {
         #geojsonio::geojson_json(processOutput, pretty = TRUE)
         jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(processOutput)))
     }
-    else if(RstoxData::firstClass(processOutput) == "data.table") {
+    else if(getRelevantClass(processOutput) == "data.table") {
         # Check whether the table is rugged:
         if(isDataTableRugged(processOutput)) {
             flattenDataTable(processOutput)
         }
     }
-    else if(RstoxData::firstClass(processOutput) %in% c("matrix", "character")) {
+    else if(getRelevantClass(processOutput) %in% c("matrix", "character")) {
         processOutput
     }
     else {
@@ -5239,13 +5409,13 @@ flattenProcessOutput <- function(processOutput) {
 
 #' Function to get all process output memory files of a process:
 #' 
-#' @inheritParams Projects
-#' @inheritParams getProcessOutput
+#' @inheritParams general_arguments
 #' @param onlyTableNames Logical: If TRUE return only table names.
 #' @param type One of c("memory", "output", "text".
+#' @param warn Logical: If TRUE warn if the process has not bee run.
 #' @export
 #' 
-getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNames = FALSE, type = "memory") {
+getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNames = FALSE, type = "memory", warn = TRUE) {
     
     # Get the directory holding the output files:
     folderPath <- getProcessOutputFolder(
@@ -5263,7 +5433,10 @@ getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNa
     if(length(folderPath) == 0 || !file.exists(folderPath)) {
         #processName <- getProcessName(projectPath, modelName, processID)
         #stop("Has the previous processes been run? The folder ", folderPath, " does not exist.")
-        warning("StoX: Process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " of the model ", modelName, " has not been run.")
+        if(warn) {
+            warning("StoX: Process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " of the model ", modelName, " has not been run.")
+        }
+        
         return(NULL)
     }
     
@@ -5354,6 +5527,41 @@ getProcessOutputTableNames <- function(projectPath, modelName, processID) {
 }
 
 
+#' Get the names of the output tables of a process
+#' 
+#' @inheritParams general_arguments
+#' @export
+#' 
+getProcessOutputElements <- function(projectPath, modelName, processID) {
+    # Get the output file names, and add the process name:
+    elementName <- getProcessOutputFiles(projectPath = projectPath, modelName = modelName, processID = processID, onlyTableNames = TRUE, warn = FALSE)
+    
+    if(!length(elementName)) {
+        return(NULL)
+    }
+    
+    processName <- getProcessNameFromProcessID(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID
+    )
+    elementFullName <- paste0(processName, "(", elementName, ")")
+    
+    
+    # Get the element types:
+    outputClass <- readOutputClass(projectPath, modelName, processID)
+    elementType <- getOutputElementType(outputClass)
+    
+    elementInfo <- data.table::data.table(
+        elementName = elementName, 
+        elementFullName = elementFullName, 
+        elementType = elementType
+    )
+    
+    return(elementInfo)
+}
+
+
 deleteProcessOutput <- function(projectPath, modelName, processID, type = c("memory", "output")) {
     # Get the directory holding the output files:
     folderPath <- getProcessOutputFolder(projectPath = projectPath, modelName = modelName, processID = processID, type = type)
@@ -5362,31 +5570,25 @@ deleteProcessOutput <- function(projectPath, modelName, processID, type = c("mem
 
 
 
-
-getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("memory", "output", "text"), subfolder = NULL) {
-    type <- match.arg(type)
+#' Find the output folder of a process 
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams getProcessOutput
+#' @param type The type of output folder, one of "memory", to point to the memory output (files that only live while the project in open), or "output" or "text to point to the output folder holding files that continue living after the project is closed (written when Write output to file is checked in the GUI).
+#' @export
+#' 
+getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("memory", "output", "text"), subFolder = NULL) {
+    type <- RstoxData::match_arg_informative(type)
     if(type == "memory") {
         folderPath <- file.path(getProjectPaths(projectPath, "dataModelsFolder"), modelName, processID)
     }
-    else if(type == "output") {
+    else if(type %in% c("output", "text")) {
         # Get the processName and build the folderPath:
-        processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
-        folderPath <- file.path(
-            getProjectPaths(
-                projectPath, 
-                "output"
-            ), 
-            modelName, 
-            processName
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
         )
-        # Add subfolder:
-        if(length(subfolder)) {
-            folderPath <- file.path(folderPath, subfolder)
-        }
-    }
-    else if(type == "text") {
-        # Get the processName and build the folderPath:
-        processName <- getProcessNameFromProcessID(projectPath, modelName, processID)
         folderPath <- file.path(
             getProjectPaths(
                 projectPath = projectPath, 
@@ -5394,9 +5596,13 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
             ), 
             processName
         )
+        # Add subFolder:
+        if(length(subFolder)) {
+            folderPath <- file.path(folderPath, subFolder)
+        }
     }
     else {
-        stop("typetype must be one of \"memory\" and \"output\"")
+        stop("typetype must be one of \"memory\" and \"output\"/\"text\"")
     }
     return(folderPath)
 }
@@ -5404,10 +5610,11 @@ getProcessOutputFolder <- function(projectPath, modelName, processID, type = c("
 #' Function to get process ID from process name
 #' 
 #' @inheritParams general_arguments
+#' @param only.processID Logical: If TRUE return only the processID (not a table of processName and processID).
 #' 
 #' @export
 #' 
-getProcessIDFromProcessName <- function(projectPath, modelName, processName) {
+getProcessIDFromProcessName <- function(projectPath, modelName, processName, only.processID = FALSE) {
     # Get the table linking process names and IDs:
     processIndexTable <- readProcessIndexTable(
         projectPath = projectPath, 
@@ -5415,7 +5622,12 @@ getProcessIDFromProcessName <- function(projectPath, modelName, processName) {
     )
     # Extract the requested process ID:
     validRow <- processIndexTable$processName == processName
-    processIndexTable[validRow, ]
+    if(only.processID) {
+        processIndexTable[validRow, processID]
+    }
+    else {
+        processIndexTable[validRow, ]
+    }
 }
 
 
@@ -5451,6 +5663,10 @@ getProcessNameFromProcessID <- function(projectPath, modelName, processID) {
         projectPath = projectPath, 
         modelName = modelName
     )
+    if(!NROW(processIndexTable)) {
+        stop("Project ", projectPath, " is not open.")
+    }
+    
     # Extract the requested process names:
     thisProcessID <- processID
     processIndexTable[processID == thisProcessID, processName]
@@ -5481,13 +5697,13 @@ getProcessOutputTextFilePath <- function(
         output.file.type <- getRstoxFrameworkDefinitions("default.output.file.type")[[modelName]]
     }
     
-    # Get the folder to place the output files in (added subfolder named by the process on 2020-10-21):
+    # Get the folder to place the output files in (added subFolder named by the process on 2020-10-21):
     folderPath <- getProcessOutputFolder(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
         type = "text", 
-        subfolder = NULL
+        subFolder = NULL
     )
     
     # Create the folder:
@@ -5534,6 +5750,11 @@ getProcessOutputTextFilePath <- function(
                 else if("matrix" %in% class(processOutput[[1]]) || any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutput[[1]]))) {
                     # Set file extension:
                     ext <- "csv"
+                }
+                else if("ggplot" %in% class(processOutput[[1]])) {
+                    # Set file extension:
+                    ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+                    # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
                 }
                 else {
                     stop("Unknown process output: ", class(processOutput[[1]]))
@@ -5613,7 +5834,7 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
     processName <- getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID)
     
     # Get the output.file.type:
-    output.file.type <- match.arg(output.file.type)
+    output.file.type <- RstoxData::match_arg_informative(output.file.type)
     # Apply the default output.file.type if specified:
     if(output.file.type == "default") {
         output.file.type <- getRstoxFrameworkDefinitions("default.output.file.type")[[modelName]]
@@ -5728,9 +5949,45 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
             writeLines(as.character(processOutputOne), filePath)
         }
     }
+    else if("ggplot" %in% class(processOutputOne)) {
+        # Write the plot file:
+        ggsaveApplyDefaults(processOutputOne, filePath)
+    }
     else {
         stop("Unknown process output: ", class(processOutputOne))
     }
+}
+
+
+
+ggsaveApplyDefaults <- function(x, filePath, overrideAttributes = list()) {
+    
+    # Replace any attributes given in the overrideAttributes:
+    att <- attributes(x)
+    attToOverride <- intersect(names(att), names(overrideAttributes))
+    if(length(attToOverride)) {
+        att[attToOverride] <- overrideAttributes[attToOverride]
+    }
+    
+    arguments <- list(
+        plot = x, 
+        device = if("Format"      %in% names(att)) att$Format      
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format, 
+        width  = if("Width"       %in% names(att)) att$Width
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Width,
+        height = if("Height"      %in% names(att)) att$Height
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Height, 
+        dpi    = if("DotsPerInch" %in% names(att)) att$DotsPerInch
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$DotsPerInch, 
+        units = "cm"
+    )
+    
+    # Set the file extension to the format:
+    arguments$filename <- paste(tools::file_path_sans_ext(filePath), arguments$device, sep = ".")
+    
+    do.call(ggplot2::ggsave, arguments)
+    
+    return(arguments$filename)
 }
 
 
@@ -5758,7 +6015,7 @@ unlistOneStep <- function(processOutput) {
     # Unlist and add the names:
     if(!areAllValidOutputDataClasses(processOutput)){
         # A trick to prepare for unlist(). Add one list level to all elements which are valid class:
-        validClass <- sapply(processOutput, isValidOutputDataOne)
+        validClass <- sapply(processOutput, isValidOutputDataClass)
         processOutput[validClass] <- lapply(processOutput[validClass], list)
         
         # Define the names of the files first, by pasting the level and the sub-level names separated by underscore:
@@ -5773,23 +6030,40 @@ unlistOneStep <- function(processOutput) {
 }
 
 # Function to check that all the output elements are of the valid classes:
-areAllValidOutputDataClasses <- function(processOutput) {
+areAllValidOutputDataClasses <- function(x) {
+    all(sapply(x, isValidOutputDataClass))
+}
+
+# Function to check that all the output elements are of the valid classes:
+isValidOutputDataClass <- function(x) {
     validOutputDataClasses <- getRstoxFrameworkDefinitions("validOutputDataClasses")
-    classes <- sapply(processOutput, RstoxData::firstClass)
-    #classes <- unlist(lapply(classes, "[[", 1))
-    all(classes %in% validOutputDataClasses)
+    
+    isValid <- getRelevantClass(x) %in% validOutputDataClasses
+    
+    return(isValid)
+}
+
+# Function to get the first class of the object x, except if the class "gg" is returned, in which case "ggplot" is returned instead if present as one of the classes of the object:
+getRelevantClass <- function(x) {
+    relevantClass <- RstoxData::firstClass(x)
+    # ggplot objects have "gg" as first class and "gpglot" as second. RstoxFramework wishes to specify "ggplot" as valid class for clarity (and since "gg" seems to be a wider class). So using only first class as the most relevant class fails in this respect. Thus we add a specific check on the existence of "ggplot" in the classes of the object:
+    if(relevantClass == "gg" && "ggplot" %in% class(x)) {
+        relevantClass <- "ggplot"
+    }
+    return(relevantClass)
 }
 
 
 # Function to write process output to a memory file:
-writeProcessOutputMemoryFiles <- function(processOutput, projectPath, modelName, processID, type = c("memory", "output"), subfolder = NULL) {
+writeProcessOutputMemoryFiles <- function(processOutput, projectPath, modelName, processID, type = c("memory", "output"), subFolder = NULL) {
     if(length(processOutput)) {
         # Get the path to the folder to place the memory file in:
-        folderPath <- getProcessOutputFolder(projectPath = projectPath, modelName = modelName, processID = processID, type = type, subfolder = subfolder)
-        writeProcessOutputTables(
+        folderPath <- getProcessOutputFolder(projectPath = projectPath, modelName = modelName, processID = processID, type = type, subFolder = subFolder)
+        writeProcessOutputElements(
             processOutput, 
             folderPath = folderPath, 
-            writeOrderFile = TRUE
+            writeOrderFile = TRUE,
+            writeClassFile = TRUE
         )
     }
     else {
@@ -5799,7 +6073,7 @@ writeProcessOutputMemoryFiles <- function(processOutput, projectPath, modelName,
 
 
 # Function to write process output to a memory file:
-writeProcessOutputTables <- function(processOutput, folderPath, writeOrderFile = TRUE) {
+writeProcessOutputElements <- function(processOutput, folderPath, writeOrderFile = TRUE, writeClassFile = TRUE) {
     if(length(processOutput)) {
         # Create the folder if not existing:
         dir.create(folderPath, recursive = TRUE, showWarnings = FALSE)
@@ -5822,11 +6096,73 @@ writeProcessOutputTables <- function(processOutput, folderPath, writeOrderFile =
                 writeOrderFile = writeOrderFile
             )
         }
+        
+        if(writeClassFile) {
+            # Write the class file:
+            if(writeOrderFile) {
+                outputClass <- getOutputClass(processOutput, outputDepth)
+                outputClassFileName <- file.path(folderPath, "outputClass.txt")
+                write(outputClass, outputClassFileName)
+            }
+        }
+        
+        # Write the data types for bootstrap processes (which sets the dataType attribute to each process output, so we check the first). The Bootstrap functions sets the data types as attributes to the individual baseline process outputs, and then this is picked up by writeProcessOutputElements()):
+        if("dataType" %in% names(attributes(processOutput[[1]]))) {
+            dataType <- data.table::data.table(
+                processName = names(processOutput), 
+                dataType = sapply(processOutput, attr, "dataType")
+            )
+            dataTypeFileName <- file.path(folderPath, "dataType.txt")
+            data.table::fwrite(dataType, dataTypeFileName)
+        }
     }
     else {
         NULL
     }
 }
+
+
+# Get the class of the output elements:
+getOutputClass <- function(processOutput, outputDepth) {
+    if(any(outputDepth == 1)) {
+        outputClass <- getRelevantClass(processOutput[[1]])
+    }
+    if(any(outputDepth == 2)) {
+        outputClass <- getRelevantClass(processOutput[[1]][[1]])
+    }
+    
+    return(outputClass)
+}
+
+# Get the class of the output elements:
+readOutputClass <- function(projectPath, modelName, processID) {
+    
+    # Get the directory holding the output files:
+    folderPath <- getProcessOutputFolder(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        type = "memory"
+    )
+    
+    # Read the order file if present:
+    outputClassFile <- file.path(folderPath, "outputClass.txt")
+    if(file.exists(outputClassFile)) {
+        outputClass <- readLines(outputClassFile)
+    }
+    else {
+        warning("The file ",outputClassFile, " does not exist. Class guessed to be data.table")
+        outputClass <- "data.table"
+    }
+    
+    return(outputClass)
+}
+
+# Get the type of the output elements, one of "table", "geojson" and "filePath", for use in the GUI. The GUI acts accordingly, e.g. by showing the plot saved in a temporary file given by the filePath:
+getOutputElementType <- function(outputClass) {
+    getRstoxFrameworkDefinitions("outputTypes")[[outputClass]]
+}
+
 
 
 writeProcessOutput1 <- function(processOutput, folderPath, writeOrderFile = TRUE) {
@@ -5850,7 +6186,7 @@ writeProcessOutput2 <- function(processOutput, folderPath, writeOrderFile = TRUE
     # Create the file names and add the folder paths to the file names (flattening the output):
     fileNamesSansExt <- vector("list", length(processOutput))
     # Add names of the elements which are lists of valid output data types (typically table):
-    areValid <- sapply(processOutput, isValidOutputDataOne)
+    areValid <- sapply(processOutput, isValidOutputDataClass)
     fileNamesSansExt[areValid] <- as.list(names(processOutput)[areValid])
     
     # Add the names of the list for lists of valid output data types:
@@ -5868,12 +6204,12 @@ getOutputDepth <- function(outputData) {
 }
 getOutputDepthOne <- function(outputDataOne) {
     # If the outputDataOne has length 0 or is of valid output data classes, set outputDepth to 1:
-    if(!length(outputDataOne) || isValidOutputDataOne(outputDataOne)) {
+    if(!length(outputDataOne) || isValidOutputDataClass(outputDataOne)) {
         outputDepth <- 1
     }
     # Else if outputDataOne is a list, check all elements:
     else if(length(outputDataOne) && is.list(outputDataOne)) {
-        areValid <- sapply(outputDataOne, isValidOutputDataOne) | lengths(outputDataOne) == 0
+        areValid <- sapply(outputDataOne, isValidOutputDataClass) | lengths(outputDataOne) == 0
         if(all(areValid)) {
             outputDepth <- 2
         }
@@ -5895,16 +6231,6 @@ getFolderDepth <- function(folderPath) {
         folderDepth <- 2
     }
     folderDepth
-}
-
-
-# A valid process output (from running the process in runProcess()) must be a pure list with class not in the valid classes, and where the first element of the list HAS a valid class:
-#isValidOutputData <- function(x) {
-#    validOutputDataClasses <- getRstoxFrameworkDefinitions("validOutputDataClasses")
-#    is.list(x) && !RstoxData::firstClass(x) %in% validOutputDataClasses && RstoxData::firstClass(x[[1]]) %in% validOutputDataClasses
-#}
-isValidOutputDataOne <- function(outputDataOne) {
-    RstoxData::firstClass(outputDataOne) %in% getRstoxFrameworkDefinitions("validOutputDataClasses")
 }
 
 

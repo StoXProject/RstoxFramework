@@ -6,7 +6,7 @@
 \alias{getStoxDependencies}
 \alias{installOfficialRstoxPackagesWithDependencies}
 \alias{getOfficialRstoxPackageVersion}
-\title{Tools to download and install Rstox packages and dependen packages.}
+\title{Tools to download and install Rstox packages and dependent packages.}
 \usage{
 getNonRstoxDependencies(
   packageName = c("RstoxFramework", "RstoxBase", "RstoxData"),

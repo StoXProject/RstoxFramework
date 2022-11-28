@@ -21,7 +21,7 @@ runProject_ReplaceAcousticFiles(
 
 \item{ReadAcoustic.FileNames}{Optional: character vector with file paths to input acoustic files to replaec the existing acoustic files by in the procecss using the function \code{ReadAcoustic}.}
 
-\item{modelNames}{The name of the model(s) (possible values are "baseline", "analysis" and "report").}
+\item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
 \item{projectPath0}{Optional: Path to the project to copy to the project given by \code{projectPath}.}
 

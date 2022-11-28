@@ -31,6 +31,12 @@ backwardCompatibility <- list(
                 ProcessName = "ImputeSuperIndividuals", 
                 Seed = 1
             )
+        ), 
+        list(
+            changeVersion = "3.5.2", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "TargetVariableUnit"
         )
     )
 )
@@ -1013,7 +1019,7 @@ copyInputFilesOneType <- function(
     clearExisting = TRUE
 ) {
     # Get the data type:
-    type <- match.arg(type)
+    type <- RstoxData::match_arg_informative(type)
     
     # Read the project.xml file to a list:
     projectList2.7 <- RstoxBase::readProjectXMLToList(projectPath = projectPath2.7)

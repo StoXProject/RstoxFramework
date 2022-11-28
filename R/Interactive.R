@@ -62,10 +62,11 @@ modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, process
     ## Get the process data of the process, a table of PSU, Layer, Haul and HaulWeight:
     BioticAssignment <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)$BioticAssignment
     
-    # Check for existing PSU:
-    if(!PSU %in% BioticAssignment$PSU) {
-        warning("StoX: The acoustic PSU with name ", PSU, " does not exist. Please choose a different PSU name or add the PSU using DefineAcousticPSU.")
-    }
+    # PSUs are added in assignment_addHaul, so we do not need this warnning. Since most projects at IMR use Stratum, we have not discovered that this warning is false.
+    ## Check for existing PSU:
+    #if(!PSU %in% BioticAssignment$PSU) {
+    #    warning("StoX: The acoustic PSU with name ", PSU, " does not exist. Please choose a different PSU name or add the PSU using DefineAcousticPSU.")
+    #}
     
     # Add or remove the hauls (either using assignment_addHaul() or assignment_removeHaul()):
     utilityFunctionName <- paste0("assignment_", action[1], "Haul")
@@ -89,7 +90,7 @@ modifyAssignment <- function(Stratum, PSU, Haul, projectPath, modelName, process
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -239,7 +240,7 @@ addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processI
     )
     
     # Revert the active process ID to the current process (currently it is a requirement that the process is the active process for the GUI to allow modification, so resetting the active process is not effective here) and set it as dirty:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -284,7 +285,7 @@ removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -308,11 +309,11 @@ renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID
     AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
     
     # Add the acsoutic PSU:
-    PSUsToRename <- AcousticPSU$Stratum_PSU$PSU %in% PSU
-    EDSUsToRename <- AcousticPSU$EDSU_PSU$PSU %in% PSU
+    atPSUsToRename <- AcousticPSU$Stratum_PSU$PSU %in% PSU
+    atEDSUsToRename <- AcousticPSU$EDSU_PSU$PSU %in% PSU
     
-    AcousticPSU$Stratum_PSU$PSU[PSUsToRename] <- newPSUName
-    AcousticPSU$EDSU_PSU$PSU[EDSUsToRename] <- newPSUName
+    AcousticPSU$Stratum_PSU$PSU[atPSUsToRename] <- newPSUName
+    AcousticPSU$EDSU_PSU$PSU[atEDSUsToRename] <- newPSUName
     
     # Format the output:
     RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
@@ -327,7 +328,7 @@ renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -368,7 +369,7 @@ addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -413,7 +414,7 @@ removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -424,7 +425,51 @@ removeEDSU <- function(EDSU, projectPath, modelName, processID) {
         )
     )
 }
-
+#' 
+#' @export
+#' @rdname AcousticPSU
+#' 
+removeAllAcousticPSUsOfStratum <- function(Stratum, projectPath, modelName, processID) {
+    
+    # Check that the process returns AcousticPSU process data:
+    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
+    
+    # Get the process data of the process:
+    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
+    
+    # Remove the acoustic PSUs:
+    atPSUsToRemoveInStratum_PSU <- AcousticPSU$Stratum_PSU$Stratum %in% Stratum
+    PSUsToRemove <- subset(AcousticPSU$Stratum_PSU, atPSUsToRemoveInStratum_PSU)$PSU
+    atPSUsToSetToNAInEDSU_PSU <- AcousticPSU$EDSU_PSU$PSU %in% PSUsToRemove
+    
+    
+    AcousticPSU$Stratum_PSU <- AcousticPSU$Stratum_PSU[!atPSUsToRemoveInStratum_PSU, ]
+    AcousticPSU$EDSU_PSU[atPSUsToSetToNAInEDSU_PSU, PSU := NA]
+    
+    # Format the output:
+    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
+    
+    # Set the AcousticPSU back to the process data of the process:
+    setProcessMemory(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        argumentName = "processData", 
+        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
+    )
+    
+    # Revert the active process ID to the previous process:
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
+    
+    # Return the active process:
+    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+    return(
+        list(
+            activeProcess = activeProcess, 
+            saved = isSaved(projectPath)
+        )
+    )
+}
 
 
 
@@ -442,6 +487,7 @@ removeEDSU <- function(EDSU, projectPath, modelName, processID) {
 #' @inheritParams getProcessOutput
 #' @param stratum The SpatialPolygonsDataFrame object defining the stratum to add.
 #' @param stratumName The name of the stratum.
+#' @param newStratumName The new name of the stratum.
 #' 
 #' @name Stratum
 #' 
@@ -481,7 +527,7 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     if(length(usedStratumNames)) {
         stop("StoX: The stratum name ", usedStratumNames, " already exist. Choose a different name")
     }
-    if(length(RstoxBase::getStratumNames(stratum)) == 0) {
+    if(!length(RstoxBase::getStratumNames(stratum)) || !nchar(RstoxBase::getStratumNames(stratum))) {
         stop("StoX: The new stratum must have a name")
     }
     
@@ -513,7 +559,7 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -546,6 +592,14 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
         #StratumPolygon$StratumPolygon@polygons <- StratumPolygon$StratumPolygon@polygons[-atRemove]
         StratumPolygon$StratumPolygon <- StratumPolygon$StratumPolygon[-atRemove, ]
     }
+    else {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        warning("StoX: The stratum with name ", stratumName, " does not exist for the process ", processName, ". No stratum deleted.")
+    }
     
     # Set the StratumPolygon back to the process data of the process:
     setProcessMemory(
@@ -565,7 +619,7 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
     #)
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -576,9 +630,6 @@ removeStratum <- function(stratumName, projectPath, modelName, processID) {
         )
     )
 }
-
-
-
 #' 
 #' @export
 #' @rdname Stratum
@@ -602,19 +653,32 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     }
     
     # Modify the coordinates:
+    if(length(RstoxBase::getStratumNames(stratum)) > 1) {
+        stop("Only one stratum can be modified.")
+    }
+    
     atModify <- match( 
         RstoxBase::getStratumNames(stratum), 
         RstoxBase::getStratumNames(StratumPolygon$StratumPolygon)
     )
-    if(length(atModify)) {
-        # Set ID of the new strata:
+    if(!any(is.na(atModify))) {
+        # Set ID of the modified strata:
         for(ind in seq_along(stratum@polygons)) {
             stratum@polygons[[ind]]@ID <- StratumPolygon$StratumPolygon@polygons[[atModify[ind]]]@ID
         }
         
-        # Insert the new strata
+        # Insert the modified strata
         StratumPolygon$StratumPolygon@polygons[atModify] <- stratum@polygons
     }
+    else {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        warning("StoX: The stratum with name ", RstoxBase::getStratumNames(stratum), " does not exist for the process ", processName, ". No stratum modified.")
+    }
+    
     
     # Set the StratumPolygon back to the process data of the process:
     setProcessMemory(
@@ -626,7 +690,7 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     )
     
     # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE)
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
     # Return the active process:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -637,6 +701,66 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
         )
     )
 }
+#' 
+#' @export
+#' @rdname Stratum
+#' 
+renameStratum <- function(stratumName, newStratumName, projectPath, modelName, processID) {
+    
+    # Check that the process returns StratumPolygon process data:
+    checkDataType("StratumPolygon", projectPath = projectPath, modelName = modelName, processID = processID)
+    
+    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
+    StratumPolygon <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
+    
+    # Add the coordinates:
+    # Modify the coordinates:
+    atRename <- match( 
+        stratumName, 
+        RstoxBase::getStratumNames(StratumPolygon$StratumPolygon)
+    )
+    if(!any(is.na(atRename))) {
+        StratumPolygon$StratumPolygon$StratumName[atRename] <- newStratumName
+    }
+    else {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        warning("StoX: The stratum with name ", stratumName, " does not exist for the process ", processName, ". No stratum renamed.")
+    }
+    
+    # Set the StratumPolygon back to the process data of the process:
+    setProcessMemory(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        argumentName = "processData", 
+        argumentValue = list(StratumPolygon) # We need to list this to make it correspond to the single value of the argumentName parameter.
+    )
+    
+    # Remove PSUs in all subsequent PSU processes:
+    #removePSUsByStratum(
+    #    stratumName = stratumName, 
+    #    projectPath = projectPath, 
+    #    modelName = modelName, 
+    #    processID = processID
+    #)
+    
+    # Revert the active process ID to the previous process:
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
+    
+    # Return the active process:
+    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+    return(
+        list(
+            activeProcess = activeProcess, 
+            saved = isSaved(projectPath)
+        )
+    )
+}
+
 
 # Function to add colnames to the coords slot of a SpatialPolygonsDataFrame:
 addCoordsNames <- function(stratum, names = c("x", "y")) {

@@ -45,7 +45,7 @@ jobs:
           brew update
         shell: bash
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Do autorelease increment, tagging, and environment setup
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -54,6 +54,7 @@ jobs:
           curl "https://raw.githubusercontent.com/StoXProject/repo/master/scripts/deploy-actions.sh" --output deploy.sh
           chmod +x ./checktag.sh ./deploy.sh
           . checktag.sh
+          echo "PRERELEASE=${PRERELEASE}" >> $GITHUB_ENV
           echo "FINAL_TAG=${FINAL_TAG}" >> $GITHUB_ENV
           echo "PKG_FILE_PREFIX=${PKG_FILE_PREFIX}" >> $GITHUB_ENV
           echo "PKG_FILE=${PKG_FILE_PREFIX}${{ matrix.config.pkgext }}" >> $GITHUB_ENV
@@ -67,7 +68,7 @@ jobs:
           rtools-version: ${{ matrix.config.rtools }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
 
-      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-pandoc@v2
 
       - name: Query dependencies
         run: |
@@ -78,7 +79,7 @@ jobs:
 
       - name: Cache R packages
         if: runner.os != 'Windows'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-2-${{ hashFiles('.github/depends.Rds') }}
@@ -128,6 +129,27 @@ jobs:
           if(length(missing)) {
             message("Installing the following packages using default type:\n", paste0(missing, collapse = ", "))
             utils::install.packages(missing, dependencies = TRUE)
+          }
+        shell: Rscript {0}
+
+      - name: Install prereleases
+        run: |
+          # After installing Rstox pakcages from the drat repo it may be that the installed versions are not the minimum versions specified in the DESCRIPTION file, since pre-releases are not deployed to the drat repo due to size restrictions. The following installs from the package repos directlly, those packages that difffer (from source):
+          # Get the installed versions:
+          installed <- as.data.frame(utils::installed.packages())
+          # Find minimum versions:
+          deps <- strsplit(read.dcf("./DESCRIPTION", all = TRUE)$Imports, ",\n")[[1]]
+          Rstox_deps <- deps[startsWith(deps, "Rstox")]
+          Rstox_deps <- data.frame(
+          	Package = sub("[ (].*", "", Rstox_deps),
+          	MinimumVersion = sub(".*>=  *(.*?) *).*", "\\1", Rstox_deps)
+          )
+          Rstox_deps <- merge(Rstox_deps, installed)
+          differ <- which(Rstox_deps$MinimumVersion != Rstox_deps$Version)
+          for(ind in differ) {
+            thisPackage <- Rstox_deps$Package[ind]
+            thisMinimumVersion <- Rstox_deps$MinimumVersion[ind]
+            remotes::install_github(repo = paste("stoxproject", thisPackage, sep = "/"), ref = paste(thisPackage, thisMinimumVersion, sep = "-v"))
           }
         shell: Rscript {0}
 

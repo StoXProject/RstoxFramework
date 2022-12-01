@@ -4,8 +4,8 @@
 \alias{ReportBootstrapData}
 \title{Reported Bootstrap data}
 \description{
-The ReportBootstrapData model data is a report of the \code{\link{BootstrapData}} such as cv of Biomass per Stratum and SpeciesCategory.
+The ReportBootstrapData model data is a report of the \code{\link{BootstrapData}} such as cv of Biomass per Stratum and SpeciesCategory, given as a table or list of tables.
 }
 \seealso{
-This data type is produced by \code{\link{ReportBootstrap}}. See \code{\link{DataTypes}} for a list of all StoX data types produced by \code{\link{RstoxBase}}
+This data type is produced by \code{\link{ReportBootstrap}}. See \code{\link{DataTypes}} for a list of all StoX data types produced by \code{\link{RstoxData}}, \code{\link{RstoxBase}} and \code{\link{RstoxFramework}}.
 }

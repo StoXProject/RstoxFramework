@@ -37,6 +37,55 @@ stoxFunctionAttributes <- list(
                 BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
             )
         )
+    ), 
+    
+    PlotReportBootstrap = list(
+        functionType = "modelData", 
+        functionCategory = "report", 
+        functionOutputDataType = "PlotReportBootstrapData", 
+        functionParameterFormat = list(
+            GroupingVariables = "groupingVariables_PlotReportBootstrap"
+        ),
+        functionArgumentHierarchy = list(
+            CVVariable = list(
+                AddCVToPlot = TRUE
+            ), 
+            # Options for the labels and other text:
+            Title = list(
+                UseDefaultTextSettings = FALSE
+            ), 
+            AxisTitleSize = list(
+                UseDefaultTextSettings = FALSE
+            ), 
+            AxisTickSize = list(
+                UseDefaultTextSettings = FALSE
+            ), 
+            LegendTitleSize = list(
+                UseDefaultTextSettings = FALSE
+            ), 
+            LegendTextSize = list(
+                UseDefaultTextSettings = FALSE
+            ), 
+            # Options for the output file:
+            Format = list(
+                UseDefaultFileSettings = FALSE
+            ), 
+            Width = list(
+                UseDefaultFileSettings = FALSE
+            ), 
+            Height = list(
+                UseDefaultFileSettings = FALSE
+            ), 
+            DotsPerInch = list(
+                UseDefaultFileSettings = FALSE
+            )
+        ), 
+        functionParameterDefaults = c(
+            # Default general options:
+            RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotGeneralOptions, 
+            # Default file options:
+            RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions
+        )
     )
 )
 
@@ -87,7 +136,7 @@ getValidFunctionsOneResamplableDataType <- function(resamplableDataType, stoxLib
 getResampleFunctions <- function() {
     #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
     resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
-    unlist(getRstoxFrameworkDefinitions("resampleFunctions")[resamplableDataTypes])
+    unname(unlist(getRstoxFrameworkDefinitions("resampleFunctions")[resamplableDataTypes]))
 }
 
 #' Process property formats for RstoxFramework
@@ -203,6 +252,20 @@ processPropertyFormats <- list(
             
             dataType <- attr(BootstrapData[[BaselineProcess]], "dataType")
             quantity <- RstoxBase::getBaseUnit(dataType = dataType, variableName = TargetVariable, element = "quantity")
+            if(is.na(quantity)) {
+                list()
+            }
+            else {
+                RstoxData::getUnitOptions(quantity)
+            }
+        }
+    ), 
+    
+    groupingVariables_PlotReportBootstrap = list(
+        class = "vector", 
+        title = "Select 1 or 2 GroupingVariables for the plot (defining the x-axis).", 
+        possibleValues = function(ReportVariable) {
+            quantity <- getBaseUnit(dataType = "SpeciesCategoryCatchData", variableName = ReportVariable, element = "quantity")
             if(is.na(quantity)) {
                 list()
             }

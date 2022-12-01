@@ -1,4 +1,14 @@
-# RstoxFramework v3.5.2 (2022-11-14)
+# RstoxFramework v3.6.0-9001 (2022-12-01)
+* Fixed bug when running a project with projectPath ending with exactly one slash ("/") (problem fixed in getRelativePath()).
+* Removed rows of the output from ReportBootstrap() that contained combinations of the GroupingVariables that are not present in the BootstrapData. There rows were created to ensure that all bootstrap runs contain all combinations of the GroupingVariables, but also introduced non-existing combinations.
+* Added unfinished PlotReportBootstrap().
+* Prepared for adding tolerance to tests.
+* Improved documentation of seed in Bootstrap().
+* Fixed bug in pkgdown.yaml.
+* Added support for pre-releases, which are not deployed to the StoX repo.
+* Updated tests to document the StratumArea change when switching to sf.
+
+# RstoxFramework v3.5.2 (2022-11-21)
 * Added the parameter TargetVariableUnit in ReportBootstrap().
 * Added the memory file "dataType.txt" to save the data types for bootstrap output (the Bootstrap functions sets the data types as attributes to the individual baseline process outputs, and then this is picked up by writeProcessOutputElements()). 
 * Removed warning when a PSU to be added assignment to is not present in the BioticAssignment (this should be no problem, as PSUs are added with).

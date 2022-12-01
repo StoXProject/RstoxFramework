@@ -149,6 +149,7 @@ getNonEmptyModels <- function(projectPath) {
 # Function to get memory of a process (or an argument of a process):
 getProjectMemoryData <- function(projectPath, modelName = NULL, processID = NULL, argumentName = NULL, drop1 = FALSE, argumentFilePaths = NULL, named.list = TRUE, addAttributes = FALSE) {
     
+    
     # Get the argument files:
     if(length(argumentFilePaths) > 0 && length(modelName) == 1 && length(processID) == 1 && length(argumentName) == 1 ) {
         # Select the requested argument file path(s):
@@ -160,8 +161,10 @@ getProjectMemoryData <- function(projectPath, modelName = NULL, processID = NULL
         argumentFilePaths <- getArgumentFilePaths(projectPath, modelName = modelName, processID = processID, argumentName = argumentName)
     }
     
+    
     # Read the memory files:
     output <- rapply(argumentFilePaths, readRDS, how = "replace")
+    
     
     # Drop the levels with only one element if requested:
     if(drop1) {

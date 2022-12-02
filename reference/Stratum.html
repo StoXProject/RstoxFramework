@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9001</span>
       </span>
     </div>
 
@@ -57,7 +57,9 @@
 <span></span>
 <span><span class="fu">removeStratum</span><span class="op">(</span><span class="va">stratumName</span>, <span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">modifyStratum</span><span class="op">(</span><span class="va">stratum</span>, <span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">modifyStratum</span><span class="op">(</span><span class="va">stratum</span>, <span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">renameStratum</span><span class="op">(</span><span class="va">stratumName</span>, <span class="va">newStratumName</span>, <span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processID</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -71,7 +73,7 @@
 
 
 <dt>modelName</dt>
-<dd><p>The name of the model (one of "baseline", "analysis" and "report").</p></dd>
+<dd><p>The name of the model (possible values are "baseline", "analysis" and "report").</p></dd>
 
 
 <dt>processID</dt>
@@ -80,6 +82,10 @@
 
 <dt>stratumName</dt>
 <dd><p>The name of the stratum.</p></dd>
+
+
+<dt>newStratumName</dt>
+<dd><p>The new name of the stratum.</p></dd>
 
 </dl></div>
     <div id="details">

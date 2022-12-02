@@ -25,7 +25,16 @@
     <loc>/reference/BootstrapData.html</loc>
   </url>
   <url>
+    <loc>/reference/DataTypes.html</loc>
+  </url>
+  <url>
     <loc>/reference/KnownDifferencesOldVersusNewStoX.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PlotReportBootstrap.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PlotReportBootstrapData.html</loc>
   </url>
   <url>
     <loc>/reference/ProjectUtils.html</loc>
@@ -127,10 +136,19 @@
     <loc>/reference/getProcessOutput.html</loc>
   </url>
   <url>
+    <loc>/reference/getProcessOutputElements.html</loc>
+  </url>
+  <url>
     <loc>/reference/getProcessOutputFiles.html</loc>
   </url>
   <url>
+    <loc>/reference/getProcessOutputFolder.html</loc>
+  </url>
+  <url>
     <loc>/reference/getProcessOutputTableNames.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getProcessPlotOutput.html</loc>
   </url>
   <url>
     <loc>/reference/getProcessTable.html</loc>
@@ -149,6 +167,9 @@
   </url>
   <url>
     <loc>/reference/getTemplate.html</loc>
+  </url>
+  <url>
+    <loc>/reference/hasFileOutput.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>

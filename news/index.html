@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9001</span>
       </span>
     </div>
 
@@ -48,11 +48,52 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.0-9001" id="rstoxframework-v360-9001-2022-12-01">RstoxFramework v3.6.0-9001 (2022-12-01)<a class="anchor" aria-label="anchor" href="#rstoxframework-v360-9001-2022-12-01"></a></h2>
+<ul><li>Fixed bug when running a project with projectPath ending with exactly one slash (“/”) (problem fixed in getRelativePath()).</li>
+<li>Removed rows of the output from ReportBootstrap() that contained combinations of the GroupingVariables that are not present in the BootstrapData. There rows were created to ensure that all bootstrap runs contain all combinations of the GroupingVariables, but also introduced non-existing combinations.</li>
+<li>Added unfinished PlotReportBootstrap().</li>
+<li>Prepared for adding tolerance to tests.</li>
+<li>Improved documentation of seed in Bootstrap().</li>
+<li>Fixed bug in pkgdown.yaml.</li>
+<li>Added support for pre-releases, which are not deployed to the StoX repo.</li>
+<li>Updated tests to document the StratumArea change when switching to sf.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.5.2" id="rstoxframework-v352-2022-11-21">RstoxFramework v3.5.2 (2022-11-21)<a class="anchor" aria-label="anchor" href="#rstoxframework-v352-2022-11-21"></a></h2>
+<ul><li>Added the parameter TargetVariableUnit in ReportBootstrap().</li>
+<li>Added the memory file “dataType.txt” to save the data types for bootstrap output (the Bootstrap functions sets the data types as attributes to the individual baseline process outputs, and then this is picked up by writeProcessOutputElements()).</li>
+<li>Removed warning when a PSU to be added assignment to is not present in the BioticAssignment (this should be no problem, as PSUs are added with).</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.5.1" id="rstoxframework-v351-2022-11-14">RstoxFramework v3.5.1 (2022-11-14)<a class="anchor" aria-label="anchor" href="#rstoxframework-v351-2022-11-14"></a></h2>
+<ul><li>Fixed bug when the GUI expects png.</li>
+<li>Completed some docs.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.5.1-9001" id="rstoxframework-v351-9001-2022-11-10">RstoxFramework v3.5.1-9001 (2022-11-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v351-9001-2022-11-10"></a></h2>
+<ul><li>Removed warning when a preview is open in the GUI and the process is changed (setting warn to FALSE in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput()).</li>
+<li>Added the parameter deleteCurrent in resetModel() to facilitate deleting the output of the current process, used by all functions that modify processData interactively, and by setProcessPropertyValue().</li>
+<li>Fixed bug where EDSUs for StoX projects with data from ICESAcoustic data with and without end position given by Longitude2 resulted in EDSUs not being shown.</li>
+<li>Added support for saving output files frorm plotting functions.</li>
+<li>Added renameStratum() for use by the GUI.</li>
+<li>Added removeAllAcousticPSUsOfStratum().</li>
+<li>Disalowed empty string stratum name from the GUI.</li>
+<li>Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.</li>
+<li>Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().</li>
+<li>Added a line “… truncated” if a table in Preview does not contain all rows (the GUI shows at most 200000 rows).</li>
+<li>Cleaned up JSON validation test files to enhance the expected error.</li>
+<li>Improved error message when readProjectDescriptionJSON() fails to read project.json.</li>
+<li>Disabled warning in getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessPlotOutput() occuring when changing a parameter of the process.</li>
+<li>Changed to ignoreAttributes = FALSE in getProcessPlotOutput().</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="3.5.0" id="rstoxframework-v350-2022-08-12">RstoxFramework v3.5.0 (2022-08-12)<a class="anchor" aria-label="anchor" href="#rstoxframework-v350-2022-08-12"></a></h2>
-<ul><li>Start of using semantic versioning (<a href="https://semver.org/" class="external-link uri">https://semver.org/</a>). Before this release the two first version numbers represented the major and minor release number, in accordance with semantic versioning, whereas the third version number identified test versions. The major and minor releases (versions ending with 0.0 or 0) were considered as official versions. From this release and onwards, the third version number will represent patches (bug fixes), and are to be considered equally official as the major and minor releases. In fact, as patches are restricted to fixing bugs and not adding new functionality, the latest patch will be the recommended version.</li></ul></div>
+<ul><li>Start of using semantic versioning (<a href="https://semver.org/" class="external-link uri">https://semver.org/</a>). Before this release the two first version numbers represented the major and minor release number, in accordance with semantic versioning, whereas the third version number identified test versions. The major and minor releases (versions ending with 0.0 or 0) were considered as official versions. From this release and onwards, the third version number will represent patches (bug fixes), and are to be considered equally official as the major and minor releases. In fact, as patches are restricted to fixing bugs and not adding new functionality, the latest patch will be the recommended version.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.4.6" id="rstoxframework-v346-2022-08-10">RstoxFramework v3.4.6 (2022-08-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v346-2022-08-10"></a></h2>
-<ul><li>Added truncation to 1000 characters for messages, warnings and errors</li></ul></div>
+<ul><li>Added truncation to 1000 characters for messages, warnings and errors</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.4.4" id="rstoxframework-v344-2022-08-07">RstoxFramework v3.4.4 (2022-08-07)<a class="anchor" aria-label="anchor" href="#rstoxframework-v344-2022-08-07"></a></h2>
 <ul><li>Added optional validation of the project.jsos in readProjectDescription().</li>
@@ -80,7 +121,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.7" id="rstoxframework-v337-2022-03-22">RstoxFramework v3.3.7 (2022-03-22)<a class="anchor" aria-label="anchor" href="#rstoxframework-v337-2022-03-22"></a></h2>
-<ul><li>Added expandProcess() and extractErrorIDs()</li></ul></div>
+<ul><li>Added expandProcess() and extractErrorIDs()</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.6" id="rstoxframework-v336-2022-03-15">RstoxFramework v3.3.6 (2022-03-15)<a class="anchor" aria-label="anchor" href="#rstoxframework-v336-2022-03-15"></a></h2>
 <ul><li>Fixed bug in removeEDSU(), where EDSUs to remove were assigned empty string instead of NA as PSU.</li>
@@ -88,7 +130,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.5" id="rstoxframework-v335-2022-03-03">RstoxFramework v3.3.5 (2022-03-03)<a class="anchor" aria-label="anchor" href="#rstoxframework-v335-2022-03-03"></a></h2>
-<ul><li>Modified tests export_ICESbiotic.zip and export_ICESAcoustic.zip for the new ICES formats.</li></ul></div>
+<ul><li>Modified tests export_ICESbiotic.zip and export_ICESAcoustic.zip for the new ICES formats.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.4" id="rstoxframework-v334-2022-02-28">RstoxFramework v3.3.4 (2022-02-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v334-2022-02-28"></a></h2>
 <ul><li>Reduced time of ReportBootstrap() to a few percent.</li>
@@ -102,7 +145,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.3" id="rstoxframework-v333-2022-02-14">RstoxFramework v3.3.3 (2022-02-14)<a class="anchor" aria-label="anchor" href="#rstoxframework-v333-2022-02-14"></a></h2>
-<ul><li>Added InformationVariables to ReportBootstrap().</li></ul></div>
+<ul><li>Added InformationVariables to ReportBootstrap().</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.3.2" id="rstoxframework-v332-2022-02-10">RstoxFramework v3.3.2 (2022-02-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v332-2022-02-10"></a></h2>
 <ul><li>Added reshapeParameter and reshapeProcessData as backward compatibility actions.</li>
@@ -117,16 +161,20 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.2.2" id="rstoxframework-v322-2022-01-10">RstoxFramework v3.2.2 (2022-01-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v322-2022-01-10"></a></h2>
-<ul><li>Added ResampleMeanSpeciesCategoryCatchData(). Added test for functioning help-pages. Updated tests.</li></ul></div>
+<ul><li>Added ResampleMeanSpeciesCategoryCatchData(). Added test for functioning help-pages. Updated tests.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.2.1" id="rstoxframework-v321-2022-01-07">RstoxFramework v3.2.1 (2022-01-07)<a class="anchor" aria-label="anchor" href="#rstoxframework-v321-2022-01-07"></a></h2>
-<ul><li>Added renameColumInProcessDataTable as backward compatibility action. Changed to using AJV. Dropped the option of saving and reading project.RData. Added a second json validation after backward compatibility action, in case the first did not pass.</li></ul></div>
+<ul><li>Added renameColumInProcessDataTable as backward compatibility action. Changed to using AJV. Dropped the option of saving and reading project.RData. Added a second json validation after backward compatibility action, in case the first did not pass.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.21" id="rstoxframework-v3121-2021-12-22">RstoxFramework v3.1.21 (2021-12-22)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3121-2021-12-22"></a></h2>
-<ul><li>Added coastal cod test project with empty PSUs, stratum names ordered as “Loppa” before “indre”, and NA in Beam for certain acoustic PSUs.</li></ul></div>
+<ul><li>Added coastal cod test project with empty PSUs, stratum names ordered as “Loppa” before “indre”, and NA in Beam for certain acoustic PSUs.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.19" id="rstoxframework-v3119-2021-12-13">RstoxFramework v3.1.19 (2021-12-13)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3119-2021-12-13"></a></h2>
-<ul><li>Added escaping newline and tab when writing output tables to txt, in order to read back in. Fixed bug in readStoxOutputFile() when no character columns are present.</li></ul></div>
+<ul><li>Added escaping newline and tab when writing output tables to txt, in order to read back in. Fixed bug in readStoxOutputFile() when no character columns are present.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.18" id="rstoxframework-v3118-2021-12-03">RstoxFramework v3.1.18 (2021-12-03)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3118-2021-12-03"></a></h2>
 <ul><li>Added option of reading empty strings as NA in readModelData() to support output files from StoX &lt;= 3.1.0.</li>
@@ -142,10 +190,12 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.16" id="rstoxframework-v3116-2021-11-08">RstoxFramework v3.1.16 (2021-11-08)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3116-2021-11-08"></a></h2>
-<ul><li>Added tests comparing results to StoX 2.7 for Barents sea cod 2020 and sandeel 2011.</li></ul></div>
+<ul><li>Added tests comparing results to StoX 2.7 for Barents sea cod 2020 and sandeel 2011.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.14" id="rstoxframework-v3114-2021-11-04">RstoxFramework v3.1.14 (2021-11-04)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3114-2021-11-04"></a></h2>
-<ul><li>Updated validation of project.json (using processDataSchema).</li></ul></div>
+<ul><li>Updated validation of project.json (using processDataSchema).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.13" id="rstoxframework-v3113-2021-10-24">RstoxFramework v3.1.13 (2021-10-24)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3113-2021-10-24"></a></h2>
 <ul><li>Fixed bug in getProcessOutputFiles() where project paths containing special characters resulted in corrupt file paths, causing View output to crash.</li>
@@ -159,10 +209,11 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.10" id="rstoxframework-v3110-2021-10-05">RstoxFramework v3.1.10 (2021-10-05)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3110-2021-10-05"></a></h2>
-<ul><li>Fixed bugs in getObjectHelpAsHtml() which caused all links to fail.</li></ul></div>
+<ul><li>Fixed bugs in getObjectHelpAsHtml() which caused all links to fail.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.9" id="rstoxframework-v319-2021-09-28">RstoxFramework v3.1.9 (2021-09-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v319-2021-09-28"></a></h2>
-<ul><li>Changed output text files (located in the output folder) from un-quoted files for all values (numeric, character, time, logical) to files where all character class values are quoted with ". Also missing values are represented by empty space in the preivous version and NA (un-quoted) in the new version. This ensures equality in class when reading the files back in using RstoxFramework::readModelData().</li>
+<ul><li>Changed output text files (located in the output folder) from un-quoted files for all values (numeric, character, time, logical) to files where all character class values are quoted with “. Also missing values are represented by empty space in the preivous version and NA (un-quoted) in the new version. This ensures equality in class when reading the files back in using RstoxFramework::readModelData().</li>
 <li>Modified Versions.R to support installing from source when on Linux. Also, fixed bug where Rstox packages were not sorted hierarchically when installing with installOfficialRstoxPackagesWithDependencies().</li>
 <li>Fixed bug where emptying a field in the filter expression builder caused syntax error.</li>
 <li>Fixed bug where acoustic PSUs could be added even if the process using DefineAcousticPSU was not active.</li>
@@ -176,7 +227,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.1.2" id="rstoxframework-v312-2021-08-19">RstoxFramework v3.1.2 (2021-08-19)<a class="anchor" aria-label="anchor" href="#rstoxframework-v312-2021-08-19"></a></h2>
-<ul><li>Updated test projects for ICES export to pass the initial checks on <a href="https://acoustic.ices.dk/submit" class="external-link uri">https://acoustic.ices.dk/submit</a>. Moved toJSON_Rstox() from RstoxBase to RstoxFramework, and moved reading AcousticPSU, BioticAssignment and StratumPolygon the other way.</li></ul></div>
+<ul><li>Updated test projects for ICES export to pass the initial checks on <a href="https://acoustic.ices.dk/submit" class="external-link uri">https://acoustic.ices.dk/submit</a>. Moved toJSON_Rstox() from RstoxBase to RstoxFramework, and moved reading AcousticPSU, BioticAssignment and StratumPolygon the other way.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.0.30" id="rstoxframework-v3030-2021-06-16">RstoxFramework v3.0.30 (2021-06-16)<a class="anchor" aria-label="anchor" href="#rstoxframework-v3030-2021-06-16"></a></h2>
 <ul><li>Added parallel bootstrapping.</li>
@@ -193,10 +245,12 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.0.0" id="rstoxframework-v300-2021-02-11">RstoxFramework v3.0.0 (2021-02-11)<a class="anchor" aria-label="anchor" href="#rstoxframework-v300-2021-02-11"></a></h2>
-<ul><li>Final version for the release of StoX 3.0.0.</li></ul></div>
+<ul><li>Final version for the release of StoX 3.0.0.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.40" id="rstoxframework-v1240-2021-01-30">RstoxFramework v1.2.40 (2021-01-30)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1240-2021-01-30"></a></h2>
-<ul><li>Added %notequal%.</li></ul></div>
+<ul><li>Added %notequal%.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.39" id="rstoxframework-v1239-2021-01-28">RstoxFramework v1.2.39 (2021-01-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1239-2021-01-28"></a></h2>
 <ul><li>Fixed bug with possible values of length 1 being dropped.</li>
@@ -211,7 +265,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.33" id="rstoxframework-v1233-2021-01-12">RstoxFramework v1.2.33 (2021-01-12)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1233-2021-01-12"></a></h2>
-<ul><li>Renamed GUI to Application in project.json.</li></ul></div>
+<ul><li>Renamed GUI to Application in project.json.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.33" id="rstoxframework-v1233-2020-12-22">RstoxFramework v1.2.33 (2020-12-22)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1233-2020-12-22"></a></h2>
 <ul><li>Added backwards compatibility (for new projects).</li>
@@ -220,16 +275,20 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.25" id="rstoxframework-v1225-2020-10-11">RstoxFramework v1.2.25 (2020-10-11)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1225-2020-10-11"></a></h2>
-<ul><li>Introduced project.JSON.</li></ul></div>
+<ul><li>Introduced project.JSON.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.20" id="rstoxframework-v1220-2020-09-07">RstoxFramework v1.2.20 (2020-09-07)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1220-2020-09-07"></a></h2>
-<ul><li>Added UseOutputData in Bootstrap().</li></ul></div>
+<ul><li>Added UseOutputData in Bootstrap().</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.18" id="rstoxframework-v1218-2020-08-28">RstoxFramework v1.2.18 (2020-08-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1218-2020-08-28"></a></h2>
-<ul><li>Removed unit in variable and parameter names</li></ul></div>
+<ul><li>Removed unit in variable and parameter names</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.14" id="rstoxframework-v1214-2020-07-19">RstoxFramework v1.2.14 (2020-07-19)<a class="anchor" aria-label="anchor" href="#rstoxframework-v1214-2020-07-19"></a></h2>
-<ul><li>Added Bootstrap</li></ul></div>
+<ul><li>Added Bootstrap</li>
+</ul></div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

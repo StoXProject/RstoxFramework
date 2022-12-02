@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9001</span>
       </span>
     </div>
 
@@ -51,7 +51,7 @@
           <p class="section-desc"></p>
         </th>
       </tr></tbody><tbody><tr><td>
-          <p><code><a href="AcousticPSU.html">addAcousticPSU()</a></code> <code><a href="AcousticPSU.html">removeAcousticPSU()</a></code> <code><a href="AcousticPSU.html">renameAcousticPSU()</a></code> <code><a href="AcousticPSU.html">addEDSU()</a></code> <code><a href="AcousticPSU.html">removeEDSU()</a></code> </p>
+          <p><code><a href="AcousticPSU.html">addAcousticPSU()</a></code> <code><a href="AcousticPSU.html">removeAcousticPSU()</a></code> <code><a href="AcousticPSU.html">renameAcousticPSU()</a></code> <code><a href="AcousticPSU.html">addEDSU()</a></code> <code><a href="AcousticPSU.html">removeEDSU()</a></code> <code><a href="AcousticPSU.html">removeAllAcousticPSUsOfStratum()</a></code> </p>
         </td>
         <td><p>Add or remove acoustic PSUs and EDSUs</p></td>
       </tr><tr><td>
@@ -67,9 +67,21 @@
         </td>
         <td><p>Bootstrap data</p></td>
       </tr><tr><td>
+          <p><code><a href="DataTypes.html">DataTypes</a></code> </p>
+        </td>
+        <td><p>StoX data types of the RstoxBase package</p></td>
+      </tr><tr><td>
           <p><code><a href="KnownDifferencesOldVersusNewStoX.html">KnownDifferencesOldVersusNewStoX</a></code> </p>
         </td>
         <td><p>Known differences between StoX 2.7 and the new StoX &gt;= 3.0.0</p></td>
+      </tr><tr><td>
+          <p><code><a href="PlotReportBootstrap.html">PlotReportBootstrap()</a></code> </p>
+        </td>
+        <td><p>Plot ReportBootstrapData</p></td>
+      </tr><tr><td>
+          <p><code><a href="PlotReportBootstrapData.html">PlotReportBootstrapData</a></code> </p>
+        </td>
+        <td><p>Plot of reported Bootstrap data</p></td>
       </tr><tr><td>
           <p><code><a href="ProjectUtils.html">isProject()</a></code> <code><a href="ProjectUtils.html">isSaved()</a></code> <code><a href="ProjectUtils.html">isOpenProject()</a></code> <code><a href="ProjectUtils.html">readProjectDescription()</a></code> <code><a href="ProjectUtils.html">writeProjectDescription()</a></code> <code><a href="ProjectUtils.html">initiateActiveProcessID()</a></code> <code><a href="ProjectUtils.html">isRunning()</a></code> <code><a href="ProjectUtils.html">setRunning()</a></code> <code><a href="ProjectUtils.html">setNotRunning()</a></code> </p>
         </td>
@@ -111,7 +123,7 @@
         </td>
         <td><p>Get objects for use in the GUI</p></td>
       </tr><tr><td>
-          <p><code><a href="Stratum.html">addStratum()</a></code> <code><a href="Stratum.html">removeStratum()</a></code> <code><a href="Stratum.html">modifyStratum()</a></code> </p>
+          <p><code><a href="Stratum.html">addStratum()</a></code> <code><a href="Stratum.html">removeStratum()</a></code> <code><a href="Stratum.html">modifyStratum()</a></code> <code><a href="Stratum.html">renameStratum()</a></code> </p>
         </td>
         <td><p>Stratum manipulation</p></td>
       </tr><tr><td>
@@ -199,17 +211,29 @@
         </td>
         <td><p>Function to get process name from process ID</p></td>
       </tr><tr><td>
-          <p><code><a href="getProcessOutput.html">getProcessOutput()</a></code> </p>
+          <p><code><a href="getProcessOutput.html">getProcessOutput()</a></code> <code><a href="getProcessOutput.html">getProcessTableOutput()</a></code> <code><a href="getProcessOutput.html">getProcessGeoJsonOutput()</a></code> </p>
         </td>
         <td><p>Get output of a StoX process.</p></td>
+      </tr><tr><td>
+          <p><code><a href="getProcessOutputElements.html">getProcessOutputElements()</a></code> </p>
+        </td>
+        <td><p>Get the names of the output tables of a process</p></td>
       </tr><tr><td>
           <p><code><a href="getProcessOutputFiles.html">getProcessOutputFiles()</a></code> </p>
         </td>
         <td><p>Function to get all process output memory files of a process:</p></td>
       </tr><tr><td>
+          <p><code><a href="getProcessOutputFolder.html">getProcessOutputFolder()</a></code> </p>
+        </td>
+        <td><p>Find the output folder of a process</p></td>
+      </tr><tr><td>
           <p><code><a href="getProcessOutputTableNames.html">getProcessOutputTableNames()</a></code> </p>
         </td>
         <td><p>Get the names of the output tables of a process</p></td>
+      </tr><tr><td>
+          <p><code><a href="getProcessPlotOutput.html">getProcessPlotOutput()</a></code> </p>
+        </td>
+        <td><p>Get output of a StoX process.</p></td>
       </tr><tr><td>
           <p><code><a href="getProcessTable.html">getProcessTable()</a></code> <code><a href="getProcessTable.html">scanForModelError()</a></code> <code><a href="getProcessTable.html">getProcessesSansProcessData()</a></code> <code><a href="getProcessTable.html">getProcessAndFunctionNames()</a></code> </p>
         </td>
@@ -225,7 +249,7 @@
       </tr><tr><td>
           <p><code><a href="getResampleFunctions.html">getResampleFunctions()</a></code> </p>
         </td>
-        <td><p>Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be albe to use it:</p></td>
+        <td><p>Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:</p></td>
       </tr><tr><td>
           <p><code><a href="getRstoxFrameworkDefinitions.html">getRstoxFrameworkDefinitions()</a></code> </p>
         </td>
@@ -235,13 +259,17 @@
         </td>
         <td><p>Get a template.</p></td>
       </tr><tr><td>
+          <p><code><a href="hasFileOutput.html">hasFileOutput()</a></code> </p>
+        </td>
+        <td><p>Does the process store output files?:</p></td>
+      </tr><tr><td>
           <p><code><a href="initiateRstoxFramework.html">initiateRstoxFramework()</a></code> </p>
         </td>
         <td><p>Definitions stored in the RstoxFramework environment</p></td>
       </tr><tr><td>
           <p><code><a href="installPackages.html">getNonRstoxDependencies()</a></code> <code><a href="installPackages.html">getStoxDependencies()</a></code> <code><a href="installPackages.html">installOfficialRstoxPackagesWithDependencies()</a></code> <code><a href="installPackages.html">getOfficialRstoxPackageVersion()</a></code> </p>
         </td>
-        <td><p>Tools to download and install Rstox packages and dependen packages.</p></td>
+        <td><p>Tools to download and install Rstox packages and dependent packages.</p></td>
       </tr><tr><td>
           <p><code><a href="json2expression.html">json2expression()</a></code> </p>
         </td>

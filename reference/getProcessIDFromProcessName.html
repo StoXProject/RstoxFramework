@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9001</span>
       </span>
     </div>
 
@@ -53,7 +53,12 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getProcessIDFromProcessName</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">modelName</span>, <span class="va">processName</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getProcessIDFromProcessName</span><span class="op">(</span></span>
+<span>  <span class="va">projectPath</span>,</span>
+<span>  <span class="va">modelName</span>,</span>
+<span>  <span class="va">processName</span>,</span>
+<span>  only.processID <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -63,11 +68,15 @@
 
 
 <dt>modelName</dt>
-<dd><p>The name of the model(s) (possible values are "baseline", "analysis" and "report").</p></dd>
+<dd><p>The name of the model (possible values are "baseline", "analysis" and "report").</p></dd>
 
 
 <dt>processName</dt>
-<dd><p>The name of the process(es).</p></dd>
+<dd><p>The name of the process.</p></dd>
+
+
+<dt>only.processID</dt>
+<dd><p>Logical: If TRUE return only the processID (not a table of processName and processID).</p></dd>
 
 </dl></div>
 

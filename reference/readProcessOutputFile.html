@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9001</span>
       </span>
     </div>
 
@@ -57,12 +57,14 @@
 <span>  <span class="va">filePath</span>,</span>
 <span>  flatten <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  pretty <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  pretty.json <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  pageindex <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  linesPerPage <span class="op">=</span> <span class="fl">1000L</span>,</span>
 <span>  columnSeparator <span class="op">=</span> <span class="st">" "</span>,</span>
 <span>  lineSeparator <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  na <span class="op">=</span> <span class="st">"-"</span>,</span>
-<span>  enable.auto_unbox <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  enable.auto_unbox <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  splitGeoJson <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -80,8 +82,12 @@
 <dd><p>Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.</p></dd>
 
 
+<dt>pretty.json</dt>
+<dd><p>Logical: If TRUE prettify the geojson.</p></dd>
+
+
 <dt>pageindex</dt>
-<dd><p>A vevctor of the pages to return with <code>linesPerPage</code> number of lines (rows). Default is to not split into pages.</p></dd>
+<dd><p>A vector of the pages to return with <code>linesPerPage</code> number of lines (rows). Default is to not split into pages.</p></dd>
 
 
 <dt>linesPerPage</dt>
@@ -102,6 +108,10 @@
 
 <dt>enable.auto_unbox</dt>
 <dd><p>Logical: If TRUE wrap the output in a list if  <code>pretty</code> is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.</p></dd>
+
+
+<dt>splitGeoJson</dt>
+<dd><p>Logical: If TRUE split the geojson into a vector of separate lines.</p></dd>
 
 </dl></div>
 

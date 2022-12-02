@@ -19,6 +19,8 @@ compareProjectToStoredOutputFiles(
   data.out = FALSE,
   mergeWhenDifferentNumberOfRows = FALSE,
   sort = TRUE,
+  compareReports = FALSE,
+  tolerance = sqrt(.Machine$double.eps),
   ...
 )
 }

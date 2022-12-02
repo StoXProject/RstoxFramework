@@ -31,7 +31,7 @@ ReportBootstrap(
 
 \item{BootstrapReportFunction}{The function to apply across bootstrap run, such as "cv" or "stoxSummary".}
 
-\item{GroupingVariables}{The variables to report by. For most applications \code{GroupingVariables} should include "Survey" or "SpeciesCategory", unless the user needs to sum over all Survey and SpeciesCategory.}
+\item{GroupingVariables}{The variables to report by. For most applications \code{GroupingVariables} should include "Survey" and "SpeciesCategory", unless the user needs to sum over all Survey or SpeciesCategory.}
 
 \item{InformationVariables}{Variables to include as columns to the end of the report table. These cannot have more unique combinations than the \code{GroupingVariables}.}
 

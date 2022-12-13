@@ -71,6 +71,8 @@
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">openProjectAsTemplate</span><span class="op">(</span><span class="va">projectPath</span>, <span class="va">newProjectPath</span>, ow <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">closeProject</span><span class="op">(</span></span>
 <span>  <span class="va">projectPath</span>,</span>
 <span>  save <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -97,6 +99,7 @@
 <span>  <span class="va">newProjectPath</span>,</span>
 <span>  ow <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  empty.output <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  empty.input <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  close <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  msg <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
@@ -146,6 +149,10 @@
 <dd><p>Logical: If TRUE, print information to the console, e.g. about backward compatibility.</p></dd>
 
 
+<dt>newProjectPath</dt>
+<dd><p>The path to the copied StoX project.</p></dd>
+
+
 <dt>save</dt>
 <dd><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></dd>
 
@@ -154,12 +161,12 @@
 <dd><p>Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).</p></dd>
 
 
-<dt>newProjectPath</dt>
-<dd><p>The path to the copied StoX project.</p></dd>
-
-
 <dt>empty.output</dt>
 <dd><p>Logical: If TRUE, do not include the output files when copying.</p></dd>
+
+
+<dt>empty.input</dt>
+<dd><p>Logical: If TRUE, do not include the input files when copying.</p></dd>
 
 
 <dt>close</dt>

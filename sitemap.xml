@@ -31,10 +31,16 @@
     <loc>/reference/KnownDifferencesOldVersusNewStoX.html</loc>
   </url>
   <url>
+    <loc>/reference/ModelData.html</loc>
+  </url>
+  <url>
     <loc>/reference/PlotReportBootstrap.html</loc>
   </url>
   <url>
     <loc>/reference/PlotReportBootstrapData.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ProcessData.html</loc>
   </url>
   <url>
     <loc>/reference/ProjectUtils.html</loc>
@@ -124,6 +130,9 @@
     <loc>/reference/getModelData.html</loc>
   </url>
   <url>
+    <loc>/reference/getProcessIDFromFunctionName.html</loc>
+  </url>
+  <url>
     <loc>/reference/getProcessIDFromProcessName.html</loc>
   </url>
   <url>
@@ -164,6 +173,9 @@
   </url>
   <url>
     <loc>/reference/getRstoxFrameworkDefinitions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getSubPlotNames_PlotReportBootstrap.html</loc>
   </url>
   <url>
     <loc>/reference/getTemplate.html</loc>

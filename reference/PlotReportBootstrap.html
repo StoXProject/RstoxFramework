@@ -62,6 +62,7 @@
 <span>  AddCVToPlot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  CVVariable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  GroupingVariables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  SubPlots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  UseDefaultTextSettings <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  Title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  AxisTitleSize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -78,7 +79,43 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>UseDefaultTextSettings</dt>
+    <dl><dt>ReportBootstrapData</dt>
+<dd><p>The <code><a href="ReportBootstrapData.html">ReportBootstrapData</a></code> data.</p></dd>
+
+
+<dt>PlotType</dt>
+<dd><p>The type of plot to produce. Currently only "ErrorBarPlot" is implemented.</p></dd>
+
+
+<dt>PlottingVariable</dt>
+<dd><p>The variable to plot the points for. Normally this is the variable giving the mean.</p></dd>
+
+
+<dt>PlottingVariableLower</dt>
+<dd><p>The variable to use for the lower end of the error bars.</p></dd>
+
+
+<dt>PlottingVariableUpper</dt>
+<dd><p>The variable to use for the upper end of the error bars.</p></dd>
+
+
+<dt>AddCVToPlot</dt>
+<dd><p>Logical: If TRUE add a dotted line with points for the coefficient of variation (standard deviation divided by mean) CV. Setting this to TRUE requires to specify the <code>CVVariable</code>.</p></dd>
+
+
+<dt>CVVariable</dt>
+<dd><p>The name of the variable holding the CV. Must be given if <code>AddCVToPlot</code> is TRUE.</p></dd>
+
+
+<dt>GroupingVariables</dt>
+<dd><p>A vector of length 1 or 2 giving the names of the variables to plot along the x axis, where the second is coded with colors in the plot.</p></dd>
+
+
+<dt>SubPlots</dt>
+<dd><p>A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables).</p></dd>
+
+
+<dt>UseDefaultTextSettings</dt>
 <dd><p>Logical: If TRUE (default) use the default text settings of the plotting function. Setting this to FALSE will show all text options of the plotting function in the StoX GUI.</p></dd>
 
 

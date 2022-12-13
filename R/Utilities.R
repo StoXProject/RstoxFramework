@@ -717,6 +717,8 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param data.out Logical, if TRUE output the original and new data along with the tests.
 #' @param mergeWhenDifferentNumberOfRows Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.
 #' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
+#' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
+#' @param tolerance The tolerance to use in all.equal.
 #' @param ... Used in runModel().
 #' 
 #' @export

@@ -14,3 +14,6 @@ ResampleBioticAssignment(BioticAssignment, Seed)
 \description{
 This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 }
+\seealso{
+\code{\link[RstoxBase]{ModelData}} for model data types and \code{\link[RstoxBase]{DataTypes}} for all data types produced by \code{\link[RstoxBase]{RstoxBase}}.
+}

@@ -13,6 +13,7 @@ PlotReportBootstrap(
   AddCVToPlot = FALSE,
   CVVariable = character(),
   GroupingVariables = character(),
+  SubPlots = character(),
   UseDefaultTextSettings = TRUE,
   Title = character(),
   AxisTitleSize = numeric(),
@@ -27,6 +28,24 @@ PlotReportBootstrap(
 )
 }
 \arguments{
+\item{ReportBootstrapData}{The \code{\link{ReportBootstrapData}} data.}
+
+\item{PlotType}{The type of plot to produce. Currently only "ErrorBarPlot" is implemented.}
+
+\item{PlottingVariable}{The variable to plot the points for. Normally this is the variable giving the mean.}
+
+\item{PlottingVariableLower}{The variable to use for the lower end of the error bars.}
+
+\item{PlottingVariableUpper}{The variable to use for the upper end of the error bars.}
+
+\item{AddCVToPlot}{Logical: If TRUE add a dotted line with points for the coefficient of variation (standard deviation divided by mean) CV. Setting this to TRUE requires to specify the \code{CVVariable}.}
+
+\item{CVVariable}{The name of the variable holding the CV. Must be given if \code{AddCVToPlot} is TRUE.}
+
+\item{GroupingVariables}{A vector of length 1 or 2 giving the names of the variables to plot along the x axis, where the second is coded with colors in the plot.}
+
+\item{SubPlots}{A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables).}
+
 \item{UseDefaultTextSettings}{Logical: If TRUE (default) use the default text settings of the plotting function. Setting this to FALSE will show all text options of the plotting function in the StoX GUI.}
 
 \item{Title}{The title of the plot, defaulted to no title.}

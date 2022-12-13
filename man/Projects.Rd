@@ -4,6 +4,7 @@
 \alias{Projects}
 \alias{createProject}
 \alias{openProject}
+\alias{openProjectAsTemplate}
 \alias{closeProject}
 \alias{saveProject}
 \alias{saveAsProject}
@@ -28,6 +29,8 @@ openProject(
   saveIfAlreadyOpen = FALSE,
   verbose = FALSE
 )
+
+openProjectAsTemplate(projectPath, newProjectPath, ow = FALSE)
 
 closeProject(
   projectPath,
@@ -55,6 +58,7 @@ copyProject(
   newProjectPath,
   ow = FALSE,
   empty.output = FALSE,
+  empty.input = FALSE,
   close = FALSE,
   msg = TRUE
 )
@@ -82,13 +86,15 @@ deleteProject(projectPath)
 
 \item{verbose}{Logical: If TRUE, print information to the console, e.g. about backward compatibility.}
 
+\item{newProjectPath}{The path to the copied StoX project.}
+
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
-\item{newProjectPath}{The path to the copied StoX project.}
-
 \item{empty.output}{Logical: If TRUE, do not include the output files when copying.}
+
+\item{empty.input}{Logical: If TRUE, do not include the input files when copying.}
 
 \item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
 }

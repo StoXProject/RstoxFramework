@@ -1,4 +1,7 @@
-# RstoxFramework v3.6.0-9001 (2022-12-01)
+# RstoxFramework v3.6.0-9001 (2022-12-13)
+* Removed the test project tobis_20, as it is covered largely by the test project tobis_20_depth. 
+* Updated the test projects catch_99, coastalCod_20, cod_19, haddock_19, splitNASC_18 and tobis_20_depth, and added 1e-12 tolerance in the tests.
+* Added the parameter empty.input to CopyProject().
 * Fixed bug when running a project with projectPath ending with exactly one slash ("/") (problem fixed in getRelativePath()).
 * Removed rows of the output from ReportBootstrap() that contained combinations of the GroupingVariables that are not present in the BootstrapData. There rows were created to ensure that all bootstrap runs contain all combinations of the GroupingVariables, but also introduced non-existing combinations.
 * Added unfinished PlotReportBootstrap().

@@ -1,3 +1,18 @@
+getPlottingVariable_PlotReportBootstrap <- function(ReportBootstrapData) {
+    # Get the original GroupingVariables and InformationVariables used in the report:
+    originalGroupingVariables <- attr(ReportBootstrapData, "GroupingVariables")
+    originalInformationVariables <- attr(ReportBootstrapData, "InformationVariables")
+    setdiff(names(ReportBootstrapData), c(originalGroupingVariables, originalInformationVariables))
+}
+
+getGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapData) {
+    # Get the original GroupingVariables and InformationVariables used in the report:
+    originalGroupingVariables <- attr(ReportBootstrapData, "GroupingVariables")
+    originalInformationVariables <- attr(ReportBootstrapData, "InformationVariables")
+    c(originalGroupingVariables, originalInformationVariables)
+}
+
+
 #' A list of the attributes of the exported StoX functions:
 #' 
 #' The format describes the actual content, such as catchabilityTable, filePath, filter, etc. These are used by StoX to choose action on these parameters.
@@ -44,7 +59,11 @@ stoxFunctionAttributes <- list(
         functionCategory = "report", 
         functionOutputDataType = "PlotReportBootstrapData", 
         functionParameterFormat = list(
-            GroupingVariables = "groupingVariables_PlotReportBootstrap"
+            GroupingVariables = "groupingVariables_PlotReportBootstrap", 
+            SubPlots = "subPlots_PlotReportBootstrap", 
+            PlottingVariable = "plottingVariable_PlotReportBootstrap", 
+            PlottingVariableLower = "plottingVariableLower_PlotReportBootstrap", 
+            PlottingVariableUpper = "plottingVariableUpper_PlotReportBootstrap"
         ),
         functionArgumentHierarchy = list(
             CVVariable = list(
@@ -264,16 +283,32 @@ processPropertyFormats <- list(
     groupingVariables_PlotReportBootstrap = list(
         class = "vector", 
         title = "Select 1 or 2 GroupingVariables for the plot (defining the x-axis).", 
-        possibleValues = function(ReportVariable) {
-            quantity <- getBaseUnit(dataType = "SpeciesCategoryCatchData", variableName = ReportVariable, element = "quantity")
-            if(is.na(quantity)) {
-                list()
-            }
-            else {
-                RstoxData::getUnitOptions(quantity)
-            }
-        }
+        possibleValues = getGroupingVariables_PlotReportBootstrap
+    ), 
+    
+    subPlots_PlotReportBootstrap = list(
+        class = "vector", 
+        title = "Select sub plots.", 
+        possibleValues = getSubPlotNames_PlotReportBootstrap
+    ), 
+    
+    plottingVariable_PlotReportBootstrap = list(
+        class = "vector", 
+        title = "Select plotting variable.", 
+        possibleValues = getPlottingVariable_PlotReportBootstrap
+    ), 
+    plottingVariableLower_PlotReportBootstrap = list(
+        class = "vector", 
+        title = "Select variable for upper end of error bars.", 
+        possibleValues = getPlottingVariable_PlotReportBootstrap
+    ), 
+    plottingVariableUpper_PlotReportBootstrap = list(
+        class = "vector", 
+        title = "Select variable for lower end of error bars.", 
+        possibleValues = getPlottingVariable_PlotReportBootstrap
     )
     
 )
+
+
 

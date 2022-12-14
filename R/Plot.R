@@ -133,6 +133,9 @@ getRemainingGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapDat
 getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVariables, SubPlots = NULL) {
     # Get the variables that are not to be used as GroupingVariables in the plot:
     by <- getRemainingGroupingVariables_PlotReportBootstrap(ReportBootstrapData, GroupingVariables)
+    if(!length(by)) {
+        return("ReportBootstrapData")
+    }
     # Get unique groupings:
     uniqueSubGroups <- unique(subset(ReportBootstrapData, select = by))
     subPlotNames <- apply(mapply(paste, by, uniqueSubGroups, sep = "-"), 1, paste, collapse = "_")

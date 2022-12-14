@@ -63,7 +63,8 @@ stoxFunctionAttributes <- list(
             SubPlots = "subPlots_PlotReportBootstrap", 
             PlottingVariable = "plottingVariable_PlotReportBootstrap", 
             PlottingVariableLower = "plottingVariableLower_PlotReportBootstrap", 
-            PlottingVariableUpper = "plottingVariableUpper_PlotReportBootstrap"
+            PlottingVariableUpper = "plottingVariableUpper_PlotReportBootstrap", 
+            CVVariable = "cvVariable_PlotReportBootstrap"
         ),
         functionArgumentHierarchy = list(
             CVVariable = list(
@@ -305,6 +306,11 @@ processPropertyFormats <- list(
     plottingVariableUpper_PlotReportBootstrap = list(
         class = "vector", 
         title = "Select variable for lower end of error bars.", 
+        possibleValues = getPlottingVariable_PlotReportBootstrap
+    ), 
+    cvVariable_PlotReportBootstrap = list(
+        class = "vector", 
+        title = "Select CV variable.", 
         possibleValues = getPlottingVariable_PlotReportBootstrap
     )
     

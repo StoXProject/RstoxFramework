@@ -16,6 +16,8 @@
 #' @return
 #' A \code{\link{BootstrapData}} object, which is a list of the RstoxData \code{\link[RstoxData]{DataTypes}} and RstoxBase \code{\link[RstoxBase]{DataTypes}}.
 #' 
+#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assignned Hauls (not using the Stratum assignment method  in \code{\link{DefineBioticAssigment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstra  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
+#' 
 #' @export
 #' 
 Bootstrap <- function(

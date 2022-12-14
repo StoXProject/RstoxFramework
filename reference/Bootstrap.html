@@ -96,7 +96,7 @@
 
 
 <dt>BaselineSeedTable</dt>
-<dd><p>A table of ProcessName and Seed, givng the seed to use for the Baseline processes that requires a Seed parameter. The seed is used to draw one seed per bootstrap run using <code><a href="https://rdrr.io/pkg/RstoxBase/man/getSeedVector.html" class="external-link">getSeedVector</a></code>.</p></dd>
+<dd><p>A table of ProcessName and Seed, giving the seed to use for the Baseline processes that requires a Seed parameter. The seed is used to draw one seed per bootstrap run using <code><a href="https://rdrr.io/pkg/RstoxBase/man/getSeedVector.html" class="external-link">getSeedVector</a></code>.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -107,7 +107,8 @@
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>A copy of the project is made for each core given by <code>NumberOfCores</code>. In the case that NumberOfCores == 1, this is still done for safety.</p>
+    <p>A copy of the project is made for each core given by <code>NumberOfCores</code>. In the case that NumberOfCores == 1, this is still done for safety.
+Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assignned Hauls (not using the Stratum assignment method  in <code>DefineBioticAssigment</code>), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstra  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.</p>
     </div>
 
   </div>

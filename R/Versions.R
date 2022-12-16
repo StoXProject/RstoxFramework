@@ -414,6 +414,7 @@ readOfficialRstoxPackageVersionsFile <- function(officialRstoxPackageVersionsFil
         dependencies <- strsplit(official$Dependencies, "[,]")
         dependencies <- lapply(dependencies, extractPackageNameAsNames)
         official <- data.table::data.table(
+            StoX = official$StoX, 
             RstoxFramework = official$RstoxFramework, 
             data.table::rbindlist(dependencies),
             Official = official$Official
@@ -1020,6 +1021,17 @@ getOfficialRstoxPackagesInfo <- function(
         stop("The StoX version ", StoXGUIVersion, " is not an official version. Installation of Rstox packages for non-official versions is no longer supported in the StoX GUI. It is highly recommended to use the latest official version StoX ", getLatestOfficialStoxVersion(officialRstoxPackageVersionsFile), ".\nTo install the Rstox packages for this non-official version, the following lines must be run in R. If you are using Rstudio, it is adviced to restart R before installing the Rstox packages. Also, on Windows Rtools must be installed, as the Rstox packages are installed from source by these lines:\n", paste0(installCommands, collapse = "\n"))
     }
     
+    
+    ### pat <- Sys.getenv("GITHUB_PAT")
+    ### if(nchar(pat)) {
+    ###     api_data <- httr::GET(URL_releases, httr::authenticate(Sys.getenv("GITHUB_PAT"), "x-oauth-basic", "basic"))
+    ### }
+    ### else {
+    ###     api_data <- httr::GET(URL_releases)
+    ###     warning("Please create a personal access token with the following procedure: Use `usethis::create_github_token()` to go the the GitHub page where you need to log in and click the green 'Generate token' button at the bottom of the page, but be sure to create personalized note in the required field (you will be reminded of this if not). Then copy this to the clipboard and use `usethis::edit_r_environ()` to open the .Renivron file. Add the token as `GITHUB_PAT=12345678901234567890` (replace with the copied token) and end the file with a line space. Save and close the file, and restart R to make the change effective.")
+    
+    
+            
     # Get the table of official Rstox package versions from the Rstox.repos:
     supportedRVersion <- getSupportedRVersions()
     binaries <- mapply(
@@ -1085,13 +1097,62 @@ getInstallType <- function() {
 }
 
 
-
-is_online <- function(site="http://example.com/") {
+# Updated this to read from our file, after Dave Boyer had problems with the original site = "http://example.com/":
+is_online <- function(site = "https://raw.githubusercontent.com/StoXProject/repo/master/README.md") {
     tryCatch({
         readLines(site,n=1)
         TRUE
     },
     warning = function(w) invokeRestart("muffleWarning"),
     error = function(e) FALSE)
+}
+
+
+
+nonOfficialColor <- rgb(255,30,78, maxColorValue=255)
+
+isOfficialStoXVersion <- function(StoXVersion, officialRstoxPackageVersionsFile) {
+    official <- readOfficialRstoxPackageVersionsFile(officialRstoxPackageVersionsFile, toTable = TRUE)
+    officialStoXVersions <- official$StoX[official$Official]
+    StoXVersion %in% officialStoXVersions
+}
+
+isCertifiedRstoxPackageVersion <- function(StoXVersion, RstoxPackage, RstoxPackageVersion, officialRstoxPackageVersionsFile) {
+    certified <- readOfficialRstoxPackageVersionsFile(officialRstoxPackageVersionsFile, toTable = TRUE)
+    certified <- subset(certified, certified$StoX == StoXVersion)
+    
+    certified[[RstoxPackage]] == RstoxPackageVersion
+}
+
+colorOfStoXLogo <- function(StoXVersion, officialRstoxPackageVersionsFile) {
+    if(isOfficialStoXVersion(StoXVersion, officialRstoxPackageVersionsFile)) {
+        "black"
+    }
+    else {
+        nonOfficialColor
+    }
+}
+
+colorOfRstoxFrameworkLogo <- function(StoXVersion, RstoxPackages, RstoxPackageVersions, officialRstoxPackageVersionsFile) {
+    
+    certified <- mapply(isCertifiedRstoxPackageVersion, StoXVersion, RstoxPackages, RstoxPackageVersions, MoreArgs = list(officialRstoxPackageVersionsFile = officialRstoxPackageVersionsFile))
+    
+    if(any(!certified)) {
+        #rgb(255,30,78, maxColorValue=255)
+        nonOfficialColor
+    }
+    else {
+        #rgb(0,0,0, maxColorValue=255)
+        "black"
+    }
+}
+
+colorOfRstoxPackages <- function(StoXVersion, RstoxPackages, RstoxPackageVersions, officialRstoxPackageVersionsFile) {
+    
+    certified <- mapply(isCertifiedRstoxPackageVersion, StoXVersion, RstoxPackages, RstoxPackageVersions, MoreArgs = list(officialRstoxPackageVersionsFile = officialRstoxPackageVersionsFile))
+    
+    cols <- c(nonOfficialColor, "black")
+    
+    cols[certified + 1]
 }
 

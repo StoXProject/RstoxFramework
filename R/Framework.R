@@ -2226,7 +2226,7 @@ getStoxFunctionParameterFormals <- function(functionName) {
     
     functionName <- getFunctionNameFromPackageFunctionName(functionName)
     if(! functionName %in% availableFunctions) {
-        stop("StoX: The function ", functionName, " is not an official StoX function.")
+        warning("StoX: The function ", functionName, " is not an official StoX function.")
         return(list())
     }
     

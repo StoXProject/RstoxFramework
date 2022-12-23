@@ -136,9 +136,10 @@ getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVar
     if(!length(by)) {
         return("ReportBootstrapData")
     }
+    
     # Get unique groupings:
     uniqueSubGroups <- unique(subset(ReportBootstrapData, select = by))
-    subPlotNames <- apply(mapply(paste, by, uniqueSubGroups, sep = "-"), 1, paste, collapse = "_")
+    subPlotNames <- apply(do.call(cbind, mapply(paste, by, uniqueSubGroups, sep = "-", SIMPLIFY = F)), 1, paste, collapse = "_")
     subPlotNames <- setdiff(subPlotNames, SubPlots)
     return(subPlotNames)
 }

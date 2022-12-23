@@ -19,6 +19,7 @@ getNonRstoxDependencies(
 getStoxDependencies(
   StoXGUIVersion,
   officialRstoxPackageVersionsFile,
+  optionalDependencies = FALSE,
   Rstox.repos = "https://stoxproject.github.io/repo",
   dependency.repos = "https://cloud.r-project.org",
   dependencyTypes = NA,
@@ -29,6 +30,7 @@ getStoxDependencies(
 installOfficialRstoxPackagesWithDependencies(
   StoXGUIVersion,
   officialRstoxPackageVersionsFile,
+  optionalDependencies = FALSE,
   destdir = NA,
   Rstox.repos = "https://stoxproject.github.io/repo",
   dependency.repos = "https://cloud.r-project.org",
@@ -44,7 +46,7 @@ getOfficialRstoxPackageVersion(
   StoXGUIVersion = NULL,
   officialRstoxPackageVersionsFile = system.file("versions",
     "OfficialRstoxFrameworkVersions.txt", package = "RstoxFramework"),
-  packageName = c("RstoxFramework", "RstoxBase", "RstoxData"),
+  optionalDependencies = FALSE,
   toJSON = FALSE,
   list.out = FALSE
 )
@@ -61,6 +63,8 @@ getOfficialRstoxPackageVersion(
 \item{StoXGUIVersion}{The version of the StoX GUI defining the combination of official Rstox package versions.}
 
 \item{officialRstoxPackageVersionsFile}{The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").}
+
+\item{optionalDependencies}{Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Sugggests field of the DESCRIPTION file.}
 
 \item{dependency.repos}{The repository to download from.}
 

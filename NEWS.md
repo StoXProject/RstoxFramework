@@ -1,3 +1,9 @@
+# RstoxFramework v3.6.0-9002 (2022-12-24)
+* Added RstoxFDA to OfficialRstoxFrameworkVersions.txt.
+* Added Date to OfficialRstoxFrameworkVersions.txt and removed all versions prior to StoX 3.0.0.
+* Updated Versions.R to supprort RstoxFDA in the list of package versions in the StoX and RstoxFramework logo inn the GUI upper right corner.
+* Fixed bug in PlotBootstrap().
+
 # RstoxFramework v3.6.0-9001 (2022-12-13)
 * Removed the test project tobis_20, as it is covered largely by the test project tobis_20_depth. 
 * Updated the test projects catch_99, coastalCod_20, cod_19, haddock_19, splitNASC_18 and tobis_20_depth, and added 1e-12 tolerance in the tests.

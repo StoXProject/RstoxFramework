@@ -139,7 +139,6 @@ applyBackwardCompatibilityActionsReordered <- function(
     }
     
     # Now, order by version first, then by action name, and finally by package:
-    #official <- RstoxFramework:::readOfficialRstoxPackageVersionsFile(toTable = TRUE)
     packageNames <- sapply(backwardCompatibility, "[[", "packageName")
     actionNames <- sapply(backwardCompatibility, "[[", "actionName")
     changeVersions <- sapply(backwardCompatibility, "[[", "changeVersion")

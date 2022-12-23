@@ -187,6 +187,9 @@ initiateRstoxFramework <- function(){
     
     # Get the schemas of the Rstox packages:
     processDataSchemas <- lapply(officialStoxLibraryPackages, readProcessDataSchema)
+    # Remove duplicates (by name) and unlist:
+    toKeep <- split(!duplicated(unlist(lapply(processDataSchemas, names))), rep(seq_along(processDataSchemas), lengths(processDataSchemas)))
+    processDataSchemas <- mapply("[", processDataSchemas, toKeep)
     processDataSchemas <- unlist(processDataSchemas, recursive = FALSE)
 
     # Get the names of the processData schemas:

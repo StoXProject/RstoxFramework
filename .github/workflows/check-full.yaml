@@ -102,6 +102,13 @@ jobs:
           rm '/usr/local/bin/gfortran'
           rm '/usr/local/bin/2to3'
           rm '/usr/local/bin/2to3-3.11'
+          rm '/usr/local/bin/idle3.11'
+          rm '/usr/local/bin/pydoc3'
+          rm '/usr/local/bin/python3'
+          rm '/usr/local/bin/python3-config'
+          rm '/usr/local/bin/pydoc3.11'
+          rm '/usr/local/bin/python3.11'
+          rm '/usr/local/bin/python3.11-config'
           export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=false # This prevents Homebrew from re-installing R, which will lead to .Platform$pkgType = "source".
           brew install gdal udunits
         shell: bash
@@ -142,7 +149,9 @@ jobs:
           # Get the installed versions:
           installed <- as.data.frame(utils::installed.packages())
           # Find minimum versions:
-          deps <- strsplit(read.dcf("./DESCRIPTION", all = TRUE)$Imports, ",\n")[[1]]
+          imports <- strsplit(read.dcf("./DESCRIPTION", all = TRUE)$Imports, ",\n")[[1]]
+          suggests <- strsplit(read.dcf("./DESCRIPTION", all = TRUE)$Suggests, ",\n")[[1]]
+          deps <- c(imports, suggests)
           Rstox_deps <- deps[startsWith(deps, "Rstox")]
           Rstox_deps <- data.frame(
               Package = sub("[ (].*", "", Rstox_deps),
@@ -168,7 +177,7 @@ jobs:
       - name: Session info
         run: |
           options(width = 100)
-          pkgs <- installed.packages()[, "Package"]
+          pkgs <- utils::installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 

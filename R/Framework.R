@@ -623,7 +623,8 @@ saveProject <- function(
     # Get the current project description and save it to the project.JSON file:
     writeProjectDescription(
         projectPath = projectPath, 
-        Application = Application
+        Application = Application, 
+        optionalDependencies = TRUE
     )
     # Set the status of the projcet as saved:
     setSavedStatus(projectPath, status = TRUE)
@@ -720,11 +721,12 @@ deleteProcessData <- function(projectPath, modelName, processID) {
 #' Utilities for projects.
 #' 
 #' @inheritParams general_arguments
+#' @inheritParams installPackages
 #' @param projectDescription A list holding the project description, as read using \code{\link{readProjectDescription}}.
 #' @param projectDescriptionFile The path to the file holding the projectDescription.
 #' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
 #' @param formatProcesses Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.
-#' @param validateJSON Logical: If  TRUE validate the project.json.
+#' @param validateJSON Logical: If TRUE validate the project.json.
 #' 
 #' @name ProjectUtils
 #' 
@@ -881,7 +883,8 @@ readProjectDescription <- function(
             tempProjectDescriptionFile <- tempfile()
             writeProjectDescription(
                 projectDescription = projectDescription, 
-                projectDescriptionFile = tempProjectDescriptionFile
+                projectDescriptionFile = tempProjectDescriptionFile, 
+                optionalDependencies = TRUE
             )
             valid <- validateProjectDescriptionFile(tempProjectDescriptionFile)
         }
@@ -1026,7 +1029,7 @@ JSON2processData <- function(JSON) {
 #' @export
 #' @rdname ProjectUtils
 #' 
-writeProjectDescription <- function(projectPath, projectDescription = NULL, projectDescriptionFile = NULL, Application = R.version.string, verbose = FALSE) {
+writeProjectDescription <- function(projectPath, projectDescription = NULL, projectDescriptionFile = NULL, Application = R.version.string, optionalDependencies = FALSE, verbose = FALSE) {
     
     # Get the file to write to:
     if(!length(projectDescriptionFile)) {
@@ -1057,7 +1060,7 @@ writeProjectDescription <- function(projectPath, projectDescription = NULL, proj
     #projectDescription <- applyBackwardCompatibility(projectDescription, verbose = verbose)
     
     # Add the attirbutes:
-    projectDescription <- addProjectDescriptionAttributes(projectDescription)
+    projectDescription <- addProjectDescriptionAttributes(projectDescription, optionalDependencies = optionalDependencies)
     
     # Save the project.json:
     writeProjectDescriptionJSON(
@@ -1136,69 +1139,6 @@ writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFi
     write(json, projectDescriptionFile) 
 }
 
-#recodeNumericNAOneProcessData <- function(x, na = -999) {
-#    if(is.list(x) && !data.table::is.data.table(x)) {
-#        lapply(x, recodeNumericNAOneTable, na = na)
-#    }
-#    else if(data.table::is.data.table(x)) {
-#        recodeNumericNAOneTable(x, na = na)
-#    }
-#    else if(length(x)){
-#        stop("Supported procecss data types are data.table and list of data.tables.")
-#    }
-#}
-#
-#recodeNumericNAOneTable <- function(x, na = -999) {
-#    if(data.table::is.data.table(x)) {
-#        toRecode <- sapply(x, hasNumericNA)
-#        if(any(toRecode)) {
-#            namesToRecode <- names(toRecode)[toRecode]
-#            for(name in namesToRecode) {
-#                x[is.na(get(name)), eval(name) := na]
-#            }
-#        }
-#    }
-#}
-#
-#hasNumericNA <- function(x) {
-#    is.numeric(x) && any(is.na(x))
-#}
-
-#decodeNumericNAOneProcessData <- function(x, na = -999) {
-#    if(is.list(x) && !data.table::is.data.table(x)) {
-#        lapply(x, decodeNumericNAOneTable, na = na)
-#    }
-#    else if(data.table::is.data.table(x)) {
-#        decodeNumericNAOneTable(x, na = na)
-#    }
-#    else if(length(x)){
-#        stop("Supported procecss data types are data.table and list of data.tables.")
-#    }
-#}
-#
-#decodeNumericNAOneTable <- function(x, na = -999) {
-#    if(data.table::is.data.table(x)) {
-#        toRecode <- sapply(x, hasNumericNACode, na = na)
-#        if(any(toRecode)) {
-#            namesToRecode <- names(toRecode)[toRecode]
-#            for(name in namesToRecode) {
-#                x[get(name) == na, eval(name) := NA_real_]
-#            }
-#        }
-#    }
-#}
-
-#hasNumericNACode <- function(x, na = -999) {
-#    is.numeric(x) && any(x == na)
-#}
-
-
-isOfficialRstoxFrameworkVersion <- function() {
-    #StoXVersion <- attr(getOfficialRstoxPackageVersion(), "StoX")
-    #officialRstoxFrameworkVersion <- endsWith(StoXVersion, ".0")
-    officialRstoxFrameworkVersion <- attr(getOfficialRstoxPackageVersion(), "Official")
-    return(officialRstoxFrameworkVersion)
-}
 
 
 orderEachProcess <- function(projectDescription) {
@@ -1237,16 +1177,16 @@ orderProjectDescription <- function(projectDescription) {
 
 
 
-addProjectDescriptionAttributes <- function(projectDescription) {
+addProjectDescriptionAttributes <- function(projectDescription, optionalDependencies = FALSE) {
     
     # Get packcage versions as strings "PACKAGENAME vPACKAGEVERSION":
     dependentPackageVersion <- getRstoxFrameworkDefinitions("dependentPackageVersion")
     
     # Get the certified Rstox package versions:
-    certifiedRstoxPackageVersionList <- getOfficialRstoxPackageVersion(list.out = TRUE)
+    certifiedRstoxPackageVersionList <- getOfficialRstoxPackageVersion(list.out = TRUE, optionalDependencies = optionalDependencies)
     
     
-    # Paste the package name and version_
+    # Paste the package name and version:
     CertifiedRstoxPackageVersion <- getPackageNameAndVersionString(
         certifiedRstoxPackageVersionList$packageName, 
         certifiedRstoxPackageVersionList$version
@@ -1283,7 +1223,9 @@ addProjectDescriptionAttributes <- function(projectDescription) {
 getPackageVersion <- function(packageNames, only.version = FALSE, sep = "_") {
     # Changed from using utils::packageVersion, which returns a numeric sequence which when converted to character separates with dots only, ignoring any hyphens in the original package version, to getNamespaceVersion(), which gives us exactly what we need:
     #version <- sapply(packageNames, function(x) as.character(utils::packageVersion(x)))
-    version <- sapply(packageNames, getNamespaceVersion)
+    #version <- sapply(packageNames, getNamespaceVersion)
+    # No, it is better to use installed.packages(), as it does not load the namespace:
+    version <- sapply(packageNames, getVersionStringOfPackage)
     
     if(only.version) {
         version
@@ -2226,7 +2168,7 @@ getStoxFunctionParameterFormals <- function(functionName) {
     
     functionName <- getFunctionNameFromPackageFunctionName(functionName)
     if(! functionName %in% availableFunctions) {
-        stop("StoX: The function ", functionName, " is not an official StoX function.")
+        warning("StoX: The function ", functionName, " is not an official StoX function.")
         return(list())
     }
     

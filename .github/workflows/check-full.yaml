@@ -102,6 +102,7 @@ jobs:
           rm '/usr/local/bin/gfortran'
           rm '/usr/local/bin/2to3'
           rm '/usr/local/bin/2to3-3.11'
+          rm '/usr/local/bin/idle3.11'
           export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=false # This prevents Homebrew from re-installing R, which will lead to .Platform$pkgType = "source".
           brew install gdal udunits
         shell: bash

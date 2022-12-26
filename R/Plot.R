@@ -12,7 +12,7 @@
 #' @param AddCVToPlot Logical: If TRUE add a dotted line with points for the coefficient of variation (standard deviation divided by mean) CV. Setting this to TRUE requires to specify the \code{CVVariable}.
 #' @param CVVariable The name of the variable holding the CV. Must be given if \code{AddCVToPlot} is TRUE.
 #' @param GroupingVariables A vector of length 1 or 2 giving the names of the variables to plot along the x axis, where the second is coded with colors in the plot.
-#' @param SubPlots A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables).
+#' @param SubPlots A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables). The subplot names cannot contain slashes, which are replaced by underscore.
 #' 
 #' @return
 #' A \code{\link{PlotReportBootstrapData}} object.
@@ -140,6 +140,8 @@ getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVar
     # Get unique groupings:
     uniqueSubGroups <- unique(subset(ReportBootstrapData, select = by))
     subPlotNames <- apply(do.call(cbind, mapply(paste, by, uniqueSubGroups, sep = "-", SIMPLIFY = F)), 1, paste, collapse = "_")
+    # The subPlotNames cannot contain file separator:
+    subPlotNames <- gsub("/", "_", subPlotNames)
     subPlotNames <- setdiff(subPlotNames, SubPlots)
     return(subPlotNames)
 }

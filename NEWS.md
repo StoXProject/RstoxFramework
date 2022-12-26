@@ -3,6 +3,7 @@
 * Added Date to OfficialRstoxFrameworkVersions.txt and removed all versions prior to StoX 3.0.0.
 * Updated Versions.R to supprort RstoxFDA in the list of package versions in the StoX and RstoxFramework logo inn the GUI upper right corner.
 * Fixed bug in PlotBootstrap().
+* Fixed bug with slashes in sub plot names in PlotReportBootstrap(). 
 
 # RstoxFramework v3.6.0-9001 (2022-12-13)
 * Removed the test project tobis_20, as it is covered largely by the test project tobis_20_depth. 

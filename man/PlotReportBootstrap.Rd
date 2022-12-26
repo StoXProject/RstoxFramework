@@ -44,7 +44,7 @@ PlotReportBootstrap(
 
 \item{GroupingVariables}{A vector of length 1 or 2 giving the names of the variables to plot along the x axis, where the second is coded with colors in the plot.}
 
-\item{SubPlots}{A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables).}
+\item{SubPlots}{A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables). The subplot names cannot contain slashes, which are replaced by underscore.}
 
 \item{UseDefaultTextSettings}{Logical: If TRUE (default) use the default text settings of the plotting function. Setting this to FALSE will show all text options of the plotting function in the StoX GUI.}
 

@@ -1080,11 +1080,11 @@ getOfficialRstoxPackagesInfo <- function(
         optionalDependencies = optionalDependencies, 
         toJSON = FALSE
     )
-    warning("StoX: ",  paste(officialRstoxPackageNameAndVersion, collapse = "  00000000    "))
     officialRstoxPackageName <- getOnlyPackageName(officialRstoxPackageNameAndVersion)
     
     # Get the package hierarchy, so as to install the lowest package first:
-    packageHierarchy <- getRstoxPackageHierarchy(officialRstoxPackageName)
+    # We need to use reversed = TRUE since remotes::install_github() finds the Additional_repositories and installs the dependent Rstox-packages from that repo, which does not contain the pre-releases:
+    packageHierarchy <- getRstoxPackageHierarchy(officialRstoxPackageName, reversed = TRUE)
     
     # Get the ordered list of official packages:
     officialRstoxPackageVersionList <- extractPackageNameAsNames(officialRstoxPackageNameAndVersion)
@@ -1159,7 +1159,7 @@ getOfficialRstoxPackagesInfo <- function(
 }
 
 
-getRstoxPackageHierarchy <- function(packageNames, dependencyTypes = "Imports") {
+getRstoxPackageHierarchy <- function(packageNames, dependencyTypes = "Imports", reversed = FALSE) {
     #dependencyList <- lapply(packageNames, function(x) exlcudeBasePackages(get_deps(x, dependencyTypes = dependencyTypes, onlyStartingWith = "Rstox")$package))
     dependencyList <- lapply(packageNames,  getDependencies, repos = "https://stoxproject.github.io/repo", onlyStartingWith = "Rstox")
     names(dependencyList) <- packageNames
@@ -1182,6 +1182,10 @@ getRstoxPackageHierarchy <- function(packageNames, dependencyTypes = "Imports") 
     
     # Add the RstoxFramework as the highest:
     packageHierarchy <- c(packageHierarchy, "RstoxFramework")
+    
+    if(reversed) {
+        packageHierarchy <- rev(packageHierarchy)
+    }
     
     return(packageHierarchy)
 }

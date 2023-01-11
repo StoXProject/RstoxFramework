@@ -1051,7 +1051,7 @@ toJSONString <- function(DT) {
     # Convert vector value:
     atVector <- isVectorParameter(DT$format)
     if(any(atVector)) {
-        DT[atVector, value := lapply(value, vectorToJSONStringOne)]
+        DT[atVector, value := lapply(value, vectorToJSONStringOne, stringifyVector = TRUE)]
     }
     
     # Convert all the other columns, which are required to have length 1:
@@ -1103,9 +1103,11 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
     
     # Convert to JSON string for each element if not already character:
     else if(!data.table::is.data.table(x)) {
-        if(!is.character(x)) {
-            x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
-        }
+        # Why was this used??????
+        ### if(!is.character(x)) {
+        ###     browser()
+        ###     x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
+        ### }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):
             x <- list(x)
@@ -1587,7 +1589,7 @@ getParameterFormatElement <- function(projectPath, modelName, processID, format,
             processID = processID
         )$functionArguments
         # Apply the function:
-        output <- do.call_robust(
+        output <- RstoxData::do.call_robust(
             processPropertyFormats[[format]][[element]], 
             functionArguments
         )

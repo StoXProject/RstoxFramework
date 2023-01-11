@@ -222,11 +222,6 @@ Bootstrap <- function(
     #    fileOutput = FALSE
     #)
     
-    
-    
-    
-    
-    
     processNames <- names(BootstrapData[[1]])
     processIDs <- unlist(
         mapply(
@@ -749,9 +744,10 @@ ResampleMeanNASCData <- function(MeanNASCData, Seed) {
 #' 
 #' @param BootstrapData The \code{\link{BootstrapData}} data output from \code{\link{Bootstrap}}.
 #' @inheritParams RstoxBase::general_report_arguments
-#' @param BaselineProcess A strings naming the baseline process to report from the boostrap output.
+#' @param BaselineProcess A strings naming the baseline process to report from the \code{\link{BootstrapData}}. If a process with 
 #' @param AggregationFunction The function to apply to each bootstrap run. This must be a function returning a single value.
-#' @param BootstrapReportFunction The function to apply across bootstrap run, such as "cv" or "stoxSummary".
+#' @param BootstrapReportFunction The function to apply across bootstrap run, such as "cv" or "c".
+#' @param Percentages The percentages to report Percentiles for when BootstrapReportFunction = "Percentages".
 #' @param AggregationWeightingVariable The variable to weight by in the \code{AggregationFunction}.
 #' @param BootstrapReportWeightingVariable The variable to weight by in the \code{BootstrapReportFunction}.
 #'
@@ -775,6 +771,7 @@ ReportBootstrap <- function(
     TargetVariableUnit = character(), 
     AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE), 
     BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE), 
+    Percentages = double(), 
     GroupingVariables = character(), 
     InformationVariables = character(), 
     RemoveMissingValues = FALSE, 
@@ -782,8 +779,12 @@ ReportBootstrap <- function(
     BootstrapReportWeightingVariable = character()
 ) 
 {
-    if(!length(BootstrapData[[BaselineProcess]])) {
+    
+    if(!length(BootstrapData)) {
         stop("The Bootstrap process must been run.")
+    }
+    if(!length(BootstrapData[[BaselineProcess]])) {
+        stop("The Baseline process ", BaselineProcess, " is not included in the BootstrapData. Please include it in the parameter OutputProcesses in the Bootstrap process.")
     }
     
     # Store any dataType attribute:
@@ -794,6 +795,7 @@ ReportBootstrap <- function(
         warning(RstoxBase::getRstoxBaseDefinitions("RemoveMissingValuesWarning")(TargetVariable))
     }
     
+    
     if(! BaselineProcess %in% names(BootstrapData)) {
         # If the BootstrapData is empty, stop:
         if(!length(BootstrapData)) {
@@ -803,46 +805,18 @@ ReportBootstrap <- function(
             stop("The BaselineProcess ", BaselineProcess, " is not one of the outputs of the Bootstrap. Possible values are ", paste(names(BootstrapData), collapse = ", "), ".")
         }
     }
-    else if(
-        is.list(BootstrapData[[BaselineProcess]]) && 
-        all(c("Data", "Resolution")  %in% names(BootstrapData[[BaselineProcess]]))
-    ) {
-        BootstrapData[[BaselineProcess]] <- BootstrapData[[BaselineProcess]]$Data
+    else {
+        if(is.list(BootstrapData[[BaselineProcess]]) && !data.table::is.data.table(BootstrapData[[BaselineProcess]]) ) {
+            if("Data" %in% names(BootstrapData[[BaselineProcess]])) {
+                BootstrapData[[BaselineProcess]] <- BootstrapData[[BaselineProcess]]$Data
+            }
+            else {
+                stop("StoX: For multi-table process requested by the BaselineProcess, the table \"Data\" must be present.")
+            }
+        }
     }
     
-    ### # Run the initial aggregation (only applicable for single output functions):
-    ### AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
-    ### out <- RstoxBase::aggregateBaselineDataOneTable(
-    ###     stoxData = BootstrapData[[BaselineProcess]], 
-    ###     TargetVariable = TargetVariable, 
-    ###     aggregationFunction = AggregationFunction, 
-    ###     GroupingVariables = c(GroupingVariables, "BootstrapID"), 
-    ###     InformationVariables = InformationVariables, 
-    ###     na.rm = RemoveMissingValues, 
-    ###     WeightingVariable = AggregationWeightingVariable
-    ### )
-    ### 
-    ### 
-    ### # Get the name of the new TargetVariable:
-    ### TargetVariableAfterInitialAggregation <- RstoxBase::getReportFunctionVariableName(
-    ###     functionName = AggregationFunction, 
-    ###     TargetVariable = TargetVariable
-    ### )
-    ### 
-    ### # Run the report function of the bootstraps:
-    ### BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
-    ### out <- RstoxBase::aggregateBaselineDataOneTable(
-    ###     stoxData = out, 
-    ###     TargetVariable = TargetVariableAfterInitialAggregation, 
-    ###     aggregationFunction = BootstrapReportFunction, 
-    ###     GroupingVariables = GroupingVariables, 
-    ###     InformationVariables = InformationVariables, 
-    ###     na.rm = RemoveMissingValues, 
-    ###     padWithZerosOn = "BootstrapID", 
-    ###     WeightingVariable = BootstrapReportWeightingVariable
-    ### )
-    ### 
-    ### return(out)
+    
     
     # Store the unique combinations of the GroupingVariables from the BootstrapData[[BaselineProcess]]:
     uniqueGroupingVariablesToKeep <- unique(subset(BootstrapData[[BaselineProcess]], select = GroupingVariables))
@@ -859,7 +833,7 @@ ReportBootstrap <- function(
         unit = TargetVariableUnit
     )
     
-    # Run the initial aggregation (only applicable for single output functions):
+    # Run the initial aggregation (only applicable for functions with output of length 1):
     AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
     output <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = BootstrapData[[BaselineProcess]], 
@@ -889,6 +863,7 @@ ReportBootstrap <- function(
         na.rm = RemoveMissingValues, 
         padWithZerosOn = "BootstrapID", 
         WeightingVariable = BootstrapReportWeightingVariable, 
+        SpecificationParameter = Percentages, 
         uniqueGroupingVariablesToKeep = uniqueGroupingVariablesToKeep
     )
     

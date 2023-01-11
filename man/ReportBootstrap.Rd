@@ -11,6 +11,7 @@ ReportBootstrap(
   TargetVariableUnit = character(),
   AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE),
   BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE),
+  Percentages = double(),
   GroupingVariables = character(),
   InformationVariables = character(),
   RemoveMissingValues = FALSE,
@@ -21,7 +22,7 @@ ReportBootstrap(
 \arguments{
 \item{BootstrapData}{The \code{\link{BootstrapData}} data output from \code{\link{Bootstrap}}.}
 
-\item{BaselineProcess}{A strings naming the baseline process to report from the boostrap output.}
+\item{BaselineProcess}{A strings naming the baseline process to report from the \code{\link{BootstrapData}}. If a process with}
 
 \item{TargetVariable}{The variable to report.}
 
@@ -29,7 +30,9 @@ ReportBootstrap(
 
 \item{AggregationFunction}{The function to apply to each bootstrap run. This must be a function returning a single value.}
 
-\item{BootstrapReportFunction}{The function to apply across bootstrap run, such as "cv" or "stoxSummary".}
+\item{BootstrapReportFunction}{The function to apply across bootstrap run, such as "cv" or "c".}
+
+\item{Percentages}{The percentages to report Percentiles for when BootstrapReportFunction = "Percentages".}
 
 \item{GroupingVariables}{The variables to report by. For most applications \code{GroupingVariables} should include "Survey" and "SpeciesCategory", unless the user needs to sum over all Survey or SpeciesCategory.}
 

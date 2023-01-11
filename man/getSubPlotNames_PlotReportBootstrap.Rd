@@ -4,18 +4,12 @@
 \alias{getSubPlotNames_PlotReportBootstrap}
 \title{List PlotReportBootstrap plots}
 \usage{
-getSubPlotNames_PlotReportBootstrap(
-  ReportBootstrapData,
-  GroupingVariables,
-  SubPlots = NULL
-)
+getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables)
 }
 \arguments{
 \item{ReportBootstrapData}{The \code{\link{ReportBootstrapData}} data.}
 
 \item{GroupingVariables}{A vector of length 1 or 2 giving the names of the variables to plot along the x axis, where the second is coded with colors in the plot.}
-
-\item{SubPlots}{A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables). The subplot names cannot contain slashes, which are replaced by underscore.}
 }
 \description{
 List PlotReportBootstrap plots

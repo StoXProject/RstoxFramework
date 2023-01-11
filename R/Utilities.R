@@ -591,16 +591,7 @@ expandLogical <- function(x) {
 
 
 
-do.call_robust <- function(what, args, quote = FALSE, envir = parent.frame()) {
-    # Get the formals of the function:
-    f <-  formals(what)
-    # Keep only the relevant args:
-    if(is.list(args)) {
-        args <- args[intersect(names(args), names(f))]
-    }
-    # Run the function:
-    do.call(what, args, quote = quote, envir = envir)
-}
+
 
 
 
@@ -835,7 +826,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     diffWarning <- function(x) {
         x_info <- unlistDiff(x)
         if(length(x_info)) {
-            x_info <- paste0("\n", names(x_info), ": ", x_info, collapse = "\n")
+            x_info <- paste0("\n", names(x_info), ":\n", x_info, collapse = "\n")
             msg <- paste0(
                 "projectPath:\n", 
                 projectPath, 

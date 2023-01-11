@@ -1499,6 +1499,15 @@ writeActiveProcessID <- function(projectPath, modelName, activeProcessID = NULL,
         activeProcessIDTable[modelName == thisModelName, propertyDirty := ..propertyDirty]
     }
     
+    # Set active process of all later models to NA:
+    stoxModelNames <- getRstoxFrameworkDefinitions("stoxModelNames")
+    modelsToReset <- stoxModelNames[-seq_len(which(stoxModelNames == thisModelName))]
+    if(length(modelsToReset)) {
+        activeProcessIDTable[modelName %in% modelsToReset, processID := NA]
+        activeProcessIDTable[modelName %in% modelsToReset, processDirty := FALSE]
+        activeProcessIDTable[modelName %in% modelsToReset, propertyDirty := FALSE]
+    }
+    
     # Write and return the activeProcessIDTable:
     activeProcessIDFile <- getProjectPaths(projectPath, "activeProcessIDFile")
     data.table::fwrite(activeProcessIDTable, activeProcessIDFile, sep = "\t", na = "NA")
@@ -2528,7 +2537,7 @@ writeProcessIndexTable <- function(projectPath, processIndexTable) {
     processIndexTableFile <- getProjectPaths(projectPath, "processIndexTableFile")
     # write the file:
     #processIndexTable <- data.table::fwrite(processIndexTable[, c("processID", "processName", "modelName")], processIndexTableFile, sep = "\t")
-    processIndexTable <- data.table::fwrite(processIndexTable, processIndexTableFile, sep = "\t")
+    data.table::fwrite(processIndexTable, processIndexTableFile, sep = "\t")
 }
 
 
@@ -4682,25 +4691,33 @@ runProcess <- function(
         replaceData <- list(FunctionName = replaceData)
     }
     if(is.list(replaceData) && !data.table::is.data.table(replaceData) && is.character(replaceData$FunctionName)) {
+        
         if(!exists(replaceData$FunctionName)) {
             stop("If replaceData is given as a list with a function name first, this must be an existing function (was ", replaceData$FunctionName, ").")
         }
-        processOutput <- do.call_robust(
+        args <- c(
+            structure(
+                list(processOutput), 
+                names = getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
+            ), 
+            functionArguments, 
+            replaceData$MoreArgs
+        )
+        # For functions that return the same data type as used as input, there will be duplictedly named elements, so we only keep the new:
+        if(any(duplicated(names(args)))) {
+            args <- args[!duplicated(names(args))]
+        }
+        
+        # Run the replaceData function. Here we are using the full address of the function, as the do.call_robust has been relocacted to RstoxData. This should be changed to using the full address in the first place in the BootstrapMethodTable in the future, if we want to allow custom specifications of bootstrapping:
+        replaceData$FunctionName <- paste("RstoxFramework", replaceData$FunctionName, sep = "::")
+        processOutput <- RstoxData::do.call_robust(
             what = replaceData$FunctionName, 
-            args = c(
-                structure(
-                    list(processOutput), 
-                    names = getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
-                ), 
-                functionArguments, 
-                replaceData$MoreArgs
-            )
+            args = args
         )
     }
     else if(length(replaceData)) {
         processOutput <- replaceData
     }
-    
     
     if(failed){
         return(FALSE)
@@ -5645,7 +5662,6 @@ getProcessOutputTextFilePath <- function(
     output.file.type = "default"
     )
 {
-    
     # Get the process name
     processName <- getProcessNameFromProcessID(projectPath, modelName, processID)
     
@@ -5799,24 +5815,22 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
         output.file.type <- getRstoxFrameworkDefinitions("default.output.file.type")[[modelName]]
     }
     
+    
     # Return NULL for empty process output:
     if(length(processOutput)) {
-        # Unlist introduces dots, and we replace by underscore:
-        processOutput <- unlistToDataType(processOutput)
         
-        filePath <- getProcessOutputTextFilePath(
-            projectPath = projectPath, 
-            modelName = modelName, 
-            processID = processID, 
-            processOutput = processOutput, 
-            output.file.type = output.file.type
-        )
-
         # Store the process output:
         if(output.file.type == "RData") {
             ## Rename the process output to the process name:
             #assign(processName, processOutput)
             
+            filePath <- getProcessOutputTextFilePath(
+                projectPath = projectPath, 
+                modelName = modelName, 
+                processID = processID, 
+                processOutput = processOutput, 
+                output.file.type = output.file.type
+            )
             
             # Rename the process output to the datatype:
             dataType <- getDataType(projectPath = projectPath, modelName = modelName, processID = processID)
@@ -5834,6 +5848,17 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             
         }
         else {
+            # Unlist introduces dots, and we replace by underscore:
+            processOutput <- unlistToDataType(processOutput)
+            
+            filePath <- getProcessOutputTextFilePath(
+                projectPath = projectPath, 
+                modelName = modelName, 
+                processID = processID, 
+                processOutput = processOutput, 
+                output.file.type = output.file.type
+            )
+            
             mapply(
                 reportFunctionOutputOne, 
                 processOutput = processOutput, 
@@ -5957,7 +5982,12 @@ removeIDsFromGeojson <- function(json) {
 
 
 
-# Function to flatten the list and add names from the levels of the list:
+#' Function to flatten a list of output datat and add names from the levels of the list
+#' 
+#' @param processOutput A list of StoX output data.
+#' 
+#' @export
+#' 
 unlistToDataType <- function(processOutput) {
     
     # Unlist through 2 levels:

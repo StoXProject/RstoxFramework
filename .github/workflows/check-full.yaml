@@ -42,12 +42,6 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Anticipate Bintray shutdown
-        if: runner.os == 'macOS'
-        run: |
-          brew update
-        shell: bash
-
       - uses: actions/checkout@v3
 
       - name: Do autorelease increment, tagging, and environment setup
@@ -70,6 +64,12 @@ jobs:
           r-version: ${{ matrix.config.r }}
           rtools-version: ${{ matrix.config.rtools }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
+
+      - name: Anticipate Bintray shutdown
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+        shell: bash
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -119,7 +119,7 @@ jobs:
           # The following two lines caused trouble for sf on the new R 4.2 on Ubuntu in May 2022:
           #sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
           #sudo apt-get update
-          sudo apt-get install libgdal-dev libproj-dev libgeos-dev libudunits2-dev
+          sudo apt-get install libgdal-dev libproj-dev libgeos-dev libudunits2-dev libxslt1-dev
         shell: bash
       
       - name: Install dependencies on Linux

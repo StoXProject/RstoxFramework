@@ -52,6 +52,8 @@ PlotReportBootstrap <- function(
     DotsPerInch = numeric()	
 ) {
     
+    PlotType <- RstoxData::match_arg_informative(PlotType)
+    
     # Get the formals:
     plotArguments <- RstoxBase::allargs()
     
@@ -59,6 +61,12 @@ PlotReportBootstrap <- function(
     plotArguments$ReportBootstrapData <- data.table::copy(plotArguments$ReportBootstrapData)
     
     plotArguments <- RstoxBase::setDefaultsInStoxFunction(plotArguments, StoxFunctionName = "PlotReportBootstrap", stoxFunctionAttributes = stoxFunctionAttributes)
+    
+    ### # Hardcode to "royalblue4"
+    ### plotArguments$CVColor <- "royalblue4"
+    ### plotArguments$CVColor <- "blue4"
+    ### plotArguments$CVColor <- "purple4"
+    ### plotArguments$CVColor <- "purple4"
     
     if(length(plotArguments$PlottingVariable) != 1) {
         stop("StoX: PlottingVariable must have length 1.")
@@ -130,7 +138,11 @@ getRemainingGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapDat
 #' 
 #' @export
 #' 
-getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVariables, SubPlots = NULL) {
+getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVariables) {
+#getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVariables, SubPlots = NULL) {
+        if(!length(ReportBootstrapData)) {
+        return(list())
+    }
     # Get the variables that are not to be used as GroupingVariables in the plot:
     by <- getRemainingGroupingVariables_PlotReportBootstrap(ReportBootstrapData, GroupingVariables)
     if(!length(by)) {
@@ -141,8 +153,14 @@ getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVar
     uniqueSubGroups <- unique(subset(ReportBootstrapData, select = by))
     subPlotNames <- apply(do.call(cbind, mapply(paste, by, uniqueSubGroups, sep = "-", SIMPLIFY = F)), 1, paste, collapse = "_")
     # The subPlotNames cannot contain file separator:
-    subPlotNames <- gsub("/", "_", subPlotNames)
-    subPlotNames <- setdiff(subPlotNames, SubPlots)
+    if(any(grepl("/", subPlotNames, fixed = TRUE))) {
+        warning("StoX: Slash (\"/\") was repalced by underscore (\"_\") in the subplot names to avoid confusion witth file names. This will result in discrepancy between subplot names and the corresponding variables in the ReportBootstrapData. To avoid this it is recommended to translate values that contain slashes, e.g. by translating SpeciesCategory using TranslateStoxBiotic().")
+        subPlotNames <- gsub("/", "_", subPlotNames)
+    }
+    
+    # This caused a bug in the GUI
+    #subPlotNames <- setdiff(subPlotNames, SubPlots)
+    
     return(subPlotNames)
 }
 
@@ -159,7 +177,6 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
         plotArguments$ReportBootstrapData[, eval(var) := RstoxBase::factorNAfirst(get(var))]
     }
     
-    
     xlab <-plotArguments$GroupingVariables[1]
     ylab <- plotArguments$PlottingVariable
     if("Unit" %in% names(plotArguments$ReportBootstrapData)) {
@@ -167,7 +184,7 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
     }
     # Add info about the lower and upper value:
     #ylab <- paste0(ylab, " (Lower: ", plotArguments$PlottingVariableLower, ", Upper: ", plotArguments$PlottingVariableUpper, ")")
-    ylab <- paste0(ylab, " (", plotArguments$PlottingVariableLower, ", ", plotArguments$PlottingVariableUpper, ")")
+    ylab <- c(ylab, paste0("(", plotArguments$PlottingVariableLower, ", ", plotArguments$PlottingVariableUpper, ")"))
     
     approximateMaxWidthXlab <- 50 * plotArguments$Width / plotArguments$AxisTitleSize
     approximateMaxWidthYlab <- 50 * plotArguments$Height / plotArguments$AxisTitleSize
@@ -215,22 +232,24 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
                     ggplot2::aes_string(x = plotArguments$GroupingVariables[1], y = plotArguments$CVVariable, group = 1), 
                     show.legend = FALSE, 
                     linetype = "dashed"
+                    #color = plotArguments$CVColor
                 ) + 
                 ggplot2::geom_point(
                     ggplot2::aes_string(x = plotArguments$GroupingVariables[1], y = plotArguments$CVVariable, group = 1), 
                     show.legend = FALSE, 
-                    shape = 15
+                    shape = 17
+                    #color = plotArguments$CVColor
                 )
             
             if(!is.na(cvScalingFactor)) {
-                p <- p + ggplot2::scale_y_continuous(sec.axis = ggplot2::sec_axis(~./cvScalingFactor, name = "CV"))
+                p <- p + ggplot2::scale_y_continuous(sec.axis = ggplot2::sec_axis(~./cvScalingFactor, name = "CV (trianngles on dashed line)"))
             }
         } 
         
     }
     else if(length(plotArguments$GroupingVariables) == 2){
         p <- p + ggplot2::geom_errorbar(
-            ggplot2::aes_string(x = plotArguments$GroupingVariables[1], y = plotArguments$CVVariable, ymin = plotArguments$PlottingVariableLower, ymax = plotArguments$PlottingVariableUpper, color = plotArguments$GroupingVariables[2]), 
+            ggplot2::aes_string(x = plotArguments$GroupingVariables[1], y = plotArguments$PlottingVariable, ymin = plotArguments$PlottingVariableLower, ymax = plotArguments$PlottingVariableUpper, color = plotArguments$GroupingVariables[2]), 
             position = ggplot2::position_dodge(0.5),
             width = 0.5
         ) + 
@@ -253,6 +272,7 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
                     ), 
                     show.legend = FALSE, 
                     linetype = "dashed"
+                    #color = plotArguments$CVColor
                 ) + 
                 ggplot2::geom_point(
                     ggplot2::aes_string(
@@ -262,11 +282,12 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
                         color = plotArguments$GroupingVariables[2]
                     ), 
                     show.legend = FALSE, 
-                    shape = 15
+                    shape = 17
+                    #color = plotArguments$CVColor
                 )
             
             if(!is.na(cvScalingFactor)) {
-                p <- p + ggplot2::scale_y_continuous(sec.axis = ggplot2::sec_axis(~./cvScalingFactor, name = "CV"))
+                p <- p + ggplot2::scale_y_continuous(sec.axis = ggplot2::sec_axis(~./cvScalingFactor, name = "CV (trianngles on dashed line)"))
             }
         }
     }
@@ -284,16 +305,19 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
         ggplot2::ylab(ylab) + 
         ggplot2::ggtitle(plotArguments$Title)
     
-    
-    
     p <- p + ggplot2::theme(
-        axis.title.x = ggplot2::element_text(size = if(length(plotArguments$AxisTitleSize)) plotArguments$AxisTitleSize else 10), 
-        axis.title.y = ggplot2::element_text(size = if(length(plotArguments$AxisTitleSize)) plotArguments$AxisTitleSize else 10), 
+        axis.title.x = ggplot2::element_text(size = if(length(plotArguments$AxisTitleSize)) plotArguments$AxisTitleSize else 10, vjust = -0.5), 
+        axis.title.y = ggplot2::element_text(size = if(length(plotArguments$AxisTitleSize)) plotArguments$AxisTitleSize else 10, vjust = 1.5), 
         axis.text.x = ggplot2::element_text(size = if(length(plotArguments$AxisTickSize)) plotArguments$AxisTickSize else 10), 
         axis.text.y = ggplot2::element_text(size = if(length(plotArguments$AxisTickSize)) plotArguments$AxisTickSize else 10), 
         legend.text = ggplot2::element_text(size = if(length(plotArguments$LegendTextSize)) plotArguments$LegendTextSize else 10), 
         legend.title = ggplot2::element_text(size = if(length(plotArguments$LegendTitleSize)) plotArguments$LegendTitleSize else 10)
     )
+    if(plotArguments$AddCVToPlot) {
+        p <- p + ggplot2::theme(
+            axis.title.y.right = ggplot2::element_text(size = if(length(plotArguments$AxisTitleSize)) plotArguments$AxisTitleSize else 10, vjust = 1.5)
+        )
+    }
     
     # Set the plot attributes to the output:
     p <- setPlotAttributes(

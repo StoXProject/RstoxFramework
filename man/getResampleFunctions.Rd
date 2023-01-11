@@ -4,7 +4,10 @@
 \alias{getResampleFunctions}
 \title{Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:}
 \usage{
-getResampleFunctions()
+getResampleFunctions(projectPath)
+}
+\arguments{
+\item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 }
 \description{
 Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:

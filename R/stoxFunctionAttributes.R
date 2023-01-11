@@ -39,10 +39,10 @@ stoxFunctionAttributes <- list(
         functionOutputDataType = "ReportBootstrapData", 
         # This is an example of using an expression to determine when to show a parameter:
         functionParameterFormat = list(
-            #TargetVariable = "targetVariable_ReportBootstrap", 
             GroupingVariables = "groupingVariables_ReportBootstrap", 
             InformationVariables = "informationVariables_ReportBootstrap", 
-            TargetVariableUnit = "targetVariableUnit_ReportBootstrap"
+            TargetVariableUnit = "targetVariableUnit_ReportBootstrap", 
+            Percentages = "percentages_ReportBootstrap"
         ), 
         functionArgumentHierarchy = list(
             AggregationWeightingVariable = list(
@@ -50,7 +50,13 @@ stoxFunctionAttributes <- list(
             ), 
             BootstrapReportWeightingVariable = list(
                 BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
+            ), 
+            Percentages = list(
+                BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
             )
+        ), 
+        functionParameterDefaults = list(
+            Percentages = c(5, 50, 95)
         )
     ), 
     
@@ -149,15 +155,31 @@ getValidFunctionsOneResamplableDataType <- function(resamplableDataType, stoxLib
     return(hasResamplableDataType)
 }
 
+
+
 #' Utility function for processPropertyFormats. This is exported in order for processPropertyFormats to be able to use it:
+#' 
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
-getResampleFunctions <- function() {
+getResampleFunctions <- function(projectPath) {
+    
+    # Get the baseline processes with valid functions:
+    baselineProcesses <- getProcessAndFunctionNames(
+        projectPath = projectPath, 
+        modelName = "baseline"
+    )
+    baselineDataTypes <- baselineProcesses[, sapply(functionName, RstoxFramework:::getStoxFunctionMetaData, metaDataName = "functionOutputDataType")]
+    
+    
     #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
     resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
+    resamplableDataTypes<- intersect(resamplableDataTypes, baselineDataTypes)
+    
     unname(unlist(getRstoxFrameworkDefinitions("resampleFunctions")[resamplableDataTypes]))
 }
+
 
 #' Process property formats for RstoxFramework
 #' 
@@ -182,7 +204,7 @@ processPropertyFormats <- list(
         possibleValues = function(projectPath) {
             # Must be an unnamed list:
             possibleValues = list(
-                getResampleFunctions(),
+                getResampleFunctions(projectPath),
                 getResamplableProcesses(projectPath), 
                 NULL
             )
@@ -312,6 +334,15 @@ processPropertyFormats <- list(
         class = "vector", 
         title = "Select CV variable.", 
         possibleValues = getPlottingVariable_PlotReportBootstrap
+    ),
+    
+    percentages_ReportBootstrap = list(
+        class = "vector", 
+        title = "Percentages defining the percentiles in the summaryStox function.", 
+        possibleValues = function() {
+            list()
+        },
+        variableTypes <- "double"
     )
     
 )

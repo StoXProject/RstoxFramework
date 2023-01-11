@@ -755,7 +755,8 @@ orderBackwardCompatibility <- function(x) {
 
 orderBackwardCompatibilityOne <- function(x) {
     changeVersion <- sapply(x, "[[", "changeVersion")
-    x[order(changeVersion)]
+    changeVersionOrder <- order(semver::parse_version(changeVersion))
+    x[changeVersionOrder]
 }
 
 

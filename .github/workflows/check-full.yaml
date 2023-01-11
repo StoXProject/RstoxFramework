@@ -42,12 +42,6 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Anticipate Bintray shutdown
-        if: runner.os == 'macOS'
-        run: |
-          brew update
-        shell: bash
-
       - uses: actions/checkout@v3
 
       - name: Do autorelease increment, tagging, and environment setup
@@ -63,6 +57,12 @@ jobs:
           echo "PKG_FILE=${PKG_FILE_PREFIX}${{ matrix.config.pkgext }}" >> $GITHUB_ENV
           echo "PKG_FREL=${PKG_FILE_PREFIX}-R.${{ matrix.config.r }}-${{ runner.os }}${{ matrix.config.pkgext }}" >> $GITHUB_ENV
           echo "PKG_REPO=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Anticipate Bintray shutdown
+        if: runner.os == 'macOS'
+        run: |
+          brew update
         shell: bash
 
       - uses: r-lib/actions/setup-r@v2

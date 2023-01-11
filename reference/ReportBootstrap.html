@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9003</span>
       </span>
     </div>
 
@@ -60,6 +60,7 @@
 <span>  TargetVariableUnit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  AggregationFunction <span class="op">=</span> <span class="fu">RstoxBase</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RstoxBase/man/getReportFunctions.html" class="external-link">getReportFunctions</a></span><span class="op">(</span>getMultiple <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  BootstrapReportFunction <span class="op">=</span> <span class="fu">RstoxBase</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RstoxBase/man/getReportFunctions.html" class="external-link">getReportFunctions</a></span><span class="op">(</span>getMultiple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  Percentages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/double.html" class="external-link">double</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  GroupingVariables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  InformationVariables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  RemoveMissingValues <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -75,7 +76,7 @@
 
 
 <dt>BaselineProcess</dt>
-<dd><p>A strings naming the baseline process to report from the boostrap output.</p></dd>
+<dd><p>A strings naming the baseline process to report from the <code><a href="BootstrapData.html">BootstrapData</a></code>. If a process with</p></dd>
 
 
 <dt>TargetVariable</dt>
@@ -91,7 +92,11 @@
 
 
 <dt>BootstrapReportFunction</dt>
-<dd><p>The function to apply across bootstrap run, such as "cv" or "stoxSummary".</p></dd>
+<dd><p>The function to apply across bootstrap run, such as "cv" or "c".</p></dd>
+
+
+<dt>Percentages</dt>
+<dd><p>The percentages to report Percentiles for when BootstrapReportFunction = "Percentages".</p></dd>
 
 
 <dt>GroupingVariables</dt>

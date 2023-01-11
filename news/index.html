@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0-9003</span>
       </span>
     </div>
 
@@ -47,6 +47,13 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.0-9003" id="rstoxframework-v360-9003-2023-01-10">RstoxFramework v3.6.0-9003 (2023-01-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v360-9003-2023-01-10"></a></h2>
+<ul><li>Fixed bug in output file of Bootstrap() when OutputProcesses contained processes with more than one table (e.g. the Data and Resolution table of Quantity()) mixed with single table outputs (e.g. ImputeSuperIndividuals()). The list of output data was flattened to include e.g. Quantity_Data and Quantity_Resolution. However, for BootstrapData, the output is saved to an RData file, and no such flattening of the list is necessary, and also corrupts the data when read back in when using the UseOutputData option in Bootstrap(). This may break scripts using the output file of a Bootstrap process with datta from multi table processes. This is however rare, and the function RstoxFramework::unlistToDataType() can be used to re-create the previous list in the output file of Bootstrap processes.</li>
+<li>Fixed bug in the GUI, where running a process in one model did not reset all later models.</li>
+<li>Added the parameter Percentages with default c(5, 50, 95) in ReportBootstrap() when BootstrapReportFunction = “summaryStox” (currently the only option).</li>
+<li>Reversed the order of installation of Rstox packages for pre-releases, to ensure that the lower packages get the correct ersion (ultimately RstoxData).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.6.0-9002" id="rstoxframework-v360-9002-2022-12-24">RstoxFramework v3.6.0-9002 (2022-12-24)<a class="anchor" aria-label="anchor" href="#rstoxframework-v360-9002-2022-12-24"></a></h2>
 <ul><li>Added RstoxFDA to OfficialRstoxFrameworkVersions.txt.</li>

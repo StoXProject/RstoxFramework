@@ -55,7 +55,7 @@ Imports:
     stringi (>= 1.4.0)
 Suggests: 
     remotes (>= 2.0.0),
-     RstoxFDA (>= 1.1.0-9001)
+    RstoxFDA (>= 1.1.0-9001)
     tinytest (>= 1.2.0)
 Additional_repositories: 
     https://stoxproject.github.io/repo

@@ -170,7 +170,7 @@ getResampleFunctions <- function(projectPath) {
         projectPath = projectPath, 
         modelName = "baseline"
     )
-    baselineDataTypes <- baselineProcesses[, sapply(functionName, RstoxFramework:::getStoxFunctionMetaData, metaDataName = "functionOutputDataType")]
+    baselineDataTypes <- baselineProcesses[, sapply(functionName, RstoxFramework::getStoxFunctionMetaData, metaDataName = "functionOutputDataType")]
     
     
     #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
@@ -339,10 +339,10 @@ processPropertyFormats <- list(
     percentages_ReportBootstrap = list(
         class = "vector", 
         title = "Percentages defining the percentiles in the summaryStox function.", 
-        possibleValues = function() {
+        possibleValues = function(...) {
             list()
         },
-        variableTypes <- "double"
+        variableTypes = "double"
     )
     
 )

@@ -5921,7 +5921,14 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
             cat("", file = filePath)
         }
         else {
-            data.table::fwrite(data.table::as.data.table(processOutputOne), filePath, col.names = FALSE, sep = ",", na = "")
+            # Convert NAs to empty string to support keeping the string "NA" as NA in the written file:
+            if(any(is.na(processOutputOne))) {
+                processOutputOne[is.na(processOutputOne)] <- ""
+            }
+            data.table::fwrite(data.table::as.data.table(processOutputOne), filePath, col.names = FALSE, sep = ",", na = "", quote = FALSE)
+            
+            # Changed on 2021-01-12 to using na = "NA", and quote = FALSE, which stores NAs as NA (unquoted) and requires that NAs from the variable row length is stored as empty string in the process output (which will result in empty fields for those cells, identical to the previous na = ""):
+            #data.table::fwrite(data.table::as.data.table(processOutputOne), filePath, col.names = FALSE, sep = ",", na = "NA", quote = FALSE)
         }
     }
     else if(any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutputOne))) {

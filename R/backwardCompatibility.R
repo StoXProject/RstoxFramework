@@ -82,45 +82,6 @@ applyBackwardCompatibility <- function(projectDescription, verbose = FALSE) {
 }
 
 
-# Apply one BWC action category:
-applyBackwardCompatibilityActionsOldBByActionName <- function(
-    backwardCompatibilityActionNames, 
-    backwardCompatibility, 
-    projectDescription, 
-    verbose = FALSE
-) {
-    # Run through the supported backward compatibility action names:
-    for(backwardCompatibilityActionName in backwardCompatibilityActionNames) {
-        
-        # Run through the packages with backward compatibility actions:
-        for(packageName in names(backwardCompatibility)) {
-            
-            # Run through the backward compatibility actions:
-            for(backwardCompatibilityAction in backwardCompatibility [[packageName]] [[backwardCompatibilityActionName]]) {
-                run <- checkBackwardCompatibilityVersion(
-                    backwardCompatibilityAction = backwardCompatibilityAction, 
-                    projectDescription = projectDescription, 
-                    packageName = packageName
-                )
-                
-                if(run) {
-                    # Apply the backwardCompatibilityAction:
-                    projectDescription <- applyBackwardCompatibilityAction(
-                        backwardCompatibilityActionName = backwardCompatibilityActionName, 
-                        backwardCompatibilityAction = backwardCompatibilityAction, 
-                        projectDescription = projectDescription, 
-                        packageName = packageName, 
-                        verbose = verbose
-                    )
-                }
-            }
-            
-        }
-        
-    }
-    
-    return(projectDescription)
-}
 
 
 
@@ -280,7 +241,6 @@ applyRenameFunction <- function(action, projectDescription, packageName, verbose
 
 #### 4. removeParameter: ####
 applyRemoveParameter <- function(action, projectDescription, packageName, verbose = FALSE) {
-    
     # Get the indices at functions to apply the action to:
     atFunctionName <- getIndicesAtFunctionName(
         projectDescription = projectDescription, 
@@ -386,7 +346,6 @@ applyAddParameter <- function(action, projectDescription, packageName, verbose =
         action = action, 
         packageName = packageName
     )
-    
     for(ind in atFunctionName) {
         
         # Add the function parameter as function...:
@@ -399,7 +358,7 @@ applyAddParameter <- function(action, projectDescription, packageName, verbose =
         }
         
         if(verbose && length(atFunctionName)) {
-            message("StoX: Backward compatibility: Adding parameter '", action$parameterName, "' with value '", valueToAdd, "' in process '", projectDescription[[action$modelName]][[ind]]$processName, "'")
+            message("StoX: Backward compatibility: Adding parameter '", action$parameterName, "' with value '", deparse(valueToAdd), "' in process '", projectDescription[[action$modelName]][[ind]]$processName, "'")
         }
         
         projectDescription[[action$modelName]][[ind]]$functionParameters[[action$parameterName]] <- valueToAdd
@@ -784,6 +743,7 @@ checkBackwardCompatibilityVersion <-  function(backwardCompatibilityAction, proj
         lastSavedVersion <- lastSavedVersion[startsWith(lastSavedVersion, packageName)]
         lastSavedVersion <- interpretVersionString(lastSavedVersion)
         #convert <- lastSavedVersion < backwardCompatibilityAction$changeVersion
+        
         convert <- utils::compareVersion(backwardCompatibilityAction$changeVersion, lastSavedVersion) == 1
     }
     # NA is introduced 

@@ -170,7 +170,7 @@ getResampleFunctions <- function(projectPath) {
         projectPath = projectPath, 
         modelName = "baseline"
     )
-    baselineDataTypes <- baselineProcesses[, sapply(functionName, RstoxFramework::getStoxFunctionMetaData, metaDataName = "functionOutputDataType")]
+    baselineDataTypes <- baselineProcesses[, sapply(functionName, getStoxFunctionMetaData, metaDataName = "functionOutputDataType")]
     
     
     #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
@@ -262,6 +262,9 @@ processPropertyFormats <- list(
         class = "vector", 
         title = "One or more processes to store in BootstrapData", 
         possibleValues = function(projectPath, BootstrapMethodTable) {
+            if(!NROW(BootstrapMethodTable)) {
+                stop("StoX: The BootstrapMethodTable must be specified.")
+            }
             ## Get the reasmpled processes:
             #reasmpledProcesses <- BootstrapMethodTable$ProcessName
             #

@@ -4416,24 +4416,24 @@ expandProcess <- function(projectPath, modelName, processName, values = NULL, re
     
     # Add an AddToStoxBiotic process which inputs the firstStoxBioticProcess 
     suppressWarnings(
-        RstoxFramework::addProcess(
+        addProcess(
             projectPath = projectPath, 
             modelName = modelName, 
             values = values
         )
     )
     # Move the new process to immediately after the existing:
-    processID_toMove <- RstoxFramework::getProcessIDFromProcessName(
+    processID_toMove <- getProcessIDFromProcessName(
         projectPath = projectPath, 
         modelName = modelName, 
         processName = values$processName
     )
-    afterProcessID <- RstoxFramework::getProcessIDFromProcessName(
+    afterProcessID <- getProcessIDFromProcessName(
         projectPath = projectPath, 
         modelName = modelName, 
         processName = processName
     )
-    RstoxFramework::rearrangeProcesses(
+    rearrangeProcesses(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID_toMove$processID, 

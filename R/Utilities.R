@@ -1349,14 +1349,24 @@ escapeForRegex <- function(x) {
 #' 
 hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRUE) {
     
-    functionArguments <- getFunctionArguments(
+    #browser()
+    #
+    #functionArguments <- getFunctionArguments(
+    #    projectPath = projectPath, 
+    #    modelName = modelName, 
+    #    processID = processID
+    #)
+    #
+    ## Extract the process and the function arguments:
+    #process <- functionArguments$process
+    
+    process <- getProcess(
         projectPath = projectPath, 
         modelName = modelName, 
-        processID = processID
+        processID = processID, 
+        #only.valid = TRUE
+        only.valid = FALSE
     )
-    
-    # Extract the process and the function arguments:
-    process <- functionArguments$process
     
     fileOutput <- process$processParameters$fileOutput
     

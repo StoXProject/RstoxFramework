@@ -826,7 +826,7 @@ ReportBootstrap <- function(
     
     
     
-    BootstrapData[[BaselineProcess]][[TargetVariable]] <- setUnitRstoxBase(
+    BootstrapData[[BaselineProcess]][[TargetVariable]] <- RstoxBase::setUnitRstoxBase(
         BootstrapData[[BaselineProcess]][[TargetVariable]], 
         dataType =  dataType, 
         variableName = TargetVariable, 

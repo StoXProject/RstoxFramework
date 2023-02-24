@@ -273,7 +273,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     
     # Return if the StratumPolygon is empty:
     if(!length(processData$StratumPolygon)) {
-        return(processData$StratumPolygon)
+        return(list(stratumPolygon = geojsonsf::sf_geojson(sf::st_as_sf(processData$StratumPolygon), simplify = FALSE)))
     }
     
     # Add StratumName, as this is used by the GUI:
@@ -289,11 +289,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     #    includeInTotal = 
     #)
     
-    return(
-        list(
-            stratumPolygon = stratumPolygon
-        )
-    )
+    return(list(stratumPolygon = stratumPolygon))
     #stratumPolygon
 }
 
@@ -596,7 +592,19 @@ getStartMiddleEndPosition <- function(Log, positionOrigins = c("start", "middle"
     # Fill in the present data:
     #if(!all(Log$LogOrigin[1] == Log$LogOrigin && Log$LogOrigin2[1] == Log$LogOrigin2)) {
     if(!Log[, RstoxBase::allEqual(LogOrigin) && RstoxBase::allEqual(LogOrigin2)]) {
-        stop("StoX: LogOrigin or LogOrigin2 is not constant")
+        hasSomeNAs <- Log[, any(is.na(LogOrigin)) && any(!is.na(LogOrigin))]
+        hasSomeNAs2 <- Log[, any(is.na(LogOrigin2)) && any(!is.na(LogOrigin2))]
+        onlyLastLogIsNA <- Log[, is.na(utils::tail(LogOrigin, 1)) && sum(is.na(LogOrigin)) == 1]
+        onlyLastLogIsNA2 <- Log[, is.na(utils::tail(LogOrigin2, 1)) && sum(is.na(LogOrigin2)) == 1]
+        if(onlyLastLogIsNA || onlyLastLogIsNA2) {
+            stop("StoX: The last LogOrigin or LogOrigin2 is NAs, which suggests an incomplete file. Try using FilterStoxAcoustic() to filter out LogOrigin or LogOrigin2 that are NA.")
+        }
+        if(hasSomeNAs || hasSomeNAs2) {
+            stop("StoX: Some LogOrigin or LogOrigin2 are NAs. Try using FilterStoxAcoustic() to filter out LogOrigin or LogOrigin2 that are NA.")
+        }
+        else {
+            stop("StoX: LogOrigin or LogOrigin2 is not constant")
+        }
     }
     
     presentNames <- c(outer(Log[1, c(LogOrigin, LogOrigin2)], c("Longitude", "Latitude"), paste0))

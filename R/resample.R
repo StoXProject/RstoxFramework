@@ -57,8 +57,9 @@ Bootstrap <- function(
         
         return(outputData)
     }
+    
     # Identify the first process set for resampling by the BootstrapMethodTable (here BootstrapMethodTable$ProcessName can be a vector, in which case the table is returned from the first process of these and onwards):
-    processesSansProcessData <- getProcessesSansProcessData(projectPath, modelName = "baseline", startProcess = BootstrapMethodTable$ProcessName, endProcess = OutputProcesses, return.processIndex = TRUE)
+    processesSansProcessData <- getProcessesSansProcessData(projectPath, modelName = "baseline", startProcess = BootstrapMethodTable$ProcessName, endProcess = OutputProcesses, return.processIndex = TRUE, only.valid = TRUE)
     
     # Check the output processes:
     if(length(OutputProcesses) && !all(OutputProcesses %in% processesSansProcessData$processName)) {
@@ -116,12 +117,12 @@ Bootstrap <- function(
             processesSansProcessData$processName[hasSeed], 
             BaselineSeedTable$ProcessName
         )
-        presentInBaselineSeedTableButNotInBaseline <- setdiff(
-            BaselineSeedTable$ProcessName, 
-            processesSansProcessData$processName[hasSeed]
-        )
-        if(length(presentInBaselineButNotInBaselineSeedTable) || length(presentInBaselineSeedTableButNotInBaseline)) {
-            stop("The BaselineSeedTable must contain Seed for the processes (and only the processes) ", paste(processesSansProcessData$processName[hasSeed], collapse = ", "), ".")
+        #presentInBaselineSeedTableButNotInBaseline <- setdiff(
+        #    BaselineSeedTable$ProcessName, 
+        #    processesSansProcessData$processName[hasSeed]
+        #)
+        if(length(presentInBaselineButNotInBaselineSeedTable)) {
+            stop("The BaselineSeedTable must contain Seed for the processes ", paste(processesSansProcessData$processName[hasSeed], collapse = ", "), ".")
         }
     }
     # Construct a list of lists, where each list contains a list of Seed named by the processes using Seed in the Baseline:
@@ -197,6 +198,7 @@ Bootstrap <- function(
         )
     )
     
+    
     # Here we need to merge the NeCDF4 bootstrap files, when we get these files implemented. For now all bootstrap data are accumulated in memory and dumped to an RData file.
     
     # Changed on 2020-11-02 to run the baseline out after bootstrapping (with no modification, so a clean baseline run):
@@ -247,8 +249,6 @@ Bootstrap <- function(
         )
     )
     
-    
-    
     # Add the process names after rbinding each output:
     bootstrapDataNames <- names(BootstrapData[[1]])
     BootstrapData <- lapply(bootstrapDataNames, rbindlistByName, x = BootstrapData)
@@ -265,8 +265,6 @@ Bootstrap <- function(
     for(bootstrapDataName in names(BootstrapData)) {
         attr(BootstrapData[[bootstrapDataName]], "dataType") <- dataTypes[[bootstrapDataName]]
     }
-    
-    
     
     
     return(BootstrapData)
@@ -530,6 +528,69 @@ addBootstrapIDOne <- function(x, ind) {
 
 
 # This function resamples varToResample with replacement by altering the input data. Used in ResampleMeanLengthDistributionData(), ResampleBioticAssignment() and ResampleMeanNASCData():
+resampleDataBy_new4.0.0_excludingPSUsThatAreNotResampled <- function(data, seed, varToScale, varToResample, resampleBy) {
+    
+    # Get the unique resampleBy, and sort in C-locale for consistensy across platforms:
+    #uniqueResampleBy <- unique(data[[resampleBy]])
+    #uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "C")
+    
+    # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
+    uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX", na_last = FALSE)
+    
+    # Build a table of (usually) Stratum and Seed and merge with the MeanLengthDistributionData:
+    seedTable <- data.table::data.table(
+        resampleBy = uniqueResampleBy, 
+        seed = RstoxBase::getSeedVector(seed, size = length(uniqueResampleBy))
+    )
+    data.table::setnames(seedTable, c(resampleBy, "seed"))
+    data <- merge(data, seedTable, by = resampleBy, all = TRUE)
+    
+    # Resample the data:
+    data[, BootstrapSampleFactor := getResampledCount(.SD, seed = seed[1], varToResample = varToResample), by = resampleBy]
+    
+    # Scale the varToScale
+    for(var in varToScale) {
+        data[, eval(var) := get(var) * BootstrapSampleFactor]
+    }
+    
+    # Subset out those that have BootstrapSampleFactor = 0:
+    data <- subset(data, BootstrapSampleFactor > 0)
+    
+    data[, seed := NULL]
+    
+    return(data)
+}
+
+
+# Function to resample Hauls of one subset of the data:
+getResampledCount <- function(subData, seed, varToResample) {
+    
+    # Resample the unique:
+    if(length(varToResample) != 1) {
+        stop("StoX: varToResample must be a single string naming the variable to resample")
+    }
+    resampled <- RstoxBase::sampleSorted(unique(subData[[varToResample]]), seed = seed, replace = TRUE)
+    # Tabulate the resamples:
+    resampleTable <- data.table::as.data.table(table(resampled, useNA = "ifany"))
+    # Set an unmistakable name to the counts:
+    data.table::setnames(resampleTable, c("resampled","N"), c(varToResample, "BootstrapSampleFactor"))
+    
+    # Merge the resampled counts into the data:
+    # The sort = FALSE is very important, as it retains the order of the data. This should probably be replaced by a more robust solution, e.g. by merging in resampleDataBy():
+    count <- merge(subData, resampleTable, by = varToResample, all.x = TRUE, sort = FALSE)
+    
+    # Insert the new count into varToScale (with NAs replaced by 0):
+    count[, BootstrapSampleFactor := ifelse(
+        is.na(count$BootstrapSampleFactor), 
+        0, 
+        count$BootstrapSampleFactor
+    )]
+    
+    return(count$BootstrapSampleFactor)
+}
+
+
+# This function resamples varToResample with replacement by altering the input data. Used in ResampleMeanLengthDistributionData(), ResampleBioticAssignment() and ResampleMeanNASCData():
 resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     
     # Get the unique resampleBy, and sort in C-locale for consistensy across platforms:
@@ -747,7 +808,7 @@ ResampleMeanNASCData <- function(MeanNASCData, Seed) {
 #' @param BaselineProcess A strings naming the baseline process to report from the \code{\link{BootstrapData}}. If a process with 
 #' @param AggregationFunction The function to apply to each bootstrap run. This must be a function returning a single value.
 #' @param BootstrapReportFunction The function to apply across bootstrap run, such as "cv" or "c".
-#' @param Percentages The percentages to report Percentiles for when BootstrapReportFunction = "Percentages".
+#' @param Percentages The percentages to report Percentiles for when BootstrapReportFunction = "summaryStox".
 #' @param AggregationWeightingVariable The variable to weight by in the \code{AggregationFunction}.
 #' @param BootstrapReportWeightingVariable The variable to weight by in the \code{BootstrapReportFunction}.
 #'
@@ -774,6 +835,7 @@ ReportBootstrap <- function(
     Percentages = double(), 
     GroupingVariables = character(), 
     InformationVariables = character(), 
+    Filter = character(), 
     RemoveMissingValues = FALSE, 
     AggregationWeightingVariable = character(), 
     BootstrapReportWeightingVariable = character()
@@ -816,18 +878,21 @@ ReportBootstrap <- function(
         }
     }
     
+    # Subset the BootstrapData to only the TargetVariable, GroupingVariables, InformationVariables, AggregationWeightingVariable, BootstrapReportWeightingVariable and "BootstrapID"
+    toKeep <- c(TargetVariable, GroupingVariables, InformationVariables, AggregationWeightingVariable, BootstrapReportWeightingVariable, "BootstrapID")
+    relevantBootstrapData <- BootstrapData[[BaselineProcess]][, ..toKeep]
+    # Free the memory of the large object:
+    rm(BootstrapData)
+    gc()
     
     
-    # Store the unique combinations of the GroupingVariables from the BootstrapData[[BaselineProcess]]:
-    uniqueGroupingVariablesToKeep <- unique(subset(BootstrapData[[BaselineProcess]], select = GroupingVariables))
+    # Store the unique combinations of the GroupingVariables from the relevantBootstrapData:
+    uniqueGroupingVariablesToKeep <- unique(subset(relevantBootstrapData, select = GroupingVariables))
     setorder(uniqueGroupingVariablesToKeep)
     
-     
-    
-    
-    
-    BootstrapData[[BaselineProcess]][[TargetVariable]] <- RstoxBase::setUnitRstoxBase(
-        BootstrapData[[BaselineProcess]][[TargetVariable]], 
+    # Set the unit of the target variable:
+    relevantBootstrapData[[TargetVariable]] <- RstoxBase::setUnitRstoxBase(
+        relevantBootstrapData[[TargetVariable]], 
         dataType =  dataType, 
         variableName = TargetVariable, 
         unit = TargetVariableUnit
@@ -836,7 +901,7 @@ ReportBootstrap <- function(
     # Run the initial aggregation (only applicable for functions with output of length 1):
     AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
     output <- RstoxBase::aggregateBaselineDataOneTable(
-        stoxData = BootstrapData[[BaselineProcess]], 
+        stoxData = relevantBootstrapData, 
         TargetVariable = TargetVariable, 
         aggregationFunction = AggregationFunction, 
         GroupingVariables = c(GroupingVariables, "BootstrapID"), 
@@ -867,14 +932,16 @@ ReportBootstrap <- function(
         uniqueGroupingVariablesToKeep = uniqueGroupingVariablesToKeep
     )
     
-    ### # Discard all rows with combinations of the GroupingVariables that are not present in the BootstrapData[[BaselineProcess]]:
+    ### # Discard all rows with combinations of the GroupingVariables that are not present in the relevantBootstrapData:
     ### output <- output[uniqueCombinations, , on = names(uniqueCombinations)]
     
     # Add the unit to the report:
-    if(RstoxData::hasUnit(BootstrapData[[BaselineProcess]][[TargetVariable]], property = "shortname")) {
-        unit <- RstoxData::getUnit(BootstrapData[[BaselineProcess]][[TargetVariable]], property = "shortname")
+    if(RstoxData::hasUnit(relevantBootstrapData[[TargetVariable]], property = "shortname")) {
+        unit <- RstoxData::getUnit(relevantBootstrapData[[TargetVariable]], property = "shortname")
         output <- cbind(output, Unit = unit)
     }
+    
+    output <- filterTable(output, filter = Filter)
     
     # Add the grouping and information variables as attributes, for use e.g. when plotting:
     attr(output, "GroupingVariables") <- GroupingVariables

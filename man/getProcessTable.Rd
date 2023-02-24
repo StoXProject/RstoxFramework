@@ -40,7 +40,8 @@ getProcessesSansProcessData(
   beforeProcessID = NULL,
   argumentFilePaths = NULL,
   only.valid = FALSE,
-  return.processIndex = FALSE
+  return.processIndex = FALSE,
+  warn = TRUE
 )
 
 getProcessAndFunctionNames(
@@ -51,7 +52,8 @@ getProcessAndFunctionNames(
   afterProcessID = NULL,
   beforeProcessID = NULL,
   argumentFilePaths = NULL,
-  return.processIndex = FALSE
+  return.processIndex = FALSE,
+  warn = TRUE
 )
 }
 \arguments{
@@ -72,6 +74,8 @@ getProcessAndFunctionNames(
 \item{only.valid}{Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).}
 
 \item{return.processIndex}{Logical: If TRUE include the process indices as a sequence starting from 1 in each model.}
+
+\item{warn}{Logical: If TRUE show warnings that are not highly important.}
 }
 \description{
 Functions to get the process table of a model.

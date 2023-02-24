@@ -11,7 +11,7 @@
 #' @param save Logical: If TRUE save the project after running.
 #' @param force.restart Logical: If TRUE restart the model before running.
 #' @param close Logical: If TRUE close the project after running and getting the output.
-#' @param returnModelData Logical: If TRUE return the output of the model runs.
+#' @param returnModelData Logical: If TRUE return the output of the model runs. Can also be given as a string vector holding the names of the models to return data from. If TRUE, the specific models to return data from (across models) can be given by \code{processes}.
 #' @param ... Arguments passed on to \code{\link{openProject}}, \code{\link{closeProject}} and \code{\link{runProcesses}}.
 #' 
 #' @return
@@ -24,7 +24,7 @@ runModel <- function(
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
     run = TRUE, save = TRUE, force.restart = FALSE, 
-    replaceDataList = list(), replaceArgsList = list(), 
+    replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
     returnModelData = TRUE, 
@@ -37,7 +37,7 @@ runModel <- function(
     
     # Close after running if requested:
     if(close) {
-        on.exit(closeProject(projectPath, save = save, ...))
+        on.exit(closeProject(projectPath, save = save, msg = msg))
     }
     
     # Run the model if required:
@@ -59,6 +59,7 @@ runModel <- function(
                 force.restart = force.restart, 
                 replaceDataList = replaceDataList, 
                 replaceArgsList = replaceArgsList, 
+                prependProcessList = prependProcessList, 
                 fileOutput = fileOutput, 
                 setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
                 purge.processData = purge.processData, 
@@ -113,9 +114,10 @@ runProject <- function(
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype  = TRUE, unlistDepth2 = FALSE, 
     run = TRUE, save = TRUE, force.restart = FALSE, 
-    replaceDataList = list(), replaceArgsList = list(), 
+    replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
+    returnModelData = TRUE, 
     try = TRUE, 
     close = FALSE, 
     unlist.models = TRUE, 
@@ -130,7 +132,7 @@ runProject <- function(
     
     # Close after running if requested:
     if(close) {
-        on.exit(closeProject(projectPath, save = save, ...))
+        on.exit(closeProject(projectPath, save = save, msg = msg))
     }
     
     if(msg) {
@@ -142,9 +144,18 @@ runProject <- function(
         )
     }
     
+    # Return model data from all models by default (is this risky?):
+    if(isTRUE(returnModelData)) {
+        returnModelData <- rep(TRUE, length(modelNames))
+    }
+    else if(is.character(returnModelData)) {
+        returnModelData <- modelNames %in% returnModelData
+    }
+    
     projectData <- mapply(
         runModel, 
         modelName = modelNames, 
+        returnModelData = returnModelData, 
         MoreArgs = list(
             projectPath, 
             startProcess = startProcess, 
@@ -155,6 +166,7 @@ runProject <- function(
             force.restart = force.restart, 
             replaceDataList = replaceDataList, 
             replaceArgsList = replaceArgsList, 
+            prependProcessList = prependProcessList, 
             fileOutput = fileOutput, 
             processes = processes, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
@@ -212,9 +224,10 @@ runProjects <- function(
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
     run = TRUE, save = TRUE, force.restart = FALSE, 
-    replaceDataList = list(), replaceArgsList = list(), 
+    replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
+    returnModelData = TRUE, 
     try = TRUE, 
     unlist.models = FALSE, 
     close = FALSE, 
@@ -229,9 +242,10 @@ runProjects <- function(
         processes = processes, startProcess = startProcess, endProcess = endProcess, 
         drop.datatype = drop.datatype, unlistDepth2 = unlistDepth2, 
         run = run, save = save, force.restart = force.restart, 
-        replaceDataList = replaceDataList, replaceArgsList = replaceArgsList, 
+        replaceDataList = replaceDataList, replaceArgsList = replaceArgsList, prependProcessList = prependProcessList, 
         fileOutput = fileOutput, 
         setUseProcessDataToTRUE = setUseProcessDataToTRUE, purge.processData = purge.processData, 
+        returnModelData = returnModelData, 
         try = try, 
         unlist.models = unlist.models, 
         close = close, 
@@ -239,13 +253,13 @@ runProjects <- function(
         simplify = FALSE
     )
     
-    output <- rbindListRecursive(output)
+    output <- rbindListRecursive(output, names = basename(projectPaths))
     
     
     return(output)
 }
 
-rbindListRecursive <- function(x) {
+rbindListRecursive <- function(x, names) {
     
     x <- unlist(unname(x), recursive = FALSE)
     
@@ -257,15 +271,31 @@ rbindListRecursive <- function(x) {
     for(namesVector in namesList) {
         # Declare the list element:
         output <- createNestedListElement(output, namesVector)
-        # Insert the rbinded table:
-        output[[namesVector]] <- data.table::rbindlist(extractFromAllProcessOutputs(namesVector, x), fill = TRUE)
+        
+        #  Extract the output:
+        extractedOutput <- extractFromAllProcessOutputs(namesVector, x)
+        
+        
+        if(length(extractedOutput)) {
+            names(extractedOutput) <- names
+            # Rbind tables and matrices:
+            if(data.table::is.data.table(extractedOutput[[1]])) {
+                extractedOutput <- data.table::rbindlist(extractedOutput, fill = TRUE, idcol = "projectName")
+            }
+            else if(is.matrix(extractedOutput[[1]])) {
+                extractedOutput <- mapply(cbind, projectName =  names(extractedOutput), extractedOutput)
+                extractedOutput <- do.call(rbind, extractedOutput)
+            }
+            
+            # Insert into the output:
+            output[[namesVector]] <- extractedOutput
+        }
     }
         
     return(output)
 }
 
 extractFromAllProcessOutputs <- function(nameVector, x) {
-    
     
     if(length(nameVector) == 1) {
         output <- x[names(x) == nameVector]
@@ -289,7 +319,7 @@ extractFromAllProcessOutputs <- function(nameVector, x) {
 
 pasteNamesRecursive <- function (L, sep = "/") {
     # Return the names if all elements are not lists, and recurse futher if any are lists:
-    areNotList <- sapply(L, inherits, c("data.table", "data.frame"))
+    areNotList <- sapply(L, inherits, c("data.table", "data.frame", "ggplot"))
     areList <- !areNotList
     
     if(any(areList)) {

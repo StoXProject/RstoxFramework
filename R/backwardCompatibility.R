@@ -744,7 +744,8 @@ checkBackwardCompatibilityVersion <-  function(backwardCompatibilityAction, proj
         lastSavedVersion <- interpretVersionString(lastSavedVersion)
         #convert <- lastSavedVersion < backwardCompatibilityAction$changeVersion
         
-        convert <- utils::compareVersion(backwardCompatibilityAction$changeVersion, lastSavedVersion) == 1
+        #convert <- utils::compareVersion(backwardCompatibilityAction$changeVersion, lastSavedVersion) == 1
+        convert <- semver::parse_version(backwardCompatibilityAction$changeVersion) > semver::parse_version(lastSavedVersion)
     }
     # NA is introduced 
     else if(is.na(lastSavedVersion)) {
@@ -770,15 +771,31 @@ interpretVersionString <- function(versionString) {
 
 #' Backward compabitibility actions:
 #' 
-#' @inheritParams general_arguments
 #' @param projectPath2.7 The path to the StoX 2.7 project to convert to StoX 3.x.x.
 #' @param projectPath3 The path to the StoX 3.x.x project used as model for the conversion.
 #' @param newProjectPath3 The path to the StoX 3.x.x project to create.
+#' @param functionsToApplyProjectXML2.7To A character vector of names of process data functions to read from the project.xml of the \code{projectPath2.7}.
+#' @param ow Logical: If TRUE, overwrite the \code{newProjectPath3}.
 #' @param run Logical: If TRUE, run the entire project after converting. If FALSE, changes will not be stored in the project.json before one opens and runs the baseline.
+#' @param msg Logical: If TRUE, print extra messages.
 #' 
 #' @export
 #' 
-convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow = FALSE, run = TRUE) {
+convertStoX2.7To3 <- function(
+    projectPath2.7, 
+    projectPath3, 
+    newProjectPath3, 
+    functionsToApplyProjectXML2.7To = c(
+        "DefineSurvey", 
+        "DefineStratumPolygon", 
+        "DefineBioticPSU", 
+        "DefineAcousticPSU", 
+        "DefineBioticAssignment"
+    ), 
+    ow = FALSE, 
+    run = TRUE, 
+    msg = FALSE
+) {
     
     # Save to a different project:
     createProject(
@@ -790,6 +807,9 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow 
         Application = R.version.string
     )
     # Replace the project.json file from the projectPath3:
+    if(!file.exists(projectPath3)) {
+        stop("The StoX >= 3.0.0. template project must exist.")
+    }
     projectDescriptionFile3 <- getProjectPaths(projectPath3, "projectJSONFile")
     newProjectDescriptionFile3 <- getProjectPaths(newProjectPath3, "projectJSONFile")
     unlink(newProjectDescriptionFile3, force = TRUE)
@@ -809,17 +829,12 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow 
     
     # Replace the project.xml file path:
     projectXMLFilePath <- RstoxBase::getProjectXMLFilePath(projectPath = projectPath2.7)
-    functionsToApplyProjectXML2.7To <- c(
-        "DefineSurvey", 
-        "DefineStratumPolygon", 
-        "DefineBioticPSU", 
-        "DefineAcousticPSU", 
-        "DefineBioticAssignment"
-    )
+    
     lapply(functionsToApplyProjectXML2.7To, 
         applyProjectXML2.7, 
         projectPath3 = newProjectPath3, 
-        projectXMLFilePath = projectXMLFilePath
+        projectXMLFilePath = projectXMLFilePath, 
+        msg = msg
     )
     
     output <- newProjectPath3
@@ -841,7 +856,7 @@ convertStoX2.7To3 <- function(projectPath2.7, projectPath3, newProjectPath3, ow 
 
 
 # Function to change the FileName in processes using Define* with DefinitionMethod = "ResourceFile", and FileName ending with "xml":
-applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, projectXMLFilePath = NULL) {
+applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, projectXMLFilePath = NULL, msg = FALSE) {
     
     # Find the processes:
     processName <- findProcess(
@@ -851,7 +866,9 @@ applyProjectXML2.7 <- function(functionName, projectPath3, projectPath2.7, proje
     )$processName
     
     if(!length(processName)) {
-        warning("No processes using the function ", functionName, " found in the baseline model. Returning NULL.")
+        if(msg) {
+            message("No processes using the function ", functionName, " found in the baseline model. Returning NULL.")
+        }
         return(NULL)
     }
     else if(length(processName) > 1) {
@@ -1310,5 +1327,192 @@ mergeAssignment2.7With3 <- function(bioticassignment_2.7, BioticAssignment_3) {
 
 
 
+# Function to compare one output from the old and new StoX project using merging:
+compareByMerging <- function(output_Old, output_New, processName_Old, processName_New, keys_Old, keys_New, dataVariable, tolerance, data.out = FALSE) {
+    
+    old <- data.table::as.data.table(output_Old$outputData[[processName_Old]])
+    new <- output_New[[processName_New]]
+    if(!data.table::is.data.table(new) && is.list(new) && "Data" %in% names(new)) {
+        new <- data.table::as.data.table(new$Data)
+    }
+    else {
+        new <- data.table::as.data.table(new)
+    }
+    
+    merged <- merge(old, new, by.x = keys_Old, by.y = keys_New, all = TRUE)
+    
+    dataVariable_Old <- paste0(dataVariable, ".x")
+    dataVariable_New <- paste0(dataVariable, ".y")
+    merged[ , offset := get(dataVariable_New) / get(dataVariable_Old)]
+    
+    # :
+    hasOffset <- subset(merged, abs((offset - 1)) > tolerance)
+    positiveInOld_NAInNew <- subset(merged, !is.na(get(dataVariable_Old)) & is.na(get(dataVariable_New)))
+    NAInOld_PositiveInNew <- subset(merged, is.na(get(dataVariable_Old)) & !is.na(get(dataVariable_New)))
+    
+    
+    sumPositiveInOld_NAInNew <- positiveInOld_NAInNew[,  sum(get(dataVariable_Old), na.rm = TRUE)]
+    sumNAInOld_PositiveInNew <- NAInOld_PositiveInNew[,  sum(get(dataVariable_New), na.rm = TRUE)]
+    sum_Old <- merged[,  sum(get(dataVariable_Old), na.rm = TRUE)]
+    sum_New <- merged[,  sum(get(dataVariable_Old), na.rm = TRUE)]
+    
+    
+    output <- list(
+        sumPositiveInOld_NAInNew = sumPositiveInOld_NAInNew,
+        sumNAInOld_PositiveInNew = sumNAInOld_PositiveInNew,
+        sum_Old = sum_Old,
+        sum_New = sum_New,
+        fractionSumPositiveInOld_NAInNew = sumPositiveInOld_NAInNew / sum_Old, 
+        fractionSumNAInOld_PositiveInNew = sumNAInOld_PositiveInNew / sum_New, 
+        hasOffset = hasOffset, 
+        positiveInOld_NAInNew = positiveInOld_NAInNew,
+        NAInOld_PositiveInNew = NAInOld_PositiveInNew, 
+        tolerance = tolerance
+    )
+    if(data.out) {
+        output <- c(
+            output, 
+            list(
+                merged = merged
+            )
+        )
+    }
+    
+    return(output)
+}
 
+# Function to compare one output from the old and new StoX project using cbinding (used for SuperIndAbundance/SuperIndividuals, where keys are not sufficient in the SuperIndAbundance):
+compareByCbinding <- function(output_Old, output_New, processName_Old, processName_New, subsetByNAOn_Old, subsetByNAOn_New, orderBy_Old, orderBy_New, dataVariable, tolerance, data.out = FALSE) {
+    
+    old <- data.table::as.data.table(output_Old$outputData[[processName_Old]])
+    new <- output_New[[processName_New]]
+    if(!data.table::is.data.table(new) && is.list(new) && "Data" %in% names(new)) {
+        new <- data.table::as.data.table(new$Data)
+    }
+    else {
+        new <- data.table::as.data.table(new)
+    }
+    
+    # Discard rows of Old with NA for subsetByNAOn_Old:
+    atNA_Old <- rowSums(is.na(old[, ..subsetByNAOn_Old])) == length(subsetByNAOn_Old)
+    old <- subset(old, atNA_Old)
+    atNA_New <- rowSums(is.na(new[, ..subsetByNAOn_New])) == length(subsetByNAOn_New)
+    new <- subset(new, atNA_New)
+    
+    # Order:
+    data.table::setorderv(old, orderBy_Old)
+    data.table::setorderv(new, orderBy_New)
+    
+    
+    output <- list(
+        test = all(abs(new[[dataVariable]] - old[[dataVariable]]) < tolerance), 
+        tolerance = tolerance
+    )
+    if(data.out) {
+        output <- c(
+            output, 
+            list(
+                old = old, 
+                new = new
+            )
+        )
+    }
+    
+    return(output)
+}
+
+
+
+#' Compare processes in a StoX 2.7 project and a copy in StoX >= 3.0.0:
+#' 
+#' @param projectPathOld The path to the StoX 2.7 project.
+#' @param projectPathNew The path to the copy project in StoX >= 3.0.0.
+#' @param comparisonModel A list with specifications of what and how to compare the outputs from the old and new project (see Details).
+#' @param output_Old The StoX 2.7 table.
+#' @param output_New The StoX 2.7 table.
+#' @param data.out The StoX 2.7 table.
+#' 
+#' The \code{comparisonModel} is a list with the following required elements:
+#' \itemize{
+#'  \item{dataType}{The StoX >= 3.0.0 datatypes to compare.}
+#'  \item{dataVariable}{The specific variable to compare in the StoX >= 3.0.0 datatypes.}
+#'  \item{processName_Old,processName_New}{The process named in the old and new project, respectively. Must correspond to the \code{dataType}.}
+#'  \item{compareAction}{A string vector specifyfing whether to merge ("merge") or cbind ("cbind") when comparing. Cbind is only for SuperIndividuals in StoX 2.7, which does not have unique keys in.}
+#'  \item{keys_Old,keys_New"}{A list of the keys of the datatypes in the old and new project, respectively. Specify only for datatypes to be merged (use NA for those that use compareAction = "cbind").}
+#'  \item{subsetByNAOn_Old,subsetByNAOn_New"}{A list of variables to subset the old and new data by, respectively. When any of these are NA in a row, the row is skipped. Specify only for datatypes to be cbinded (use NA for those that use compareAction = "merge").}
+#'  \item{orderBy_Old,orderBy_New}{SA list of variables to order the old and new data by, respectively (after subsetting using \code{subsetByNAOn_Old} and \code{subsetByNAOn_New}). Specify only for datatypes to be cbinded (use NA for those that use compareAction = "merge").}
+#'  \item{tolerance}{A numeric vector setting the tolerance for the comparison, below which the outputs are regarded as equal.}
+#' }
+#' 
+#' @export
+#' 
+compareSweptAreaBaseline <- function(projectPathOld, projectPathNew, comparisonModel, output_Old = NULL, output_New = NULL, data.out = FALSE) {
+    
+    numberOfComparisons <- length(comparisonModel$dataType)
+    
+    comparison <- vector("list", numberOfComparisons)
+    
+    # Run in old StoX:
+    if(!length(output_Old)) {
+        stop("The output_Old must be given. Please run the following in Rstox 1.11.1: \n\tlibrary(Rstox) \n\toutput_Old <- Rstox::getBaseline(", projectPathOld, ")")
+        #library(Rstox)
+        #output_Old <- Rstox::getBaseline(projectPathOld)
+    }
+    
+    # Run in new StoX:
+    if(!length(output_New)) {
+        output_New <- RstoxFramework::runModel(projectPathNew, modelName = "baseline", verbose = TRUE, close = TRUE)
+    }
+    
+    
+    
+    for(ind in seq_len(numberOfComparisons)) {
+        if(comparisonModel$compareAction[[ind]] == "merge") {
+            comparison[[ind]] <- compareByMerging(
+                output_Old = output_Old, 
+                output_New = output_New, 
+                processName_Old = comparisonModel$processName_Old[[ind]], 
+                processName_New = comparisonModel$processName_New[[ind]], 
+                keys_Old = comparisonModel$keys_Old[[ind]], 
+                keys_New = comparisonModel$keys_New[[ind]], 
+                dataVariable = comparisonModel$dataVariable[[ind]], 
+                tolerance = comparisonModel$tolerance[[ind]], 
+                data.out = data.out
+            )
+        }
+        else if(comparisonModel$compareAction[[ind]] == "cbind") {
+            comparison[[ind]] <- compareByCbinding(
+                output_Old = output_Old, 
+                output_New = output_New, 
+                processName_Old = comparisonModel$processName_Old[[ind]], 
+                processName_New = comparisonModel$processName_New[[ind]], 
+                subsetByNAOn_Old = comparisonModel$subsetByNAOn_Old[[ind]], 
+                subsetByNAOn_New = comparisonModel$subsetByNAOn_New[[ind]], 
+                orderBy_Old = comparisonModel$orderBy_Old[[ind]], 
+                orderBy_New = comparisonModel$orderBy_New[[ind]], 
+                dataVariable = comparisonModel$dataVariable[[ind]], 
+                tolerance = comparisonModel$tolerance[[ind]], 
+                data.out = data.out
+            )
+        }
+        else {
+            stop("Unknown compareAction")
+        }
+    }
+    
+    names(comparison) <- comparisonModel$dataType
+    
+    if(data.out) {
+        output <- list(
+            comparison = comparison, 
+            output_Old = output_Old, 
+            output_New = output_New
+        )
+    }
+    else {
+        output <- comparison
+    }
+    
+    return(output)
+}
 

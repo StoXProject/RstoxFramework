@@ -17,9 +17,11 @@ runProjects(
   force.restart = FALSE,
   replaceDataList = list(),
   replaceArgsList = list(),
+  prependProcessList = list(),
   fileOutput = NULL,
   setUseProcessDataToTRUE = TRUE,
   purge.processData = FALSE,
+  returnModelData = TRUE,
   try = TRUE,
   unlist.models = FALSE,
   close = FALSE,
@@ -51,11 +53,15 @@ runProjects(
 
 \item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
 
+\item{prependProcessList}{A list of \code{values} used in \code{\link{prependProcess}}, named by the processes to prepend a process to.}
+
 \item{fileOutput}{Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.}
 
 \item{setUseProcessDataToTRUE}{Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.}
 
 \item{purge.processData}{Logical: If TRUE replace process data entirely.}
+
+\item{returnModelData}{Logical: If TRUE return the output of the model runs. Can also be given as a string vector holding the names of the models to return data from. If TRUE, the specific models to return data from (across models) can be given by \code{processes}.}
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 

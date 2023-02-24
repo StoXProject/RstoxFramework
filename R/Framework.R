@@ -237,14 +237,21 @@ getAvaiableTemplates <- function(list.out = FALSE) {
 #' @export
 #'
 getTemplate <- function(template) {
-    # Get the templates:
-    templates <- getAvaiableTemplates(list.out = TRUE)
-    if(template %in% names(templates)) {
-        template <- templates[[template]]
+    # Support reading a project description:
+    if(isProject(template)) {
+        template <- readProjectDescription(projectPath, verbose = verbose)$projectDescription
     }
     else {
-        warning("StoX: Invalid template name ", template, ". Available templates are ", paste0(names(templates), collapse = ", "))
+        # Get the templates:
+        templates <- getAvaiableTemplates(list.out = TRUE)
+        if(template %in% names(templates)) {
+            template <- templates[[template]]
+        }
+        else {
+            warning("StoX: Invalid template name ", template, ". Available templates are ", paste0(names(templates), collapse = ", "))
+        }
     }
+    
     
     # Define the process IDs and return the template:
     defineProcessIDs(template)
@@ -351,13 +358,6 @@ createProject <- function(
     
     # Get the template:
     thisTemplate <- getTemplate(template)
-    
-    ## Get the tempaltes:
-    #templates <- getAvaiableTemplates(TRUE)
-    #thisTemplate <- templates[[template]]
-    #if(length(thisTemplate) == 0) {
-    #    stop("The requested template does not exist. See getAvaiableTemplates() for a list of the available templates (with list.out = TRUE if y#ou wish to see what the dirrefent templates are.)")
-    #}
     
     # Create the project folder structure:
     projectSkeleton <- createProjectSkeleton(projectPath, ow = ow)
@@ -740,6 +740,11 @@ isProject <- function(projectPath) {
 }
 # Checks only one project:
 isProjectOne <- function(projectPath) {
+    if(!is.character(projectPath)) {
+        warning("projectPath must be a character string.")
+        return(FALSE)
+    }
+    
     # If the project is zipped, read the paths without unzipping:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
         files <- utils::unzip(projectPath, list = TRUE)
@@ -2454,8 +2459,8 @@ readProcessIndexTable <- function(projectPath, modelName = NULL, processes = NUL
     }
     else {
         # startProcess and endProcess can be given as process names or IDs:
-        startProcessNumeric <- matchProcesses(startProcess, processIndexTable)
-        endProcessNumeric <- matchProcesses(endProcess, processIndexTable)
+        startProcessNumeric <- matchProcesses(startProcess, processIndexTable, warn = warn)
+        endProcessNumeric <- matchProcesses(endProcess, processIndexTable, warn = warn)
         # If there are less elements affter matching, issue a warning:
         if(any(is.na(startProcessNumeric))) {
             warning(
@@ -2852,7 +2857,7 @@ scanForModelError <- function(projectPath, modelName = NULL, startProcess = 1, e
 #' @export
 #' @rdname getProcessTable
 #' 
-getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, only.valid = FALSE, return.processIndex = FALSE) {
+getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, only.valid = FALSE, return.processIndex = FALSE, warn = TRUE) {
     
     # Read the memory file paths once, and insert to the get* functions below to speed things up:
     if(length(argumentFilePaths) == 0) {
@@ -2868,7 +2873,8 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
         afterProcessID = afterProcessID, 
         beforeProcessID = beforeProcessID, 
         argumentFilePaths = argumentFilePaths, 
-        return.processIndex = return.processIndex
+        return.processIndex = return.processIndex, 
+        warn = warn
     )
     if(length(processTable) == 0) {
         return(processTable)
@@ -2926,7 +2932,7 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
 #' @export
 #' @rdname getProcessTable
 #' 
-getProcessAndFunctionNames <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, return.processIndex = FALSE) {
+getProcessAndFunctionNames <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, return.processIndex = FALSE, warn = TRUE) {
     
     # Read the memory file paths once, and insert to the get* functions below to speed things up:
     if(length(argumentFilePaths) == 0) {
@@ -2939,7 +2945,8 @@ getProcessAndFunctionNames <- function(projectPath, modelName = NULL, startProce
         modelName = modelName, 
         startProcess = startProcess, 
         endProcess = endProcess, 
-        return.processIndex = return.processIndex
+        return.processIndex = return.processIndex, 
+        warn = warn
     )
     # Return an empty data.table if the processIndexTable is empty:
     if(nrow(processIndexTable) == 0) {
@@ -3148,7 +3155,7 @@ applyEmptyFunction <- function(process) {
 }
 
 
-# This funciton is quite central, as it is resposible of setting the default values of funcitons. Only the function inputs and parameters introduced to a process using setFunctionName() can be modified:
+# This funciton is quite central, as it is responsible of setting the default values of functions. Only the function inputs and parameters introduced to a process using setFunctionName() can be modified:
 setFunctionName <- function(process, newFunctionName, add.defaults = FALSE) {
     
     # If empty function name, return empty list:
@@ -4340,11 +4347,11 @@ addProcesses <- function(projectPath, projectMemory, returnProcessTable = TRUE, 
 #' @param values A list of values to assign to the process, such as list(processName = "ReadBiotic", functionName = "RstoxBase::ReadBiotic").
 #' @param returnProcessTable Logical: If TRUE return the process table.
 #' @param add.defaults Logical: If TRUE defaults of a function are added when setting the function of the process.
-#' @param strict Logical: If FALSE a proposed process nname is changed to the default new process name, whereas TRUE throws an error.
+#' @param strict Logical: If FALSE a proposed process name is changed to the default new process name, whereas TRUE throws an error.
 #' 
 #' @export
 #' 
-addProcess <- function(projectPath, modelName, values = NULL, returnProcessTable = TRUE, archive = TRUE, add.defaults = FALSE, strict = TRUE) {
+addProcess <- function(projectPath, modelName, values = NULL, returnProcessTable = TRUE, archive = TRUE, add.defaults = FALSE, strict = TRUE, afterProcessID =  NULL, beforeProcessID =  NULL) {
     
     # values must be a list:
     if(length(values) && !is.list(values)) {
@@ -4370,6 +4377,25 @@ addProcess <- function(projectPath, modelName, values = NULL, returnProcessTable
         archive = archive, 
         add.defaults = add.defaults
     )
+    
+    # Move the process if requested:
+    if(length(beforeProcessID)) {
+        afterProcessID <- getProcessIDByOffset(
+            projectPath = projectPath,
+            modelName = modelName,
+            beforeProcessID, 
+            offset = -1
+        )
+    }
+    if(length(afterProcessID)) {
+        rearrangeProcesses(
+            projectPath = projectPath,
+            modelName = modelName,
+            processID = process$processID,
+            afterProcessID = afterProcessID
+        )
+    }
+        
     
     # Return the process:
     #process <- getProcess(
@@ -4684,7 +4710,6 @@ runProcess <- function(
         )
     }
     
-    
     # Apply the replaceData, which can be a function with first parameter the processOutput and additional parameters given in ..., or an actual object to replace the output by:
     #thisReplaceData <- replaceData[[process$processName]]
     if(length(replaceData) && is.character(replaceData)) {
@@ -4709,8 +4734,9 @@ runProcess <- function(
         }
         
         # Run the replaceData function. Here we are using the full address of the function, as the do.call_robust has been relocacted to RstoxData. This should be changed to using the full address in the first place in the BootstrapMethodTable in the future, if we want to allow custom specifications of bootstrapping:
-        replaceData$FunctionName <- paste("RstoxFramework", replaceData$FunctionName, sep = "::")
+        #replaceData$FunctionName <- paste("RstoxFramework", replaceData$FunctionName, sep = "::")
         processOutput <- RstoxData::do.call_robust(
+        #processOutput <- do.call(
             what = replaceData$FunctionName, 
             args = args
         )
@@ -5201,10 +5227,12 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
         # Get the process outputs:
         processOutput <- mapply(
             getProcessOutput, 
-            projectPath = projectPath, 
-            modelName = modelName, 
-            processTable$processID, 
-            drop.datatype = drop.datatype, 
+            processID = processTable$processID, 
+            MoreArgs = list(
+                projectPath = projectPath, 
+                modelName = modelName, 
+                drop.datatype = drop.datatype
+            ), 
             SIMPLIFY = FALSE
         )
         names(processOutput) <- processTable$processName
@@ -5612,6 +5640,32 @@ getProcessIndexFromProcessID <- function(projectPath, modelName, processID) {
         processIndex <- 0
     }
     processIndex
+}
+
+#' Function to get process index from process ID
+#' 
+#' @inheritParams general_arguments
+#' @param offset An integer value to offset the process by, where -1 means the previous process and 1 means the next process.
+#' 
+#' @export
+#' 
+getProcessIDByOffset <- function(projectPath, modelName, processID, offset = 0) {
+    # Get the table linking process names and IDs:
+    processIndexTable <- readProcessIndexTable(
+        projectPath = projectPath, 
+        modelName = modelName
+    )
+    processIndex <- which(processIndexTable$processID == processID)
+    
+    # Added 0 as output for processes that has not been run:
+    if(!length(processIndex)) {
+        processIndex <- 0
+    }
+    
+    # Apply the offset:
+    processIndex <- processIndex + offset
+    
+    processIndexTable[processIndex, "processID"]
 }
 
 #' Function to get process name from process ID
@@ -6252,10 +6306,11 @@ purgeOutput <- function(projectPath, modelName) {
 #' @inheritParams general_arguments
 #' @inheritParams runProcess
 #' @inheritParams Projects
-#' @param replaceDataList A list named by the processes to replace output data for. See \code{\link{runProcess}}.
 #' @param force.restart Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.
 #' @param prugeStopFile Logical: Should the file that signals that the model should be stopped be deleted if present before running? This parameter does not yet seem to in use by any other function.
+#' @param replaceDataList A list named by the processes to replace output data for. See \code{\link{runProcess}}.
 #' @param replaceArgsList A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.
+#' @param prependProcessList A list of \code{values} used in \code{\link{prependProcess}}, named by the processes to prepend a process to.
 #' @param ... \code{replaceArgsList} can also be given directly.
 #' 
 #' @export
@@ -6272,6 +6327,7 @@ runProcesses <- function(
     purge.processData = FALSE, 
     replaceDataList = list(), 
     replaceArgsList = list(), 
+    prependProcessList = list(), 
     try = TRUE, 
     prugeStopFile = FALSE, 
     ...
@@ -6282,6 +6338,18 @@ runProcesses <- function(
     if(!isOpenProject(projectPath)) {
         # No need for Application here as runProcesses() should be used after opening the project in a Application:
         openProject(projectPath, ...)
+    }
+    
+    if(length(prependProcessList)) {
+        mapply(
+            prependProcess, 
+            processName = names(prependProcessList), 
+            values = prependProcessList, 
+            MoreArgs = list(
+                projectPath = projectPath, 
+                modelName = modelName
+            )
+        )
     }
     
     # Save both before and after for safety:
@@ -6468,12 +6536,90 @@ findProcess <- function(projectPath, modelName, processName = NULL, functionName
         modelName = modelName
     )
     
-    # Find the processes that use the given function:
-    functionNames <- getFunctionNameFromPackageFunctionName(processTable$functionName)
-    atFunctionName <- which(functionNames == functionName)
-    processTable <- processTable[atFunctionName,]
+    if(length(processName)) {
+        atProcess <- matchProcesses(processName, processTable)
+        processTable <- processTable[atProcess, ]
+    }
+    else if(length(functionName)) {
+        # Find the processes that use the given function:
+        functionNames <- getFunctionNameFromPackageFunctionName(processTable$functionName)
+        atFunctionName <- which(functionNames == functionName)
+        processTable <- processTable[atFunctionName,]
+    }
     
     return(processTable)
 }
+
+
+#' Prepend (append before) to a process by adding another process of the same function
+#' 
+#' This method is only available for functions that has the same data type as input and output.
+#' 
+#' @inheritParams general_arguments
+#' @param prependProcessName The name of process to prepend.
+#' @param values A list of zero or more of the following process arguments: functionParameters, processData, processParameters. The arguments functionInputs, functionName and processName are set as equal to the process given by \code{processName}.
+#' 
+#' @export
+#' 
+prependProcess <- function(projectPath, modelName, processName, prependProcessName = paste(processName, "prepended", sep = "_"), values = NULL, returnProcessTable = TRUE) {
+    
+    # Get the process:
+    processTable <- getProcessesSansProcessData(
+        projectPath = projectPath, 
+        modelName = modelName
+    )
+    atProcess <- matchProcesses(processName, processTable, warn = FALSE)
+    if(!length(atProcess)) {
+        return(FALSE)
+    }
+    process <- processTable[atProcess, ]
+    
+    # This function can only be run on processes that input and output the same data type:
+    if(!readsItsOwnOutputDataType(process$functionName)) {
+        stop("Only processes that input and output the same data type can be prepended.")
+    }
+    
+    # Get the output data type of the process:
+    outputDataType <- getFunctionOutputDataType(process$functionName)
+    
+    # Create the new process, and add the same input as in the existing process (only for the single output data type of the function, so this can be used mostly for filter functions):
+    values$functionInputs[[outputDataType]] <- process$functionInputs[[1]][[outputDataType]]
+    
+    # Add function name
+    values$functionName <- process$functionName
+    # Add process name
+    values$processName <- prependProcessName
+    
+    
+    
+    addProcess(projectPath, modelName, values = values, beforeProcessID = process$processID)
+    
+    # Change the input to the existing process:
+    modifyFunctionInputs(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = process$processID, 
+        newFunctionInputs = structure(list(prependProcessName), names = outputDataType), 
+        archive = TRUE
+    )
+    
+    
+    if(returnProcessTable) {
+        processTable <- getProcessTable(projectPath = projectPath, modelName = modelName)
+        activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+        return(
+            list(
+                processTable = processTable, 
+                activeProcess = activeProcess, 
+                saved = isSaved(projectPath)
+            )
+        )
+    }
+    else {
+        return(TRUE)
+    }
+}
+
+
 
 

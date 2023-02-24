@@ -11,7 +11,9 @@ addProcess(
   returnProcessTable = TRUE,
   archive = TRUE,
   add.defaults = FALSE,
-  strict = TRUE
+  strict = TRUE,
+  afterProcessID = NULL,
+  beforeProcessID = NULL
 )
 }
 \arguments{
@@ -27,7 +29,11 @@ addProcess(
 
 \item{add.defaults}{Logical: If TRUE defaults of a function are added when setting the function of the process.}
 
-\item{strict}{Logical: If FALSE a proposed process nname is changed to the default new process name, whereas TRUE throws an error.}
+\item{strict}{Logical: If FALSE a proposed process name is changed to the default new process name, whereas TRUE throws an error.}
+
+\item{afterProcessID}{The ID of the process after which to get the process table or to place a process.}
+
+\item{beforeProcessID}{The ID of the process before which to get the process table.}
 }
 \description{
 Add a StoX process to a model.

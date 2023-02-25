@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
       </span>
     </div>
 
@@ -69,6 +69,7 @@
 <span>  purge.processData <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  replaceDataList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  replaceArgsList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  prependProcessList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  try <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  prugeStopFile <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -135,6 +136,10 @@
 
 <dt>replaceArgsList</dt>
 <dd><p>A list of <code>replaceArgs</code> holding parameters to replace in the function call, named by the processes to modify.</p></dd>
+
+
+<dt>prependProcessList</dt>
+<dd><p>A list of <code>values</code> used in <code><a href="prependProcess.html">prependProcess</a></code>, named by the processes to prepend a process to.</p></dd>
 
 
 <dt>try</dt>

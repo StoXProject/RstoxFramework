@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
       </span>
     </div>
 
@@ -63,6 +63,7 @@
 <span>  Percentages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/double.html" class="external-link">double</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  GroupingVariables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  InformationVariables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  RemoveMissingValues <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  AggregationWeightingVariable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  BootstrapReportWeightingVariable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -96,7 +97,7 @@
 
 
 <dt>Percentages</dt>
-<dd><p>The percentages to report Percentiles for when BootstrapReportFunction = "Percentages".</p></dd>
+<dd><p>The percentages to report Percentiles for when BootstrapReportFunction = "summaryStox".</p></dd>
 
 
 <dt>GroupingVariables</dt>
@@ -105,6 +106,10 @@
 
 <dt>InformationVariables</dt>
 <dd><p>Variables to include as columns to the end of the report table. These cannot have more unique combinations than the <code>GroupingVariables</code>.</p></dd>
+
+
+<dt>Filter</dt>
+<dd><p>A string with an R expression to filter out unwanted rows of the report, e.g. "IndividualAge %notin% NA" or "Survey %notin% NA &amp; SpeciesCategory %notin% NA".</p></dd>
 
 
 <dt>RemoveMissingValues</dt>

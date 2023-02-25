@@ -85,6 +85,9 @@
     <loc>/reference/compareProjectToStoredOutputFilesAll.html</loc>
   </url>
   <url>
+    <loc>/reference/compareSweptAreaBaseline.html</loc>
+  </url>
+  <url>
     <loc>/reference/convertKeys2.7To3.html</loc>
   </url>
   <url>
@@ -128,6 +131,9 @@
   </url>
   <url>
     <loc>/reference/getModelData.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getProcessIDByOffset.html</loc>
   </url>
   <url>
     <loc>/reference/getProcessIDFromFunctionName.html</loc>
@@ -203,6 +209,9 @@
   </url>
   <url>
     <loc>/reference/parseParameter.html</loc>
+  </url>
+  <url>
+    <loc>/reference/prependProcess.html</loc>
   </url>
   <url>
     <loc>/reference/processPropertyFormats.html</loc>

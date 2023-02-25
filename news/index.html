@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
       </span>
     </div>
 
@@ -47,6 +47,16 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.7.0-9001" id="rstoxframework-v370-9001-2023-02-15">RstoxFramework v3.7.0-9001 (2023-02-15)<a class="anchor" aria-label="anchor" href="#rstoxframework-v370-9001-2023-02-15"></a></h2>
+<ul><li>Changed the requirements of the the BaselineSeedTable of the function Bootstrap to only need the ImputeSuperIndividuals processes which use ImputationMethod = “RandomSampling”.</li>
+<li>Added the option prependProcessList in runProcesses(), runModel(), runProject() and runProjects().</li>
+<li>Added the option of giving a string vector holding the names of the models to return data from in returnModelData in runModel(), runProject() and runProjects().</li>
+<li>Improved error message when there are missing LogOrigin or LogOrigin2.</li>
+<li>Added functions to compare old and new StoX output: compareSweptAreaBaseline().</li>
+<li>Changed the error “The BaselineSeedTable must contain Seed for the processes…” to ignore ImputeSuperIndividuals proecsses with Regressio method (no seed required).</li>
+<li>Reduced memory for large BootstrapData in ReportBootstrap() by sending only the relevant columns to the report function.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.6.0-9003" id="rstoxframework-v360-9003-2023-01-10">RstoxFramework v3.6.0-9003 (2023-01-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v360-9003-2023-01-10"></a></h2>
 <ul><li>Fixed bug in output file of Bootstrap() when OutputProcesses contained processes with more than one table (e.g. the Data and Resolution table of Quantity()) mixed with single table outputs (e.g. ImputeSuperIndividuals()). The list of output data was flattened to include e.g. Quantity_Data and Quantity_Resolution. However, for BootstrapData, the output is saved to an RData file, and no such flattening of the list is necessary, and also corrupts the data when read back in when using the UseOutputData option in Bootstrap(). This may break scripts using the output file of a Bootstrap process with datta from multi table processes. This is however rare, and the function RstoxFramework::unlistToDataType() can be used to re-create the previous list in the output file of Bootstrap processes.</li>

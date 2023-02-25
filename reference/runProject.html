@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
       </span>
     </div>
 
@@ -66,9 +66,11 @@
 <span>  force.restart <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  replaceDataList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  replaceArgsList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  prependProcessList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  fileOutput <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  setUseProcessDataToTRUE <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  purge.processData <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  returnModelData <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  try <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  close <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  unlist.models <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -127,6 +129,10 @@
 <dd><p>A list of <code>replaceArgs</code> holding parameters to replace in the function call, named by the processes to modify.</p></dd>
 
 
+<dt>prependProcessList</dt>
+<dd><p>A list of <code>values</code> used in <code><a href="prependProcess.html">prependProcess</a></code>, named by the processes to prepend a process to.</p></dd>
+
+
 <dt>fileOutput</dt>
 <dd><p>Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.</p></dd>
 
@@ -137,6 +143,10 @@
 
 <dt>purge.processData</dt>
 <dd><p>Logical: If TRUE replace process data entirely.</p></dd>
+
+
+<dt>returnModelData</dt>
+<dd><p>Logical: If TRUE return the output of the model runs. Can also be given as a string vector holding the names of the models to return data from. If TRUE, the specific models to return data from (across models) can be given by <code>processes</code>.</p></dd>
 
 
 <dt>try</dt>

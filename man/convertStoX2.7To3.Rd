@@ -8,8 +8,11 @@ convertStoX2.7To3(
   projectPath2.7,
   projectPath3,
   newProjectPath3,
+  functionsToApplyProjectXML2.7To = c("DefineSurvey", "DefineStratumPolygon",
+    "DefineBioticPSU", "DefineAcousticPSU", "DefineBioticAssignment"),
   ow = FALSE,
-  run = TRUE
+  run = TRUE,
+  msg = FALSE
 )
 }
 \arguments{
@@ -19,9 +22,13 @@ convertStoX2.7To3(
 
 \item{newProjectPath3}{The path to the StoX 3.x.x project to create.}
 
-\item{ow}{Logical: If TRUE overwrite the project.}
+\item{functionsToApplyProjectXML2.7To}{A character vector of names of process data functions to read from the project.xml of the \code{projectPath2.7}.}
+
+\item{ow}{Logical: If TRUE, overwrite the \code{newProjectPath3}.}
 
 \item{run}{Logical: If TRUE, run the entire project after converting. If FALSE, changes will not be stored in the project.json before one opens and runs the baseline.}
+
+\item{msg}{Logical: If TRUE, print extra messages.}
 }
 \description{
 Backward compabitibility actions:

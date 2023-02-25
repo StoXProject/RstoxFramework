@@ -20,6 +20,7 @@ runProcesses(
   purge.processData = FALSE,
   replaceDataList = list(),
   replaceArgsList = list(),
+  prependProcessList = list(),
   try = TRUE,
   prugeStopFile = FALSE,
   ...
@@ -55,6 +56,8 @@ runProcesses(
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
 
 \item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
+
+\item{prependProcessList}{A list of \code{values} used in \code{\link{prependProcess}}, named by the processes to prepend a process to.}
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 

@@ -154,7 +154,7 @@ getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVar
     subPlotNames <- apply(do.call(cbind, mapply(paste, by, uniqueSubGroups, sep = "-", SIMPLIFY = F)), 1, paste, collapse = "_")
     # The subPlotNames cannot contain file separator:
     if(any(grepl("/", subPlotNames, fixed = TRUE))) {
-        warning("StoX: Slash (\"/\") was repalced by underscore (\"_\") in the subplot names to avoid confusion witth file names. This will result in discrepancy between subplot names and the corresponding variables in the ReportBootstrapData. To avoid this it is recommended to translate values that contain slashes, e.g. by translating SpeciesCategory using TranslateStoxBiotic().")
+        warning("StoX: Slash (\"/\") was replaced by underscore (\"_\") in the subplot names to avoid confusion with file names. This will result in discrepancy between subplot names and the corresponding variables in the ReportBootstrapData. To avoid this, it is recommended to translate values that contain slashes, e.g. by translating SpeciesCategory using TranslateStoxBiotic().")
         subPlotNames <- gsub("/", "_", subPlotNames)
     }
     

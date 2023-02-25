@@ -821,7 +821,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     
-    # browser()
+    #browser()
     
     diffWarning <- function(x) {
         x_info <- unlistDiff(x)
@@ -1062,6 +1062,9 @@ locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
 compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, tolerance = sqrt(.Machine$double.eps)) {
+    
+    
+    
     
     classOf <- RstoxData::match_arg_informative(classOf)
     
@@ -1390,5 +1393,25 @@ hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRU
     
     
     return(fileOutput)
+}
+
+
+
+getFunctionOutputDataType <- function(functionName) {
+    # Get the simple function name and find the function in the stoxLibrary:
+    functionNameSansPackageName <- sub(".*::", "", functionName)
+    functionProperties <- getRstoxFrameworkDefinitions("stoxLibrary")[[functionNameSansPackageName]]
+    
+    functionProperties$functionOutputDataType
+}
+
+
+readsItsOwnOutputDataType <- function(functionName) {
+    
+    # Get the function output datatype:
+    functionOutputDataType <- getFunctionOutputDataType(functionName)
+    
+    functionNameSansPackageName <- sub(".*::", "", functionName)
+    functionOutputDataType %in% names(formals(get(functionNameSansPackageName)))
 }
 

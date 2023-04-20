@@ -14,19 +14,20 @@
 
 # Global variables
 utils::globalVariables(c(
-	 "..EDSUInfoToKeep", "..PSU", "..activeProcessID", "..clickPointNames", "..coordinateNames",
-	 "..functionInputs", "..functionName", "..functionParameters", "..haulInfoToKeep", "..ind",
-	 "..newProcessName", "..presentVariables", "..processDirty", "..propertyDirty", "..skipNAAt",
-	 "..stationInfoToKeep", "..subsetByNAOn_New", "..subsetByNAOn_Old", "..toKeep", "..validInd",
-	 "AcoCat", "BeamKey", "BootstrapID", "BootstrapSampleFactor", "CruiseKey", "Haul", "Layer",
-	 "LogKey", "LogOrigin", "LogOrigin2", "PSU", "Package", "PolygonKey", "ProcessName",
-	 "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum", "Version",
-	 "WeightingFactor", "assignmentPasted", "binaryPath", "canShowInMap", "capture.output", "ch",
-	 "col2rgb", "colorRampPalette", "download.file", "freq", "functionName",
+	 "..BootstrapID", "..EDSUInfoToKeep", "..PSU", "..activeProcessID", "..clickPointNames",
+	 "..coordinateNames", "..functionInputs", "..functionName", "..functionParameters",
+	 "..haulInfoToKeep", "..ind", "..newProcessName", "..presentVariables", "..processDirty",
+	 "..propertyDirty", "..skipNAAt", "..stationInfoToKeep", "..subsetByNAOn_New",
+	 "..subsetByNAOn_Old", "..toKeep", "..validInd", "AcoCat", "BeamKey", "BootstrapData",
+	 "BootstrapID", "BootstrapSampleFactor", "CruiseKey", "Haul", "Layer", "LogKey", "LogOrigin",
+	 "LogOrigin2", "PSU", "Package", "PolygonKey", "ProcessName", "ResampleFunction", "SampleUnit",
+	 "Station", "StationWeight", "StoX", "Stratum", "Version", "WeightingFactor",
+	 "assignmentPasted", "binaryPath", "canShowInMap", "capture.output", "ch", "col2rgb",
+	 "colorRampPalette", "download.file", "filePath", "freq", "functionInputError", "functionName",
 	 "functionOutputDataType", "hasProcessData", "modelName", "name", "newVersion", "numStations",
 	 "offset", "possibleValues", "processID", "processIndex", "processName", "projectPath",
 	 "read.table", "remove.packages", "resampledCountWithUniqueName", "start_time", "transceiver",
-	 "value", "verbose", "weightsPasted"))
+	 "value", "variable", "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

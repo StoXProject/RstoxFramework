@@ -21,7 +21,19 @@ getGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapData) {
 #' @export
 #' 
 stoxFunctionAttributes <- list(
-    # Bootstrap baseline:
+    # # Bootstrap baseline:
+    # BootstrapNetCDF4 = list(
+    #     functionType = "bootstrap", 
+    #     functionCategory = "analysis", 
+    #     functionOutputDataType = "BootstrapNetCDF4Data", 
+    #     functionParameterFormat = list(
+    #         BootstrapMethodTable = "bootstrapMethodTable", 
+    #         OutputProcesses = "outputProcesses", 
+    #         BaselineSeedTable = "baselineSeedTable"
+    #     )
+    # ), 
+    
+    # Old bootstrap function using RData:
     Bootstrap = list(
         functionType = "bootstrap", 
         functionCategory = "analysis", 
@@ -59,6 +71,33 @@ stoxFunctionAttributes <- list(
             Percentages = c(5, 50, 95)
         )
     ), 
+    
+    # ReportBootstrapNetCDF4 = list(
+    #     functionType = "modelData", 
+    #     functionCategory = "report", 
+    #     functionOutputDataType = "ReportBootstrapData", 
+    #     # This is an example of using an expression to determine when to show a parameter:
+    #     functionParameterFormat = list(
+    #         GroupingVariables = "groupingVariables_ReportBootstrap", 
+    #         InformationVariables = "informationVariables_ReportBootstrap", 
+    #         TargetVariableUnit = "targetVariableUnit_ReportBootstrap", 
+    #         Percentages = "percentages_ReportBootstrap"
+    #     ), 
+    #     functionArgumentHierarchy = list(
+    #         AggregationWeightingVariable = list(
+    #             AggregationFunction = expression(RstoxBase::getWeightingFunctions())
+    #         ), 
+    #         BootstrapReportWeightingVariable = list(
+    #             BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
+    #         ), 
+    #         Percentages = list(
+    #             BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
+    #         )
+    #     ), 
+    #     functionParameterDefaults = list(
+    #         Percentages = c(5, 50, 95)
+    #     )
+    # ), 
     
     PlotReportBootstrap = list(
         functionType = "modelData", 
@@ -243,6 +282,7 @@ processPropertyFormats <- list(
     
     targetVariable_ReportBootstrap = list(
         class = "single", 
+        title = "Select TargetVariable for ReportBootstrap",
         possibleValues = function(BootstrapData, BaselineProcess) {
             sort(setdiff(names(BootstrapData[[BaselineProcess]]), "BootstrapID"))
         }

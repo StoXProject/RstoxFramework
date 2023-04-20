@@ -475,49 +475,48 @@ verifyPaths <- function(x) {
 }
 
 
-getMemoryFileFormat <- function(x) {
-    if(length(x) == 0) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Empty")
-    }
-    else if(data.table::is.data.table(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Table")
-    }
-    else if(is.matrix(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Matrix")
-    }
-    else if("SpatialPolygonsDataFrame" %in% class(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
-    }
-    else if("SpatialPointsDataFrame" %in% class(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
-    }
-    else if(is.character(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Character")
-    }
-    else if(is.numeric(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Numeric")
-    }
-    else if(is.integer(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Integer")
-    }
-    else if(is.logical(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Logical")
-    }
-    else if(is.list(x)) {
-        memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_List")
-    }
-    else {
-        stop("StoX: Wrong memory file class ", class(x)[1])
-    }
-    return(memoryFileFormat)
-}
+# getMemoryFileFormat <- function(x) {
+#     if(length(x) == 0) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Empty")
+#     }
+#     else if(data.table::is.data.table(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Table")
+#     }
+#     else if(is.matrix(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Matrix")
+#     }
+#     else if("SpatialPolygonsDataFrame" %in% class(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
+#     }
+#     else if("SpatialPointsDataFrame" %in% class(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
+#     }
+#     else if(is.character(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Character")
+#     }
+#     else if(is.numeric(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Numeric")
+#     }
+#     else if(is.integer(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Integer")
+#     }
+#     else if(is.logical(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Logical")
+#     }
+#     else if(is.list(x)) {
+#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_List")
+#     }
+#     else {
+#         stop("StoX: Wrong memory file class ", class(x)[1])
+#     }
+#     return(memoryFileFormat)
+# }
 
 
 writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
     
-    if(length(ext) == 0) {
-        # Get the memory file format and append this as a file extension to the file to write:
-        ext <- getMemoryFileFormat(x)
+    if(!length(ext)) {
+        stop("ext must be given")
     }
     
     filePath <- paste(filePathSansExt, ext, sep = ".")
@@ -537,7 +536,7 @@ writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
         saveRDS(x, file = filePath)
     }
     else {
-        stop("StoX: Wrong memoryFileFormat")
+        stop("StoX: Wrong ext")
     }
     
     return(filePath)
@@ -545,14 +544,14 @@ writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
 
 
 
-writeMemoryFiles <- function(objects, filePathsSansExt, writeOrderFile = TRUE) {
+writeMemoryFiles <- function(objects, filePathsSansExt, writeOrderFile = TRUE, ext = NULL) {
     
     # Write the files, in an mapply loop if not a valid class at the top level (for outputDepth 2):
     if(isValidOutputDataClass(objects)) {
-        filePaths <- writeMemoryFile(objects, filePathsSansExt)
+        filePaths <- writeMemoryFile(objects, filePathSansExt = filePathsSansExt, ext = ext)
     }
     else {
-        filePaths <- mapply(writeMemoryFile, objects, filePathsSansExt)
+        filePaths <- mapply(writeMemoryFile, objects, filePathSansExt = filePathsSansExt, ext = ext)
     }
     
     
@@ -577,6 +576,9 @@ readMemoryFile <- function(filePath) {
     if(grepl("rds", ext, ignore.case = TRUE)) {
         output <- readRDS(file = filePath)
     }
+    else if(grepl("nc", ext, ignore.case = TRUE)) {
+        output <- createStoXNetCDF4FileDataType(filePath)
+    }
     else {
         stop("StoX: Unsupported file format")
     }
@@ -590,7 +592,10 @@ expandLogical <- function(x) {
 }
 
 
-
+createStoXNetCDF4FileDataType <- function(x) {
+    class(x) <- "StoXNetCDF4File"
+    return(x)
+}
 
 
 
@@ -731,6 +736,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     message(projectPath_copy)
     openProject(projectPath_copy)
     dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = FALSE, try = try, msg = FALSE, ...)
+    
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
@@ -1080,20 +1086,33 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     classes_in_x <- sapply(x, getRelevantClass)
     classes_in_y <- sapply(y, getRelevantClass)
     
+    tryFormats <- c("%Y-%m-%dT%H:%M:%OSZ", "%Y/%m/%dT%H:%M:%OSZ", "%Y-%m-%d %H:%M:%OS", "%Y/%m/%d %H:%M:%OS", "%Y-%m-%d %H:%M", "%Y/%m/%d %H:%M", "%Y-%m-%d", "%Y/%m/%d")
+    
     if(!identical(classes_in_x, classes_in_y)) {
         
         if(classOf == "first") {
             # Coerce to the class in the memory:
             differ <- names(x)[classes_in_x != classes_in_y]
             for(col in differ){
-                data.table::set(x, j = col, value = methods::as(x[[col]], classes_in_y[col]))
+                if(classes_in_y[col] == "POSIXct") {
+                    data.table::set(x, j = col, value = as.POSIXct(x[[col]], tryFormats = tryFormats, tz = "UTC"))
+                }
+                else {
+                    data.table::set(x, j = col, value = methods::as(x[[col]], classes_in_y[col]))
+                }
             }
         }
         else if(classOf == "second") {
             # Coerce to the class in the memory:
             differ <- names(y)[classes_in_x != classes_in_y]
             for(col in differ){
-                data.table::set(y, j = col, value = methods::as(y[[col]], classes_in_x[col]))
+                if(classes_in_y[col] == "POSIXct") {
+                    data.table::set(y, j = col, value = as.POSIXct(y[[col]], tryFormats = tryFormats, tz = "UTC"
+                                                                   ))
+                }
+                else {
+                    data.table::set(y, j = col, value = methods::as(y[[col]], classes_in_x[col]))
+                }
             }
         }
     }
@@ -1413,5 +1432,303 @@ readsItsOwnOutputDataType <- function(functionName) {
     
     functionNameSansPackageName <- sub(".*::", "", functionName)
     functionOutputDataType %in% names(formals(get(functionNameSansPackageName)))
+}
+
+
+
+#' Write/append a table/list of tables to NetCDF4
+#' 
+#' @inheritParams ncdf4::ncvar_def
+#' @param list A list of tables to write to NetCDF4.
+#' @param filePath The path to the file.
+#' @param index The index of the current data to write, with number of rows indicated in the \code{dims} argument.
+#' @param dims A list of lists of dimensions of the tables to write.
+#' @param nchars A list of lists of lists holding the maximum number of characters for each variable of each table of each process.
+#' @param append Logical: If TRUE, append to the existing file.
+#' @param ow Logical: If TRUE, overwrite the existing file.
+#' @param missval The value to use for representing missing values (NA) for numeric variables.
+#' 
+#' @export
+#' 
+write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = 1, verbose = FALSE) {
+    
+    # Thoughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
+    
+    
+    
+    # Unlist to the StoX data type with sep = "/" to produce groups.
+    list <- unlistToDataType(list, sep = "/")
+    dimsTable <- data.table::rbindlist(lapply(lapply(dims, unlistToDataType, sep = "/"), function(x) lapply(x, utils::head, 1)))
+    ncharsTable  <- data.table::rbindlist(lapply(nchars, unlistToDataType, sep = "/"))
+    
+    nsteps <- nrow(dimsTable)
+    stepDim <- ncdf4::ncdim_def("step", "cardinality", seq_len(nsteps), unlim = FALSE)
+    
+    
+    
+    #  Run through the tables and format the DateTime:
+    for(name in names(list)) {
+        # Convert any POSIX to character ISO 8601:
+        formatPOSIXAsISO8601(list[[name]])
+    }
+    
+    
+    
+    # Define variables and dimensions if not appending:
+    if(!append) {
+        variables <- list()
+        
+        nrowVariables <- list()
+        
+        #  Run through the tables:
+        for(name in names(list)) {
+            
+            # Add first the nrow variable:
+            nrowsVariableName <- paste(name, "nrow", sep = "/")
+            nrowVariables[[nrowsVariableName]] <- ncdf4::ncvar_def(
+                name = nrowsVariableName, 
+                units = "cardinality", 
+                prec = "integer", 
+                dim = stepDim, 
+                compression = compression, 
+                verbose = verbose
+            )
+            
+            
+            # Select the current table:
+            table <- list[[name]]
+            
+            # Get the number rof rows:
+            numberOfRows <- nrow(table)
+            
+            # Convert any POSIX to character ISO 8601:
+            #formatPOSIXAsISO8601(table)
+            
+            # Define dimension as the number of rows: 
+            totalNumberOfRows <- sum(dimsTable[[name]])
+            # We need to redefine the rowDim every time, even though it is already defined at the first iteration:
+            rowDim <- ncdf4::ncdim_def(paste0(name, "_row"), "cardinality", seq_len(totalNumberOfRows), unlim = FALSE)
+            
+            # Get StoX units, if present:
+            units <- sapply(table, getStoxUnits)
+            
+            # Get precision:
+            prec <- getPrec(table)
+            
+            # Define the variables:
+            for(ind in seq_along(names(table))) {
+                thisVariableName <- names(table)[ind]
+                thisFullVariableName <- paste(name, thisVariableName, sep = "/")
+                
+                if(is.character(table[[ind]])) {
+                    # Create the string dimension:
+                    thisStringDimName <- paste(
+                        name, 
+                        paste0("nchar_", thisVariableName), 
+                        sep = "/"
+                    )
+                    max_length <- max(1, max(ncharsTable[[thisFullVariableName]]))
+                    thisStringDim <- ncdf4::ncdim_def(thisStringDimName, "", seq_len(max_length), create_dimvar = FALSE)
+                    
+                    # Define the variable:
+                    variables[[thisFullVariableName]] <- ncdf4::ncvar_def(
+                        name = thisFullVariableName, 
+                        units = units[[ind]], 
+                        prec = prec[[ind]], 
+                        dim = list(thisStringDim, rowDim), 
+                        compression = compression, 
+                        verbose = verbose
+                    )
+                }
+                else {
+                    # Only the row and step dimension for non-character:
+                    variables[[thisFullVariableName]] <- ncdf4::ncvar_def(
+                        name = thisFullVariableName, 
+                        units = units[[ind]], 
+                        prec = prec[[ind]], 
+                        missval = missval, 
+                        dim = list(rowDim), 
+                        compression = compression, 
+                        verbose = verbose
+                    )
+                }
+            }
+            
+        }
+        
+        
+        # Create/open the file:
+        if(file.exists(filePath)) {
+            if(ow){
+                ncout <- ncdf4::nc_create(filePath, c(nrowVariables, variables), force_v4 = TRUE, verbose = verbose)
+            }
+            else{
+                stop("File ", filePath, " exists. Chose a different file path or set ow to TRUE.")
+            }
+        }
+        else {
+            # Create the file:
+            ncout <- ncdf4::nc_create(filePath, c(nrowVariables, variables), force_v4 = TRUE, verbose = verbose)
+        }
+        
+        variableNames <- names(variables)
+    }
+    else {
+        if(file.exists(filePath)) {
+            ncout <- ncdf4::nc_open(filePath, write = TRUE, verbose = verbose)
+        }
+        else {
+            stop("Cannot append to the non-existing file ", filePath)
+        }
+        
+        
+        variableNames <- names(ncout$var)
+        # Do not write the nrow variables:
+        variableNames <- variableNames[!endsWith(variableNames, "/nrow")]
+    }
+    
+    
+    
+    if(!append) {
+        for(tableVariableName in names(nrowVariables)) {
+            
+            # Get the name of the table and the name of the variable of the table:
+            tableVariableNameSplitLastSlash <- strsplit(tableVariableName, "/(?=[^/]+$)", perl = TRUE)[[1]]
+            tableName <- tableVariableNameSplitLastSlash[1]
+            variableName <- tableVariableNameSplitLastSlash[2]
+            
+            ncdf4::ncvar_put(
+                ncout, 
+                varid = tableVariableName, 
+                vals = dimsTable[[tableName]], 
+                verbose = verbose
+            )
+            
+            # Add global attributes:
+            allAttritues <- attributes(list)
+            standardAttritues <- c("dim", "names", "dimnames")
+            attributesToBeWritten <- setdiff(names(allAttritues), standardAttritues)
+            print(attributesToBeWritten)
+            for(attributeName in attributesToBeWritten) {
+                ncdf4::ncatt_put( ncout, varid = 0, attname = attributeName, attval = allAttritues[[attributeName]], verbose= verbose)
+            }
+            
+            # Sync, so that not all is written at nc_close:
+            ncdf4::nc_sync( ncout )
+        }
+    }
+    
+    
+    # Put the variables of the given step (e.g. bootstrap ID):
+    for(tableVariableName in variableNames) {
+        
+        # Get the name of the table and the name of the variable of the table:
+        tableVariableNameSplitLastSlash <- strsplit(tableVariableName, "/(?=[^/]+$)", perl = TRUE)[[1]]
+        tableName <- tableVariableNameSplitLastSlash[1]
+        variableName <- tableVariableNameSplitLastSlash[2]
+        # Get the length of the variable to write:
+        variableLength <- length(list[[tableName]][[variableName]])
+        
+        
+        if(index == 1) {
+            startInd <- 1
+        }
+        else {
+            startInd <- dimsTable[seq_len(index - 1), sum(get(tableName))] + 1
+        }
+        thisNrow <- dimsTable[index, get(tableName)]
+        
+        if(is.character(list[[tableName]][[variableName]])) {
+            
+            # Get maximum number of characters of the variable to write:
+            max_length <- max(1, max(nchar(list[[tableName]][[variableName]]), na.rm = TRUE))
+            ncdf4::ncvar_put(
+                ncout, 
+                varid = tableVariableName, 
+                vals = list[[tableName]][[variableName]], 
+                start = c(1, startInd), 
+                count = c(max_length, thisNrow), 
+                verbose = verbose
+            )
+        }
+        else {
+            ncdf4::ncvar_put(
+                ncout, 
+                varid = tableVariableName, 
+                vals = list[[tableName]][[variableName]], 
+                start = startInd, 
+                count = thisNrow, 
+                verbose = verbose
+            )
+        }
+        #ncdf4::nc_sync( ncout )
+    }
+    
+    # Close the file:
+    ncdf4::nc_close(ncout)
+}
+
+
+
+
+
+
+
+
+
+# Utility functions for write_table_NetCDFF4():
+formatPOSIXAsISO8601 <- function(table, cols = NULL) {
+    if(!length(cols)) {
+        cols <- names(table)
+    }
+    
+    areDateTime <- names(table)[sapply(table, getRelevantClass) %in% "POSIXct"]
+    
+    toConvertToCharacter <- intersect(areDateTime, cols)
+    
+    if(length(toConvertToCharacter)) {
+        for(col in toConvertToCharacter) {
+            table[, (col) := format(get(col), format = "%Y-%m-%dT%H:%M:%OS3Z")]
+        }
+    }
+}
+
+getStoxUnits <- function(x) {
+    if(is.list(x)) {
+        sapply(x, getStoxUnitOne)
+    }
+    else {
+        getStoxUnitOne(x)
+    }
+}
+
+getStoxUnitOne <- function(x) {
+    stoxUnit <- attr(x, "stoxUnit")
+    if(!length(stoxUnit)) {
+        stoxUnit <- ""
+    }
+    return(stoxUnit)
+}
+
+getPrec <- function(x) {
+    if(is.list(x)) {
+        lapply(x, getPrecOne)
+    }
+    else {
+        getPrecOne(x)
+    }
+}
+
+getPrecOne <- function(x) {
+    typeToNetCDF4Prec <- getRstoxFrameworkDefinitions("typeToNetCDF4Prec")
+    thisType <- getRelevantClass(x)
+    atType <- which(thisType == typeToNetCDF4Prec$type)
+    
+    if(length(atType)) {
+        typeToNetCDF4Prec$prec[atType]
+    }
+    else {
+        NA
+    }
 }
 

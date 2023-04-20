@@ -6,7 +6,11 @@
 \arguments{
 \item{BootstrapData}{The \code{\link{BootstrapData}} data.}
 
+\item{BootstrapNetCDF4Data}{The \code{\link{BootstrapNetCDF4Data}} data.}
+
 \item{ReportBootstrapData}{The \code{\link{ReportBootstrapData}} data.}
+
+\item{ReportBootstrapNetCDF4Data}{The \code{\link{ReportBootstrapNetCDF4Data}} data.}
 
 \item{PlotReportBootstrapData}{The \code{\link{PlotReportBootstrapData}} data.}
 

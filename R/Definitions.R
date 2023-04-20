@@ -69,32 +69,37 @@ initiateRstoxFramework <- function(){
        sort = FALSE
    )
 
-    # Define formats for files saved by Rstox:
-    memoryFileFormat_Empty <- "rds"
-    # 2020-06-08: The fst::write_fst() does not retain the encoding, and has been discarded until these problems are fixed:
-    #memoryFileFormat_Table <- "fst"
-    memoryFileFormat_Table <- "rds"
-    memoryFileFormat_Matrix <- "rds"
-    memoryFileFormat_Spatial <- "rds"
-    memoryFileFormat_List <- "rds"
-    memoryFileFormat_Character <- "rds"
-    memoryFileFormat_Numeric <- "rds"
-    memoryFileFormat_Integer <- "rds"
-    memoryFileFormat_Logical <- "rds"
-    memoryFileFormat_Other <- "rds"
-    allMemoryFileFormats <- unique(
-        c(
-            memoryFileFormat_Empty, 
-            memoryFileFormat_Table, 
-            memoryFileFormat_Matrix, 
-            memoryFileFormat_Spatial, 
-            memoryFileFormat_List, 
-            memoryFileFormat_Character, 
-            memoryFileFormat_Numeric, 
-            memoryFileFormat_Integer, 
-            memoryFileFormat_Logical, 
-            memoryFileFormat_Other
-        )
+    ### # Define formats for files saved by Rstox:
+    ### memoryFileFormat_Empty <- "rds"
+    ### # 2020-06-08: The fst::write_fst() does not retain the encoding, and has been discarded until these problems are fixed:
+    ### #memoryFileFormat_Table <- "fst"
+    ### memoryFileFormat_Table <- "rds"
+    ### memoryFileFormat_Matrix <- "rds"
+    ### memoryFileFormat_Spatial <- "rds"
+    ### memoryFileFormat_List <- "rds"
+    ### memoryFileFormat_Character <- "rds"
+    ### memoryFileFormat_Numeric <- "rds"
+    ### memoryFileFormat_Integer <- "rds"
+    ### memoryFileFormat_Logical <- "rds"
+    ### memoryFileFormat_Other <- "rds"
+    ### allMemoryFileFormats <- unique(
+    ###     c(
+    ###         memoryFileFormat_Empty, 
+    ###         memoryFileFormat_Table, 
+    ###         memoryFileFormat_Matrix, 
+    ###         memoryFileFormat_Spatial, 
+    ###         memoryFileFormat_List, 
+    ###         memoryFileFormat_Character, 
+    ###         memoryFileFormat_Numeric, 
+    ###         memoryFileFormat_Integer, 
+    ###         memoryFileFormat_Logical, 
+    ###         memoryFileFormat_Other
+    ###     )
+    ### )
+
+    allMemoryFileFormats <- c(
+        "rds", 
+        "nc"
     )
     
     default.output.file.type <- list(
@@ -338,6 +343,11 @@ initiateRstoxFramework <- function(){
     # Value of numeric NA in processData stored in the project.json:
     #jsonNA <- -999999
     
+    typeToNetCDF4Prec <- data.table::data.table(
+        type = c("numeric", "double", "integer", "character", "POSIXc"), 
+        prec = c("double", "double", "integer", "char", "char")
+    )
+    
     # Define the permitted classes for individual outputs from StoX functions:
     validOutputDataClasses <- c(
         "data.table", 
@@ -349,7 +359,8 @@ initiateRstoxFramework <- function(){
         "SpatialPolygonsDataFrame", 
         #"StoX_multipolygon_WKT", 
         #"StoX_shapefile"
-        "ggplot"
+        "ggplot", 
+        "StoXNetCDF4File"
     )
     
     outputTypes <- list(
@@ -572,12 +583,14 @@ initiateRstoxFramework <- function(){
     # Sub folders of the data folder:
     dataModelsFolder <- file.path(dataFolder, "models")
     dataModelsFolders <- file.path(dataModelsFolder, stoxModelFolders)
+    names(dataModelsFolders) <- stoxModelFolders
     
     # Sub folders of the memory folder:
     memoryCurrentFolder <- file.path(memoryFolder, "current")
     memoryHistoryFolder <- file.path(memoryFolder, "history")
     memoryModelsFolder <- file.path(memoryFolder, "models")
     memoryModelsFolders <- file.path(memoryModelsFolder, stoxModelFolders)
+    names(memoryModelsFolders) <- stoxModelFolders
     
     memoryCurrentModelsFolder <- file.path(memoryCurrentFolder, "models")
     memoryCurrentModelsFolders <- file.path(memoryCurrentModelsFolder, stoxModelFolders)
@@ -962,3 +975,59 @@ getBackwardCompatibility <- function(packageName) {
     
     backwardCompatibility
 }
+
+
+
+getDefaultOutputFileType <- function(processOutput) {
+    if(length(processOutput)) {
+        if("StoXNetCDF4File" %in% class(processOutput[[1]])) {
+            ext <- "nc"
+        }
+        else if("BootstrapData" %in% class(processOutput[[1]])) {
+            ext <- "RData"
+        }
+        
+        # List of outputs:
+        else if("SpatialPolygonsDataFrame" %in% class(processOutput[[1]])) {
+            # Set file extension:
+            ext <- "geojson"
+        }
+        else if("data.table" %in% class(processOutput[[1]])) {
+            # Set file extension:
+            ext <- "txt"
+        }
+        else if("matrix" %in% class(processOutput[[1]]) || any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutput[[1]]))) {
+            # Set file extension:
+            ext <- "csv"
+        }
+        else if("ggplot" %in% class(processOutput[[1]])) {
+            # Set file extension:
+            ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+        }
+        # List of lists of outputs:
+        else if("SpatialPolygonsDataFrame" %in% class(processOutput[[1]][[1]])) {
+            # Set file extension:
+            ext <- "geojson"
+        }
+        else if("data.table" %in% class(processOutput[[1]][[1]])) {
+            # Set file extension:
+            ext <- "txt"
+        }
+        else if("matrix" %in% class(processOutput[[1]][[1]]) || any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutput[[1]][[1]]))) {
+            # Set file extension:
+            ext <- "csv"
+        }
+        else if("ggplot" %in% class(processOutput[[1]][[1]])) {
+            # Set file extension:
+            ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+        }
+        else {
+            stop("Unknown process output: [[1]]: ", class(processOutput[[1]]), ", [[1]][[1]]: ", class(processOutput[[1]][[1]]))
+        }
+    }
+    
+    return(ext) 
+}
+

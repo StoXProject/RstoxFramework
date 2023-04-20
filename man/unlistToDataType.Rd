@@ -4,10 +4,21 @@
 \alias{unlistToDataType}
 \title{Function to flatten a list of output datat and add names from the levels of the list}
 \usage{
-unlistToDataType(processOutput)
+unlistToDataType(
+  processOutput,
+  sep = "_",
+  validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses"),
+  nlevel = 2
+)
 }
 \arguments{
 \item{processOutput}{A list of StoX output data.}
+
+\item{sep}{The separator to use when constructing names for the finla flat list, defaulted to underscore, but slash can also be useful e.g. for denoting groupes in a NetCDF4 file.}
+
+\item{validOutputDataClasses}{A vector of valid output data classes, indicating when to stop the unlisting.}
+
+\item{nlevel}{The number of levels to unlist through.}
 }
 \description{
 Function to flatten a list of output datat and add names from the levels of the list

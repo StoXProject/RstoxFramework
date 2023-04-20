@@ -2,7 +2,6 @@
 % Please edit documentation in R/Routes.R
 \name{StoXGUI_interfaces}
 \alias{StoXGUI_interfaces}
-\alias{getModelNames}
 \alias{getModelInfo}
 \alias{getInteractiveMode}
 \alias{getInteractiveData}
@@ -18,8 +17,6 @@
 \alias{getParameterVectorInfo}
 \title{Get objects for use in the GUI}
 \usage{
-getModelNames()
-
 getModelInfo()
 
 getInteractiveMode(projectPath, modelName, processID)

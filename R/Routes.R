@@ -35,19 +35,24 @@
 NULL
 
 
-#' 
-#' @export
-#' @rdname StoXGUI_interfaces
-#' 
-getModelNames <- function() {
-    getRstoxFrameworkDefinitions("stoxModelTypes")
-}
+
 #' 
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
 getModelInfo <- function() {
     getRstoxFrameworkDefinitions("stoxModelInfo")
+}
+
+
+getModel <- function(modelName) {
+    modelNames <- getRstoxFrameworkDefinitions("stoxModelNames")
+    output <- intersect(modelName, modelNames)
+    if(!length(output)) {
+        warning("modelName must be one of ", paste0(modelNames, collapse = ", "), ".")
+        output <- NA
+    }
+    return(output)
 }
 
 ##########
@@ -1007,7 +1012,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
     
     # Set the propertyDirty flag to FALSE, so that a GUI can update the properties:
     # Do we really need this??????????????!!!!!!!!!!!!!!!!!!!!
-    writeActiveProcessID(projectPath, modelName, propertyDirty = FALSE)
+    #### writeActiveProcessID(projectPath, modelName, propertyDirty = FALSE)
     
     # Return the list of process property groups (process property sheet):
     output <- list(
@@ -1171,22 +1176,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
     
     # The flag updateHelp is TRUE only if the functionName is changed:
     updateHelp <- FALSE
-    
-    # Reset the active process ID to the process before the modified process:
-    resetModel(
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = processID, 
-        #processDirty = hasBeenRun(
-        #    projectPath = projectPath, 
-        #    modelName = modelName, 
-        #    processID = processID
-        #), 
-        processDirty = TRUE, 
-        shift = 0, 
-        delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
-        deleteCurrent = TRUE
-    )
+    changed <- FALSE
     
     # If the process property 'processArguments' is given, modify the process name, function name or process parameters:
     if(groupName == "processArguments") {
@@ -1196,7 +1186,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
             newProcessName <- formatProcessName(value)
             
             # Modify the process name:
-            modifyProcessName(
+            changed <- changed || modifyProcessName(
                 projectPath = projectPath, 
                 modelName = modelName, 
                 processID = processID, 
@@ -1215,7 +1205,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
             updateHelp <- TRUE
             
             # Modify function name:
-            modifyFunctionName(
+            changed <- changed || modifyFunctionName(
                 projectPath = projectPath, 
                 modelName = modelName, 
                 processID = processID, 
@@ -1233,7 +1223,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
             newProcessParameters <- formatProcessParameters(newProcessParameters)
             
             # Modify process parameter:
-            modifyProcessParameters(
+            changed <- changed || modifyProcessParameters(
                 projectPath = projectPath, 
                 modelName = modelName, 
                 processID = processID, 
@@ -1249,7 +1239,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         # All process parameters are logical:
         newFunctionInputs <- formatFunctionInputs(newFunctionInputs)
         
-        modifyFunctionInputs(
+        changed <- changed || modifyFunctionInputs(
             projectPath = projectPath, 
             modelName = modelName, 
             processID = processID, 
@@ -1274,11 +1264,29 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         newFunctionParameters <- formatFunctionParameters(newFunctionParameters, functionName = functionName, projectPath = projectPath, modelName = modelName, processID = processID)
         
         # Modify the process parameter:
-        modifyFunctionParameters(
+        changed <- changed || modifyFunctionParameters(
             projectPath = projectPath, 
             modelName = modelName, 
             processID = processID, 
             newFunctionParameters = newFunctionParameters
+        )
+    }
+    
+    if(changed) {
+        # Reset the active process ID to the process before the modified process:
+        resetModel(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            #processDirty = hasBeenRun(
+            #    projectPath = projectPath, 
+            #    modelName = modelName, 
+            #    processID = processID
+            #), 
+            processDirty = TRUE, 
+            shift = 0, 
+            delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
+            deleteCurrent = TRUE
         )
     }
     

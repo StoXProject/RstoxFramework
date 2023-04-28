@@ -27,8 +27,7 @@
 #' @param stopIfEmptyPossibleValues Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
 #' @param format A character string naming the format to get info for.
 #' @param objectName The R object to get help as html for.
-#' @param packageName The package holding the object to get
-#'  help as html for.
+#' @param packageName The package holding the object to get help as html for.
 #' 
 #' @name StoXGUI_interfaces
 #'
@@ -469,7 +468,7 @@ getEDSUData <- function(projectPath, modelName, processID) {
     CruiseLog <- RstoxData::mergeDataTables(EDSUData, tableNames = tableNames, output.only.last = TRUE)
     # Uniquify in case e.g. there are data from different instruments:
     #EDSUInfoToKeep <- c("EDSU", "Platform", "Log", "DateTime", "Longitude", "Latitude", "EffectiveLogDistance", "BottomDepth")
-    EDSUInfoToKeep <- c("EDSU", "Longitude", "Latitude")
+    EDSUInfoToKeep <- c("EDSU", "Longitude", "Latitude", "LogDistance")
     CruiseLog <- unique(CruiseLog, by = EDSUInfoToKeep)
     
     # Order by Beam:

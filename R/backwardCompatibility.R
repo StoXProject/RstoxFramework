@@ -118,7 +118,6 @@ applyBackwardCompatibilityActionsReordered <- function(
     backwardCompatibility <- backwardCompatibility[newOrder]
     
     
-    
     # Run through the supported backward compatibility action names:
     for(backwardCompatibilityAction in backwardCompatibility) {
         
@@ -130,6 +129,8 @@ applyBackwardCompatibilityActionsReordered <- function(
             projectDescription = projectDescription, 
             packageName = packageName
         )
+        
+        print(run)
         
         if(run) {
             # Apply the backwardCompatibilityAction:

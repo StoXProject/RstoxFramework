@@ -93,8 +93,7 @@ getParameterVectorInfo(
 
 \item{stylesheet}{The html stylesheet to use, defaulted to no stylesheet.}
 
-\item{packageName}{The package holding the object to get
-help as html for.}
+\item{packageName}{The package holding the object to get help as html for.}
 
 \item{objectName}{The R object to get help as html for.}
 

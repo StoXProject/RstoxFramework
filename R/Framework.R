@@ -718,11 +718,13 @@ deleteProcessData <- function(projectPath, modelName, processID) {
 
 ##################################################
 ##################################################
+
+### @param projectDescription A list holding the project description, as read using \code{\link{readProjectDescription}}.
+
+
 #' Utilities for projects.
 #' 
 #' @inheritParams general_arguments
-#' @inheritParams installPackages
-#' @param projectDescription A list holding the project description, as read using \code{\link{readProjectDescription}}.
 #' @param projectDescriptionFile The path to the file holding the projectDescription.
 #' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
 #' @param formatProcesses Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.
@@ -896,9 +898,10 @@ readProjectDescription <- function(
         
         if(!isTRUE(valid)) {
             # Write the error to a temp file:
-            tempErrorFile <- file.path(tempdir(), "projectJSONValidatorError.rds")
+            tempErrorFile <- file.path(gsub("\\\\", "/", tempdir()), "projectJSONValidatorError.rds")
             saveRDS(valid, tempErrorFile)
-            stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. \nRun the following code in R to see the JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
+            #stop("StoX: The file ", projectDescriptionFile, " is not a valid project.json file. \nRun the following code in R to see the JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
+            warning("StoX: The JSON validation failed for the project description file ", projectDescriptionFile, ". The file was attempted opened anyway, but there may be errors in the project, and the results generally not be trusted. \nRun the following code in R to see the JSON schema validation error:\n err <- readRDS(\"", tempErrorFile, "\")")
         }
     }
     
@@ -1032,7 +1035,10 @@ JSON2processData <- function(JSON) {
 #' Write the project description.
 #' 
 #' @export
-#' @rdname ProjectUtils
+#' @param Application The application running StoX. Defaulted to the R.version.string, but can be a StoX version when run from the GUI.
+#' @param projectDescription The project description to write to the project.json file. Defaulted to NULL, in which case the project description is read for the project.
+#' @inheritParams getOfficialRstoxPackageVersion
+#' @inheritParams ProjectUtils
 #' 
 writeProjectDescription <- function(projectPath, projectDescription = NULL, projectDescriptionFile = NULL, Application = R.version.string, optionalDependencies = FALSE, verbose = FALSE) {
     
@@ -1198,7 +1204,7 @@ addProjectDescriptionAttributes <- function(projectDescription, optionalDependen
     )
     
     # Get installed versions:
-    InstalledRstoxPackageVersion <- getPackageVersion(certifiedRstoxPackageVersionList$packageName, only.version = FALSE)
+    InstalledRstoxPackageVersion <- getRstoxFrameworkDefinitions("InstalledRstoxPackageVersion")
     
     # Get the all certified tag:
     AllCertifiedRstoxPackageVersion = identical(
@@ -1230,7 +1236,7 @@ getPackageVersion <- function(packageNames, only.version = FALSE, sep = "_") {
     #version <- sapply(packageNames, function(x) as.character(utils::packageVersion(x)))
     #version <- sapply(packageNames, getNamespaceVersion)
     # No, it is better to use installed.packages(), as it does not load the namespace:
-    version <- sapply(packageNames, getVersionStringOfPackage)
+    version <- getVersionStringOfPackage(packageNames)
     
     if(only.version) {
         version
@@ -1240,38 +1246,36 @@ getPackageVersion <- function(packageNames, only.version = FALSE, sep = "_") {
     }
 }
 
+
 # Get the versions of the dependent packages recursively:
 #getDependentPackageVersion <- function(packageName, only.depedencies = TRUE) {
 getDependentPackageVersion <- function(
     packageName, 
     dependencyTypes = NA, 
-    Rstox.repos = NULL, 
-    nonRstox.repos = "https://cloud.r-project.org", 
-    sort = FALSE
+    recursive = TRUE
 ) {
-        
-    #dependencies <- gtools:: getDependencies("RstoxFramework", available = FALSE)
-    dependencies <- getNonRstoxDependencies(
-        packageName = packageName, 
-        dependencyTypes = dependencyTypes, 
-        Rstox.repos = Rstox.repos, 
-        nonRstox.repos = nonRstox.repos, 
-        sort = sort
-    )
-    # Remove the specified packcages:
-    ###if(only.depedencies) {
-    ###    dependencies <- setdiff(
-    ###        dependencies, 
-    ###        packageName
-    ###    )
-    ###}
     
-    # Get packcage versions as strings "PACKAGENAME vPACKAGEVERSION":
-    #RstoxPackageVersion <- getPackageVersion(RstoxPackages)
-    dependentPackageVersion <- getPackageVersion(dependencies)
+    # Read the package table from the repos, using the first lib as the StoX GUI selects a folder in some cases on Windows and otherwise we can assume that the first should be used:
+    packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
+    
+    # Get the dependencies: 
+    deps <- unique(unlist(tools::package_dependencies(packages = packageName, db = packageTable, recursive = recursive, which = if(is.na(dependencyTypes)) "strong" else dependencyTypes)))
+    
+    # Ignore base packages of R (but include recommended packates, which are also shipped with R but can be installed manually):
+    deps <- setdiff(deps, rownames(utils::installed.packages(priority = "base")))
+    
+    # Igngore also Rstox packages:
+    deps <- deps[!startsWith(deps, "Rstox")]
+    
+    
+    # Get package versions as strings "PACKAGENAME vPACKAGEVERSION":
+    dependentPackageVersion <- getPackageVersion(deps)
     
     return(dependentPackageVersion)
 }
+
+
+
 
 
 
@@ -1519,9 +1523,6 @@ writeActiveProcessID <- function(projectPath, modelName, activeProcessID = NULL,
         stoxModelNames <- getRstoxFrameworkDefinitions("stoxModelNames")
         modelsToReset <- stoxModelNames[-seq_len(which(stoxModelNames == thisModelName))]
         if(length(modelsToReset) && length(activeProcessID)) {
-            warning("StoX: currentActiveProcessID ", currentActiveProcessID)
-            warning("StoX: activeProcessID ", activeProcessID)
-            warning("StoX: identical ", identical(currentActiveProcessID, activeProcessID))
             if(length(currentActiveProcessID)) {
                 if(!identical(currentActiveProcessID, activeProcessID)) {
                     activeProcessIDTable[modelName %in% modelsToReset, processID := NA]
@@ -2715,7 +2716,7 @@ modifyProcessNameInProcessIndexTable <- function(projectPath, modelName, process
 modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processName, newProcessName) {
     
     # Update for all models from the specified model and onwards:
-    modelNames <- RstoxFramework::getRstoxFrameworkDefinitions("stoxModelHierarchy")
+    modelNames <- getRstoxFrameworkDefinitions("stoxModelHierarchy")
     atModel <- which(modelNames == modelName)
     modelNames <- modelNames[seq(atModel, length(modelNames))]
     

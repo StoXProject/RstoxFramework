@@ -36,7 +36,7 @@ initiateRstoxFramework <- function(){
     # Add RstoxFramework:
     officialStoxLibraryPackagesAll <- c("RstoxFramework", officialStoxLibraryPackages)
     # Get installed versions:
-    InstalledRstoxPackageVersion <- as.list(getPackageVersion(officialStoxLibraryPackagesAll, only.version = TRUE))
+    InstalledRstoxPackageVersion <- getPackageVersion(officialStoxLibraryPackagesAll, only.version = FALSE)
 
     # Get the versions of the dependencies:
     ### dependentPackagesOnlyRstoxFramework <- getPackageVersion(
@@ -62,11 +62,7 @@ initiateRstoxFramework <- function(){
     # Get the versions of the dependencies:
    dependentPackageVersion <- getDependentPackageVersion(
        packageName = officialStoxLibraryPackagesAll, 
-       dependencyTypes = NA, 
-       Rstox.repos = NULL, 
-       # Get dependencies from the locally installed packates (setting nonRstox.repos to NULL). 
-       nonRstox.repos = NULL, 
-       sort = FALSE
+       dependencyTypes = NA
    )
 
     ### # Define formats for files saved by Rstox:

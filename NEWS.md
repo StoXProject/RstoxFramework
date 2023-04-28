@@ -1,13 +1,17 @@
-# RstoxFramework v3.6.1 (2023-04-20)
+# RstoxFramework v3.6.1 (2023-04-28)
+* Fixed bug when on R 4.3 where StoX could not be opened on MacOS and R connection failed on Windows.
+* Stopped using the Versions.R file in the StoX GUI, but rather separated out the functions used by the GUI to an exclusive GUI file. Simplified functions for getting versions used in the project.json file.
 * Improved how StoX changes the active process so that setting a parameter without actually changing it value does not reset the process.
 * Fixed bug in StoX 3.6.0 where simply selecting a process in a model would reset the later models.
 * Added support for specifying startProcess and endProcess in runProject() and runProjects() as a list named by the proecsses, such as endProcess = list(report = 2) to only run the first two processes of the report model.
 * Fixed bug in runProjects(), where processes returning StratumPolygon and BioticData and AcousticData could not be included in the processes argument.
 * Added support for arbitraty name of first argument in functions used in replaceData.
 * Fixed bug in modifyProcessNameInFunctionInputs() where function input were modified only in the same model, and failed when at least one function input was empty.
-* Changed to check function input errors only for enabled procecsses.
-* Improved warming for function input not enabled (added the name of the procecss).
+* Changed to check function input errors only for enabled processes.
+* Improved warming for function input not enabled (added the name of the process).
 * Preparations for writing bootstrap data to NetCDF4.
+* Fixed bug where slash and backslash were mixed in file name in json schema validation error message. Now using only slash. Also changed this to a warning instead of an error, so that StoX tries to open the project anyhow.
+* Added LogDistance to tooltip for EDSUs in the map.
 
 
 # RstoxFramework v3.7.0-9001 (2023-02-15)
@@ -160,7 +164,7 @@
 * Changed all sd and cv in reports from 0 to NA. Standard deviation = 0 is no longer accepted by StoX, as it implies either insufficient number of bootstraps or only one value to sample from in the bootstrapping.
 * Fixed bug where the blue dot marking processes as 'run' was turned on on a newly modified process when immediately modifying a later process.
 * Moved setting precision to runProcess() instead of each StoX function.
-* Fixed bug when working with a DefineStratumPolygon procecss with no polygons defined (readProcessOutputFile() did nor read deal properly with the empty SpatialPolygonsDataFrame with jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data))), but ok when using replaceSpatialFileReference(buildSpatialFileReferenceString(data)) instead).
+* Fixed bug when working with a DefineStratumPolygon process with no polygons defined (readProcessOutputFile() did nor read deal properly with the empty SpatialPolygonsDataFrame with jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data))), but ok when using replaceSpatialFileReference(buildSpatialFileReferenceString(data)) instead).
 * Changed to using StratumName instead of the old polygonName in stratum polygons throughout RstoxFramework and the StoX GUI.
 * Changed to using RstoxData::firstClass instead of a copy.
 * Added order of backward compatibility actions to package first (alphabetically), then change version (numerically), and finally action type with order as given by RstoxFramework::getRstoxFrameworkDefinitions("backwardCompatibilityActionNames"). 

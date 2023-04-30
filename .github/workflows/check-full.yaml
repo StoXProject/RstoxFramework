@@ -132,6 +132,7 @@ jobs:
           # Force RstoxData and RstoxBase:
           utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE)
           utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE)
+          utils::install.packages("RstoxFDA", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE)
         shell: Rscript {0}
 
       - name: Install dependencies on Windows and macOS
@@ -154,6 +155,7 @@ jobs:
         run: |
           utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "binary")
           utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "binary")
+          utils::install.packages("RstoxFDA", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "binary")
         shell: Rscript {0}
 
       - name: Install RstoxData and RstoxBase on macOS
@@ -161,6 +163,7 @@ jobs:
         run: |
           utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
           utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
+          utils::install.packages("RstoxFDA", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
         shell: Rscript {0}
 
       - name: Install prereleases

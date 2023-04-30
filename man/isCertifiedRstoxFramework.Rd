@@ -15,7 +15,7 @@ isCertifiedRstoxFramework(
 
 \item{officialRstoxPackageVersionsFile}{The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").}
 
-\item{optionalDependencies}{Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Sugggests field of the DESCRIPTION file.}
+\item{optionalDependencies}{Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Suggests field of the DESCRIPTION file.}
 }
 \description{
 This function is used by the StoX GUI to set colour to the RstoxFramework logo.

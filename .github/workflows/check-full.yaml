@@ -19,18 +19,21 @@ jobs:
       matrix:
         config:
           - {os: macOS-latest,   r: 'release', pkgext: '.tgz'}
+          - {os: macOS-latest,   r: '4.3',  pkgext: '.tgz'}
           - {os: macOS-latest,   r: '4.2',  pkgext: '.tgz'}
           - {os: macOS-latest,   r: '4.1',  pkgext: '.tgz'}
           - {os: macOS-latest,   r: '4.0',     pkgext: '.tgz'}
           # Disccarded due to missing package cpp11 on Mac for R 3.6:
           #- {os: macOS-latest,   r: '3.6',     pkgext: '.tgz'}
           - {os: windows-latest, r: 'release', pkgext: '.zip'}
+          - {os: windows-latest, r: '4.3',  pkgext: '.zip'}
           - {os: windows-latest, r: '4.2',  pkgext: '.zip'}
           - {os: windows-latest, r: '4.1',  pkgext: '.zip'}
           - {os: windows-latest, r: '4.0',     pkgext: '.zip',    rspm: "https://cloud.r-project.org"} # Temporarily disabling this due to -- error: DLL 'maps' not found: maybe not installed for this architecture?
           # Disccarded due to jsonvalidate 1.3.2 not available on Windoes for R 3.6:
           #- {os: windows-latest, r: '3.6',     pkgext: '.zip',    rspm: "https://cloud.r-project.org"}
           - {os: ubuntu-latest,  r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-22.04,   r: '4.3',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
           - {os: ubuntu-22.04,   r: '4.2',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
           - {os: ubuntu-20.04,   r: '4.1',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
           - {os: ubuntu-20.04,   r: '4.0',     pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
@@ -144,9 +147,20 @@ jobs:
             message("Installing the following packages using default type:\n", paste0(missing, collapse = ", "))
             utils::install.packages(missing, dependencies = TRUE)
           }
-          # Force RstoxData and RstoxBase:
+        shell: Rscript {0}
+
+      - name: Install RstoxData and RstoxBase on Windows
+        if: runner.os == 'Windows'
+        run: |
           utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "binary")
           utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "binary")
+        shell: Rscript {0}
+
+      - name: Install RstoxData and RstoxBase on macOS
+        if: runner.os == 'macOS'
+        run: |
+          utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
+          utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
         shell: Rscript {0}
 
       - name: Install prereleases

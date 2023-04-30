@@ -22,7 +22,7 @@ writeProjectDescription(
 
 \item{Application}{The application running StoX. Defaulted to the R.version.string, but can be a StoX version when run from the GUI.}
 
-\item{optionalDependencies}{Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Sugggests field of the DESCRIPTION file.}
+\item{optionalDependencies}{Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Suggests field of the DESCRIPTION file.}
 
 \item{verbose}{Logical: If TRUE extra messages are printed to console.}
 }

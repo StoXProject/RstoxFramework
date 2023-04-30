@@ -61,9 +61,9 @@ jobs:
           remotes::install_dev("pkgdown")
             # Add dependencies:
           remotes::install_deps(dependencies = TRUE)
-          utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
-          utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
-          utils::install.packages("RstoxFDA", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
+          # utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
+          # utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
+          # utils::install.packages("RstoxFDA", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
         shell: Rscript {0}
 
       - name: Install package

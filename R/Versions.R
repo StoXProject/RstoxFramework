@@ -2,6 +2,8 @@
 #source ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/R/Versions.R")
 #installOfficialRstoxPackagesWithDependencies("3.4.0")
 
+# 
+
 
 
 
@@ -11,7 +13,7 @@
 #'
 #' @param StoXVersion The version of the StoX GUI defining the combination of official Rstox package versions.
 #' @param officialRstoxPackageVersionsFile The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").
-#' @param optionalDependencies Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Sugggests field of the DESCRIPTION file.
+#' @param optionalDependencies Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Suggests field of the DESCRIPTION file.
 #' @param toJSON Logical: If TRUE output a JSON string.
 #' @param list.out Logical: If TRUE wrap the output of \code{getOfficialRstoxPackageVersion} in a list with packageName and version.
 #' 

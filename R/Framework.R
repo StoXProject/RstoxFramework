@@ -1258,6 +1258,9 @@ getDependentPackageVersion <- function(
     # Read the package table from the repos, using the first lib as the StoX GUI selects a folder in some cases on Windows and otherwise we can assume that the first should be used:
     packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
     
+    warning("___000___ ", packageName, " ___000___")
+    warning("___000___ ", packageTable, " ___000___")
+    
     
     # Get the dependencies: 
     deps <- unique(unlist(tools::package_dependencies(packages = packageName, db = packageTable, recursive = recursive, which = if(is.na(dependencyTypes)) "strong" else dependencyTypes)))

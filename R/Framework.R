@@ -1259,7 +1259,9 @@ getDependentPackageVersion <- function(
     packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
     
     warning("___000___ ", packageName, " ___000___")
-    warning("___000___ ", packageTable, " ___000___")
+    warning("___001___ ", .libPaths(), " ___001___")
+    warning("___002___ ", dim(packageTable), " ___002___")
+    warning("___003___ ", packageTable, " ___003___")
     
     
     # Get the dependencies: 

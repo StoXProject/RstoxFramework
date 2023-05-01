@@ -102,7 +102,11 @@ jobs:
       - name: Install MacOS dependencies
         if: runner.os == 'macOS'
         run: |
-          #rm '/usr/local/bin/gfortran'
+          # gfortran may not exist in a period after a new R minor release:
+          gfortranFile = '/usr/local/bin/gfortran'
+          if [ -f "$gfortranFile" ] ; then
+            rm "$gfortranFile"
+          fi
           rm '/usr/local/bin/2to3'
           rm '/usr/local/bin/2to3-3.11'
           rm '/usr/local/bin/idle3.11'

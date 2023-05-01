@@ -103,7 +103,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           # gfortran may not exist in a period after a new R minor release:
-          gfortranFile = '/usr/local/bin/gfortran'
+          gfortranFile='/usr/local/bin/gfortran'
           if [ -f "$gfortranFile" ] ; then
             rm "$gfortranFile"
           fi

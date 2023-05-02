@@ -63,7 +63,8 @@ jobs:
         run: |
           install.packages("remotes")
           remotes::install_dev("pkgdown")
-            # Add dependencies:
+          # Add dependencies:
+          options(install.packages.compile.from.source = "never") # Avoid installing sources which need compilation
           remotes::install_deps(dependencies = TRUE)
           # utils::install.packages("RstoxData", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")
           # utils::install.packages("RstoxBase", repos = "https://stoxproject.github.io/repo/", dependencies = FALSE, type = "source")

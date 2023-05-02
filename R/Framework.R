@@ -1259,7 +1259,12 @@ getDependentPackageVersion <- function(
     packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
     warning("dim(packageTable): ", paste(dim(packageTable), collapse = ", "))
     warning("colnames(packageTable): ", paste(colnames(packageTable), collapse = ", "))
+    warning("colnames(available.packages()): ", paste(colnames(available.packages()), collapse = ", "))
     warning("packageName: ", packageName)
+    warning("____________________________________________________________________________")
+    warning(paste(as.character(body(tools::package_dependencies)), collapse = "\n"))
+    warning("____________________________________________________________________________")
+    
     
     # tools::package_dependencies has some problems with one row package table on R 4.0, and it seems fair to require more than one package in the table:
     if(NROW(packageTable) > 1) {

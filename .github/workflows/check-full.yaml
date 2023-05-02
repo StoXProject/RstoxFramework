@@ -147,6 +147,7 @@ jobs:
           ### options(install.packages.check.source = "no")
           getOption("repos")
           ### remotes::install_deps(dependencies = TRUE, type = "binary")
+          options(install.packages.compile.from.source = "never") # Avoid installing sources which need compilation
           remotes::install_deps(dependencies = TRUE, type = "both")
           ### installed <- utils::installed.packages()[, "Package"]
           ### needed <- remotes::dev_package_deps()

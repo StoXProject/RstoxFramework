@@ -28,7 +28,8 @@ scanForModelError(
   beforeProcessID = NULL,
   argumentFilePaths = NULL,
   only.valid = TRUE,
-  return.processIndex = FALSE
+  return.processIndex = FALSE,
+  check.only.enabled = TRUE
 )
 
 getProcessesSansProcessData(
@@ -74,6 +75,8 @@ getProcessAndFunctionNames(
 \item{only.valid}{Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).}
 
 \item{return.processIndex}{Logical: If TRUE include the process indices as a sequence starting from 1 in each model.}
+
+\item{check.only.enabled}{Logical: If TRUE check input errors only for enabled procecsses.}
 
 \item{warn}{Logical: If TRUE show warnings that are not highly important.}
 }

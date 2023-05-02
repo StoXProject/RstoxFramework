@@ -6,7 +6,6 @@
 \alias{isSaved}
 \alias{isOpenProject}
 \alias{readProjectDescription}
-\alias{writeProjectDescription}
 \alias{initiateActiveProcessID}
 \alias{isRunning}
 \alias{setRunning}
@@ -26,15 +25,6 @@ readProjectDescription(
   applyBackwardCompatibility = TRUE,
   formatProcesses = TRUE,
   validateJSON = TRUE
-)
-
-writeProjectDescription(
-  projectPath,
-  projectDescription = NULL,
-  projectDescriptionFile = NULL,
-  Application = R.version.string,
-  optionalDependencies = FALSE,
-  verbose = FALSE
 )
 
 initiateActiveProcessID(projectPath)
@@ -58,20 +48,12 @@ setNotRunning(projectPath, modelName)
 
 \item{validateJSON}{Logical: If TRUE validate the project.json.}
 
-\item{projectDescription}{A list holding the project description, as read using \code{\link{readProjectDescription}}.}
-
-\item{Application}{A single string naming the application used when saving the project. Defaulted to R.version.string.}
-
-\item{optionalDependencies}{Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Sugggests field of the DESCRIPTION file.}
-
 \item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 }
 \description{
 Utilities for projects.
 
 Read the project description.
-
-Write the project description.
 
 Initiate the actige processID.
 

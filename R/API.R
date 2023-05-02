@@ -152,14 +152,30 @@ runProject <- function(
         returnModelData <- modelNames %in% returnModelData
     }
     
+    # Support for model specific startProcess and endProcess:
+    if(is.list(startProcess)) {
+        startProcess <- startProcess[modelNames]
+        # Add the default for the models that are not specified in startProcess:
+        if(any(lengths(startProcess) == 0)) {
+            startProcess[lengths(startProcess) == 0] <- formals()$startProcess
+        }
+    }
+    if(is.list(endProcess)) {
+        endProcess <- endProcess[modelNames]
+        # Add the default for the models that are not specified in endProcess:
+        if(any(lengths(endProcess) == 0)) {
+            endProcess[lengths(endProcess) == 0] <- formals()$endProcess
+        }
+    }
+    
     projectData <- mapply(
         runModel, 
         modelName = modelNames, 
         returnModelData = returnModelData, 
+        startProcess = startProcess, 
+        endProcess = endProcess, 
         MoreArgs = list(
             projectPath, 
-            startProcess = startProcess, 
-            endProcess = endProcess, 
             drop.datatype = drop.datatype, unlistDepth2 = unlistDepth2, 
             run = run, 
             save = save, 
@@ -308,7 +324,8 @@ extractFromAllProcessOutputs <- function(nameVector, x) {
         output <- lapply(output, "[[", nameVector[3])
     }
     else {
-        stop("Process outputs can only have three levels")
+        warning("Process outputs with three levels (BioticData and AcousticData) cannot be combined, as these are named by the input data files, which generally differ bewteen StoX projects. A list of the un-combined output is returned.")
+        output <- x
     }
     
     # Remove the empty ones:
@@ -319,7 +336,7 @@ extractFromAllProcessOutputs <- function(nameVector, x) {
 
 pasteNamesRecursive <- function (L, sep = "/") {
     # Return the names if all elements are not lists, and recurse futher if any are lists:
-    areNotList <- sapply(L, inherits, c("data.table", "data.frame", "ggplot"))
+    areNotList <- sapply(L, inherits, c("data.table", "data.frame", "ggplot", "SpatialPolygonsDataFrame"))
     areList <- !areNotList
     
     if(any(areList)) {
@@ -503,14 +520,17 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
         output <- freadKeepQuotedCharacterAsCharacter(path, na.strings = "NA", tz = "UTC", encoding = "UTF-8")
         
         # If here are any keys that are time (such as LogKey of the StoxAcoustic format), convert these to character with 3 digits:
-        areKeys <- endsWith(names(output), "Key")
-        areDateTime <- sapply(output, getRelevantClass) %in% "POSIXct"
-        toConvertToCharacter <- areKeys & areDateTime
-        if(any(toConvertToCharacter)) {
-            for(col in names(output)[toConvertToCharacter]) {
-                output[, (col) := format(get(col), format = "%Y-%m-%dT%H:%M:%OS3Z")]
-            }
-        }
+        #areKeys <- endsWith(names(output), "Key")
+        #areDateTime <- sapply(output, getRelevantClass) %in% "POSIXct"
+        #toConvertToCharacter <- areKeys & areDateTime
+        #if(any(toConvertToCharacter)) {
+        #    for(col in names(output)[toConvertToCharacter]) {
+        #        output[, (col) := format(get(col), format = "%Y-%m-%dT%H:%M:%OS3Z")]
+        #    }
+        #}
+        
+        keys <- names(output)[endsWith(names(output), "Key")]
+        formatPOSIXAsISO8601(output, cols = keys)
     }
     else if(tolower(ext) %in% "csv") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:

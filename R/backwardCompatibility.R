@@ -118,7 +118,6 @@ applyBackwardCompatibilityActionsReordered <- function(
     backwardCompatibility <- backwardCompatibility[newOrder]
     
     
-    
     # Run through the supported backward compatibility action names:
     for(backwardCompatibilityAction in backwardCompatibility) {
         
@@ -130,6 +129,8 @@ applyBackwardCompatibilityActionsReordered <- function(
             projectDescription = projectDescription, 
             packageName = packageName
         )
+        
+        print(run)
         
         if(run) {
             # Apply the backwardCompatibilityAction:
@@ -1326,11 +1327,19 @@ mergeAssignment2.7With3 <- function(bioticassignment_2.7, BioticAssignment_3) {
 }
 
 
+convertSampleUnitToChatacter <- function(DT) {
+    if("SampleUnit" %in% names(DT)) {
+        DT[, SampleUnit := as.character(SampleUnit)]
+    }
+}
+
 
 # Function to compare one output from the old and new StoX project using merging:
 compareByMerging <- function(output_Old, output_New, processName_Old, processName_New, keys_Old, keys_New, dataVariable, tolerance, data.out = FALSE) {
     
     old <- data.table::as.data.table(output_Old$outputData[[processName_Old]])
+    convertSampleUnitToChatacter(old)
+    
     new <- output_New[[processName_New]]
     if(!data.table::is.data.table(new) && is.list(new) && "Data" %in% names(new)) {
         new <- data.table::as.data.table(new$Data)
@@ -1454,7 +1463,7 @@ compareSweptAreaBaseline <- function(projectPathOld, projectPathNew, comparisonM
     
     # Run in old StoX:
     if(!length(output_Old)) {
-        stop("The output_Old must be given. Please run the following in Rstox 1.11.1: \n\tlibrary(Rstox) \n\toutput_Old <- Rstox::getBaseline(", projectPathOld, ")")
+        stop("The output_Old must be given. Please run the following in Rstox 1.11.1: \n\tlibrary(Rstox) \n\toutput_Old <- Rstox::getBaseline(\"", projectPathOld, "\")")
         #library(Rstox)
         #output_Old <- Rstox::getBaseline(projectPathOld)
     }

@@ -1259,7 +1259,7 @@ getDependentPackageVersion <- function(
     packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
     warning("dim(packageTable): ", paste(dim(packageTable), collapse = ", "))
     warning("colnames(packageTable): ", paste(colnames(packageTable), collapse = ", "))
-    warning("colnames(available.packages()): ", paste(colnames(available.packages("https://cloud.r-project.org/src/contrib")), collapse = ", "))
+    warning("colnames(available.packages()): ", paste(colnames(utils::available.packages("https://cloud.r-project.org/src/contrib")), collapse = ", "))
     warning("packageName: ", packageName)
     warning("____________________________________________________________________________")
     warning(paste(as.character(body(tools::package_dependencies)), collapse = "\n"))

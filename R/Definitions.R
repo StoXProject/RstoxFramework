@@ -62,7 +62,7 @@ initiateRstoxFramework <- function(){
     # Get the versions of the dependencies:
     dependentPackageVersion <- getDependentPackageVersion(
         packageName = officialStoxLibraryPackagesAll, 
-        dependencyTypes = NA
+        dependencyTypes = c("Depends", "Imports", "LinkingTo") # Use the types explicitely, since the keyword "strong" was introduced in R 4.1, and will cause an error in R <= 4.0.
     )
 
     ### # Define formats for files saved by Rstox:

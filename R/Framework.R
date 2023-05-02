@@ -1251,25 +1251,20 @@ getPackageVersion <- function(packageNames, only.version = FALSE, sep = "_") {
 #getDependentPackageVersion <- function(packageName, only.depedencies = TRUE) {
 getDependentPackageVersion <- function(
     packageName, 
-    dependencyTypes = NA, 
+    dependencyTypes = c("Depends", "Imports", "LinkingTo"),  # Use the types explicitely, since the keyword "strong" was introduced in R 4.1, and will cause an error in R <= 4.0.
     recursive = TRUE
 ) {
     
     # Read the package table from the repos, using the first lib as the StoX GUI selects a folder in some cases on Windows and otherwise we can assume that the first should be used:
     packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
-    warning("dim(packageTable): ", paste(dim(packageTable), collapse = ", "))
-    warning("colnames(packageTable): ", paste(colnames(packageTable), collapse = ", "))
-    warning("colnames(available.packages()): ", paste(colnames(utils::available.packages("https://cloud.r-project.org/src/contrib")), collapse = ", "))
-    warning("packageName: ", packageName)
-    warning("____________________________________________________________________________")
-    warning(paste(as.character(body(tools::package_dependencies)), collapse = "\n"))
-    warning("____________________________________________________________________________")
-    
     
     # tools::package_dependencies has some problems with one row package table on R 4.0, and it seems fair to require more than one package in the table:
     if(NROW(packageTable) > 1) {
-        # Get the dependencies: 
-        deps <- unique(unlist(tools::package_dependencies(packages = packageName, db = packageTable, recursive = recursive, which = if(is.na(dependencyTypes)) "strong" else dependencyTypes)))
+        # Get the dependencies:
+        if(!all(dependencyTypes %in% c("Depends", "Imports", "LinkingTo", "Suggests", "Enhances"))) {
+            stop("dependencyTypes must be among \"Depends\", \"Imports\", \"LinkingTo\", \"Suggests\", \"Enhances\"")
+        }
+        deps <- unique(unlist(tools::package_dependencies(packages = packageName, db = packageTable, recursive = recursive, which = dependencyTypes)))
         
         # Ignore base packages of R (but include recommended packages, which are also shipped with R but can be installed manually):
         deps <- setdiff(deps, rownames(utils::installed.packages(priority = "base")))

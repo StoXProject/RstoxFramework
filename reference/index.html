@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.1</span>
       </span>
     </div>
 
@@ -67,6 +67,14 @@
         </td>
         <td><p>Bootstrap data</p></td>
       </tr><tr><td>
+          <p><code><a href="BootstrapNetCDF4.html">BootstrapNetCDF4()</a></code> </p>
+        </td>
+        <td><p>Bootstrap the baseline model, write to NetCDF4 file</p></td>
+      </tr><tr><td>
+          <p><code><a href="BootstrapNetCDF4Data.html">BootstrapNetCDF4Data</a></code> </p>
+        </td>
+        <td><p>BootstrapNetCDF4 data</p></td>
+      </tr><tr><td>
           <p><code><a href="DataTypes.html">DataTypes</a></code> </p>
         </td>
         <td><p>StoX data types of the RstoxFramework package</p></td>
@@ -91,7 +99,7 @@
         </td>
         <td><p>Process data used by RstoxFramework</p></td>
       </tr><tr><td>
-          <p><code><a href="ProjectUtils.html">isProject()</a></code> <code><a href="ProjectUtils.html">isSaved()</a></code> <code><a href="ProjectUtils.html">isOpenProject()</a></code> <code><a href="ProjectUtils.html">readProjectDescription()</a></code> <code><a href="ProjectUtils.html">writeProjectDescription()</a></code> <code><a href="ProjectUtils.html">initiateActiveProcessID()</a></code> <code><a href="ProjectUtils.html">isRunning()</a></code> <code><a href="ProjectUtils.html">setRunning()</a></code> <code><a href="ProjectUtils.html">setNotRunning()</a></code> </p>
+          <p><code><a href="ProjectUtils.html">isProject()</a></code> <code><a href="ProjectUtils.html">isSaved()</a></code> <code><a href="ProjectUtils.html">isOpenProject()</a></code> <code><a href="ProjectUtils.html">readProjectDescription()</a></code> <code><a href="ProjectUtils.html">initiateActiveProcessID()</a></code> <code><a href="ProjectUtils.html">isRunning()</a></code> <code><a href="ProjectUtils.html">setRunning()</a></code> <code><a href="ProjectUtils.html">setNotRunning()</a></code> </p>
         </td>
         <td><p>Utilities for projects.</p></td>
       </tr><tr><td>
@@ -106,6 +114,14 @@
           <p><code><a href="ReportBootstrapData.html">ReportBootstrapData</a></code> </p>
         </td>
         <td><p>Reported Bootstrap data</p></td>
+      </tr><tr><td>
+          <p><code><a href="ReportBootstrapNetCDF4.html">ReportBootstrapNetCDF4()</a></code> </p>
+        </td>
+        <td><p>Report BootstrapNetCDF4</p></td>
+      </tr><tr><td>
+          <p><code><a href="ReportBootstrapNetCDF4Data.html">ReportBootstrapNetCDF4Data</a></code> </p>
+        </td>
+        <td><p>Reported BootstrapNetCDF4 data</p></td>
       </tr><tr><td>
           <p><code><a href="ResampleBioticAssignment.html">ResampleBioticAssignment()</a></code> </p>
         </td>
@@ -127,7 +143,11 @@
         </td>
         <td><p>The Engine of StoX</p></td>
       </tr><tr><td>
-          <p><code><a href="StoXGUI_interfaces.html">getModelNames()</a></code> <code><a href="StoXGUI_interfaces.html">getModelInfo()</a></code> <code><a href="StoXGUI_interfaces.html">getInteractiveMode()</a></code> <code><a href="StoXGUI_interfaces.html">getInteractiveData()</a></code> <code><a href="StoXGUI_interfaces.html">getMapData()</a></code> <code><a href="StoXGUI_interfaces.html">getEDSUColours()</a></code> <code><a href="StoXGUI_interfaces.html">getStationColours()</a></code> <code><a href="StoXGUI_interfaces.html">getProcessPropertySheet()</a></code> <code><a href="StoXGUI_interfaces.html">setProcessPropertyValue()</a></code> <code><a href="StoXGUI_interfaces.html">getFunctionHelpAsHtml()</a></code> <code><a href="StoXGUI_interfaces.html">getObjectHelpAsHtml()</a></code> <code><a href="StoXGUI_interfaces.html">getFilterOptionsAll()</a></code> <code><a href="StoXGUI_interfaces.html">getParameterTableInfo()</a></code> <code><a href="StoXGUI_interfaces.html">getParameterVectorInfo()</a></code> </p>
+          <p><code><a href="RstoxPackageStatus.html">RstoxPackageStatus()</a></code> </p>
+        </td>
+        <td><p>Get package status of an Rstox package</p></td>
+      </tr><tr><td>
+          <p><code><a href="StoXGUI_interfaces.html">getModelInfo()</a></code> <code><a href="StoXGUI_interfaces.html">getInteractiveMode()</a></code> <code><a href="StoXGUI_interfaces.html">getInteractiveData()</a></code> <code><a href="StoXGUI_interfaces.html">getMapData()</a></code> <code><a href="StoXGUI_interfaces.html">getEDSUColours()</a></code> <code><a href="StoXGUI_interfaces.html">getStationColours()</a></code> <code><a href="StoXGUI_interfaces.html">getProcessPropertySheet()</a></code> <code><a href="StoXGUI_interfaces.html">setProcessPropertyValue()</a></code> <code><a href="StoXGUI_interfaces.html">getFunctionHelpAsHtml()</a></code> <code><a href="StoXGUI_interfaces.html">getObjectHelpAsHtml()</a></code> <code><a href="StoXGUI_interfaces.html">getFilterOptionsAll()</a></code> <code><a href="StoXGUI_interfaces.html">getParameterTableInfo()</a></code> <code><a href="StoXGUI_interfaces.html">getParameterVectorInfo()</a></code> </p>
         </td>
         <td><p>Get objects for use in the GUI</p></td>
       </tr><tr><td>
@@ -207,9 +227,25 @@
         </td>
         <td><p>Function returning the names of the StoX functions available for a model:</p></td>
       </tr><tr><td>
+          <p><code><a href="getBootstrapNetCDF4Data.html">getBootstrapNetCDF4Data()</a></code> </p>
+        </td>
+        <td><p>Get bootstrap data saved in a NetCDF4 file</p></td>
+      </tr><tr><td>
+          <p><code><a href="getBootstrapNetCDF4ProcessNames.html">getBootstrapNetCDF4ProcessNames()</a></code> </p>
+        </td>
+        <td><p>Get the process names of the processes stored in a BootstrapNetCDF4Data.</p></td>
+      </tr><tr><td>
+          <p><code><a href="getBootstrapNetCDF4Variables.html">getBootstrapNetCDF4Variables()</a></code> </p>
+        </td>
+        <td><p>Get the variable names of a BootstrapNetCDF4Data.</p></td>
+      </tr><tr><td>
           <p><code><a href="getModelData.html">getModelData()</a></code> </p>
         </td>
         <td><p>Get output data from processes of a StoX model</p></td>
+      </tr><tr><td>
+          <p><code><a href="getOfficialRstoxPackageVersion.html">getOfficialRstoxPackageVersion()</a></code> </p>
+        </td>
+        <td><p>Get certified Rstox package versions</p></td>
       </tr><tr><td>
           <p><code><a href="getProcessIDByOffset.html">getProcessIDByOffset()</a></code> </p>
         </td>
@@ -291,9 +327,13 @@
         </td>
         <td><p>Definitions stored in the RstoxFramework environment</p></td>
       </tr><tr><td>
-          <p><code><a href="installPackages.html">getNonRstoxDependencies()</a></code> <code><a href="installPackages.html">getStoxDependencies()</a></code> <code><a href="installPackages.html">installOfficialRstoxPackagesWithDependencies()</a></code> <code><a href="installPackages.html">getOfficialRstoxPackageVersion()</a></code> </p>
+          <p><code><a href="isCertifiedRstoxFramework.html">isCertifiedRstoxFramework()</a></code> </p>
         </td>
-        <td><p>Tools to download and install Rstox packages and dependent packages.</p></td>
+        <td><p>Test for whether the installed Rstox packages are certified.</p></td>
+      </tr><tr><td>
+          <p><code><a href="isOfficialStoXVersion.html">isOfficialStoXVersion()</a></code> </p>
+        </td>
+        <td><p>Test for whether the given StoX version is an official version</p></td>
       </tr><tr><td>
           <p><code><a href="json2expression.html">json2expression()</a></code> </p>
         </td>
@@ -403,6 +443,14 @@
         </td>
         <td><p>Function for unzipping a zipped StoX project</p></td>
       </tr><tr><td>
+          <p><code><a href="writeActiveProcessID.html">writeActiveProcessID()</a></code> </p>
+        </td>
+        <td><p>This function has the primary use of writing the proided activeProcessID to the activeProcessID.txt file</p></td>
+      </tr><tr><td>
+          <p><code><a href="writeProjectDescription.html">writeProjectDescription()</a></code> </p>
+        </td>
+        <td><p>Write the project description.</p></td>
+      </tr><tr><td>
           <p><code><a href="writeProjectDescriptionJSON.html">writeProjectDescriptionJSON()</a></code> </p>
         </td>
         <td><p>Write project description to a file in json format</p></td>
@@ -410,6 +458,10 @@
           <p><code><a href="writeStoxJsonSchema.html">writeStoxJsonSchema()</a></code> </p>
         </td>
         <td><p>Export StoX JSON schema</p></td>
+      </tr><tr><td>
+          <p><code><a href="write_list_as_tables_NetCDFF4.html">write_list_as_tables_NetCDFF4()</a></code> </p>
+        </td>
+        <td><p>Write/append a table/list of tables to NetCDF4</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

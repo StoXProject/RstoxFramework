@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.1</span>
       </span>
     </div>
 
@@ -53,13 +53,30 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">unlistToDataType</span><span class="op">(</span><span class="va">processOutput</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">unlistToDataType</span><span class="op">(</span></span>
+<span>  <span class="va">processOutput</span>,</span>
+<span>  sep <span class="op">=</span> <span class="st">"_"</span>,</span>
+<span>  validOutputDataClasses <span class="op">=</span> <span class="fu"><a href="getRstoxFrameworkDefinitions.html">getRstoxFrameworkDefinitions</a></span><span class="op">(</span><span class="st">"validOutputDataClasses"</span><span class="op">)</span>,</span>
+<span>  nlevel <span class="op">=</span> <span class="fl">2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>processOutput</dt>
 <dd><p>A list of StoX output data.</p></dd>
+
+
+<dt>sep</dt>
+<dd><p>The separator to use when constructing names for the finla flat list, defaulted to underscore, but slash can also be useful e.g. for denoting groupes in a NetCDF4 file.</p></dd>
+
+
+<dt>validOutputDataClasses</dt>
+<dd><p>A vector of valid output data classes, indicating when to stop the unlisting.</p></dd>
+
+
+<dt>nlevel</dt>
+<dd><p>The number of levels to unlist through.</p></dd>
 
 </dl></div>
 

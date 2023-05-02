@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.1</span>
       </span>
     </div>
 
@@ -74,7 +74,8 @@
 <span>  beforeProcessID <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  argumentFilePaths <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  only.valid <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  return.processIndex <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  return.processIndex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  check.only.enabled <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">getProcessesSansProcessData</span><span class="op">(</span></span>
@@ -139,6 +140,10 @@
 
 <dt>return.processIndex</dt>
 <dd><p>Logical: If TRUE include the process indices as a sequence starting from 1 in each model.</p></dd>
+
+
+<dt>check.only.enabled</dt>
+<dd><p>Logical: If TRUE check input errors only for enabled procecsses.</p></dd>
 
 
 <dt>warn</dt>

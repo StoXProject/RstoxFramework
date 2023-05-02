@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.7.0-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.1</span>
       </span>
     </div>
 
@@ -48,6 +48,22 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.1" id="rstoxframework-v361-2023-04-28">RstoxFramework v3.6.1 (2023-04-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v361-2023-04-28"></a></h2>
+<ul><li>Fixed bug when on R 4.3 where StoX could not be opened on MacOS and R connection failed on Windows.</li>
+<li>Stopped using the Versions.R file in the StoX GUI, but rather separated out the functions used by the GUI to an exclusive GUI file. Simplified functions for getting versions used in the project.json file.</li>
+<li>Improved how StoX changes the active process so that setting a parameter without actually changing it value does not reset the process.</li>
+<li>Fixed bug in StoX 3.6.0 where simply selecting a process in a model would reset the later models.</li>
+<li>Added support for specifying startProcess and endProcess in runProject() and runProjects() as a list named by the proecsses, such as endProcess = list(report = 2) to only run the first two processes of the report model.</li>
+<li>Fixed bug in runProjects(), where processes returning StratumPolygon and BioticData and AcousticData could not be included in the processes argument.</li>
+<li>Added support for arbitraty name of first argument in functions used in replaceData.</li>
+<li>Fixed bug in modifyProcessNameInFunctionInputs() where function input were modified only in the same model, and failed when at least one function input was empty.</li>
+<li>Changed to check function input errors only for enabled processes.</li>
+<li>Improved warming for function input not enabled (added the name of the process).</li>
+<li>Preparations for writing bootstrap data to NetCDF4.</li>
+<li>Fixed bug where slash and backslash were mixed in file name in json schema validation error message. Now using only slash. Also changed this to a warning instead of an error, so that StoX tries to open the project anyhow.</li>
+<li>Added LogDistance to tooltip for EDSUs in the map.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="3.7.0-9001" id="rstoxframework-v370-9001-2023-02-15">RstoxFramework v3.7.0-9001 (2023-02-15)<a class="anchor" aria-label="anchor" href="#rstoxframework-v370-9001-2023-02-15"></a></h2>
 <ul><li>Changed the requirements of the the BaselineSeedTable of the function Bootstrap to only need the ImputeSuperIndividuals processes which use ImputationMethod = “RandomSampling”.</li>
 <li>Added the option prependProcessList in runProcesses(), runModel(), runProject() and runProjects().</li>
@@ -57,6 +73,42 @@
 <li>Changed the error “The BaselineSeedTable must contain Seed for the processes…” to ignore ImputeSuperIndividuals proecsses with Regressio method (no seed required).</li>
 <li>Reduced memory for large BootstrapData in ReportBootstrap() by sending only the relevant columns to the report function.</li>
 </ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.0" id="rstoxframework-v360-2023-01-14">RstoxFramework v3.6.0 (2023-01-14)<a class="anchor" aria-label="anchor" href="#rstoxframework-v360-2023-01-14"></a></h2>
+<div class="section level3">
+<h3 id="summary-3-6-0">Summary<a class="anchor" aria-label="anchor" href="#summary-3-6-0"></a></h3>
+<ul><li>In this release RstoxFDA package is included as an official but optional package. The new version includes a number of changes supporting improvements in the StoX GUI, as well as important bug fixes.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="general-changes-3-6-0">General changes<a class="anchor" aria-label="anchor" href="#general-changes-3-6-0"></a></h3>
+<ul><li>Added the parameter Percentages with default c(5, 50, 95) in ReportBootstrap() when BootstrapReportFunction = “summaryStox” (currently the only option).</li>
+<li>Reversed the order of installation of Rstox packages for pre-releases, to ensure that the lower packages get the correct ersion (ultimately RstoxData).</li>
+<li>Added RstoxFDA to OfficialRstoxFrameworkVersions.txt.</li>
+<li>Added Date to OfficialRstoxFrameworkVersions.txt and removed all versions prior to StoX 3.0.0.</li>
+<li>Updated Versions.R to supprort RstoxFDA in the list of package versions in the StoX and RstoxFramework logo inn the GUI upper right corner.</li>
+<li>Removed the test project tobis_20, as it is covered largely by the test project tobis_20_depth.</li>
+<li>Updated the test projects catch_99, coastalCod_20, cod_19, haddock_19, splitNASC_18 and tobis_20_depth, and added 1e-12 tolerance in the tests.</li>
+<li>Removed rows of the output from ReportBootstrap() that contained combinations of the GroupingVariables that are not present in the BootstrapData. There rows were created to ensure that all bootstrap runs contain all combinations of the GroupingVariables, but also introduced non-existing combinations.</li>
+<li>Improved documentation of seed in Bootstrap().</li>
+<li>Added support for pre-releases, which are not deployed to the StoX repo.</li>
+<li>Updated tests to document the StratumArea change when switching to sf.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="detailed-changes-3-6-0">Detailed changes<a class="anchor" aria-label="anchor" href="#detailed-changes-3-6-0"></a></h3>
+<ul><li>Added the parameter empty.input to CopyProject().</li>
+<li>Added unfinished PlotReportBootstrap().</li>
+<li>Prepared for adding tolerance to tests.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-3-6-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-3-6-0"></a></h3>
+<ul><li>Fixed bug in output file of Bootstrap() when OutputProcesses contained processes with more than one table (e.g. the Data and Resolution table of Quantity()) mixed with single table outputs (e.g. ImputeSuperIndividuals()). The list of output data was flattened to include e.g. Quantity_Data and Quantity_Resolution. However, for BootstrapData, the output is saved to an RData file, and no such flattening of the list is necessary, and also corrupts the data when read back in when using the UseOutputData option in Bootstrap(). This may break scripts using the output file of a Bootstrap process with datta from multi table processes. This is however rare, and the function RstoxFramework::unlistToDataType() can be used to re-create the previous list in the output file of Bootstrap processes.</li>
+<li>Fixed bug in the GUI, where running a process in one model did not reset all later models.</li>
+<li>Fixed bug in PlotBootstrap().</li>
+<li>Fixed bug with slashes in sub plot names in PlotReportBootstrap().</li>
+<li>Fixed bug when running a project with projectPath ending with exactly one slash (“/”) (problem fixed in getRelativePath()).</li>
+<li>Fixed bug in pkgdown.yaml.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.6.0-9003" id="rstoxframework-v360-9003-2023-01-10">RstoxFramework v3.6.0-9003 (2023-01-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v360-9003-2023-01-10"></a></h2>
 <ul><li>Fixed bug in output file of Bootstrap() when OutputProcesses contained processes with more than one table (e.g. the Data and Resolution table of Quantity()) mixed with single table outputs (e.g. ImputeSuperIndividuals()). The list of output data was flattened to include e.g. Quantity_Data and Quantity_Resolution. However, for BootstrapData, the output is saved to an RData file, and no such flattening of the list is necessary, and also corrupts the data when read back in when using the UseOutputData option in Bootstrap(). This may break scripts using the output file of a Bootstrap process with datta from multi table processes. This is however rare, and the function RstoxFramework::unlistToDataType() can be used to re-create the previous list in the output file of Bootstrap processes.</li>
@@ -166,7 +218,7 @@
 <li>Changed all sd and cv in reports from 0 to NA. Standard deviation = 0 is no longer accepted by StoX, as it implies either insufficient number of bootstraps or only one value to sample from in the bootstrapping.</li>
 <li>Fixed bug where the blue dot marking processes as ‘run’ was turned on on a newly modified process when immediately modifying a later process.</li>
 <li>Moved setting precision to runProcess() instead of each StoX function.</li>
-<li>Fixed bug when working with a DefineStratumPolygon procecss with no polygons defined (readProcessOutputFile() did nor read deal properly with the empty SpatialPolygonsDataFrame with jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data))), but ok when using replaceSpatialFileReference(buildSpatialFileReferenceString(data)) instead).</li>
+<li>Fixed bug when working with a DefineStratumPolygon process with no polygons defined (readProcessOutputFile() did nor read deal properly with the empty SpatialPolygonsDataFrame with jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data))), but ok when using replaceSpatialFileReference(buildSpatialFileReferenceString(data)) instead).</li>
 <li>Changed to using StratumName instead of the old polygonName in stratum polygons throughout RstoxFramework and the StoX GUI.</li>
 <li>Changed to using RstoxData::firstClass instead of a copy.</li>
 <li>Added order of backward compatibility actions to package first (alphabetically), then change version (numerically), and finally action type with order as given by RstoxFramework::getRstoxFrameworkDefinitions(“backwardCompatibilityActionNames”).</li>

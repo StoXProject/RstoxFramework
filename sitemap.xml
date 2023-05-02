@@ -25,6 +25,12 @@
     <loc>/reference/BootstrapData.html</loc>
   </url>
   <url>
+    <loc>/reference/BootstrapNetCDF4.html</loc>
+  </url>
+  <url>
+    <loc>/reference/BootstrapNetCDF4Data.html</loc>
+  </url>
+  <url>
     <loc>/reference/DataTypes.html</loc>
   </url>
   <url>
@@ -55,6 +61,12 @@
     <loc>/reference/ReportBootstrapData.html</loc>
   </url>
   <url>
+    <loc>/reference/ReportBootstrapNetCDF4.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ReportBootstrapNetCDF4Data.html</loc>
+  </url>
+  <url>
     <loc>/reference/ResampleBioticAssignment.html</loc>
   </url>
   <url>
@@ -68,6 +80,9 @@
   </url>
   <url>
     <loc>/reference/RstoxFramework.html</loc>
+  </url>
+  <url>
+    <loc>/reference/RstoxPackageStatus.html</loc>
   </url>
   <url>
     <loc>/reference/StoXGUI_interfaces.html</loc>
@@ -130,7 +145,19 @@
     <loc>/reference/getAvailableStoxFunctionNames.html</loc>
   </url>
   <url>
+    <loc>/reference/getBootstrapNetCDF4Data.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getBootstrapNetCDF4ProcessNames.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getBootstrapNetCDF4Variables.html</loc>
+  </url>
+  <url>
     <loc>/reference/getModelData.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getOfficialRstoxPackageVersion.html</loc>
   </url>
   <url>
     <loc>/reference/getProcessIDByOffset.html</loc>
@@ -196,7 +223,10 @@
     <loc>/reference/initiateRstoxFramework.html</loc>
   </url>
   <url>
-    <loc>/reference/installPackages.html</loc>
+    <loc>/reference/isCertifiedRstoxFramework.html</loc>
+  </url>
+  <url>
+    <loc>/reference/isOfficialStoXVersion.html</loc>
   </url>
   <url>
     <loc>/reference/json2expression.html</loc>
@@ -280,9 +310,18 @@
     <loc>/reference/unzipProject.html</loc>
   </url>
   <url>
+    <loc>/reference/writeActiveProcessID.html</loc>
+  </url>
+  <url>
+    <loc>/reference/writeProjectDescription.html</loc>
+  </url>
+  <url>
     <loc>/reference/writeProjectDescriptionJSON.html</loc>
   </url>
   <url>
     <loc>/reference/writeStoxJsonSchema.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_list_as_tables_NetCDFF4.html</loc>
   </url>
 </urlset>

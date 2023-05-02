@@ -1257,18 +1257,14 @@ getDependentPackageVersion <- function(
     
     # Read the package table from the repos, using the first lib as the StoX GUI selects a folder in some cases on Windows and otherwise we can assume that the first should be used:
     packageTable <- as.data.frame(utils::installed.packages(.libPaths()[1]), stringsAsFactors = FALSE)
-    warning("___dim___ ", dim(packageTable), " ___dim___")
-    warning("___class___ ", class(packageTable), " ___class___")
-    warning("___head___ ", head(packageTable), " ___head___")
     
-    if(NROW(packageTable)) {
+    # tools::package_dependencies has some problems with one row packagge table on R 4.0, and it seems fair to require more than one package in the table:
+    if(NROW(packageTable) > 1) {
         # Get the dependencies: 
         deps <- unique(unlist(tools::package_dependencies(packages = packageName, db = packageTable, recursive = recursive, which = if(is.na(dependencyTypes)) "strong" else dependencyTypes)))
-        warning("___111___ ", deps, " ___111___")
         
         # Ignore base packages of R (but include recommended packages, which are also shipped with R but can be installed manually):
         deps <- setdiff(deps, rownames(utils::installed.packages(priority = "base")))
-        warning("___222___ ", deps, " ___222___")
         
         # Ignore also Rstox packages:
         deps <- deps[!startsWith(deps, "Rstox")]

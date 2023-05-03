@@ -76,7 +76,7 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
-      - name: Query dependencies
+      - name: Query R package dependencies
         run: |
           install.packages('remotes')
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
@@ -99,7 +99,7 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "18.04"))')
 
-      - name: Install MacOS dependencies
+      - name: Install MacOS system dependencies
         if: runner.os == 'macOS'
         run: |
           # gfortran may not exist in a period after a new R minor release:
@@ -120,7 +120,7 @@ jobs:
           brew install gdal udunits
         shell: bash
 
-      - name: Prepare for dependencies on Linux
+      - name: Prepare for R package dependencies on Linux
         if: runner.os == 'Linux'
         run: |
           # The following two lines caused trouble for sf on the new R 4.2 on Ubuntu in May 2022:
@@ -129,7 +129,7 @@ jobs:
           sudo apt-get install libgdal-dev libproj-dev libgeos-dev libudunits2-dev libxslt1-dev
         shell: bash
       
-      - name: Install dependencies on Linux
+      - name: Install R package dependencies on Linux
         if: runner.os == 'Linux'
         run: |
           getOption("repos")
@@ -148,7 +148,7 @@ jobs:
           install.packages("ellipsis")
         shell: Rscript {0}
 
-      - name: Install dependencies on Windows and macOS
+      - name: Install R package dependencies on Windows and macOS
         if: runner.os != 'Linux'
         run: |
           # Show the repos:

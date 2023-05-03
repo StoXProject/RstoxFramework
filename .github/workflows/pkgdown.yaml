@@ -39,7 +39,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
-      - name: Install MacOS system dependencies
+      - name: Install macOS system dependencies
         if: runner.os == 'macOS'
         run: |
           # gfortran may not exist in a period after a new R minor release:

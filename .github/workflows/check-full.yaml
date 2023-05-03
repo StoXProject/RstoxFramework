@@ -144,6 +144,8 @@ jobs:
           install.packages("rlang")
           # Also vctrs need the latest version for pillar to install (used by tibble -> ggplot2):
           install.packages("vctrs")
+          # remotes::install_deps() does not seem to pick up ellipsis on R 4.0 on Windows, which is used by the following packages suggested by ggplot2: Hmisc, profvis, rmarkdown, testthat, vdiffr. We install it specifically here:
+          install.packages("ellipsis")
         shell: Rscript {0}
 
       - name: Install dependencies on Windows and macOS

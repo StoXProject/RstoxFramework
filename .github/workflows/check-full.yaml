@@ -99,7 +99,7 @@ jobs:
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "18.04"))')
 
-      - name: Install MacOS system dependencies
+      - name: Install macOS system dependencies
         if: runner.os == 'macOS'
         run: |
           # gfortran may not exist in a period after a new R minor release:
@@ -132,7 +132,6 @@ jobs:
       - name: Install R package dependencies on Linux
         if: runner.os == 'Linux'
         run: |
-          getOption("repos")
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 

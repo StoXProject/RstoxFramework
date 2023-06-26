@@ -14,6 +14,7 @@ runProjects(
   unlistDepth2 = FALSE,
   run = TRUE,
   save = TRUE,
+  force.save = FALSE,
   force.restart = FALSE,
   replaceDataList = list(),
   replaceArgsList = list(),
@@ -29,7 +30,7 @@ runProjects(
 )
 }
 \arguments{
-\item{projectPaths}{The paths to the projects to run.}
+\item{projectPaths}{A vector of paths to the StoX projects.}
 
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
@@ -46,6 +47,8 @@ runProjects(
 \item{run}{Logical: If TRUE run the model.}
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{force.save}{If no changes are made to the project, force save anyway. Overrides the \code{save} option.}
 
 \item{force.restart}{Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.}
 
@@ -67,7 +70,7 @@ runProjects(
 
 \item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
 
-\item{close}{Logical: If TRUE close the project after running and getting the output.}
+\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
 
 \item{...}{\code{replaceArgsList} can also be given directly.}
 }

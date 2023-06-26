@@ -14,6 +14,7 @@ runProject(
   unlistDepth2 = FALSE,
   run = TRUE,
   save = TRUE,
+  force.save = FALSE,
   force.restart = FALSE,
   replaceDataList = list(),
   replaceArgsList = list(),
@@ -48,6 +49,8 @@ runProject(
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
 
+\item{force.save}{If no changes are made to the project, force save anyway. Overrides the \code{save} option.}
+
 \item{force.restart}{Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.}
 
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
@@ -66,7 +69,7 @@ runProject(
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
-\item{close}{Logical: If TRUE close the project after running and getting the output.}
+\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
 
 \item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
 

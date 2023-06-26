@@ -130,8 +130,6 @@ applyBackwardCompatibilityActionsReordered <- function(
             packageName = packageName
         )
         
-        print(run)
-        
         if(run) {
             # Apply the backwardCompatibilityAction:
             projectDescription <- applyBackwardCompatibilityAction(

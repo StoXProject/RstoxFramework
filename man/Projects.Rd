@@ -35,6 +35,7 @@ openProjectAsTemplate(projectPath, newProjectPath, ow = FALSE)
 closeProject(
   projectPath,
   save = NULL,
+  force.save = FALSE,
   Application = R.version.string,
   msg = TRUE
 )
@@ -89,6 +90,8 @@ deleteProject(projectPath)
 \item{newProjectPath}{The path to the copied StoX project.}
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{force.save}{If no changes are made to the project, force save anyway. Overrides the \code{save} option.}
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 

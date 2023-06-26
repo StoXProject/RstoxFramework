@@ -7,6 +7,7 @@
 #' @inheritParams general_arguments
 #' @inheritParams getModelData
 #' @inheritParams runProcesses
+#' @inheritParams Projects
 #' @param run Logical: If TRUE run the model.
 #' @param save Logical: If TRUE save the project after running.
 #' @param force.restart Logical: If TRUE restart the model before running.
@@ -23,7 +24,7 @@ runModel <- function(
     projectPath, modelName, 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.restart = FALSE, 
+    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -55,7 +56,7 @@ runModel <- function(
                 modelName = modelName, 
                 startProcess = startProcess, 
                 endProcess = endProcess, 
-                save = save, 
+                save = save, force.save = force.save, 
                 force.restart = force.restart, 
                 replaceDataList = replaceDataList, 
                 replaceArgsList = replaceArgsList, 
@@ -100,6 +101,7 @@ runModel <- function(
 #' @inheritParams general_arguments
 #' @inheritParams getModelData
 #' @inheritParams runProcesses
+#' @inheritParams Projects
 #' @inheritParams runModel
 #' @param unlist.models Logical: If TRUE unlist the top level so that all processes are in one list.
 #' 
@@ -113,7 +115,7 @@ runProject <- function(
     modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype  = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.restart = FALSE, 
+    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -178,7 +180,7 @@ runProject <- function(
             projectPath, 
             drop.datatype = drop.datatype, unlistDepth2 = unlistDepth2, 
             run = run, 
-            save = save, 
+            save = save, force.save = force.save, 
             force.restart = force.restart, 
             replaceDataList = replaceDataList, 
             replaceArgsList = replaceArgsList, 
@@ -225,9 +227,9 @@ runProject <- function(
 #' @inheritParams general_arguments
 #' @inheritParams getModelData
 #' @inheritParams runProcesses
+#' @inheritParams Projects
 #' @inheritParams runModel
 #' @inheritParams runProject
-#' @param projectPaths The paths to the projects to run.
 #' 
 #' @return
 #' A list of model output.
@@ -239,7 +241,7 @@ runProjects <- function(
     modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.restart = FALSE, 
+    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -257,7 +259,7 @@ runProjects <- function(
         modelNames = modelNames, 
         processes = processes, startProcess = startProcess, endProcess = endProcess, 
         drop.datatype = drop.datatype, unlistDepth2 = unlistDepth2, 
-        run = run, save = save, force.restart = force.restart, 
+        run = run, save = save, force.save = force.save, force.restart = force.restart, 
         replaceDataList = replaceDataList, replaceArgsList = replaceArgsList, prependProcessList = prependProcessList, 
         fileOutput = fileOutput, 
         setUseProcessDataToTRUE = setUseProcessDataToTRUE, purge.processData = purge.processData, 

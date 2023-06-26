@@ -714,12 +714,13 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param mergeWhenDifferentNumberOfRows Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.
 #' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
 #' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
+#' @param checkOutputFiles Logical, if TRUE compare the file names of the output files.
 #' @param tolerance The tolerance to use in all.equal.
 #' @param ... Used in runModel().
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, tolerance = sqrt(.Machine$double.eps), ...) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -732,6 +733,14 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     # Run the test project:
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
+    
+    # Store the file paths of the output files to compare to the new output file paths:
+    if(checkOutputFiles) {
+        # List the output files:
+        outputDir <- file.path(projectPath_copy, "output")
+        outputFiles <- list.files(outputDir, recursive = TRUE, full.names = TRUE)
+    }
+    
     
     message(projectPath_copy)
     openProject(projectPath_copy)
@@ -869,6 +878,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     
+    
     allTests <- list(
         processNames_present = processNames_present,
         tableNames_identical = tableNames_identical,
@@ -879,7 +889,14 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     if(compareReports) {
         allTests$reports_equal <- reports_equal
     }
-
+    # Store the file paths of the output files to compare to the new output file paths:
+    if(checkOutputFiles) {
+        # List the output files:
+        newOutputFiles <- list.files(outputDir, recursive = TRUE, full.names = TRUE)
+        allTests$outputFileNames_equal <- outputFiles == newOutputFiles
+    }
+    
+    
     ok <- all(unlist(allTests) %in% TRUE)
     
     out <- lapply(allTests, formatDiffs)
@@ -1454,10 +1471,9 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
     
     # Thoughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
     
-    
-    
     # Unlist to the StoX data type with sep = "/" to produce groups.
-    list <- unlistToDataType(list, sep = "/")
+    list <- unlistToDataType(list, sep = "/", keepNonStandardAttributes = TRUE)
+    
     dimsTable <- data.table::rbindlist(lapply(lapply(dims, unlistToDataType, sep = "/"), function(x) lapply(x, utils::head, 1)))
     ncharsTable  <- data.table::rbindlist(lapply(nchars, unlistToDataType, sep = "/"))
     
@@ -1476,6 +1492,7 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
     
     # Define variables and dimensions if not appending:
     if(!append) {
+        
         variables <- list()
         
         nrowVariables <- list()
@@ -1527,6 +1544,8 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
                         paste0("nchar_", thisVariableName), 
                         sep = "/"
                     )
+                    
+                    # Get the maximum number of characters:
                     max_length <- max(1, max(ncharsTable[[thisFullVariableName]]))
                     thisStringDim <- ncdf4::ncdim_def(thisStringDimName, "", seq_len(max_length), create_dimvar = FALSE)
                     
@@ -1605,12 +1624,13 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
             )
             
             # Add global attributes:
-            allAttritues <- attributes(list)
-            standardAttritues <- c("dim", "names", "dimnames")
-            attributesToBeWritten <- setdiff(names(allAttritues), standardAttritues)
-            print(attributesToBeWritten)
-            for(attributeName in attributesToBeWritten) {
-                ncdf4::ncatt_put( ncout, varid = 0, attname = attributeName, attval = allAttritues[[attributeName]], verbose= verbose)
+            attributesToBeWritten <- getNonStandardAttributes(list)
+            # allAttritues <- attributes(list)
+            # standardAttritues <- c("dim", "names", "dimnames")
+            # attributesToBeWritten <- setdiff(names(allAttritues), standardAttritues)
+            
+            for(attributeName in names(attributesToBeWritten)) {
+                ncdf4::ncatt_put( ncout, varid = 0, attname = attributeName, attval = attributesToBeWritten[[attributeName]], verbose= verbose)
             }
             
             # Sync, so that not all is written at nc_close:
@@ -1641,7 +1661,7 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
         if(is.character(list[[tableName]][[variableName]])) {
             
             # Get maximum number of characters of the variable to write:
-            max_length <- max(1, max(nchar(list[[tableName]][[variableName]]), na.rm = TRUE))
+            suppressWarnings(max_length <- max(1, max(nchar(list[[tableName]][[variableName]]), na.rm = TRUE)))
             ncdf4::ncvar_put(
                 ncout, 
                 varid = tableVariableName, 
@@ -1670,7 +1690,22 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
 
 
 
+getNonStandardAttributes <- function(x) {
+    allAttributes <- attributes(x)
+    standardAttritueNames <- c("dim", "names", "dimnames")
+    nonStandardAttritueNames <- setdiff(names(allAttributes), standardAttritueNames)
+    nonStandardAttritues <- allAttributes[nonStandardAttritueNames]
+    return(nonStandardAttritues)
+}
 
+setNonStandardAttributes <- function(x, att) {
+    standardAttritueNames <- c("dim", "names", "dimnames")
+    nonStandardAttritueNames <- setdiff(names(att), standardAttritueNames)
+    for(attributeName in nonStandardAttritueNames) {
+        attr(x, attributeName) <- att[[attributeName]]
+    }
+    return(x)
+}
 
 
 

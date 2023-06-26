@@ -1,3 +1,12 @@
+# RstoxFramework v3.6.2-9001 (2023-06-26)
+* The functions runModel(), runProject() and runProject() have gained a parameter 'force.save' which saves a project even if there are no changes, as opposed to save = TRUE.
+* Updated the test projects coastalCod_20 and cod_19 to have RData as Bootstrap output, since StoX 3.6.1 introduced the error that this file was txt.
+* Added check for output file names in the tesing.
+* Added functions to modify projects (modifyProject()). These are preliminary and not tested.
+* Added definitions and functions to prepare for bootstrapping using NetCDF4 files.
+* Support for duplicating a process in the GUI.
+
+
 # RstoxFramework v3.6.1 (2023-04-28)
 * Fixed bug when on R 4.3 where StoX could not be opened on MacOS and R connection failed on Windows.
 * Stopped using the Versions.R file in the StoX GUI, but rather separated out the functions used by the GUI to an exclusive GUI file. Simplified functions for getting versions used in the project.json file.

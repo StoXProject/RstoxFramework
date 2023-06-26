@@ -14,6 +14,7 @@ runModel(
   unlistDepth2 = FALSE,
   run = TRUE,
   save = TRUE,
+  force.save = FALSE,
   force.restart = FALSE,
   replaceDataList = list(),
   replaceArgsList = list(),
@@ -46,6 +47,8 @@ runModel(
 \item{run}{Logical: If TRUE run the model.}
 
 \item{save}{Logical: If TRUE save the project after running.}
+
+\item{force.save}{If no changes are made to the project, force save anyway. Overrides the \code{save} option.}
 
 \item{force.restart}{Logical: If TRUE restart the model before running.}
 

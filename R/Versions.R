@@ -176,45 +176,6 @@ isOfficialRstoxFrameworkVersion <- function() {
 }
 
 
-#' Test for whether the given StoX version is an official version
-#' 
-#' @inheritParams getOfficialRstoxPackageVersion
-#' 
-#' @export
-#' 
-isOfficialStoXVersion <- function(StoXVersion, officialRstoxPackageVersionsFile) {
-    official <- readOfficialRstoxPackageVersionsFile(officialRstoxPackageVersionsFile, toTable = TRUE)
-    officialStoXVersions <- official$StoX[official$Official]
-    StoXVersion %in% officialStoXVersions
-}
-
-
-#' Test for whether the installed Rstox packages are certified. 
-#' 
-#' This function is used by the StoX GUI to set colour to the RstoxFramework logo.
-#' 
-#' @inheritParams getOfficialRstoxPackageVersion
-#' 
-#' @export
-#' 
-isCertifiedRstoxFramework <- function(StoXVersion, officialRstoxPackageVersionsFile, optionalDependencies = FALSE) {
-    
-    # Read the officialRstoxPackageVersionsFile and select the row given by the StoXVersion:
-    certifiedTable <- readOfficialRstoxPackageVersionsFile(officialRstoxPackageVersionsFile, optionalDependencies = optionalDependencies, toTable = TRUE)
-    RstoxPackageColumnNames <- startsWith(names(certifiedTable), "Rstox")
-    certifiedTable <- subset(certifiedTable, certifiedTable$StoX == StoXVersion, select = RstoxPackageColumnNames)
-    
-    # Get the names of the Rstox packages:
-    RstoxPackageNames <- names(certifiedTable)
-    
-    # Get the status of each package:
-    status <- sapply(RstoxPackageNames, RstoxPackageStatus, StoXVersion = StoXVersion, officialRstoxPackageVersionsFile = officialRstoxPackageVersionsFile)
-    
-    
-    all(status == 0)
-}
-
-
 
 
 

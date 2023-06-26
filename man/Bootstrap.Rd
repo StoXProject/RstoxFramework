@@ -36,11 +36,11 @@ Bootstrap(
 A \code{\link{BootstrapData}} object, which is a list of the RstoxData \code{\link[RstoxData]{DataTypes}} and RstoxBase \code{\link[RstoxBase]{DataTypes}}.
 }
 \description{
-This function is deprecated, as the \code{NumberOfBootstraps} is limited by memory. All output requested data from all the bootstrap runs are accumulated in R memory, and written to one RData file at the end of the function, which effectively imposes a restriction of some hundred bootstrap runs for large StoX projects. Use \code{\link{Bootstrap}} instead. Backwards compatibility sets the function Bootstrap to Bootstrap_3.6.0 for StoX projects saved in StoX 3.6.0 and older.
+Run a subset of the baseline model a number of times after resampling e.g. Hauls in each Stratum, EDUSs in each Stratum.
 }
 \details{
-Run a subset of the baseline model a number of times after resampling e.g. Hauls in each Stratum, EDUSs in each Stratum.
-
 A copy of the project is made for each core given by \code{NumberOfCores}. In the case that NumberOfCores == 1, this is still done for safety.
 Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assignned Hauls (not using the Stratum assignment method  in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstra  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
+
+#' Note on limitatiton on \code{NumberOfBootstraps}: All output requested data from all the bootstrap runs are accumulated in R memory, and written to one RData file at the end of the function, which effectively imposes a restriction of some hundred bootstrap runs for large StoX projects. Use \code{\link{Bootstrap}} instead. Backwards compatibility sets the function Bootstrap to Bootstrap_3.6.0 for StoX projects saved in StoX 3.6.0 and older.
 }

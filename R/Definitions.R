@@ -136,7 +136,9 @@ initiateRstoxFramework <- function(){
         "projectPath", 
         # Changed on 2020-10-22 to use the actual data and not the file:
         #"outputDataPath"
-        "outputData"
+        "outputData", 
+        # Added the outputMemoryFile for BootstrapNetCDF4:
+        "outputMemoryFile"
     )
     
     # Load the required packages to enable searching for formals and documentation, e.g. for getStoxFunctionParameterPossibleValues():
@@ -357,6 +359,7 @@ initiateRstoxFramework <- function(){
         #"StoX_multipolygon_WKT", 
         #"StoX_shapefile"
         "ggplot", 
+        "BootstrapData", 
         "StoXNetCDF4File"
     )
     
@@ -977,27 +980,30 @@ getBackwardCompatibility <- function(packageName) {
 
 getDefaultOutputFileType <- function(processOutput) {
     if(length(processOutput)) {
-        if("StoXNetCDF4File" %in% class(processOutput[[1]])) {
+        # Support for class specified in the output of function:
+        classes <- unique(c(class(processOutput), class(processOutput[[1]])))
+        
+        if("StoXNetCDF4File" %in% classes) {
             ext <- "nc"
         }
-        else if("BootstrapData" %in% class(processOutput[[1]])) {
+        else if("BootstrapData" %in% classes) {
             ext <- "RData"
         }
         
         # List of outputs:
-        else if("SpatialPolygonsDataFrame" %in% class(processOutput[[1]])) {
+        else if("SpatialPolygonsDataFrame" %in% classes) {
             # Set file extension:
             ext <- "geojson"
         }
-        else if("data.table" %in% class(processOutput[[1]])) {
+        else if("data.table" %in% classes) {
             # Set file extension:
             ext <- "txt"
         }
-        else if("matrix" %in% class(processOutput[[1]]) || any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutput[[1]]))) {
+        else if("matrix" %in% classes || any(getRstoxFrameworkDefinitions("vectorClasses") %in% classes)) {
             # Set file extension:
             ext <- "csv"
         }
-        else if("ggplot" %in% class(processOutput[[1]])) {
+        else if("ggplot" %in% classes) {
             # Set file extension:
             ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
             # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
@@ -1021,10 +1027,15 @@ getDefaultOutputFileType <- function(processOutput) {
             # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
         }
         else {
-            stop("Unknown process output: [[1]]: ", class(processOutput[[1]]), ", [[1]][[1]]: ", class(processOutput[[1]][[1]]))
+            stop("Unknown process output: [[1]]: ", classes, ", [[1]][[1]]: ", class(processOutput[[1]][[1]]))
         }
     }
     
     return(ext) 
+}
+
+
+classRecursive <- function(x) {
+    
 }
 

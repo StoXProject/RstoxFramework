@@ -11,6 +11,7 @@ runProcesses(
   endProcess = Inf,
   msg = TRUE,
   save = TRUE,
+  force.save = FALSE,
   saveProcessData = TRUE,
   Application = R.version.string,
   force.restart = FALSE,
@@ -38,6 +39,8 @@ runProcesses(
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{force.save}{If no changes are made to the project, force save anyway. Overrides the \code{save} option.}
 
 \item{saveProcessData}{Logical: If TRUE save the output as ProcessData, if the proecss is a ProcessData process.}
 

@@ -333,6 +333,7 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param force             Logical: If TRUE reopen (close and then open) the project if already open.
 #' @param reset             Logical: If TRUE reset each model to the start of the model.
 #' @param save              Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.
+#' @param force.save If no changes are made to the project, force save anyway. Overrides the \code{save} option.
 #' @param saveIfAlreadyOpen Logical: If TRUE save the project before closing if already open and force is TRUE.
 #' @param newProjectPath    The path to the copied StoX project.
 #' @param verbose           Logical: If TRUE, print information to the console, e.g. about backward compatibility.
@@ -558,23 +559,31 @@ openProjectAsTemplate <- function(
 closeProject <- function(
     projectPath, 
     save = NULL, 
+    force.save = FALSE, 
     Application = R.version.string,
     msg = TRUE
 ) {
+    #  If force.save, set save to TRUE:
+    if(force.save)  {
+        save  = TRUE
+    }
+    
     # Check that the project has been saved:
     if(isOpenProject(projectPath)) {
         if(isTRUE(save)) {
             saveProject(
                 projectPath, 
                 msg = FALSE, 
-                Application = Application
+                Application = Application, 
+                force = force.save
             )
         }
         else if(is.character(save)) {
             saveProject(
                 projectPath, 
                 Application = Application, 
-                msg = FALSE
+                msg = FALSE, 
+                force = force.save
             )
         }
         else if(!isFALSE(save) && !isSaved(projectPath)) {
@@ -583,7 +592,8 @@ closeProject <- function(
                 saveProject(
                     projectPath, 
                     Application = Application, 
-                    msg = FALSE
+                    msg = FALSE, 
+                    force = force.save
                 )
             }
         }
@@ -2093,6 +2103,7 @@ getStoxFunctionMetaData <- function(functionName, metaDataName = NULL, showWarni
     }
     
     # Get the function name (without package name ::):
+    packageName <- getPackageNameFromFunctionName(functionName)
     functionName <- getFunctionNameFromPackageFunctionName(functionName)
     
     # Get the function meta data:
@@ -2103,6 +2114,11 @@ getStoxFunctionMetaData <- function(functionName, metaDataName = NULL, showWarni
     }
     else if(metaDataName %in% names(stoxLibrary[[functionName]])) {
         stoxLibrary [[functionName]] [[metaDataName]]
+    }
+    else if(!length(stoxLibrary[[functionName]])) {
+        if(showWarnings) {
+            warning("StoX: The function ", functionName, "is not present. Please install ", sub("\\:.*", "", packageName), ".")
+        }
     }
     else {
         if(showWarnings) {
@@ -2176,7 +2192,12 @@ isBootstrapFunction <- function(functionName) {
     # Get the function output data type and match against the defined process data types:
     #functionOutputDataType <- getStoxFunctionMetaData(functionName, "functionOutputDataType")
     #functionOutputDataType %in% getRstoxFrameworkDefinitions("stoxProcessDataTypes")
-    identical(getStoxFunctionMetaData(functionName, "functionType"), "bootstrap")
+    getStoxFunctionMetaData(functionName, "functionType") %in% c("bootstrap")
+}
+# Is the function a bootstrap function?
+isBootstrapNetCDF4Function <- function(functionName) {
+    # Get the function output data type and match against the defined process data types:
+    getStoxFunctionMetaData(functionName, "functionType") %in% "bootstrapNetCDF4"
 }
 
 
@@ -3773,7 +3794,7 @@ modifyProcess <- function(projectPath, modelName, processName, newValues, archiv
     # 1. Process parameters
     # 1. Process data
     if(!isOpenProject(projectPath)) {
-        warning("StoX: The project ", projectPath, " is not open. Use openProject() to open the project.")
+        warning("StoX: The project ", projectPath, " is not open. Use RstoxFramework::openProject() to open the project.")
         return(NULL)
     }
     
@@ -3859,6 +3880,161 @@ modifyProcess <- function(projectPath, modelName, processName, newValues, archiv
     
     return(modified)
 }
+
+
+#' Modify a model
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams addProcess
+#' @inheritParams modifyProcess
+#' 
+modifyModel <- function(projectPath, modelName, newValues, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE, update.functionInputs = TRUE) {
+    
+    if(!isOpenProject(projectPath)) {
+        warning("StoX: The project ", projectPath, " is not open. Use RstoxFramework::openProject() to open the project.")
+        return(NULL)
+    }
+    
+    # Find the processes to modify:
+    processIndexTable <- readProcessIndexTable(projectPath = projectPath, modelName = modelName)
+    if(!nrow(processIndexTable)) {
+        return(FALSE)
+    }
+    thisModelName <- processIndexTable$modelName[1]
+    newValues <- subset(newValues, names(newValues) %in% processIndexTable$processName)
+    
+    # Modify:
+    mapply(modifyProcess, 
+           projectPath = projectPath, 
+           modelName = thisModelName, 
+           processName = names(newValues), 
+           newValues = newValues, 
+           archive = FALSE, 
+           add.defaults = add.defaults, 
+           purge.processData = purge.processData, 
+           strict = strict, 
+           update.functionInputs = update.functionInputs
+    )
+}
+
+
+#' Modify a project
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams addProcess
+#' @inheritParams modifyProcess
+#' 
+#' @export
+#' 
+modifyProject <- function(projectPath, modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), newValues, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE, update.functionInputs = TRUE) {
+    
+    if(isOpenProject(projectPath)) {
+        warning("You are trying to modify the already open project ", projectPath, ". Close the project with RstoxFramework::closeProject() first and then retry.")
+        return(NULL)
+    }
+    else {
+        openProject(projectPath)
+        on.exit(closeProject(projectPath, save = TRUE))
+    }
+    
+    # Modify:
+    output <- lapply(modelNames, function(modelName) modifyModel(
+        projectPath = projectPath, 
+        modelName = , modelName, 
+        newValues = newValues, 
+        add.defaults = add.defaults, 
+        purge.processData = purge.processData, 
+        strict = strict, 
+        update.functionInputs = update.functionInputs
+    )
+    )
+    
+    return(output)
+}
+
+
+
+#' Modify multiple projects
+#' 
+#' @inheritParams general_arguments
+#' @inheritParams addProcess
+#' @inheritParams modifyProcess
+#' 
+#' @export
+#' 
+modifyProjects <- function(projectPaths, modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), newValues, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE, update.functionInputs = TRUE) {
+    
+    # Modify:
+    lapply(projectPaths, function(projectPath) modifyProject(
+        projectPath = projectPath, 
+        modelNames = , modelNames, 
+        newValues = newValues, 
+        add.defaults = add.defaults, 
+        purge.processData = purge.processData, 
+        strict = strict, 
+        update.functionInputs = update.functionInputs
+        )
+    )
+}
+
+
+
+#' Remove a StoX process
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @export
+#' 
+removeProcesses <- function(projectPath, processNames) {
+    
+    if(isOpenProject(projectPath)) {
+        warning("You are trying to modify the already open project ", projectPath, ". Close the project with RstoxFramework::closeProject() first and then retry.")
+        return(NULL)
+    }
+    else {
+        openProject(projectPath)
+        on.exit(closeProject(projectPath, save = TRUE))
+    }
+    
+    # Get model names and process IDs:
+    processIndexTable <- readProcessIndexTable(projectPath = projectPath)
+    if(!nrow(processIndexTable)) {
+        return(FALSE)
+    }
+    
+    notPresent <- setdiff(processNames, processIndexTable$processName)
+    if(length(notPresent)) {
+        warning("The following processes do not exist and can therefore not be removed from the project ", projectPath, ": ", paste(notPresent, collapse = ", "))
+    }
+    
+    
+    # Subset by the specified process names:
+    processIndexTable <- subset(processIndexTable, processName %in% processNames)
+    
+    
+    output <- mapply(removeProcess, projectPath = projectPath, modelName = processIndexTable$modelName, processID = processIndexTable$processID)
+    
+    
+    return(output)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Function to format a process as read from the project.json
@@ -4607,7 +4783,8 @@ duplicateProcess <- function(projectPath, modelName, processID, newProcessName =
     addProcess(
         projectPath = projectPath, 
         modelName = modelName, 
-        values = processToCopy
+        values = processToCopy, 
+        afterProcessID = processID
     )
 }
 
@@ -4716,7 +4893,6 @@ runProcess <- function(
         fileOutput <- FALSE
     }
 
-    
     # Try running the function, and return FALSE if failing:
     failed <- FALSE
     if(msg) {
@@ -4817,8 +4993,8 @@ runProcess <- function(
             processDirty = FALSE
         )
         
-        # If a valid output class, wrap the function output to a list named with the data type:
-        if(isValidOutputDataClass(processOutput)) {
+        # If a valid output class, wrap the function output to a list named with the data type (but not for BootstrapData, which is a list of valid output classes AND a valid output class itself):
+        if(isValidOutputDataClass(processOutput) && !isBootstrapFunction(process$functionName)) {
             processOutput <- list(processOutput)
             names(processOutput) <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
         }
@@ -4876,7 +5052,7 @@ runProcess <- function(
         if(msg) {
             timeSpent <- proc.time()[3] - startTime
             message(
-                    "(time used: ", round(timeSpent, digits = 3), " s)"
+                    "StoX: (time used: ", round(timeSpent, digits = 3), " s)"
             )
         }
         
@@ -4933,10 +5109,12 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             functionArguments$processData <- functionArguments$processData[[1]]
         }
     }
+    
     # Add the projectPath and outputData file path if a bootstrap function (return only the outputData file path, and then open the file in Bootstrap() if needed):
     if(isBootstrapFunction(process$functionName)) {
-        
+        # Set the projectPath:
         functionArguments$projectPath <- projectPath
+        
         # Get and read any bootstrap file from before:
         functionArguments["outputData"] <- getProcessOutputTextFilePath(
             projectPath = projectPath, 
@@ -4945,6 +5123,19 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             processOutput = NULL, 
             file.ext = "RData"
         )
+    }
+    else if(isBootstrapNetCDF4Function(process$functionName)) {
+        # Set the projectPath:
+        functionArguments$projectPath <- projectPath
+        
+        # Get and read any bootstrap file from before:
+        functionArguments["outputData"] <- getProcessOutputTextFilePath(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = process$processID, 
+            processOutput = NULL, 
+            file.ext = "nc"
+        )
         
         # Get the memory file to copy the previous output file to if running BootstrapNetCDF4():
         folderPath <- getProcessOutputFolder(
@@ -4952,7 +5143,7 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             modelName = modelName, 
             processID = process$processID, 
             type = "memory"
-            )
+        )
         dataType <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
         functionArguments["outputMemoryFile"] <- file.path(folderPath, paste(dataType, "nc", sep = "."))
     }
@@ -5173,6 +5364,11 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
             processOutput <- processOutput[[1]]
         }
     }
+    
+    ### # If the output has length 1 and has names, create a two element vector with the name first and the data second, so that this will show in the GUI:
+    ### if(pretty && length(processOutput) == 1 && length(names(processOutput)) == 1) {
+    ###     processOutput <- c(names(processOutput), processOutput)
+    ### }
     
     return(processOutput)
 }
@@ -5425,6 +5621,10 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
         else {
             # Add numberOfLines = 0 and numberOfPages = 0 to conform to the output used for tables in the GUI:
             if(length(data)) {
+                
+                # The GUI need this data with no StoX class (as BootstrapNetCDF4 is a class)
+                data <- as.character(data)
+                
                 # Extract the requested lines:
                 numberOfLines <- length(data)
                 numberOfPages <- ceiling(numberOfLines / linesPerPage)
@@ -5808,7 +6008,7 @@ getProcessOutputTextFilePath <- function(
     }
     
     # Define the process output file path:
-    if(file.ext == "RData") {
+    if(file.ext %in% c("RData", "nc")) {
         # Define a single file output named by the process name:
         processID <- getProcessIDFromProcessName(projectPath = projectPath, modelName = modelName, processName = processName)$processID
         dataType <- getDataType(projectPath = projectPath, modelName = modelName, processID = processID)
@@ -5864,7 +6064,7 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             save(list = dataType, file = filePath)
         }
         # Store the process output:
-        if(outputFileType == "nc") {
+        else if(outputFileType == "nc") {
             filePath <- getProcessOutputTextFilePath(
                 projectPath = projectPath, 
                 modelName = modelName, 
@@ -6020,18 +6220,30 @@ removeIDsFromGeojson <- function(json) {
 #' Function to flatten a list of output datat and add names from the levels of the list
 #' 
 #' @param processOutput A list of StoX output data.
-#' @param sep The separator to use when constructing names for the finla flat list, defaulted to underscore, but slash can also be useful e.g. for denoting groupes in a NetCDF4 file.
+#' @param sep The separator to use when constructing names for the final flat list, defaulted to underscore, but slash can also be useful e.g. for denoting groupes in a NetCDF4 file.
 #' @param validOutputDataClasses A vector of valid output data classes, indicating when to stop the unlisting.
 #' @param nlevel The number of levels to unlist through.
+#' @param keepNonStandardAttributes Logical: If TRUE, keep attributes other than the standard \code{dim}, \code{names} and \code{dimnames}. 
 #' 
 #' @export
 #' 
-unlistToDataType <- function(processOutput, sep = "_", validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses"), nlevel = 2) {
+unlistToDataType <- function(processOutput, sep = "_", validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses"), nlevel = 2, keepNonStandardAttributes = FALSE) {
+    
+    # Save attributes:
+    if(keepNonStandardAttributes) {
+        nonStandardAttributes <- getNonStandardAttributes(processOutput)
+    }
     
     # Unlist through nlevel levels:
     for(i in seq_len(nlevel)) {
         processOutput <- unlistOneStep(processOutput, sep = sep, validOutputDataClasses = validOutputDataClasses)
     }
+    
+    # Set attributes:
+    if(keepNonStandardAttributes) {
+        processOutput <- setNonStandardAttributes(processOutput, nonStandardAttributes)
+    }
+    
     
     return(processOutput)
 }
@@ -6323,7 +6535,7 @@ runProcesses <- function(
     modelName, 
     startProcess = 1, endProcess = Inf, 
     msg = TRUE, 
-    save = TRUE, saveProcessData = TRUE, Application = R.version.string, 
+    save = TRUE, force.save = FALSE, saveProcessData = TRUE, Application = R.version.string, 
     force.restart = FALSE, 
     returnProcessOutput = FALSE, fileOutput = NULL, setUseProcessDataToTRUE = TRUE, 
     purge.processData = FALSE, 
@@ -6335,6 +6547,10 @@ runProcesses <- function(
     ...
 ) {
     
+    #  If force.save, set save to TRUE:
+    if(force.save)  {
+        save  = TRUE
+    }
     
     # Open the project if not open:
     if(!isOpenProject(projectPath)) {
@@ -6356,7 +6572,12 @@ runProcesses <- function(
     
     # Save both before and after for safety:
     if(save) {
-        saveProject(projectPath, msg = FALSE, Application = Application)
+        saveProject(
+            projectPath, 
+            msg = FALSE, 
+            Application = Application, 
+            force = force.save
+        )
     }
     
     # Get the processIDs:
@@ -6387,7 +6608,7 @@ runProcesses <- function(
     
     # Check that the project is open:
     if(!isOpenProject(projectPath)) {
-        warning("StoX: The StoX project ", projectPath, " is not open. Use openProject() to open the project.")
+        warning("StoX: The StoX project ", projectPath, " is not open. Use RstoxFramework::openProject() to open the project.")
         return(failedVector)
     }
     
@@ -6455,7 +6676,12 @@ runProcesses <- function(
     
     # Save the project after each run:
     if(save) {
-        saveProject(projectPath, msg = FALSE, Application = Application)
+        saveProject(
+            projectPath, 
+            msg = FALSE, 
+            Application = Application, 
+            force = force.save
+        )
     }
     
     #status

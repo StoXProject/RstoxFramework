@@ -12,6 +12,21 @@ getGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapData) {
     c(originalGroupingVariables, originalInformationVariables)
 }
 
+getPossibleVariables <- function(BootstrapNetCDF4Data, BaselineProcess) {
+    #  Open the file:
+    nc <- ncdf4::nc_open(unlist(BootstrapNetCDF4Data))
+    on.exit(ncdf4::nc_close(nc))
+    # Read the baseline process names:
+    processNameAndTableName <- getProcessNameAndTableName(BaselineProcess, nc)
+    #processNameSlashTableName <- paste(processNameAndTableName, collapse = "/")
+    
+    # Get all variables:
+    processNameTableNameVariableName <- getProcessNameTableNameVariableName(nc)
+    processNameTableNameVariableName <- subset(processNameTableNameVariableName, ProcessName == processNameAndTableName[1] & TableName == processNameAndTableName[2])
+    
+    return(processNameTableNameVariableName$VariableName)
+}
+
 
 #' A list of the attributes of the exported StoX functions:
 #' 
@@ -21,19 +36,21 @@ getGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapData) {
 #' @export
 #' 
 stoxFunctionAttributes <- list(
-    # # Bootstrap baseline:
-    # BootstrapNetCDF4 = list(
-    #     functionType = "bootstrap", 
-    #     functionCategory = "analysis", 
-    #     functionOutputDataType = "BootstrapNetCDF4Data", 
-    #     functionParameterFormat = list(
-    #         BootstrapMethodTable = "bootstrapMethodTable", 
-    #         OutputProcesses = "outputProcesses", 
-    #         BaselineSeedTable = "baselineSeedTable"
-    #     )
-    # ), 
+    # Add this in StoX 4.0.0:
+    # Bootstrap baseline:
+    #BootstrapNetCDF4 = list(
+    #    functionType = "bootstrapNetCDF4", 
+    #    functionCategory = "analysis", 
+    #    functionOutputDataType = "BootstrapNetCDF4Data", 
+    #    functionParameterFormat = list(
+    #        BootstrapMethodTable = "bootstrapMethodTable", 
+    #        OutputProcesses = "outputProcesses", 
+    #        OutputVariables = "outputVariables_BootstrapNetCDF4", 
+    #        BaselineSeedTable = "baselineSeedTable"
+    #    )
+    #), 
     
-    # Old bootstrap function using RData:
+    # Original bootstrap function using RData:
     Bootstrap = list(
         functionType = "bootstrap", 
         functionCategory = "analysis", 
@@ -41,6 +58,7 @@ stoxFunctionAttributes <- list(
         functionParameterFormat = list(
             BootstrapMethodTable = "bootstrapMethodTable", 
             OutputProcesses = "outputProcesses", 
+            OutputVariables = "outputVariables_Bootstrap", 
             BaselineSeedTable = "baselineSeedTable"
         )
     ), 
@@ -72,32 +90,65 @@ stoxFunctionAttributes <- list(
         )
     ), 
     
-    # ReportBootstrapNetCDF4 = list(
-    #     functionType = "modelData", 
-    #     functionCategory = "report", 
-    #     functionOutputDataType = "ReportBootstrapData", 
-    #     # This is an example of using an expression to determine when to show a parameter:
-    #     functionParameterFormat = list(
-    #         GroupingVariables = "groupingVariables_ReportBootstrap", 
-    #         InformationVariables = "informationVariables_ReportBootstrap", 
-    #         TargetVariableUnit = "targetVariableUnit_ReportBootstrap", 
-    #         Percentages = "percentages_ReportBootstrap"
-    #     ), 
-    #     functionArgumentHierarchy = list(
-    #         AggregationWeightingVariable = list(
-    #             AggregationFunction = expression(RstoxBase::getWeightingFunctions())
-    #         ), 
-    #         BootstrapReportWeightingVariable = list(
-    #             BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
-    #         ), 
-    #         Percentages = list(
-    #             BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
-    #         )
-    #     ), 
-    #     functionParameterDefaults = list(
-    #         Percentages = c(5, 50, 95)
-    #     )
-    # ), 
+    # Add this in StoX 4.0.0:
+    #ReportBootstrapNetCDF4 = list(
+    #    functionType = "modelData", 
+    #    functionCategory = "report", 
+    #    functionOutputDataType = "ReportBootstrapNetCDF4Data", 
+    #    # This is an example of using an expression to determine when to show a parameter:
+    #    functionParameterFormat = list(
+    #        BaselineProcess = "baselineProcess_ReportBootstrapNetCDF4", 
+    #        TargetVariable = "targetVariable_ReportBootstrapNetCDF4", 
+    #        TargetVariableUnit = "targetVariableUnit_ReportBootstrapNetCDF4", 
+    #        GroupingVariables = "groupingVariables_ReportBootstrapNetCDF4", 
+    #        InformationVariables = "informationVariables_ReportBootstrapNetCDF4", 
+    #        Percentages = "percentages_ReportBootstrap"
+    #    ), 
+    #    functionArgumentHierarchy = list(
+    #        AggregationWeightingVariable = list(
+    #            AggregationFunction = expression(RstoxBase::getWeightingFunctions())
+    #        ), 
+    #        BootstrapReportWeightingVariable = list(
+    #            BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
+    #        ), 
+    #        Percentages = list(
+    #            BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
+    #        )
+    #    ), 
+    #    functionParameterDefaults = list(
+    #        Percentages = c(5, 50, 95), 
+    #        NetCDF4ChunkSize = Inf
+    #    )
+    #), 
+    
+    ### ReportBootstrapNetCDF4_lowMemory = list(
+    ###     functionType = "modelData", 
+    ###     functionCategory = "report", 
+    ###     functionOutputDataType = "ReportBootstrapNetCDF4Data", 
+    ###     # This is an example of using an expression to determine when to show a parameter:
+    ###     functionParameterFormat = list(
+    ###         BaselineProcess = "baselineProcess_ReportBootstrapNetCDF4", 
+    ###         TargetVariable = "targetVariable_ReportBootstrapNetCDF4", 
+    ###         TargetVariableUnit = "targetVariableUnit_ReportBootstrapNetCDF4", 
+    ###         GroupingVariables = "groupingVariables_ReportBootstrapNetCDF4", 
+    ###         InformationVariables = "informationVariables_ReportBootstrapNetCDF4", 
+    ###         Percentages = "percentages_ReportBootstrap"
+    ###     ), 
+    ###     functionArgumentHierarchy = list(
+    ###         AggregationWeightingVariable = list(
+    ###             AggregationFunction = expression(RstoxBase::getWeightingFunctions())
+    ###         ), 
+    ###         BootstrapReportWeightingVariable = list(
+    ###             BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
+    ###         ), 
+    ###         Percentages = list(
+    ###             BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
+    ###         )
+    ###     ), 
+    ###     functionParameterDefaults = list(
+    ###         Percentages = c(5, 50, 95)
+    ###     )
+    ### ), 
     
     PlotReportBootstrap = list(
         functionType = "modelData", 
@@ -305,9 +356,6 @@ processPropertyFormats <- list(
             if(!NROW(BootstrapMethodTable)) {
                 stop("StoX: The BootstrapMethodTable must be specified.")
             }
-            ## Get the reasmpled processes:
-            #reasmpledProcesses <- BootstrapMethodTable$ProcessName
-            #
             # Get the process table:
             processIndexTable <- readProcessIndexTable(projectPath, modelName = "baseline", startProcess = BootstrapMethodTable$ProcessName, endProcess = Inf)
             
@@ -316,6 +364,39 @@ processPropertyFormats <- list(
         }, 
         variableTypes <- "character"
     ), 
+    
+    outputVariables_Bootstrap = list(
+        class = "vector", 
+        title = "One or more variables to store in BootstrapData across processes", 
+        variableTypes <- "character"
+    ), 
+    
+    
+    outputVariables_BootstrapNetCDF4 = list(
+        class = "vector", 
+        title = "One or more variables to store in BootstrapData across processes", 
+        possibleValues = function(projectPath, OutputProcesses) {
+            # Get the outputs of the OutputProcesses:
+            outputProcessesIDs <- 
+            processOutput <- getModelData(
+                projectPath = projectPath, 
+                modelName = "baseline", 
+                processes = OutputProcesses, 
+                drop.datatype = FALSE
+            )
+            
+            # Get the unique variable names:
+            possibleValues = unique(unlist(lapply(processOutput, function(x) lapply(x, names))))
+            # Must be an unnamed list:
+            possibleValues = as.list(possibleValues)
+            
+            return(possibleValues)
+        }, 
+        variableTypes <- "character"
+    ), 
+    
+    
+    
     
     informationVariables_ReportBootstrap = list(
         class = "vector", 
@@ -336,6 +417,22 @@ processPropertyFormats <- list(
             }
             
             dataType <- attr(BootstrapData[[BaselineProcess]], "dataType")
+            quantity <- RstoxBase::getBaseUnit(dataType = dataType, variableName = TargetVariable, element = "quantity")
+            if(is.na(quantity)) {
+                list()
+            }
+            else {
+                RstoxData::getUnitOptions(quantity)
+            }
+        }
+    ), 
+    targetVariableUnit_ReportBootstrapNetCDF4 = list(
+        class = "vector", 
+        title = "Select Unit for the TargetVariable", 
+        possibleValues = function(BootstrapNetCDF4Data, BaselineProcess, TargetVariable) {
+            nc <- ncdf4::nc_open(unlist(BootstrapNetCDF4Data))
+            on.exit(ncdf4::nc_close(nc))
+            dataType <- getDataTypeFromBootstrapNetCDF4(nc, BaselineProcess)
             quantity <- RstoxBase::getBaseUnit(dataType = dataType, variableName = TargetVariable, element = "quantity")
             if(is.na(quantity)) {
                 list()
@@ -386,6 +483,65 @@ processPropertyFormats <- list(
             list()
         },
         variableTypes = "double"
+    ), 
+    
+    
+    baselineProcess_ReportBootstrapNetCDF4 = list(
+        class = "vector", 
+        title = "Select one baseline process to report from.", 
+        possibleValues = function(BootstrapNetCDF4Data) {
+            #  Open the file:
+            nc <- ncdf4::nc_open(unlist(BootstrapNetCDF4Data))
+            on.exit(ncdf4::nc_close(nc))
+            # Read the baseline process names:
+            processNamesAndTableNames <- getProcessNamesAndTableNames(nc)
+            processNames <- unique(processNamesAndTableNames$processName)
+            
+            return(processNames)
+        }, 
+        variableTypes <- "character"
+    ),
+    
+    
+    
+    
+    targetVariable_ReportBootstrapNetCDF4 = list(
+        class = "vector", 
+        title = "Select one variable to report from.", 
+        possibleValues = function(BootstrapNetCDF4Data, BaselineProcess) {
+            possibleVariables <- getPossibleVariables(BootstrapNetCDF4Data, BaselineProcess)
+            
+            output <- setdiff(possibleVariables, "nrow")
+            
+            return(output)
+        }, 
+        variableTypes <- "character"
+    ), 
+    
+    groupingVariables_ReportBootstrapNetCDF4 = list(
+        class = "vector", 
+        title = "One or more variables to group super-individuals by when reporting BootstrapNetCDF4Data", 
+        possibleValues = function(BootstrapNetCDF4Data, BaselineProcess, TargetVariable) {
+            possibleVariables <- getPossibleVariables(BootstrapNetCDF4Data, BaselineProcess)
+            
+            output <- setdiff(possibleVariables, c("nrow", TargetVariable))
+            
+            return(output)
+        }, 
+        variableTypes <- "character"
+    ), 
+    
+    informationVariables_ReportBootstrapNetCDF4 = list(
+        class = "vector", 
+        title = "One or more variables to group super-individuals by when reporting BootstrapNetCDF4Data", 
+        possibleValues = function(BootstrapNetCDF4Data, BaselineProcess, TargetVariable, GroupingVariables) {
+            possibleVariables <- getPossibleVariables(BootstrapNetCDF4Data, BaselineProcess)
+            
+            output <- setdiff(possibleVariables, c("nrow", TargetVariable, GroupingVariables))
+            
+            return(output)
+        }, 
+        variableTypes <- "character"
     )
     
 )

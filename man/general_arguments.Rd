@@ -6,6 +6,8 @@
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
+\item{projectPaths}{A vector of paths to the StoX projects.}
+
 \item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
@@ -13,6 +15,8 @@
 \item{processID}{The ID of the process.}
 
 \item{processName}{The name of the process.}
+
+\item{processNames}{A vector of names of the processes.}
 
 \item{processes}{The name of the processes.}
 

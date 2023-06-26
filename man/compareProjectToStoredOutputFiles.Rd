@@ -20,6 +20,7 @@ compareProjectToStoredOutputFiles(
   mergeWhenDifferentNumberOfRows = FALSE,
   sort = TRUE,
   compareReports = FALSE,
+  checkOutputFiles = TRUE,
   tolerance = sqrt(.Machine$double.eps),
   ...
 )
@@ -54,6 +55,8 @@ compareProjectToStoredOutputFiles(
 \item{sort}{Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.}
 
 \item{compareReports}{Logical, if TRUE compare the report specifically (old method kept for robustness).}
+
+\item{checkOutputFiles}{Logical, if TRUE compare the file names of the output files.}
 
 \item{tolerance}{The tolerance to use in all.equal.}
 

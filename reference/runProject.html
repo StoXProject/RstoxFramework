@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
       </span>
     </div>
 
@@ -63,6 +63,7 @@
 <span>  unlistDepth2 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  run <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  save <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  force.save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  force.restart <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  replaceDataList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  replaceArgsList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -117,6 +118,10 @@
 <dd><p>Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.</p></dd>
 
 
+<dt>force.save</dt>
+<dd><p>If no changes are made to the project, force save anyway. Overrides the <code>save</code> option.</p></dd>
+
+
 <dt>force.restart</dt>
 <dd><p>Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.</p></dd>
 
@@ -154,7 +159,7 @@
 
 
 <dt>close</dt>
-<dd><p>Logical: If TRUE close the project after running and getting the output.</p></dd>
+<dd><p>Logical: (In <code>copyProject</code>) If TRUE, close the project after copying.</p></dd>
 
 
 <dt>unlist.models</dt>

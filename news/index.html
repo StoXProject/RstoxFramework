@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
       </span>
     </div>
 
@@ -47,6 +47,15 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.2-9001" id="rstoxframework-v362-9001-2023-06-26">RstoxFramework v3.6.2-9001 (2023-06-26)<a class="anchor" aria-label="anchor" href="#rstoxframework-v362-9001-2023-06-26"></a></h2>
+<ul><li>The functions runModel(), runProject() and runProject() have gained a parameter ‘force.save’ which saves a project even if there are no changes, as opposed to save = TRUE.</li>
+<li>Updated the test projects coastalCod_20 and cod_19 to have RData as Bootstrap output, since StoX 3.6.1 introduced the error that this file was txt.</li>
+<li>Added check for output file names in the tesing.</li>
+<li>Added functions to modify projects (modifyProject()). These are preliminary and not tested.</li>
+<li>Added definitions and functions to prepare for bootstrapping using NetCDF4 files.</li>
+<li>Support for duplicating a process in the GUI.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="3.6.1" id="rstoxframework-v361-2023-04-28">RstoxFramework v3.6.1 (2023-04-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v361-2023-04-28"></a></h2>
 <ul><li>Fixed bug when on R 4.3 where StoX could not be opened on MacOS and R connection failed on Windows.</li>

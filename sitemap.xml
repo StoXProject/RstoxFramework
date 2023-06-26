@@ -25,12 +25,6 @@
     <loc>/reference/BootstrapData.html</loc>
   </url>
   <url>
-    <loc>/reference/BootstrapNetCDF4.html</loc>
-  </url>
-  <url>
-    <loc>/reference/BootstrapNetCDF4Data.html</loc>
-  </url>
-  <url>
     <loc>/reference/DataTypes.html</loc>
   </url>
   <url>
@@ -59,12 +53,6 @@
   </url>
   <url>
     <loc>/reference/ReportBootstrapData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ReportBootstrapNetCDF4.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ReportBootstrapNetCDF4Data.html</loc>
   </url>
   <url>
     <loc>/reference/ResampleBioticAssignment.html</loc>
@@ -145,15 +133,6 @@
     <loc>/reference/getAvailableStoxFunctionNames.html</loc>
   </url>
   <url>
-    <loc>/reference/getBootstrapNetCDF4Data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getBootstrapNetCDF4ProcessNames.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getBootstrapNetCDF4Variables.html</loc>
-  </url>
-  <url>
     <loc>/reference/getModelData.html</loc>
   </url>
   <url>
@@ -223,19 +202,22 @@
     <loc>/reference/initiateRstoxFramework.html</loc>
   </url>
   <url>
-    <loc>/reference/isCertifiedRstoxFramework.html</loc>
-  </url>
-  <url>
-    <loc>/reference/isOfficialStoXVersion.html</loc>
-  </url>
-  <url>
     <loc>/reference/json2expression.html</loc>
   </url>
   <url>
     <loc>/reference/list2expression.html</loc>
   </url>
   <url>
+    <loc>/reference/modifyModel.html</loc>
+  </url>
+  <url>
     <loc>/reference/modifyProcess.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modifyProject.html</loc>
+  </url>
+  <url>
+    <loc>/reference/modifyProjects.html</loc>
   </url>
   <url>
     <loc>/reference/parseParameter.html</loc>
@@ -266,6 +248,9 @@
   </url>
   <url>
     <loc>/reference/removeProcess.html</loc>
+  </url>
+  <url>
+    <loc>/reference/removeProcesses.html</loc>
   </url>
   <url>
     <loc>/reference/resetModel.html</loc>

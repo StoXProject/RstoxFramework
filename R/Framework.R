@@ -2413,7 +2413,7 @@ getProcessData <- function(projectPath, modelName, processID, argumentFilePaths 
     )
 }
 
-getProcess <- function(projectPath, modelName, processID, argumentFilePaths = NULL, only.valid = FALSE) {
+getProcessArguments <- function(projectPath, modelName, processID, argumentFilePaths = NULL, only.valid = FALSE) {
     # Read the memory of the process:
     process <- getProjectMemoryData(
         projectPath = projectPath, 
@@ -2439,6 +2439,32 @@ getProcess <- function(projectPath, modelName, processID, argumentFilePaths = NU
     return(process)
 }
 
+
+#' Get the properties of a StoX process
+#' 
+#' This function lists the process name, the function name, the process parameters, the function parameters, the function inputs and the process data of a StoX process.
+#' 
+#' @inheritParams general_arguments
+#' @param only.valid Logical: If TRUE return only the valid arguments, which are those visible in the GUI. 
+#' 
+#' @export
+#' 
+getProcess <- function(projectPath, modelName, processName, only.valid = FALSE) {
+    
+    processID <- getProcessIDFromProcessName(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processName = processName, 
+        only.processID = TRUE
+    )
+        
+    getProcessArguments(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        only.valid = only.valid
+    )
+}
 
 getDataType <- function(projectPath, modelName, processID, argumentFilePaths = NULL) {
     # Get the function name:
@@ -3364,7 +3390,7 @@ setListElements <- function(list, insertList, projectPath, modelName, processID)
 modifyFunctionName <- function(projectPath, modelName, processID, newFunctionName, archive = TRUE, add.defaults = FALSE) {
     
     # Get the project description:
-    process <- getProcess(
+    process <- getProcessArguments(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID
@@ -4622,7 +4648,7 @@ addProcess <- function(projectPath, modelName, values = NULL, returnProcessTable
         
     
     # Return the process:
-    #process <- getProcess(
+    #process <- getProcessArguments(
     #    projectPath = projectPath, 
     #    modelName = modelName, 
     #    processID = process$processID
@@ -4766,7 +4792,7 @@ removeProcess <- function(projectPath, modelName, processID) {
 duplicateProcess <- function(projectPath, modelName, processID, newProcessName = NULL) {
     
     # Get the process to copy:
-    processToCopy <- getProcess(
+    processToCopy <- getProcessArguments(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID
@@ -5076,7 +5102,7 @@ setUseProcessData <- function(projectPath, modelName, processID, UseProcessData 
 getFunctionArguments <- function(projectPath, modelName, processID, arguments = NULL, replaceArgs = list(), keepEmptyFunctionInputs = TRUE) {
     
     # Get the process:
-    process <- getProcess(
+    process <- getProcessArguments(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
@@ -5157,9 +5183,9 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     )
     
     # Insert any arguments in replaceArgs:
-    replaceArgsToInsert <- intersect(names(replaceArgs), names(functionArguments))
-    if(length(replaceArgsToInsert)) {
-        functionArguments[replaceArgsToInsert] <- replaceArgs[replaceArgsToInsert]
+    namesOfReplaceArgsToInsert <- intersect(names(replaceArgs), names(functionArguments))
+    if(length(namesOfReplaceArgsToInsert)) {
+        functionArguments[namesOfReplaceArgsToInsert] <- replaceArgs[namesOfReplaceArgsToInsert]
     }
     
     # Get absolute paths:
@@ -5171,8 +5197,11 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     )
     
     
-    # Keep only arguments to show:
-    functionArguments <- extractArgumentsToShow(arguments = functionArguments, projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = NULL) # Using NULL here, as argumentFilePaths has not been read. Should it?
+    # Keep only arguments to show, but for a processData process only if UseProcessData is set to FALSE:
+    if(! "UseProcessData" %in% namesOfReplaceArgsToInsert || isTRUE(replaceArgs$UseProcessData)) {
+        functionArguments <- extractArgumentsToShow(arguments = functionArguments, projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = NULL) # Using NULL here, as argumentFilePaths has not been read. Should it?
+    }
+    
     
     # Get the function input as output from the previously run processes:
     functionInputNames <- intersect(names(functionArguments), names(process$functionInputs))
@@ -6529,7 +6558,6 @@ purgeOutput <- function(projectPath, modelName) {
 #' 
 #' @export
 #' 
-#runModel <- function(projectPath, modelName, startProcess = 1, endProcess = Inf, save = TRUE, force = FALSE) {
 runProcesses <- function(
     projectPath, 
     modelName, 
@@ -6703,7 +6731,7 @@ getreplaceArgsList <- function(replaceArgsList = list(), ...){
     # Merge and unique the inputs:
     replaceArgsList <- c(replaceArgsList, dotlist)
     # parlist <- unique(parlist) THIS REMOVED THE NAMES AND SHOULD NOT BE USED
-    replaceArgsList <- replaceArgsList[!duplicated(replaceArgsList)]
+    replaceArgsList <- replaceArgsList[!(duplicated(replaceArgsList) & duplicated(names(replaceArgsList)))]
     
     return(replaceArgsList)
 }

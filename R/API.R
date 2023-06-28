@@ -18,6 +18,47 @@
 #' @return
 #' A list of model output.
 #' 
+#' @examples
+#' \dontrun{
+#' # Open and run the sandeel test project:
+#' tmp <- tempdir()
+#' sandeelZip <- system.file("testresources", "sandeel_20.zip", package = "RstoxFramework")
+#' unzip(sandeelZip, exdir = tmp)
+#' projectPath <- file.path(tmp, "sandeel_20")
+#' d1 <- runModel(projectPath, modelName = "baseline")
+#' 
+#' # Define depth dependent acoustic target strength, and rerun:
+#' process <- getProcess(
+#'   projectPath = projectPath, 
+#'   modelName = "baseline", 
+#'   processName = "DefineAcousticTargetStrength"
+#' )
+#' newAcousticTargetStrengthTable <- process$functionParameters$AcousticTargetStrengthTable
+#' # Add the depth dependence:
+#' newAcousticTargetStrengthTable$DepthExponent = -2.3
+#' 
+#' replaceArgsList <- list(
+#'   DefineAcousticTargetStrength = list(
+#'     UseProcessData = FALSE, # Needed to override the existing process data
+#'     AcousticTargetStrengthModel = "LengthAndDepthDependent", 
+#'     AcousticTargetStrengthTable = newAcousticTargetStrengthTable
+#'   )
+#' )
+#' d2 <- RstoxFramework::runModel(
+#'   projectPath, 
+#'   modelName = "baseline", 
+#'   replaceArgsList = replaceArgsList
+#' )
+#' 
+#' # Show the change in the output:
+#' all.equal(d1, d2)
+#' # The difference is larger at larger depths:
+#' plot(
+#'   d1$Abundance$Data$MinLayerDepth, 
+#'   d1$Abundance$Data$Abundance  /  d2$Abundance$Data$Abundance
+#' )
+#' }
+#' 
 #' @export
 #' 
 runModel <- function(
@@ -51,6 +92,14 @@ runModel <- function(
                 openProject(projectPath, ...)
             }
             # Run the model:
+            if(msg) {
+                message(
+                    "StoX: Running model ", modelName, " of project ", 
+                    projectPath, 
+                    "...", 
+                    appendLF = TRUE
+                )
+            }
             runProcesses(
                 projectPath = projectPath, 
                 modelName = modelName, 
@@ -170,6 +219,15 @@ runProject <- function(
         }
     }
     
+    # Run the models and get the output:
+    if(msg) {
+        message(
+            "StoX: Running project ", 
+            projectPath, 
+            "...", 
+            appendLF = TRUE
+        )
+    }
     projectData <- mapply(
         runModel, 
         modelName = modelNames, 

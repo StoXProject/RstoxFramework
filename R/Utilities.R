@@ -1399,7 +1399,7 @@ hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRU
     ## Extract the process and the function arguments:
     #process <- functionArguments$process
     
-    process <- getProcess(
+    process <- getProcessArguments(
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 

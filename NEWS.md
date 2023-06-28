@@ -1,3 +1,10 @@
+# RstoxFramework v3.6.2 (2023-06-28)
+* Added example of using replaceArgsList in  runModel().
+* Exporting the new process getProcess() and renaming the internal function getProcess() to getProcessArguments().
+* Fixed bug in replaceArgsList, where replacements identical to replacements for other processes were removed.
+* Modified check-full.yaml to deal with ordinary releases on the StoXProject/repo and pre-releases on the StoXProject/testingRepo
+
+
 # RstoxFramework v3.6.2-9001 (2023-06-26)
 * The functions runModel(), runProject() and runProject() have gained a parameter 'force.save' which saves a project even if there are no changes, as opposed to save = TRUE.
 * Updated the test projects coastalCod_20 and cod_19 to have RData as Bootstrap output, since StoX 3.6.1 introduced the error that this file was txt.
@@ -21,9 +28,6 @@
 * Preparations for writing bootstrap data to NetCDF4.
 * Fixed bug where slash and backslash were mixed in file name in json schema validation error message. Now using only slash. Also changed this to a warning instead of an error, so that StoX tries to open the project anyhow.
 * Added LogDistance to tooltip for EDSUs in the map.
-
-
-# RstoxFramework v3.7.0-9001 (2023-02-15)
 * Changed the requirements of the the BaselineSeedTable of the function Bootstrap to only need the ImputeSuperIndividuals processes which use ImputationMethod = "RandomSampling".
 * Added the option prependProcessList in runProcesses(), runModel(), runProject() and runProjects().
 * Added the option of giving a string vector holding the names of the models to return data from in returnModelData in runModel(), runProject() and runProjects().

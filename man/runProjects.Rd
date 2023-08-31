@@ -36,9 +36,9 @@ runProjects(
 
 \item{processes}{The name of the processes.}
 
-\item{startProcess}{The process index, name or ID at which to start the model run.}
+\item{startProcess}{The process index, name or ID at which to start the model run. A list can be given named by the models if one needs to specify start process for each model. Models given inn \code{modelNames} but not in the list will be run from the start of the model.}
 
-\item{endProcess}{The process index, name or ID at which to stop the model run.}
+\item{endProcess}{The process index, name or ID at which to stop the model run. A list can be given named by the models if one needs to specify end process for each model. Models given inn \code{modelNames} but not in the list will be run to the end of the model.}
 
 \item{drop.datatype}{Logical: If TRUE, drop the top level of the output list if it has length 1 and that single element is named by the datatype name.}
 

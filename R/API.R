@@ -152,6 +152,8 @@ runModel <- function(
 #' @inheritParams runProcesses
 #' @inheritParams Projects
 #' @inheritParams runModel
+#' @param startProcess The process index, name or ID at which to start the model run. A list can be given named by the models if one needs to specify start process for each model. Models given inn \code{modelNames} but not in the list will be run from the start of the model.
+#' @param endProcess The process index, name or ID at which to stop the model run. A list can be given named by the models if one needs to specify end process for each model. Models given inn \code{modelNames} but not in the list will be run to the end of the model.
 #' @param unlist.models Logical: If TRUE unlist the top level so that all processes are in one list.
 #' 
 #' @return
@@ -201,6 +203,18 @@ runProject <- function(
     }
     else if(is.character(returnModelData)) {
         returnModelData <- modelNames %in% returnModelData
+    }
+    
+    # Recognize the start and end process and create a list linking to the model:
+    if(!is.list(startProcess)) {
+        processTable <- getProcessesSansProcessData(projectPath)
+        atProcess <- matchProcesses(startProcess, processTable)
+        startProcess <- structure(list(processTable[atProcess, processID]), names = processTable[atProcess, modelName])
+    }
+    if(!is.list(endProcess)) {
+        processTable <- getProcessesSansProcessData(projectPath)
+        atProcess <- matchProcesses(endProcess, processTable)
+        endProcess <- structure(list(processTable[atProcess, processID]), names = processTable[atProcess, modelName])
     }
     
     # Support for model specific startProcess and endProcess:
@@ -288,6 +302,8 @@ runProject <- function(
 #' @inheritParams Projects
 #' @inheritParams runModel
 #' @inheritParams runProject
+#' @param startProcess The process index, name or ID at which to start the model run. A list can be given named by the models if one needs to specify start process for each model. Models given inn \code{modelNames} but not in the list will be run from the start of the model.
+#' @param endProcess The process index, name or ID at which to stop the model run. A list can be given named by the models if one needs to specify end process for each model. Models given inn \code{modelNames} but not in the list will be run to the end of the model.
 #' 
 #' @return
 #' A list of model output.
@@ -396,7 +412,8 @@ extractFromAllProcessOutputs <- function(nameVector, x) {
 
 pasteNamesRecursive <- function (L, sep = "/") {
     # Return the names if all elements are not lists, and recurse futher if any are lists:
-    areNotList <- sapply(L, inherits, c("data.table", "data.frame", "ggplot", "SpatialPolygonsDataFrame"))
+    #areNotList <- sapply(L, inherits, c("data.table", "data.frame", "ggplot", "SpatialPolygonsDataFrame"))
+    areNotList <- sapply(L, inherits, c("data.table", "data.frame", "ggplot", "sf"))
     areList <- !areNotList
     
     if(any(areList)) {
@@ -571,7 +588,12 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
         output <- readOutputRDataFile(path)
     }
     else if(tolower(ext) %in% c("json", "geojson")) {
-        output <- RstoxBase::readGeoJSON(path)
+        # Use DefineStratumPolygon from RstoxBase:
+        output <- RstoxBase::DefineStratumPolygon(
+            DefinitionMethod = "ResourceFile", 
+            FileName = path, 
+            StratumNameLabel = "StratumName"
+        )
     }
     else if(tolower(ext) %in% "txt") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:
@@ -674,7 +696,7 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     # Run the function 'what' and store the warnings and error along with the result:
     warn <- character(0)
     err <- NULL
-    msg <- capture.output({
+    msg <- utils::capture.output({
         value <- withCallingHandlers(
             tryCatch(
                 #do.call(what, args), 

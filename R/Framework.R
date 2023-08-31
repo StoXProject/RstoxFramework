@@ -877,7 +877,6 @@ readProjectDescription <- function(
         projectDescription <- projectDescriptionAfterBackwardCompatibility
     }
     
-    
     # Format the processes, ensuring correct primitive types:
     if(formatProcesses) {
         for(modelName in names(projectDescription)) {
@@ -1318,7 +1317,8 @@ convertProcessDataToGeojson <- function(projectDescription) {
         for(processIndex in seq_along(projectDescription [[modelName]])) {
             for(processDataIndex in names(projectDescription [[modelName]] [[processIndex]]$processData)) {
                 this <- projectDescription [[modelName]] [[processIndex]]$processData[[processDataIndex]]
-                if("SpatialPolygonsDataFrame" %in% class(this)) {
+                #if("SpatialPolygonsDataFrame" %in% class(this)) {
+                if("sf" %in% class(this)) {
                     #projectDescription [[modelName]] [[processIndex]]$processData[[processDataIndex]] <- geojsonio::geojson_json(this)
                     projectDescription [[modelName]] [[processIndex]]$processData[[processDataIndex]] <- buildSpatialFileReferenceString(this)
                 }
@@ -1372,7 +1372,8 @@ buildSpatialFileReferenceString <- function(x) {
     # Write the input SpatialPolygonsDataFrame to a temporary file, but use geojsonsf instead of geojsonio to reduce dependencies:
     #write(geojsonio::geojson_json(x), file = filePath)
     #write(geojsonsf::sf_geojson(sf::st_as_sf(x)), filePath)
-    write(geojsonsf::sf_geojson(sf::st_as_sf(x), simplify = FALSE), filePath)
+    #write(geojsonsf::sf_geojson(sf::st_as_sf(x), simplify = FALSE), filePath)
+    write(geojsonsf::sf_geojson(x, simplify = FALSE), filePath)
     
     SpatialFileReferenceString <- paste0(
         getRstoxFrameworkDefinitions("spatialFileReferenceCodeStart"), 
@@ -2613,7 +2614,7 @@ matchProcesses <- function(processes, processIndexTable, warn = TRUE) {
         }
     }
     else {
-        stop("StoX: Processes must be specified as a vector of process indices, names or IDs (possibly a mixture of the lattter two.)")
+        stop("StoX: Processes must be specified as a vector of process indices, names or IDs (possibly a mixture of the latter two.)")
     }
     
     return(processesNumeric)
@@ -3107,21 +3108,21 @@ getProcessIDsFromBeforeAfter <- function(projectPath, afterProcessID = NULL, bef
 
 
 
-checkFunctionInput <- function(functionInput, functionInputDataType, processIndexTable) {
+checkFunctionInput <- function(functionInput, functionInputDataType, processIndexTable, processName) {
     # Expect an error, and return FALSE if all checks passes:
     functionInputError <- TRUE
     if(length(functionInput)) {
         # (0) Chech that the function input is a string with positive number of characters:
         if(length(functionInput) && !is.character(functionInput)) {
-            warning("StoX: Function input must be a character string (", functionInputDataType, ").")
+            warning("StoX: Function input to the process ", processName, " must be a character string (", functionInputDataType, ").")
         }
         # (1) Error if empty string:
         else if(nchar(functionInput) == 0) {
-            warning("StoX: Function input must be a non-empty character string (", functionInputDataType, ").")
+            warning("StoX: Function input to the process ", processName, " must be a non-empty character string (data type ", functionInputDataType, ").")
         }
         # (2) Error if not the name of a previous process:
         else if(! functionInput %in% processIndexTable$processName) {
-            warning("StoX: Function input ", functionInput, " is not the name of a previous process (", functionInputDataType, ").")
+            warning("StoX: Function input ", functionInput, " to the process ", processName, " is not the name of a previous process (data type ", functionInputDataType, ").")
         }
         else {
             atRequestedPriorProcess <- which(functionInput == processIndexTable$processName)
@@ -3131,7 +3132,7 @@ checkFunctionInput <- function(functionInput, functionInputDataType, processInde
             
             # (3) Error if the previous process returns the wrong data type:
             if(! functionInputDataType %in% outputDataTypeOfRequestedPriorProcess) {
-                warning("StoX: Function input from process ", processIndexTable$processName[atRequestedPriorProcess], " does not return the correct data type (", functionInputDataType, ").")
+                warning("StoX: Function input to the process ", processName, " from process ", processIndexTable$processName[atRequestedPriorProcess], " does not return the correct data type (", functionInputDataType, ").")
             }
             # (4) Error if the previous process is not enabled:
             else if(!processIndexTable$enabled[atRequestedPriorProcess]) {
@@ -3154,14 +3155,17 @@ checkFunctionInput <- function(functionInput, functionInputDataType, processInde
 }
 
 checkFunctionInputs <- function(processIndexTable) {
-    # Get the function input name and value paris:
-    functionInput <- processIndexTable$functionInputs[[nrow(processIndexTable)]]
-    functionInputDataType <- names(processIndexTable$functionInputs[[nrow(processIndexTable)]])
+    # Get the function input name and value pairs:
+    atEnd <- nrow(processIndexTable)
+    functionInput <- processIndexTable$functionInputs[[atEnd]]
+    functionInputDataType <- names(processIndexTable$functionInputs[[atEnd]])
+    processName <- processIndexTable$processName[[atEnd]]
     functionInputError <- mapply(
         checkFunctionInput, 
         functionInput = functionInput, 
         functionInputDataType = functionInputDataType, 
         MoreArgs = list(
+            processName = processName, 
             processIndexTable = processIndexTable
         )
     )
@@ -4228,7 +4232,7 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
 
 formatProcessData <-  function(processData) {
     if(!is.list(processData)) {
-        stop("StoX: ProcessData must be a list. The list can consist of SpatialPolygonsDataFrame or data.table objects. No other objects are allowed.")
+        stop("StoX: ProcessData must be a list. The list can consist of objects of classes ", paste(getRstoxFrameworkDefinitions("outputTypes"), collapse = ","))
     }
     
     if(length(processData)) {
@@ -4240,43 +4244,31 @@ formatProcessData <-  function(processData) {
 
 
 formatProcessDataOne <-  function(processDataName, processDataOne) {
+    
     if(!length(processDataOne)) {
         processDataOne <- data.table::data.table()
     }
     # Convert to sp:
     else if("features" %in% tolower(names(processDataOne))) {
-        
         # Using geojsonsf instead of geojsonio to reduce the number of dependencies:
         #processDataOne <- geojsonio::geojson_sp(toJSON_Rstox(processDataOne, pretty = TRUE))
         
-        # Check for empty multipolygonm, which is not well treated by sf:
-        geosf <- geojsonsf::geojson_sf(toJSON_Rstox(processDataOne, pretty = TRUE))
-        if(length(geosf$geometry)) {
-            processDataOne <- sf::as_Spatial(geosf)
+        # Check for empty multipolygon, which is not well treated by sf:
+        StratumPolygon <- geojsonsf::geojson_sf(toJSON_Rstox(processDataOne, pretty = TRUE))
+        
+        if(length(StratumPolygon$geometry)) {
+            
+            # Set the assumed pojection:
+            suppressWarnings(sf::st_crs(StratumPolygon) <- getRstoxBaseDefinitions("proj4string_longlat"))
+            # Make sure that the StratumPolygon is a MULTIPOLYGON object:
+            StratumPolygon <- sf::st_cast(StratumPolygon, "MULTIPOLYGON")
             
             # Add names:
-            #row.names(processDataOne) <- as.character(processDataOne@data$StratumName)
-            processDataOne <- addCoordsNames(processDataOne)
-            processDataOne <- RstoxBase::addStratumNames(processDataOne, accept.wrong.name.if.only.one = TRUE)
+            processDataOne <- RstoxBase::addStratumNames(StratumPolygon, accept.wrong.name.if.only.one = TRUE)
         }
         else {
             processDataOne <- getRstoxFrameworkDefinitions("emptyStratumPolygon")
         }
-        
-        #sp::proj4string(processDataOne) <- as.character(NA)
-        if(length(processDataOne)) {
-            suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
-            #suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
-        }
-        
-        
-        #sp::CRS(x) <- as.character(NA)
-    }
-    # Support for project.RData files, which contained SpatialPolygonsDataFrame for the stratum polygons:
-    else if("SpatialPolygonsDataFrame" %in% class(processDataOne)) {
-        suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
-        #suppressWarnings(sp::proj4string(processDataOne) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
-        
     }
     # If a data.table:
     else if(length(processDataOne) && data.table::is.data.table(processDataOne)) {
@@ -4292,9 +4284,12 @@ formatProcessDataOne <-  function(processDataName, processDataOne) {
     }
     # Otherwise try to convert to data.table:
     else if(length(processDataOne) && is.convertableToTable(processDataOne)) {
-        processDataOne <- simplifyListReadFromJSON(processDataOne)
-        processDataOne <- data.table::as.data.table(processDataOne)
+        # Why was this extremely slow method used, where converting to and then from JSON slows things down imensely?:
+        # processDataOne <- simplifyListReadFromJSON(processDataOne)
+        # processDataOne <- data.table::as.data.table(processDataOne)
         
+        # Convert to data.table:
+        processDataOne <- data.table::rbindlist(processDataOne)
         
         convertStringToNA(processDataOne)
         ## Set numeric NAs:
@@ -4306,7 +4301,7 @@ formatProcessDataOne <-  function(processDataName, processDataOne) {
         convertToPosixInDataTable(processDataOne)
     }
     else {
-        stop("StoX: ProcessData must be a list of SpatialPolygonsDataFrame or data.table. No other objects are allowed.")
+        stop("StoX: ProcessData must be a list. The list can consist of objects of classes ", paste(getRstoxFrameworkDefinitions("outputTypes"), collapse = ","))
     }
     
     return(processDataOne)
@@ -4879,7 +4874,7 @@ runProcess <- function(
     #output.file.type = c("default", "text", "RData", "rds"), # Not needed. This was maybe used in the early stages of the development.
     try = TRUE
 ) {
-    
+    # Get the model name:
     modelName <- getModel(modelName)
     
     # Stop if the stop file is present:
@@ -5007,7 +5002,7 @@ runProcess <- function(
         return(FALSE)
     }
     # If the processOutput has length (or is an empty SpatialPolygonsDataFrame) or empty data.table:
-    else if(length(processOutput) || any(c("data.table", "SpatialPolygonsDataFrame") %in% getRelevantClass(processOutput))){
+    else if(length(processOutput) || any(c("data.table", "sf") %in% getRelevantClass(processOutput))){
         
         # Update the active process ID:
         writeActiveProcessID(
@@ -5018,7 +5013,7 @@ runProcess <- function(
             currentActiveProcessID = currentActiveProcessID, 
             processDirty = FALSE
         )
-        
+
         # If a valid output class, wrap the function output to a list named with the data type (but not for BootstrapData, which is a list of valid output classes AND a valid output class itself):
         if(isValidOutputDataClass(processOutput) && !isBootstrapFunction(process$functionName)) {
             processOutput <- list(processOutput)
@@ -5026,24 +5021,7 @@ runProcess <- function(
         }
         
         # Set the precision of the processOutput:
-        # Is the output a list of lists (such as that from ReadBiotic())?
-        if(is.list(processOutput[[1]]) && !data.table::is.data.table(processOutput[[1]])){
-            # Set presicion by reference for data.table:
-            if(getRelevantClass(processOutput[[1]]) == "data.table") {
-                RstoxData::setRstoxPrecisionLevel(processOutput)
-            }
-            # Round off each polygon:
-            else if(getRelevantClass(processOutput[[1]]) == "SpatialPolygonsDataFrame") {
-                processOutput[[1]] <- RstoxData::roundSignifSPDF(processOutput[[1]])
-            }
-        }
-        # No need to set precision to a ggplot object:
-        else if(! "ggplot" %in% class(processOutput)){
-            # List of lists is always data.table:
-            for(listIndex in seq_along(processOutput)) {
-                RstoxData::setRstoxPrecisionLevel(processOutput[[listIndex]])
-            }
-        }
+        processOutput <- setRstoxPrecision(processOutput)
         
         # Return the process output if requested:
         if(returnProcessOutput) {
@@ -5571,7 +5549,8 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
     
     if(pretty) {
         # If a SpatialPolygonsDataFrame, prettify and convert to character
-        if(getRelevantClass(data) == "SpatialPolygonsDataFrame") {
+        #if(getRelevantClass(data) == "SpatialPolygonsDataFrame") {
+        if(getRelevantClass(data) == "sf") {
             #geojsonio::geojson_json(processOutput, pretty = TRUE)
             #data <- jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(data)))
             data <- replaceSpatialFileReference(
@@ -5682,9 +5661,9 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
 
 flattenProcessOutput <- function(processOutput) {
     #if(getRelevantClass(processOutput) == "SpatialPolygons") {
-    if(getRelevantClass(processOutput) == "SpatialPolygonsDataFrame") {
+    if(getRelevantClass(processOutput) == "sf") {
         #geojsonio::geojson_json(processOutput, pretty = TRUE)
-        jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(processOutput)))
+        jsonlite::prettify(geojsonsf::sf_geojson(processOutput))
     }
     else if(getRelevantClass(processOutput) == "data.table") {
         # Check whether the table is rugged:
@@ -6140,11 +6119,11 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
 # Function for writing one element of the function output list:
 reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
     
-    if("SpatialPolygonsDataFrame" %in% class(processOutputOne)) {
+    if("sf" %in% class(processOutputOne)) {
         
         # Write the file:
         #jsonObject <- geojsonio::geojson_json(processOutputOne)
-        jsonObject <- jsonlite::prettify(geojsonsf::sf_geojson(sf::st_as_sf(processOutputOne), simplify = FALSE))
+        jsonObject <- jsonlite::prettify(geojsonsf::sf_geojson(processOutputOne, simplify = FALSE))
         
         # It seems this is no longer relevant as we moved from geojsonio to geojsonsf:
         # Hack to rermove all IDs from the geojson:

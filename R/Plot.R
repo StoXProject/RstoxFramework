@@ -242,7 +242,7 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
                 )
             
             if(!is.na(cvScalingFactor)) {
-                p <- p + ggplot2::scale_y_continuous(sec.axis = ggplot2::sec_axis(~./cvScalingFactor, name = "CV (trianngles on dashed line)"))
+                p <- p + ggplot2::scale_y_continuous(sec.axis = ggplot2::sec_axis(~./cvScalingFactor, name = paste0(plotArguments$CVVariable, " (trianngles on dashed line)")))
             }
         } 
         

@@ -1,3 +1,10 @@
+# RstoxFramework v3.6.3-9001 (2023-08-31)
+* Removed dependency on the retiring package sp.
+* Speeding up openProject() for StoX projects with large process data tables.
+* Moved functions to set precision to RstoxFramework, and fixed the following ttwo bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.
+* Fixing a problem with setting default precision in StoX. Before, precision was not set for process outputs which were lists of lists of tables (ReadBioic() and ReadAcousic()). Also, all numeric columns, even integer ones were set precision to, which is now changed to exclude integer columns.
+
+
 # RstoxFramework v3.6.2 (2023-06-28)
 * Added example of using replaceArgsList in  runModel().
 * Exporting the new process getProcess() and renaming the internal function getProcess() to getProcessArguments().

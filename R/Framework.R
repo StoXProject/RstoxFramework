@@ -742,8 +742,8 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     newFolders <- gsub("^/", "", newFolders)
     newDirs <- file.path(newProjectPath, newFolders)
     
-    warning(paste("___toCopy___", paste(toCopy, collapse =  "___")))
-    warning(paste("___newDirs___", paste(newDirs, collapse =  "___")))
+    warning(paste("___toCopy___", length(toCopy) , paste(toCopy[1], collapse =  "___")))
+    warning(paste("___newDirs___", length(newDirs) , paste(newDirs[1], collapse =  "___")))
     
     temp <- lapply(newDirs, dir.create, showWarnings = FALSE, recursive = TRUE)
     temp <- mapply(file.copy, toCopy, newDirs, recursive = TRUE)

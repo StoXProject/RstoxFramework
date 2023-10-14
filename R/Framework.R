@@ -711,7 +711,8 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         empty.memory <- NULL
     }
     
-    toCopy <- as.list(getProjectPaths(projectPath, "stoxFolders"))
+    
+    toCopy <- RstoxFramework:::getRstoxFrameworkDefinitions("stoxFoldersList")
     
     if(length(empty.output)) {
         # Exlcude the models given in empty.output:
@@ -732,27 +733,20 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     
     toCopy <- unlist(toCopy)
     
-    warning(paste("___toCopy___", length(toCopy) , paste(toCopy[1], collapse =  "___")))
-    warning(paste("___projectPath___", path.expand(projectPath)))
-    warning(paste("___dirname(toCopy)___", dirname(toCopy)))
-    
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
     #lapply(toCopy, file.copy, newProjectPath, recursive = TRUE)
     
     # Get the folders to place the files in, relative to the new project:
-    newFolders <- sub(path.expand(projectPath), "", dirname(toCopy))
-    warning(paste("___newFolders___", length(newFolders) , paste(newFolders[1], collapse =  "___")))
+    #newFolders <- sub(path.expand(projectPath), "", dirname(toCopy))
+    
     
     # Remove trailing slash:
-    newFolders <- gsub("^/", "", newFolders)
-    newDirs <- file.path(newProjectPath, newFolders)
-    
-    warning(paste("___newDirs___", length(newDirs) , paste(newDirs[1], collapse =  "___")))
-    
-    stop("ppppppppppppppppppppppppppppppppppppppppppppp")
+    newFolders <- gsub("^/", "", toCopy)
+    newDirs <- dirname(file.path(newProjectPath, newFolders))
     
     temp <- lapply(newDirs, dir.create, showWarnings = FALSE, recursive = TRUE)
-    temp <- mapply(file.copy, toCopy, newDirs, recursive = TRUE)
+    toCopyFull <- file.path(projectPath, toCopy)
+    temp <- mapply(file.copy, toCopyFull, newDirs, recursive = TRUE)
     #file.copy(projectPath, newProjectPath, recursive=TRUE)
     
     if(close) {

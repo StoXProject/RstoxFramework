@@ -732,18 +732,23 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     
     toCopy <- unlist(toCopy)
     
+    warning(paste("___toCopy___", length(toCopy) , paste(toCopy[1], collapse =  "___")))
     
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
     #lapply(toCopy, file.copy, newProjectPath, recursive = TRUE)
     
     # Get the folders to place the files in, relative to the new project:
     newFolders <- sub(path.expand(projectPath), "", dirname(toCopy))
+    warning(paste("___newFolders___", length(newFolders) , paste(newFolders[1], collapse =  "___")))
+    
     # Remove trailing slash:
     newFolders <- gsub("^/", "", newFolders)
+    warning(paste("___newFolders___", length(newFolders) , paste(newFolders[1], collapse =  "___")))
     newDirs <- file.path(newProjectPath, newFolders)
     
-    warning(paste("___toCopy___", length(toCopy) , paste(toCopy[1], collapse =  "___")))
     warning(paste("___newDirs___", length(newDirs) , paste(newDirs[1], collapse =  "___")))
+    
+    stop("ppppppppppppppppppppppppppppppppppppppppppppp")
     
     temp <- lapply(newDirs, dir.create, showWarnings = FALSE, recursive = TRUE)
     temp <- mapply(file.copy, toCopy, newDirs, recursive = TRUE)

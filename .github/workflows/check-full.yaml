@@ -159,16 +159,21 @@ jobs:
           isPreRelease <- grepl("-", read.dcf("./DESCRIPTION", all = TRUE)$Version, fixed = TRUE)
           # The testingRepo is used for pre-releases:
           repo <- if(isPreRelease) "https://stoxproject.github.io/testingRepo" else "https://stoxproject.github.io/repo"
+          print("repo")
           print(repo)
           # Find Rstox dependencies:
           db <- available.packages(contriburl = contrib.url(repo))
+          print("contrib.url(repo)")
           print(contrib.url(repo))
           print(db)
-          deps <- tools::package_dependencies(packageName, db =  db)[[1]]
+          print("db")
+          deps <- tools::package_dependencies(packageName, db =  db, which = "most")[[1]]
+          print("deps")
           print(deps)
           if(length(deps)) {
             deps <- deps[startsWith(deps, "Rstox")]
           }
+          print("deps Rstox")
           print(deps)
           # Install the Rstox dependencies:
           if(length(deps)) {

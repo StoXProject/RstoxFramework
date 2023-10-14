@@ -7,13 +7,14 @@
 write_list_as_tables_NetCDFF4(
   list,
   filePath,
+  nc,
   index,
   dims,
   nchars,
   append = FALSE,
   ow = FALSE,
   missval = -9,
-  compression = 1,
+  compression = NA,
   verbose = FALSE
 )
 }
@@ -21,6 +22,8 @@ write_list_as_tables_NetCDFF4(
 \item{list}{A list of tables to write to NetCDF4.}
 
 \item{filePath}{The path to the file.}
+
+\item{nc}{A netCDF4 object, overiding the \code{filePath}.}
 
 \item{index}{The index of the current data to write, with number of rows indicated in the \code{dims} argument.}
 

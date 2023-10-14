@@ -10,6 +10,7 @@ runProcesses(
   startProcess = 1,
   endProcess = Inf,
   msg = TRUE,
+  msg.GUI = FALSE,
   save = TRUE,
   force.save = FALSE,
   saveProcessData = TRUE,
@@ -37,6 +38,8 @@ runProcesses(
 \item{endProcess}{The process index, name or ID at which to stop the model run.}
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
+
+\item{msg.GUI}{Logical: If TRUE, exlcude certain messages (used by the StoX GUI).}
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
 

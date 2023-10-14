@@ -45,6 +45,31 @@ backwardCompatibility <- list(
             parameterName = "Percentages", 
             parameterValue = c(5, 50, 95)
         )
+    ), 
+    
+    translateParameter = list(
+        list(
+            changeVersion = "3.6.3-9001", 
+            functionName = "Bootstrap", 
+            modelName = "analysis", 
+            parameterName = "BootstrapMethodTable",
+            # Multiple values must be given in a list!!! Also if only :
+            value = function(value) {
+                TRUE
+            }, # Translate regardless of the value.
+            newValue = function(projectDescriptionOne) {
+                # Find any use of the ResampleBioticAssignment resampling function:
+                hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
+                if(any(hasResampleBioticAssignment)) {
+                    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
+                    for(ind in atResampleBioticAssignment) {
+                        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
+                    }
+                }
+                
+                return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+            }
+        )
     )
 )
 
@@ -423,7 +448,10 @@ matchParameter <- function(x, value) {
     #else {
     #    isTRUE(x %in% value) || identical(x, value)
     #}
-    if(is.list(value)) {
+    if(length(value) == 1 && is.function(value)) {
+        value(x)
+    }
+    else if(is.list(value)) {
         any(sapply(value, identical, x))
     }
     else{

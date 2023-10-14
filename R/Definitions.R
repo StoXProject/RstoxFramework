@@ -278,8 +278,8 @@ initiateRstoxFramework <- function(){
         MeanNASCData = "ResampleMeanNASCData",
         MeanLengthDistributionData = "ResampleMeanLengthDistributionData", 
         MeanSpeciesCategoryCatchData = "ResampleMeanSpeciesCategoryCatchData", 
-        # This will be replaced by c("ResampleBioticAssignmentByStratum", "ResampleBioticAssignmentByPSU", where the first corresponds to the existing one):
-        BioticAssignment = "ResampleBioticAssignment" 
+        #BioticAssignment = "ResampleBioticAssignment" 
+        BioticAssignment = c("ResampleBioticAssignmentByStratum", "ResampleBioticAssignmentByPSU")
     )
     
     

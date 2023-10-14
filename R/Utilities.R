@@ -721,7 +721,7 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, ...) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -745,7 +745,9 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     message(projectPath_copy)
     openProject(projectPath_copy)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = FALSE, try = try, msg = FALSE, ...)
+    # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
+    #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, msg = FALSE, ...)
     
     
     # Read the original data:
@@ -1466,6 +1468,7 @@ readsItsOwnOutputDataType <- function(functionName) {
 #' @inheritParams ncdf4::ncvar_def
 #' @param list A list of tables to write to NetCDF4.
 #' @param filePath The path to the file.
+#' @param nc A netCDF4 object, overiding the \code{filePath}.
 #' @param index The index of the current data to write, with number of rows indicated in the \code{dims} argument.
 #' @param dims A list of lists of dimensions of the tables to write.
 #' @param nchars A list of lists of lists holding the maximum number of characters for each variable of each table of each process.
@@ -1475,7 +1478,7 @@ readsItsOwnOutputDataType <- function(functionName) {
 #' 
 #' @export
 #' 
-write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = 1, verbose = FALSE) {
+write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = NA, verbose = FALSE) {
     
     # Thoughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
     
@@ -1601,7 +1604,11 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
         variableNames <- names(variables)
     }
     else {
-        if(file.exists(filePath)) {
+        # Use the open file if given:
+        if(inherits(nc, "ncdf4")) {
+            ncout <- nc
+        }
+        else if(file.exists(filePath)) {
             ncout <- ncdf4::nc_open(filePath, write = TRUE, verbose = verbose)
         }
         else {
@@ -1692,8 +1699,14 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
         #ncdf4::nc_sync( ncout )
     }
     
-    # Close the file:
-    ncdf4::nc_close(ncout)
+    # Close the file if an open file was not given:
+    if(inherits(nc, "ncdf4")) {
+        return(nc)
+    }
+    else {
+        ncdf4::nc_close(ncout)
+        return(filePath)
+    }
 }
 
 
@@ -1787,10 +1800,13 @@ setRstoxPrecision <- function(x) {
     signifDigits <- getRstoxFrameworkDefinitions("signifDigits")
     
     currentClass <- class(x)
+    currentAttributes <- attributes(x)
     
     if(is.list(x) && ! any(c("sf", "data.frame") %in% class(x))){
         output <- lapply(x, setRstoxPrecision)
         class(output) <- currentClass
+        output <- setNonStandardAttributes(output, currentAttributes)
+                
         return(output)
     }
     else {
@@ -1885,28 +1901,28 @@ dataTable2sf_POINT <- function(x, coords = c("Longitude", "Latitude"), idCol = N
     return(points)
 }
 
-dataTable2sf_LINESTRING <- function(x, x1x2y1y2 = c("startLongitude", "endLongitude", "startLatitude", "endLatitude"), idCol = NULL, crs = NULL) {
+dataTable2sf_LINESTRING <- function(x, x1x2y1y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"), idCol = NULL, crs = NULL) {
     
-    # Split the table into one element per line:
-    xlist <- split(x[, ..x1x2y1y2], seq_len(nrow(x)))
+    # Create a geometry column:
+    linestrings  <- data.frame(geometry = sf::st_sfc(sapply(seq_len(nrow(x)), function(i) create_segment(x[i, ..x1x2y1y2]), simplify = FALSE)))
     
-    # Create an sf LINESTRING object:
-    linestrings <- lapply(
-        xlist, 
-        function(x) st_linestring(matrix(unlist(x), 2, 2))
-    )
-    linestrings <- st_sf(st_sfc(linestrings))
+    # Add info:
+    if(length(idCol) && idCol %in% names(x)) {
+        linestrings[[idCol]] <- x[, ..idCol]
+    } 
+    
+    # Convert to proper sf data frame:
+    linestrings <-  sf::st_sf(linestrings)
     
     # Set projection:
     sf::st_crs(linestrings) <- if(length(crs)) crs else getRstoxBaseDefinitions("proj4string_longlat")
-    
-    # Add info:
-    if(lenght(idCol) && idCol %in% names(x)) {
-        linestrings[[idCol]] <- x[, ..idCol]
-    }
-    
+
     return(linestrings)                   
 }
 
+# Simple function to create a segment:
+create_segment <- function(r) {
+    sf::st_linestring(t(matrix(unlist(r), 2, 2)))
+}
 
 

@@ -3,6 +3,18 @@
 * Speeding up openProject() for StoX projects with large process data tables.
 * Moved functions to set precision to RstoxFramework, and fixed the following ttwo bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.
 * Fixing a problem with setting default precision in StoX. Before, precision was not set for process outputs which were lists of lists of tables (ReadBioic() and ReadAcousic()). Also, all numeric columns, even integer ones were set precision to, which is now changed to exclude integer columns.
+* Changed isOpenProject() to only require that the projectSession folder exits, with an option strict = TRUE to use the old requirement that all folders must exist.
+* Added BootstrapNetCDF4() and ReportBootstrapNetCDF4(). These will replace Bootstrap() and ReportBootstrap() in StoX 4.0.0.
+* Added ResampleBioticAssignmentByPSU() and ResampleBioticAssignmentByStratum(), where the latter is identical to the ResampleBioticAssignment() of StoX <= 3.6.2.
+* Fixed bug where runProject() did not open the project.
+* Added printing of messages, warnings and errors for parallel bootstrapping (by applying runFunction() in each core).
+* Added the number of identical warnings in the warning printout. This is needed e.g. to get an idea of how many bootstrap replicates that has a problem of missing assignment length distribution for AcousticPSUs.
+* Changed how runFunction() saves messages, warnings and errors.
+* Added the option empty.memory to copyProject().
+* Added the option msg.GUI to runProcess() and runProcesses() to support not printing the "Running baseline process" type of messages in backend but rather in frontend, so that this gets printed before the process runs and not after.
+* Added warning when replaceArgs contains non-existent arguments.
+* Changed to using unlistDepth2 = FALSE in compareProjectToStoredOutputFiles(), as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data.
+* Increased tolerance in test-tobis_20_depth.R.
 
 
 # RstoxFramework v3.6.2 (2023-06-28)

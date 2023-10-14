@@ -297,7 +297,7 @@ createProjectSkeleton <- function(projectPath, ow = FALSE) {
     # Check whether the project exists:
     if(dir.exists(projectPath)) {
         if(!ow) {
-            stop("StoX: The project '", projectPath, "' exists. Choose a different project path.")
+            stop("StoX: The folder '", projectPath, "' exists. Choose a different project path.")
         }
         else {
             unlink(projectPath, recursive = TRUE, force = TRUE)
@@ -337,8 +337,9 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param saveIfAlreadyOpen Logical: If TRUE save the project before closing if already open and force is TRUE.
 #' @param newProjectPath    The path to the copied StoX project.
 #' @param verbose           Logical: If TRUE, print information to the console, e.g. about backward compatibility.
-#' @param empty.output      Logical: If TRUE, do not include the output files when copying.
-#' @param empty.input       Logical: If TRUE, do not include the input files when copying.
+#' @param empty.output      Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.
+#' @param empty.memory      Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.
+#' @param empty.input       Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.
 #' @param close Logical: (In \code{copyProject}) If TRUE, close the project after copying.
 #' 
 #' @name Projects
@@ -464,6 +465,7 @@ openProject <- function(
     
     # Read the project description file:
     #projectDescription <- readProjectDescription(projectPath, type = type)
+    
     temp <- readProjectDescription(projectPath, verbose = verbose)
     projectDescription <- temp$projectDescription
     saved <- temp$saved
@@ -483,6 +485,7 @@ openProject <- function(
         archive = FALSE, 
         add.defaults = FALSE
     )
+    
     # Save the project description attributes:
     writeProjectDescriptionAttributes(projectPath, projectDescription = projectDescription)
     
@@ -677,23 +680,70 @@ saveAsProject <- function(
 #' @export
 #' @rdname Projects
 #' 
-copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, close = FALSE, msg = TRUE) {
+copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, close = FALSE, msg = TRUE) {
     if(ow) {
         unlink(newProjectPath, force = TRUE, recursive = TRUE)
     }
+    
     #suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
     createProjectSkeleton(newProjectPath, ow = ow)
     
-    foldersToCopy <- getProjectPaths(projectPath, "stoxFolders")
-    if(empty.output) {
-        foldersToCopy <- foldersToCopy[basename(foldersToCopy) != "output"]
+    stoxModelFolders <- getRstoxFrameworkDefinitions("stoxModelFolders")
+    stoxDataSourceFolders <- getRstoxFrameworkDefinitions("stoxDataSourceFolders")
+    
+    # Should input and output be emptied?:
+    if(isTRUE(empty.output)) {
+        empty.output <- stoxModelFolders
     }
-    if(empty.input) {
-        foldersToCopy <- foldersToCopy[basename(foldersToCopy) != "input"]
+    else if(isFALSE(empty.output)) {
+        empty.output <- NULL
+    }
+    if(isTRUE(empty.input)) {
+        empty.input <- stoxDataSourceFolders
+    }
+    else if(isFALSE(empty.input)) {
+        empty.input <- NULL
+    }
+    if(isTRUE(empty.memory)) {
+        empty.memory <- stoxModelFolders
+    }
+    else if(isFALSE(empty.memory)) {
+        empty.memory <- NULL
     }
     
+    toCopy <- as.list(getProjectPaths(projectPath, "stoxFolders"))
+    
+    if(length(empty.output)) {
+        # Exlcude the models given in empty.output:
+        toCopy$output <- file.path(toCopy$output, setdiff(stoxModelFolders, empty.output))
+    }
+    if(length(empty.input)) {
+        toCopy$input <- file.path(toCopy$input, setdiff(stoxDataSourceFolders, empty.input))
+    }
+    if(length(empty.memory)) {
+        # Specify what to keep in the projectSession folder ():
+        toCopy$process <- c(
+            file.path(toCopy$process, "project.json"), 
+            file.path(toCopy$process, "projectSession", "status"), 
+            file.path(toCopy$process, "projectSession", "memory"), 
+            file.path(toCopy$process, "projectSession", "data", "models", setdiff(stoxModelFolders, empty.memory))
+        )
+    }
+    
+    toCopy <- unlist(toCopy)
+    
+    
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
-    lapply(foldersToCopy, file.copy, newProjectPath, recursive = TRUE)
+    #lapply(toCopy, file.copy, newProjectPath, recursive = TRUE)
+    
+    # Get the folders to place the files in, relative to the new project:
+    newFolders <- sub(path.expand(projectPath), "", dirname(toCopy))
+    # Remove trailing slash:
+    newFolders <- gsub("^/", "", newFolders)
+    newDirs <- file.path(newProjectPath, newFolders)
+    
+    temp <- lapply(newDirs, dir.create, showWarnings = FALSE, recursive = TRUE)
+    temp <- mapply(file.copy, toCopy, newDirs, recursive = TRUE)
     #file.copy(projectPath, newProjectPath, recursive=TRUE)
     
     if(close) {
@@ -739,6 +789,7 @@ deleteProcessData <- function(projectPath, modelName, processID) {
 #' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
 #' @param formatProcesses Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.
 #' @param validateJSON Logical: If TRUE validate the project.json.
+#' @param strict Logical: If TRUE, require that all folders of the projectSession folder exist in isOpenProject(). Otherwise only require that the projectSession folder exists.
 #' 
 #' @name ProjectUtils
 #' 
@@ -797,12 +848,17 @@ isSaved <- function(projectPath) {
 #' @export
 #' @rdname ProjectUtils
 #' 
-isOpenProject <- function(projectPath) {
+isOpenProject <- function(projectPath, strict = FALSE) {
     if(isProject(projectPath)) {
-        activeProcessIDFile <- getProjectPaths(projectPath, "activeProcessIDFile")
-        hasActiveProcessData <- file.exists(activeProcessIDFile)
-        existsFolders <- sapply(getProjectPaths(projectPath, "projectSessionFolderStructure"), file.exists)
-        hasActiveProcessData && length(existsFolders) && all(existsFolders)
+        if(strict) {
+            activeProcessIDFile <- getProjectPaths(projectPath, "activeProcessIDFile")
+            hasActiveProcessData <- file.exists(activeProcessIDFile)
+            existsFolders <- sapply(getProjectPaths(projectPath, "projectSessionFolderStructure"), file.exists)
+            hasActiveProcessData && length(existsFolders) && all(existsFolders)
+        }
+        else {
+            file.exists(getProjectPaths(projectPath, "projectSessionFolder"))
+        }
     }
     else {
         warning("StoX: Project ", projectPath, " does not exist. Please specify the path to the folder of a StoX project (containing the sub-folders input, output and process).")
@@ -3336,7 +3392,8 @@ processNameExists <- function(processName, projectPath) {
 checkProcessName <- function(processName, projectPath, strict = TRUE) {
     
     # If the process name is not valid:
-    if(!onlyValidCharactersInProcessnName(processName) || processNameExists(processName, projectPath)) {
+    # Check the processName only if strict is FALSE or TRUE. If NULL ignore the test, which is used when opening a project, since this test reads the ****************************:
+    if(length(strict) && (!onlyValidCharactersInProcessnName(processName) || processNameExists(processName, projectPath))) {
         if(strict) {
             stop("Invalid or already used process name \"", processName, "\" of project ", projectPath)
         }
@@ -4807,6 +4864,7 @@ duplicateProcess <- function(projectPath, modelName, processID, newProcessName =
         values = processToCopy, 
         afterProcessID = processID
     )
+
 }
 
 
@@ -4866,7 +4924,7 @@ isProcess <- function(x) {
 #' 
 runProcess <- function(
     projectPath, modelName, processID, 
-    msg = TRUE, 
+    msg = TRUE, msg.GUI = FALSE, 
     saveProcessData = TRUE, 
     returnProcessOutput = FALSE, fileOutput = NULL, setUseProcessDataToTRUE = TRUE, 
     purge.processData = FALSE, 
@@ -4874,6 +4932,7 @@ runProcess <- function(
     #output.file.type = c("default", "text", "RData", "rds"), # Not needed. This was maybe used in the early stages of the development.
     try = TRUE
 ) {
+    
     # Get the model name:
     modelName <- getModel(modelName)
     
@@ -4916,7 +4975,7 @@ runProcess <- function(
 
     # Try running the function, and return FALSE if failing:
     failed <- FALSE
-    if(msg) {
+    if(msg && !msg.GUI) {
         message(
             "StoX: Running ", modelName, " process ", 
             getProcessIndexFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), 
@@ -4958,6 +5017,7 @@ runProcess <- function(
             envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
         )
     }
+    
     
     # Apply the replaceData, which can be a function with first parameter the processOutput and additional parameters given in ..., or an actual object to replace the output by:
     #thisReplaceData <- replaceData[[process$processName]]
@@ -5004,6 +5064,7 @@ runProcess <- function(
     # If the processOutput has length (or is an empty SpatialPolygonsDataFrame) or empty data.table:
     else if(length(processOutput) || any(c("data.table", "sf") %in% getRelevantClass(processOutput))){
         
+        
         # Update the active process ID:
         writeActiveProcessID(
             projectPath = projectPath, 
@@ -5041,6 +5102,7 @@ runProcess <- function(
             # Set the propertyDirty flag to FALSE, as no change has been made to the UseProcessData flag:
             writeActiveProcessID(projectPath, modelName, propertyDirty = FALSE)
         }
+        
         
         # Write to memory files:
         processOutput <- writeProcessOutputMemoryFiles(processOutput = processOutput, projectPath = projectPath, modelName = modelName, processID = process$processID)
@@ -5162,6 +5224,11 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     
     # Insert any arguments in replaceArgs:
     namesOfReplaceArgsToInsert <- intersect(names(replaceArgs), names(functionArguments))
+    namesOfReplaceArgsNotToInsert <- setdiff(names(replaceArgs), names(functionArguments))
+    
+    if(length(namesOfReplaceArgsNotToInsert)) {
+        warning("The replaceArgs/replaceArgsList contains the following parameters that do not exist in the process: ", paste(namesOfReplaceArgsNotToInsert, sep = ", "))
+    }
     if(length(namesOfReplaceArgsToInsert)) {
         functionArguments[namesOfReplaceArgsToInsert] <- replaceArgs[namesOfReplaceArgsToInsert]
     }
@@ -6541,7 +6608,7 @@ runProcesses <- function(
     projectPath, 
     modelName, 
     startProcess = 1, endProcess = Inf, 
-    msg = TRUE, 
+    msg = TRUE, msg.GUI = FALSE, 
     save = TRUE, force.save = FALSE, saveProcessData = TRUE, Application = R.version.string, 
     force.restart = FALSE, 
     returnProcessOutput = FALSE, fileOutput = NULL, setUseProcessDataToTRUE = TRUE, 
@@ -6640,7 +6707,7 @@ runProcesses <- function(
         }
     }
     
-    #browser()
+    
     replaceArgsListFull <- structure(vector("list", length(processIDs)), names = processNames)
     valid <- intersect(names(replaceArgsListFull), names(replaceArgsList))
     replaceArgsListFull[valid] <- replaceArgsList[valid]
@@ -6652,7 +6719,7 @@ runProcesses <- function(
         MoreArgs = list(
             projectPath = projectPath, 
             modelName = modelName, 
-            msg = msg, 
+            msg = msg, msg.GUI = msg.GUI, 
             saveProcessData = saveProcessData, returnProcessOutput = returnProcessOutput,
             fileOutput = fileOutput, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
@@ -6825,8 +6892,6 @@ prependProcess <- function(projectPath, modelName, processName, prependProcessNa
     values$functionName <- process$functionName
     # Add process name
     values$processName <- prependProcessName
-    
-    
     
     addProcess(projectPath, modelName, values = values, beforeProcessID = process$processID)
     

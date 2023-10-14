@@ -1,6 +1,3 @@
-# Add this in StoX 4.0.0:
-# @param OutputVariables An optional list of variables to keep in the output. A typical set of variables could be c("Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"), which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in \code{OutputVariables}. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects. The \code{OutputVariables} are kept across the \code{OutputProcesses}.
-
 
 #' Bootstrap the baseline model
 #' 
@@ -16,9 +13,9 @@
 #' @param BaselineSeedTable A table of ProcessName and Seed, giving the seed to use for the Baseline processes that requires a Seed parameter. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}.
 #' 
 #' @details A copy of the project is made for each core given by \code{NumberOfCores}. In the case that NumberOfCores == 1, this is still done for safety.
-#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assignned Hauls (not using the Stratum assignment method  in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstra  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
+#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method  in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
 #' 
-#' #' Note on limitatiton on \code{NumberOfBootstraps}: All output requested data from all the bootstrap runs are accumulated in R memory, and written to one RData file at the end of the function, which effectively imposes a restriction of some hundred bootstrap runs for large StoX projects. Use \code{\link{Bootstrap}} instead. Backwards compatibility sets the function Bootstrap to Bootstrap_3.6.0 for StoX projects saved in StoX 3.6.0 and older.
+#' Note on limitatiton on \code{NumberOfBootstraps}: All output requested data from all the bootstrap runs are accumulated in R memory, and written to one RData file at the end of the function, which effectively imposes a restriction of some hundred bootstrap runs for large StoX projects. Use \code{\link{Bootstrap}} instead. Backwards compatibility sets the function Bootstrap to Bootstrap_3.6.0 for StoX projects saved in StoX 3.6.0 and older.
 #' 
 #' @return
 #' A \code{\link{BootstrapData}} object, which is a list of the RstoxData \code{\link[RstoxData]{DataTypes}} and RstoxBase \code{\link[RstoxBase]{DataTypes}}.
@@ -94,16 +91,15 @@ Bootstrap <- function(
     # Prepare for progress info:
     writeLines(as.character(NumberOfBootstraps), NumberOfBootstrapsFile)
     
-    # Run the bootstrap:
+     # Run the bootstrap:
     bootstrapIndex <- seq_len(NumberOfBootstraps)
     BootstrapData <- RstoxData::mapplyOnCores(
         FUN = runOneBootstrapSaveOutput, 
         NumberOfCores = NumberOfCores, 
-        # Vector inputs:
         ind = bootstrapIndex, 
-        replaceArgsList = BaselineSeedList, 
-        replaceDataList = replaceDataList, 
-        projectPath = projectPath_copies, 
+        replaceArgsList = BaselineSeedList, # This has length equal to NumberOfCores, so is will be recycled
+        replaceDataList = replaceDataList, # This has length equal to NumberOfCores, so is will be recycled
+        projectPath = projectPath_copies, # This has length equal to NumberOfCores, so is will be recycled
         
         # Other inputs:
         MoreArgs = list(
@@ -116,6 +112,25 @@ Bootstrap <- function(
             stopBootstrapFile = stopBootstrapFile
         )
     )
+    
+    allMessages <- unlist(lapply(BootstrapData, "[[", "message"))
+    allWarnings <- unlist(lapply(BootstrapData, "[[", "warning"))
+    allErrors <- unlist(lapply(BootstrapData, "[[", "error"))
+    BootstrapData <- lapply(BootstrapData, "[[", "processOutput")
+    
+    # Issue the (unique) messages, warnings and errors, so that these can be picked up:
+    allMessages <- uniqueText(allMessages, tag = "messages")
+    allWarnings <- uniqueText(allWarnings, tag = "warnings")
+    allErrors <- uniqueText(allErrors, tag = "errors")
+    if(length(allMessages)) {
+        lapply(allMessages, message)
+    }
+    if(length(allWarnings)) {
+        lapply(allWarnings, warning)
+    }
+    if(length(allErrors)) {
+        lapply(allErrors, stop)
+    }
     
     
     # Here we need to merge the NeCDF4 bootstrap files, when we get these files implemented. For now all bootstrap data are accumulated in memory and dumped to an RData file.
@@ -186,14 +201,15 @@ addBootstrapID <- function(x, ID) {
 #' 
 #' @inheritParams Bootstrap
 #' @param outputMemoryFile The path to the output memory file to copy the \code{outputData} to in the case that \code{UseOutputData} is TRUE.
+#' @param OutputVariables An optional list of variables to keep in the output. A typical set of variables could be c("Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"), which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in \code{OutputVariables}. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects. The \code{OutputVariables} are kept across the \code{OutputProcesses}.
 #' 
 #' @details A copy of the project is made for each core given by \code{NumberOfCores}. In the case that NumberOfCores == 1, this is still done for safety.
-#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assignned Hauls (not using the Stratum assignment method  in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstra  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
+#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method  in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
 #' 
 #' @return
 #' A \code{\link{BootstrapNetCDF4Data}} object, which is a list of the RstoxData \code{\link[RstoxData]{DataTypes}} and RstoxBase \code{\link[RstoxBase]{DataTypes}}.
 #' 
-#' @noRd
+#' @export
 #' 
 BootstrapNetCDF4 <- function(
     outputData, 
@@ -273,7 +289,6 @@ BootstrapNetCDF4 <- function(
     temp <- RstoxData::mapplyOnCores(
         FUN = runOneBootstrap_NetCDF4, 
         NumberOfCores = NumberOfCores, 
-        # Vector inputs:
         ind = bootstrapIndex, 
         replaceArgsList = BaselineSeedList, 
         replaceDataList = replaceDataList, 
@@ -293,6 +308,24 @@ BootstrapNetCDF4 <- function(
     # Store the dimensions:
     dims <- lapply(temp, "[[", "dims")
     nchars <- lapply(temp, "[[", "nchars")
+    
+    # Treat messages, warnings and errors:
+    allMessages <- unlist(lapply(temp, "[[", "message"))
+    allWarnings <- unlist(lapply(temp, "[[", "warning"))
+    allErrors <- unlist(lapply(temp, "[[", "error"))
+    # Issue the (unique) messages, warnings and errors, so that these can be picked up:
+    allMessages <- uniqueText(allMessages, tag = "messages")
+    allWarnings <- uniqueText(allWarnings, tag = "warnings")
+    allErrors <- uniqueText(allErrors, tag = "errors")
+    if(length(allMessages)) {
+        lapply(allMessages, message)
+    }
+    if(length(allWarnings)) {
+        lapply(allWarnings, warning)
+    }
+    if(length(allErrors)) {
+        lapply(allErrors, stop)
+    }
     
      
     # List all saved memory data folders:
@@ -314,12 +347,12 @@ BootstrapNetCDF4 <- function(
     
     # Create a tempfile to write the bootstrap data to, and return the path of this tempfile at the end. Then runProcess() will recognize the tempfile and rename it to a memory file and make a copy to the output file.
     filePath <- tempfile()
+    nc <- NULL
     
     # Run through the bootstrap runs and rename the saved baseline folders to the original name:
     message("Writing NetCDF4 file...")
     
     for(ind in seq_along(memoryDataSubFolders)) {
-        
         
         # Get the project path:
         thisProjectPath <- dirname(dirname(dirname(dirname(dirname(memoryDataSubFolders[ind])))))
@@ -334,6 +367,7 @@ BootstrapNetCDF4 <- function(
             processes = OutputProcesses, 
             drop.datatype = FALSE
         )
+        
         # If outputVariableNames is given keep only those variables in all tables:
         if(length(OutputVariables)) {
             processOutput <- lapply(processOutput, function(x) lapply(x, selectRobust, OutputVariables))
@@ -366,9 +400,9 @@ BootstrapNetCDF4 <- function(
         # 
         # However, using compression does not work well with appending to the file. The file may actually become larger with compression than without, so we do not use compression at all:
         
-        write_list_as_tables_NetCDFF4(processOutput, filePath, index = ind, dims = dims, nchars = nchars, append = ind > 1, ow = FALSE, missval = -9, compression = NA, verbose = FALSE)
+        nc <- write_list_as_tables_NetCDFF4(processOutput, filePath, nc = nc, index = ind, dims = dims, nchars = nchars, append = ind > 1, ow = FALSE, missval = -9, compression = NA, verbose = FALSE)
         #print(file.info(filePath)[, "size"])
-     }
+    }
     
     filePath <- createStoXNetCDF4FileDataType(filePath)
     
@@ -454,6 +488,7 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
         newProjectPath = projectPath_copies, 
         MoreArgs = list(
             ow = TRUE, 
+            empty.memory = c("analysis", "report"), 
             empty.output = TRUE
         ), 
         NumberOfCores = NumberOfCores
@@ -548,7 +583,7 @@ getBootstrapNetCDF4Data <- function(nc, selection = list(), BootstrapIDStart = 1
     requestedVariables <- selectionList$requestedVariables
     requestedVariablesFullName <- selectionList$requestedVariablesFullName
     
-    # Get the nrow variable,, which determine what to read, and which will be added as BootstrapID to the output table:
+    # Get the nrow variable, which determine what to read, and which will be added as BootstrapID to the output table:
     nrowsVariable <- paste(paste(listNames, collapse = "/"), "nrow", sep = "/")
     nrows <- ncdf4::ncvar_get(nc, nrowsVariable)
     start <- 1 + sum(nrows[seq_len(BootstrapIDStart - 1)])
@@ -837,22 +872,68 @@ runOneBootstrapSaveOutput <- function(ind, replaceArgsList, replaceDataList, pro
     }
     
     # Run the part of the baseline that containes the processes to be modified to those to be returned:
-    runProcesses(
-        projectPath, 
-        modelName = "baseline", 
-        startProcess = startProcess, 
-        endProcess = endProcess, 
-        save = FALSE, 
-        # Be sure to not touch the process data and file output, the latter mostly for speed if the bootstrap is run on a copy of the project (see if this is the case in the code of Bootstrap()):
-        saveProcessData = FALSE, 
-        #  Do not save the output (text) files:
-        fileOutput = FALSE, 
-        setUseProcessDataToTRUE = FALSE, 
-        replaceArgsList = replaceArgsList, 
-        replaceDataList = replaceDataList, 
-        try = FALSE, 
-        msg = FALSE
+    temp <- runFunction(
+        what = "runProcesses", 
+        args = list(
+            projectPath = projectPath, 
+            modelName = "baseline", 
+            startProcess = startProcess, 
+            endProcess = endProcess, 
+            save = FALSE, 
+            # Be sure to not touch the process data and file output, 
+            # the latter mostly for speed if the bootstrap is run on a copy of the project 
+            # (see if this is the case in the code of Bootstrap()):
+            saveProcessData = FALSE, 
+            #  Do not save the output (text) files:
+            fileOutput = FALSE, 
+            setUseProcessDataToTRUE = FALSE, 
+            replaceArgsList = replaceArgsList, 
+            replaceDataList = replaceDataList, 
+            try = FALSE, 
+            msg = FALSE
+        ), 
+        onlyStoxMessages = FALSE, 
+        onlyStoxWarnings = FALSE, 
+        maxLength.Message = 10000, 
+        maxLength.Warning = 10000, 
+        maxLength.Error = 10000, 
+        collapseMessages = FALSE, 
+        collapseWarnings = FALSE, 
+        collapseErrors = FALSE,
+        header = NULL
     )
+    
+    
+    ## Issue the messages, warnings and errors, so that these can be picked up:
+    #if(length(temp$message)) {
+    #    lapply(temp$message, message)
+    #}
+    #if(length(temp$warning)) {
+    #    lapply(temp$warning, warning)
+    #}
+    #if(length(temp$error)) {
+    #    lapply(temp$error, stop)
+    #}
+    
+    #runProcesses(
+    #    projectPath, 
+    #    modelName = "baseline", 
+    #    startProcess = startProcess, 
+    #    endProcess = endProcess, 
+    #    save = FALSE, 
+    #    # Be sure to not touch the process data and file output, 
+    #    # the latter mostly for speed if the bootstrap is run on a copy of the project 
+    #    # (see if this is the case in the code of Bootstrap()):
+    #    saveProcessData = FALSE, 
+    #    #  Do not save the output (text) files:
+    #    fileOutput = FALSE, 
+    #    setUseProcessDataToTRUE = FALSE, 
+    #    replaceArgsList = replaceArgsList, 
+    #    replaceDataList = replaceDataList, 
+    #    try = FALSE, 
+    #    msg = FALSE
+    #)
+    
     
     # Get the requested outputs:
     processOutput <- getModelData(
@@ -877,6 +958,14 @@ runOneBootstrapSaveOutput <- function(ind, replaceArgsList, replaceDataList, pro
         }
     }
     
+    # Create a list with the messages, warnings and errors alongside the data:
+    processOutput <- list(
+        message = temp$message,  
+        warning = temp$warning,  
+        error = temp$error,  
+        processOutput = processOutput
+    )
+    
     # Add a dot to the progess file:
     cat(".", file = bootstrapProgressFile, append = TRUE)
     
@@ -892,21 +981,57 @@ runOneBootstrap_NetCDF4 <- function(ind, replaceArgsList, replaceDataList, proje
     }
     
     # Run the part of the baseline that contains the processes to be modified to those to be returned:
-    runProcesses(
-        projectPath, 
-        modelName = "baseline", 
-        startProcess = startProcess, 
-        endProcess = endProcess, 
-        save = FALSE, 
-        # Be sure to not touch the process data and file output, the latter mostly for speed if the bootstrap is run on a copy of the project (see if this is the case in the code of Bootstrap()):
-        saveProcessData = FALSE, 
-        #  Do not save the output (text) files:
-        fileOutput = FALSE, 
-        setUseProcessDataToTRUE = FALSE, 
-        replaceArgsList = replaceArgsList, 
-        replaceDataList = replaceDataList, 
-        msg = FALSE
+    #runProcesses(
+    #    projectPath, 
+    #    modelName = "baseline", 
+    #    startProcess = startProcess, 
+    #    endProcess = endProcess, 
+    #    save = FALSE, 
+    #    # Be sure to not touch the process data and file output,
+    #    # the latter mostly for speed if the bootstrap is run on a copy of the project 
+    #    # (see if this is the case in the code of Bootstrap()):
+    #    saveProcessData = FALSE, 
+    #    #  Do not save the output (text) files:
+    #    fileOutput = FALSE, 
+    #    setUseProcessDataToTRUE = FALSE, 
+    #    replaceArgsList = replaceArgsList, 
+    #    replaceDataList = replaceDataList, 
+    #    msg = FALSE
+    #)
+    
+    temp <- runFunction(
+        what = "runProcesses", 
+        args = list(
+            projectPath = projectPath, 
+            modelName = "baseline", 
+            startProcess = startProcess, 
+            endProcess = endProcess, 
+            save = FALSE, 
+            # Be sure to not touch the process data and file output,
+            # the latter mostly for speed if the bootstrap is run on a copy of the project 
+            # (see if this is the case in the code of Bootstrap()):
+            saveProcessData = FALSE, 
+            #  Do not save the output (text) files:
+            fileOutput = FALSE, 
+            setUseProcessDataToTRUE = FALSE, 
+            replaceArgsList = replaceArgsList, 
+            replaceDataList = replaceDataList, 
+            try = FALSE, 
+            msg = FALSE
+        ), 
+        onlyStoxMessages = FALSE, 
+        onlyStoxWarnings = FALSE, 
+        maxLength.Message = 10000, 
+        maxLength.Warning = 10000, 
+        maxLength.Error = 10000, 
+        collapseMessages = FALSE, 
+        collapseWarnings = FALSE, 
+        collapseErrors = FALSE,
+        header = NULL
     )
+    
+    
+    
     
     # Get the output dimensions for use when writing NetCDF4 later:
     processOutput <- getModelData(
@@ -937,7 +1062,10 @@ runOneBootstrap_NetCDF4 <- function(ind, replaceArgsList, replaceDataList, proje
     
     return(list(
         dims = dims, 
-        nchars = nchars
+        nchars = nchars, 
+        message = temp$message,  
+        warning = temp$warning,  
+        error = temp$error
     ))
 }
 
@@ -1222,7 +1350,7 @@ resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
     
-    # Build a table of (usually) Stratum and Seed and merge with the MeanLengthDistributionData:
+    # Build a table of resampleBy and Seed and merge with the MeanLengthDistributionData:
     seedTable <- data.table::data.table(
         resampleBy = uniqueResampleBy, 
         seed = RstoxBase::getSeedVector(seed, size = length(uniqueResampleBy))
@@ -1361,7 +1489,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
 #' @inherit RstoxBase::ProcessData
 #' @param Seed The seed, given as a sinigle initeger.
 #' 
-#' @export
+#' @noRd
 #' 
 ResampleBioticAssignment <- function(BioticAssignment, Seed) {
     
@@ -1380,6 +1508,62 @@ ResampleBioticAssignment <- function(BioticAssignment, Seed) {
     
     return(BioticAssignment)
 }
+
+
+#' Resamples biotic PSUs
+#' 
+#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
+#' 
+#' @inherit RstoxBase::ProcessData
+#' @param Seed The seed, given as a sinigle initeger.
+#' 
+#' @export
+#' 
+ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
+    
+    # This function will be renamed to ResampleAssignedHaulsInStratum
+    
+    # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
+    BioticAssignment <- resampleDataBy(
+        #data = BioticAssignment$BioticAssignment, 
+        data = BioticAssignment, 
+        seed = Seed, 
+        varToScale = "WeightingFactor", 
+        # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
+        varToResample = "Haul", 
+        resampleBy = "Stratum"
+    )
+    
+    return(BioticAssignment)
+}
+
+#' Resamples biotic PSUs
+#' 
+#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
+#' 
+#' @inherit RstoxBase::ProcessData
+#' @param Seed The seed, given as a sinigle initeger.
+#' 
+#' @export
+#' 
+ResampleBioticAssignmentByPSU <- function(BioticAssignment, Seed) {
+    
+    # This function will be renamed to ResampleAssignedHaulsInStratum
+    
+    # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
+    BioticAssignment <- resampleDataBy(
+        #data = BioticAssignment$BioticAssignment, 
+        data = BioticAssignment, 
+        seed = Seed, 
+        varToScale = "WeightingFactor", 
+        # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
+        varToResample = "Haul", 
+        resampleBy = "PSU"
+    )
+    
+    return(BioticAssignment)
+}
+
 
 
 #' Resamples acoustic PSUs
@@ -1647,7 +1831,7 @@ aggregateRelevantBootstrapData <- function(
 #' @return
 #' A \code{\link{ReportBootstrapNetCDF4Data}} object.
 #' 
-#' @noRd
+#' @export
 #' 
 ReportBootstrapNetCDF4 <- function(
     BootstrapNetCDF4Data, 
@@ -1911,7 +2095,7 @@ initialAggregateBootstrapNetCDF4DataOne <- function(
 ) {
     
     # Get the table of current bootstrapID:
-    relevantBootstrapNetCDF4DataOne <- getBootstrapNetCDF4Data(nc, selection = selection, BootstrapIDStart = bootstrapID, BootstrapIDEnd = bootstrapID, dropList = TRUE)
+    relevantBootstrapNetCDF4DataOne <- getBootstrapNetCDF4Data(nc, selection = selection, BootstrapIDStart = min(bootstrapID), BootstrapIDEnd = max(bootstrapID), dropList = TRUE)
     
     # Set the unit of the target variable:
     relevantBootstrapNetCDF4DataOne[[TargetVariable]] <- RstoxBase::setUnitRstoxBase(

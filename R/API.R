@@ -187,6 +187,12 @@ runProject <- function(
     if(close) {
         on.exit(closeProject(projectPath, save = save, msg = msg))
     }
+    if(isProject(projectPath)) {
+        # Open the project if not open:
+        if(!isOpenProject(projectPath)) {
+            openProject(projectPath, ...)
+        }
+    }
     
     if(msg) {
         message(
@@ -682,10 +688,16 @@ unlistSep <- function(x, sep = "/") {
 #' @param onlyStoxErrors Logical: If TRUE show only the StoX errors, which are those starting with "StoX: ".
 #' @param maxLength.Message,maxLength.Warning,maxLength.Error The maximum number of characters to return for messages, warnings and errors, respectively (with allowed values 100...8170, default 1000).
 #' @param cmd A JSON string containing parameters listed above.
+#' @param nwarnings The number of warnings to save.
+#' @param collapseMessages,collapseWarnings,collapseErrors Logical: If TRUE report only unique messages, warnings and errors, respectively, adding the number of occurrences in parenthesis.
+#' @param messageLogFile,warningLogFile,errorLogFile If given, messages, warnings and errors are printed to these files.
+#' @param messageAppend,warningAppend,errorAppend Logical: If TRUE, append to the log files (\code{messageLogFile}, \code{warningLogFile} or \code{errorLogFile}, respectively)
+#' @param uniquify Logical: If TRUE (the default) return unique messages, warnings and errors, with the nnumber of occurrences in parenthesis.
+#' @param header The string to start each line with.
 #' 
 #' @export
 #' 
-runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE, maxLength.Message = 1000, maxLength.Warning = 1000, maxLength.Error = 1000) {
+runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE, maxLength.Message = 2000, maxLength.Warning = 2000, maxLength.Error = 2000, nwarnings = 10000, collapseMessages = TRUE, collapseWarnings = TRUE, collapseErrors = TRUE, messageLogFile = NULL, warningLogFile = NULL, errorLogFile = NULL, messageAppend = FALSE, warningAppend = FALSE, errorAppend = FALSE, uniquify = TRUE, header = "> ") {
     
     # Parse the args if given as a JSON string:
     args <- parseParameter(args)
@@ -693,46 +705,75 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     # Reset the warnings:
     #assign("last.warning", NULL, envir = baseenv())
     
+    # Temporarily set the number of warnings to a large number to capture not only 50 warnings:
+    old_nwarnings <- getOption("nwarnings")
+    options(nwarnings = nwarnings)
+    
     # Run the function 'what' and store the warnings and error along with the result:
-    warn <- character(0)
-    err <- NULL
-    msg <- utils::capture.output({
-        value <- withCallingHandlers(
-            tryCatch(
-                #do.call(what, args), 
-                do.call(getExportedValue(package, what), args), 
-                error = function(e) {
-                    err <<- if(removeCall) conditionMessage(e) else e
-                    NULL
-                }
-            ), 
-            warning=function(w) {
-                    warn <<- append(warn, if(removeCall) conditionMessage(w) else w)
-                invokeRestart("muffleWarning")
-            }
-        )
-    }, type = "message")
+    ### warn <- character(0)
+    ### err <- NULL
+    ### msg <- utils::capture.output({
+    ###     value <- withCallingHandlers(
+    ###         tryCatch(
+    ###             #do.call(what, args), 
+    ###             do.call(getExportedValue(package, what), args), 
+    ###             error = function(e) {
+    ###                 err <<- if(removeCall) conditionMessage(e) else e
+    ###                 NULL
+    ###             }
+    ###         ), 
+    ###         warning = function(w) {
+    ###                 warn <<- append(warn, if(removeCall) conditionMessage(w) else w)
+    ###             invokeRestart("muffleWarning")
+    ###         }
+    ###     )
+    ### }, type = "message")
     
-    if(length(warn)) {
-        warn <- as.character(warn)
+    # The followig is inspired from https://www.r-bloggers.com/2020/10/capture-message-warnings-and-errors-from-a-r-function/ written by Bangyou Zheng:
+    logs <- list()
+    add_log <- function(type, message) {
+        new_l <- logs
+        new_log <- list(timestamp = format(Sys.time(), tz = 'UTC', format = '%Y-%m-%d %H:%M:%S'),
+                        type = type,
+                        message =  message)
+        new_l[[length(new_l) + 1]]  <- new_log
+        logs <<- new_l
     }
-    if(length(err)) {
-        err <- as.character(err)
-    }
+    value <- withCallingHandlers(
+        tryCatch(
+            do.call(getExportedValue(package, what), args), 
+            error = function(e) {
+                add_log("error", conditionMessage(e))
+                NULL
+            }), 
+        warning = function(w) {
+            add_log("warning", conditionMessage(w))
+            invokeRestart("muffleWarning")
+        }, 
+        message = function(m) {
+            # Messages are with a line space at the end by default:
+            add_log("message", gsub("\n$", "", conditionMessage(m)))
+            invokeRestart("muffleMessage")
+        }
+    )
     
-    
-    
+    type <- sapply(logs, "[[", "type")
+    # Use unlist and lapply here as either of message, warning og error can be missing inn logs, resulting in list() from sapply, whereas we need NULL:
+    msg <- unlist(lapply(logs[type == "message"], "[[", "message"))
+    warn <- unlist(lapply(logs[type == "warning"], "[[", "message"))
+    err <- unlist(lapply(logs[type == "error"], "[[", "message"))
     
     
     # Get only the StoX-messages, and add "> "
     if(length(msg)) {
         if(onlyStoxMessages) {
             msg <- msg[startsWith(msg, "StoX:")]
-            msg <- trimws(sub("StoX: ", "> ", msg, fixed = TRUE))
         }
-        else {
+        if(length(header)){
             msg <- trimws(sub("StoX: ", "", msg, fixed = TRUE))
-            msg <- paste0("> ", msg)
+            if(length(msg)) {
+                msg <- paste0(header, msg)
+            }
         }
     }
     
@@ -740,11 +781,12 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     if(length(warn)) {
         if(onlyStoxWarnings) {
             warn <- warn[startsWith(warn, "StoX:")]
-            warn <- trimws(sub("StoX: ", "> ", warn, fixed = TRUE))
         }
-        else {
+        if(length(header)){
             warn <- trimws(sub("StoX: ", "", warn, fixed = TRUE))
-            warn <- paste0("> ", warn)
+            if(length(warn)) {
+                warn <- paste0(header, warn)
+            }
         }
     }
     
@@ -752,11 +794,12 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     if(length(err)) {
         if(onlyStoxErrors) {
             err <- err[startsWith(err, "StoX:")]
-            err <- trimws(sub("StoX: ", "> ", err, fixed = TRUE))
         }
-        else {
+        if(length(header)){
             err <- trimws(sub("StoX: ", "", err, fixed = TRUE))
-            err <- paste0("> ", err)
+            if(length(err)) {
+                err <- paste0(header, err)
+            }
         }
     }
     
@@ -775,15 +818,59 @@ runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRU
     # Clean the warnings:
     #warn <- unname(unlist(warn[names(warn) == "message"]))
     
+    # Reset to 50 warnings:
+    options(nwarnings = old_nwarnings)
+    
+    # Write messages warnings and errors:
+    if(length(messageLogFile)) {
+        write(msg, messageLogFile, append = messageAppend)
+    }
+    if(length(warningLogFile)) {
+        write(warn, warningLogFile, append = warningAppend)
+    }
+    if(length(errorLogFile) && file.exists(errorLogFile)) {
+        write(err, errorLogFile, append = errorAppend)
+    }
+    
+    if(uniquify) {
+        msg <- uniqueText(msg, tag = "messages")
+        warn <- uniqueText(warn, tag = "warnings")
+        err <- uniqueText(err, tag = "errors")
+    }
+    
     # Return a list of warnings and error along with the result:
     list(
         #value = if(!is.list(value)) as.list(value) else value, 
         value = value, 
-        message = as.list(unique(msg)), 
-        warning = as.list(unique(warn)), 
-        error = as.list(unique(err))
+        message = msg,
+        warning = warn,
+        error = err
     )
 }
+
+
+uniqueText <- function(x, tag = c("messages", "warnings", "errors")) {
+    tag <- match.arg(tag)
+    if(length(x)) {
+        u <- unique(x)
+        t <- table(x)
+        t <- t[match(u, names(t))]
+        out <- ifelse(
+            t > 1, 
+            paste0(names(t), "\n(", t, " identical ", tag, ")"),  
+            names(t)
+        )
+        
+        return(out)
+    }
+    else {
+        return(x)
+    }
+}
+
+
+
+
 
 truncateString <- function(string, length) {
     if(nchar(string) > length) {
@@ -801,7 +888,10 @@ runFunction.JSON <- function(cmd){
     tryCatch({
         cmdj <- jsonlite::fromJSON(cmd)
         res <- runFunction(cmdj$what, cmdj$args, cmdj$package)
-        r <- jsonlite::toJSON(res, pretty=T, auto_unbox=T, na='string')
+        res$message <- unname(as.list(res$message))
+        res$warning <- unname(as.list(res$warning))
+        res$error <- unname(as.list(res$error))
+        r <- jsonlite::toJSON(res, pretty = TRUE, auto_unbox = TRUE, na = 'string')
         r
     }, warning = function(warning_condition) {
         'warning'

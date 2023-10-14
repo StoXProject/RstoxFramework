@@ -13,9 +13,21 @@ runFunction(
   onlyStoxMessages = TRUE,
   onlyStoxWarnings = TRUE,
   onlyStoxErrors = FALSE,
-  maxLength.Message = 1000,
-  maxLength.Warning = 1000,
-  maxLength.Error = 1000
+  maxLength.Message = 2000,
+  maxLength.Warning = 2000,
+  maxLength.Error = 2000,
+  nwarnings = 10000,
+  collapseMessages = TRUE,
+  collapseWarnings = TRUE,
+  collapseErrors = TRUE,
+  messageLogFile = NULL,
+  warningLogFile = NULL,
+  errorLogFile = NULL,
+  messageAppend = FALSE,
+  warningAppend = FALSE,
+  errorAppend = FALSE,
+  uniquify = TRUE,
+  header = "> "
 )
 
 runFunction.JSON(cmd)
@@ -38,6 +50,18 @@ runFunction.JSON(cmd)
 \item{onlyStoxErrors}{Logical: If TRUE show only the StoX errors, which are those starting with "StoX: ".}
 
 \item{maxLength.Message, maxLength.Warning, maxLength.Error}{The maximum number of characters to return for messages, warnings and errors, respectively (with allowed values 100...8170, default 1000).}
+
+\item{nwarnings}{The number of warnings to save.}
+
+\item{collapseMessages, collapseWarnings, collapseErrors}{Logical: If TRUE report only unique messages, warnings and errors, respectively, adding the number of occurrences in parenthesis.}
+
+\item{messageLogFile, warningLogFile, errorLogFile}{If given, messages, warnings and errors are printed to these files.}
+
+\item{messageAppend, warningAppend, errorAppend}{Logical: If TRUE, append to the log files (\code{messageLogFile}, \code{warningLogFile} or \code{errorLogFile}, respectively)}
+
+\item{uniquify}{Logical: If TRUE (the default) return unique messages, warnings and errors, with the nnumber of occurrences in parenthesis.}
+
+\item{header}{The string to start each line with.}
 
 \item{cmd}{A JSON string containing parameters listed above.}
 }

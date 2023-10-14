@@ -500,7 +500,7 @@ getEDSUData <- function(projectPath, modelName, processID) {
     EDSUPoints <- dataTable2sf_POINT(CruiseLog, coords = c("Longitude", "Latitude"), idCol = "EDSU")
     #EDSUPoints <- geojsonio::geojson_json(EDSUPoints)
     #EDSUPoints <- geojsonsf::sf_geojson(sf::st_as_sf(EDSUPoints))
-    EDSUPoints <- geojsonsf::sf_geojson(EDSUPoints)
+    EDSUPoints <- geojsonsf::sf_geojson(EDSUPoints, simplify = FALSE)
     
     # (2) Line segments:
     ##lineStrings <- CruiseLog[, sp::Line(cbind(c(startLongitude, endLongitude), c(startLatitude, endLatitude))), by = EDSU]
@@ -514,8 +514,11 @@ getEDSUData <- function(projectPath, modelName, processID) {
     #EDSULines <- sp::SpatialLinesDataFrame(EDSULines, data = CruiseLog[, "interpolated"], match.ID = FALSE)
     ##EDSULines <- geojsonio::geojson_json(EDSULines)
     #EDSULines <- geojsonsf::sf_geojson(sf::st_as_sf(EDSULines))
-    EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "endLongitude", "startLatitude", "endLatitude"), idCol = "interpolated")
-    EDSULines <- geojsonsf::sf_geojson(EDSULines)
+    
+    # geojsonsf::sf_geojson could not handle an extra column in the linestrings:
+    #EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "endLongitude", "startLatitude", "endLatitude"), idCol = "interpolated")
+    EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"))
+    EDSULines <- geojsonsf::sf_geojson(EDSULines, simplify = FALSE)
     
     ## List the points and lines and return:
     #EDSUData <- list(

@@ -426,7 +426,7 @@ openProject <- function(
         ))
     }
     
-    # If already open, repoen if force:
+    # If already open, reopen if force:
     if(!force && isOpenProject(projectPath)) {
         if(showWarnings) {
             warning("StoX: Project ", projectPath, " is already open.")

@@ -732,8 +732,10 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     # Run the test project:
+    warning("1111111111111111111111111111111111111")
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
+    warning("222222222222222222222222222222222222")
     
     # Store the file paths of the output files to compare to the new output file paths:
     if(checkOutputFiles) {
@@ -743,11 +745,13 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     
-    message(projectPath_copy)
+    warning(projectPath_copy)
     openProject(projectPath_copy)
+    warning("33333333333333333333333333333333333")
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
     #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
     dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, msg = FALSE, ...)
+    warning("44444444444444444444444444444444444")
     
     
     # Read the original data:

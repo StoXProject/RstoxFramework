@@ -733,6 +733,8 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     toCopy <- unlist(toCopy)
     
     warning(paste("___toCopy___", length(toCopy) , paste(toCopy[1], collapse =  "___")))
+    warning(paste("___projectPath___", path.expand(projectPath)))
+    warning(paste("___dirname(toCopy)___", dirname(toCopy)))
     
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
     #lapply(toCopy, file.copy, newProjectPath, recursive = TRUE)
@@ -743,7 +745,6 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     
     # Remove trailing slash:
     newFolders <- gsub("^/", "", newFolders)
-    warning(paste("___newFolders___", length(newFolders) , paste(newFolders[1], collapse =  "___")))
     newDirs <- file.path(newProjectPath, newFolders)
     
     warning(paste("___newDirs___", length(newDirs) , paste(newDirs[1], collapse =  "___")))

@@ -60,6 +60,7 @@ copyProject(
   ow = FALSE,
   empty.output = FALSE,
   empty.input = FALSE,
+  empty.memory = FALSE,
   close = FALSE,
   msg = TRUE
 )
@@ -95,9 +96,11 @@ deleteProject(projectPath)
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
-\item{empty.output}{Logical: If TRUE, do not include the output files when copying.}
+\item{empty.output}{Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.}
 
-\item{empty.input}{Logical: If TRUE, do not include the input files when copying.}
+\item{empty.input}{Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.}
+
+\item{empty.memory}{Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.}
 
 \item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
 }

@@ -45,6 +45,31 @@ backwardCompatibility <- list(
             parameterName = "Percentages", 
             parameterValue = c(5, 50, 95)
         )
+    ), 
+    
+    translateParameter = list(
+        list(
+            changeVersion = "3.6.3-9001", 
+            functionName = "Bootstrap", 
+            modelName = "analysis", 
+            parameterName = "BootstrapMethodTable",
+            # Multiple values must be given in a list!!! Also if only :
+            value = function(value) {
+                TRUE
+            }, # Translate regardless of the value.
+            newValue = function(projectDescriptionOne) {
+                # Find any use of the ResampleBioticAssignment resampling function:
+                hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
+                if(any(hasResampleBioticAssignment)) {
+                    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
+                    for(ind in atResampleBioticAssignment) {
+                        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
+                    }
+                }
+                
+                return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+            }
+        )
     )
 )
 
@@ -423,7 +448,10 @@ matchParameter <- function(x, value) {
     #else {
     #    isTRUE(x %in% value) || identical(x, value)
     #}
-    if(is.list(value)) {
+    if(length(value) == 1 && is.function(value)) {
+        value(x)
+    }
+    else if(is.list(value)) {
         any(sapply(value, identical, x))
     }
     else{
@@ -1333,7 +1361,7 @@ convertSampleUnitToChatacter <- function(DT) {
 
 
 # Function to compare one output from the old and new StoX project using merging:
-compareByMerging <- function(output_Old, output_New, processName_Old, processName_New, keys_Old, keys_New, dataVariable, tolerance, data.out = FALSE) {
+compareByMerging <- function(output_Old, output_New, processName_Old, processName_New, keys_Old, keys_New, addKeys_Old, addKeys_New, dataVariable_Old, dataVariable_New, tolerance, data.out = FALSE) {
     
     old <- data.table::as.data.table(output_Old$outputData[[processName_Old]])
     convertSampleUnitToChatacter(old)
@@ -1346,10 +1374,27 @@ compareByMerging <- function(output_Old, output_New, processName_Old, processNam
         new <- data.table::as.data.table(new)
     }
     
+    # Add keys if requested:
+    if(length(addKeys_New) && is.list(addKeys_New) && !(length(addKeys_New) == 1 && is.na(addKeys_New))) {
+        for(ind in seq_along(addKeys_New)) {
+            # Get the name of the argument of the function:
+            var <- names(formals(addKeys_New$Station_Old))[1]
+            # Did not work out how to use expression for 'value' in set(). The following worked but not when assigning by reference:
+            # new[,  addKeys_New[[ind]](.SD[[eval(var)]])]
+            # This did not work (returning NAs): data.table::set(new, j = names(addKeys_New)[ind], value = addKeys_New[[ind]](.SD[[eval(var)]])) 
+            data.table::set(new, j = names(addKeys_New)[ind], value = addKeys_New[[ind]](new$Haul))
+        }
+    }
+    
+    
     merged <- merge(old, new, by.x = keys_Old, by.y = keys_New, all = TRUE)
     
-    dataVariable_Old <- paste0(dataVariable, ".x")
-    dataVariable_New <- paste0(dataVariable, ".y")
+    # If the data variable has the same name in the old and new StoX data.table::merge appends .x and .y to the name:
+    if(dataVariable_Old == dataVariable_New) {
+        dataVariable_Old <- paste0(dataVariable_Old, ".x")
+        dataVariable_New <- paste0(dataVariable_New, ".y")
+    }
+    
     merged[ , offset := get(dataVariable_New) / get(dataVariable_Old)]
     
     # :
@@ -1389,7 +1434,7 @@ compareByMerging <- function(output_Old, output_New, processName_Old, processNam
 }
 
 # Function to compare one output from the old and new StoX project using cbinding (used for SuperIndAbundance/SuperIndividuals, where keys are not sufficient in the SuperIndAbundance):
-compareByCbinding <- function(output_Old, output_New, processName_Old, processName_New, subsetByNAOn_Old, subsetByNAOn_New, orderBy_Old, orderBy_New, dataVariable, tolerance, data.out = FALSE) {
+compareByCbinding <- function(output_Old, output_New, processName_Old, processName_New, subsetByNAOn_Old, subsetByNAOn_New, orderBy_Old, orderBy_New, dataVariable_Old, dataVariable_New, tolerance, data.out = FALSE) {
     
     old <- data.table::as.data.table(output_Old$outputData[[processName_Old]])
     new <- output_New[[processName_New]]
@@ -1412,7 +1457,7 @@ compareByCbinding <- function(output_Old, output_New, processName_Old, processNa
     
     
     output <- list(
-        test = all(abs(new[[dataVariable]] - old[[dataVariable]]) < tolerance), 
+        test = all(abs(new[[dataVariable_New]] - old[[dataVariable_Old]]) < tolerance), 
         tolerance = tolerance
     )
     if(data.out) {
@@ -1441,8 +1486,9 @@ compareByCbinding <- function(output_Old, output_New, processName_Old, processNa
 #' 
 #' The \code{comparisonModel} is a list with the following required elements:
 #' \itemize{
-#'  \item{dataType}{The StoX >= 3.0.0 datatypes to compare.}
-#'  \item{dataVariable}{The specific variable to compare in the StoX >= 3.0.0 datatypes.}
+#'  \item{dataType}{The StoX >= 3.0.0 datatypes to compare. Used only for reference.}
+#'  \item{dataVariable_Old}{The specific variable to compare in the old datatypes.}
+#'  \item{dataVariable_New}{The specific variable to compare in the new datatypes.}
 #'  \item{processName_Old,processName_New}{The process named in the old and new project, respectively. Must correspond to the \code{dataType}.}
 #'  \item{compareAction}{A string vector specifyfing whether to merge ("merge") or cbind ("cbind") when comparing. Cbind is only for SuperIndividuals in StoX 2.7, which does not have unique keys in.}
 #'  \item{keys_Old,keys_New"}{A list of the keys of the datatypes in the old and new project, respectively. Specify only for datatypes to be merged (use NA for those that use compareAction = "cbind").}
@@ -1480,9 +1526,12 @@ compareSweptAreaBaseline <- function(projectPathOld, projectPathNew, comparisonM
                 output_New = output_New, 
                 processName_Old = comparisonModel$processName_Old[[ind]], 
                 processName_New = comparisonModel$processName_New[[ind]], 
+                addKeys_Old = comparisonModel$addKeys_Old[[ind]], 
+                addKeys_New = comparisonModel$addKeys_New[[ind]], 
                 keys_Old = comparisonModel$keys_Old[[ind]], 
                 keys_New = comparisonModel$keys_New[[ind]], 
-                dataVariable = comparisonModel$dataVariable[[ind]], 
+                dataVariable_Old = comparisonModel$dataVariable_Old[[ind]], 
+                dataVariable_New = comparisonModel$dataVariable_New[[ind]], 
                 tolerance = comparisonModel$tolerance[[ind]], 
                 data.out = data.out
             )
@@ -1497,7 +1546,8 @@ compareSweptAreaBaseline <- function(projectPathOld, projectPathNew, comparisonM
                 subsetByNAOn_New = comparisonModel$subsetByNAOn_New[[ind]], 
                 orderBy_Old = comparisonModel$orderBy_Old[[ind]], 
                 orderBy_New = comparisonModel$orderBy_New[[ind]], 
-                dataVariable = comparisonModel$dataVariable[[ind]], 
+                dataVariable_Old = comparisonModel$dataVariable_Old[[ind]], 
+                dataVariable_New = comparisonModel$dataVariable_New[[ind]], 
                 tolerance = comparisonModel$tolerance[[ind]], 
                 data.out = data.out
             )

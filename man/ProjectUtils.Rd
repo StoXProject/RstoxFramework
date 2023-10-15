@@ -16,7 +16,7 @@ isProject(projectPath)
 
 isSaved(projectPath)
 
-isOpenProject(projectPath)
+isOpenProject(projectPath, strict = FALSE)
 
 readProjectDescription(
   projectPath,
@@ -37,6 +37,8 @@ setNotRunning(projectPath, modelName)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
+
+\item{strict}{Logical: If TRUE, require that all folders of the projectSession folder exist in isOpenProject(). Otherwise only require that the projectSession folder exists.}
 
 \item{verbose}{Logical: If TRUE extra messages are printed to console.}
 

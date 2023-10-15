@@ -22,6 +22,8 @@ compareProjectToStoredOutputFiles(
   compareReports = FALSE,
   checkOutputFiles = TRUE,
   tolerance = sqrt(.Machine$double.eps),
+  debug = FALSE,
+  save = FALSE,
   ...
 )
 }
@@ -59,6 +61,10 @@ compareProjectToStoredOutputFiles(
 \item{checkOutputFiles}{Logical, if TRUE compare the file names of the output files.}
 
 \item{tolerance}{The tolerance to use in all.equal.}
+
+\item{debug}{Logical: If TRUE, interrupt the execution just before priting the test results.}
+
+\item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
 
 \item{...}{Used in runModel().}
 }

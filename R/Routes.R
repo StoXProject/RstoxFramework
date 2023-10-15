@@ -277,7 +277,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     
     # Return if the StratumPolygon is empty:
     if(!length(processData$StratumPolygon)) {
-        return(list(stratumPolygon = geojsonsf::sf_geojson(sf::st_as_sf(processData$StratumPolygon), simplify = FALSE)))
+        return(list(stratumPolygon = geojsonsf::sf_geojson(processData$StratumPolygon, simplify = FALSE)))
     }
     
     # Add StratumName, as this is used by the GUI:
@@ -286,7 +286,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     # Create the objects EDSU_PSU, PSU_Stratum and Stratum
     # On 2020-12-21 changed to using geojsonsf to reduce depencdencies:
     #stratumPolygon <- geojsonio::geojson_json(processData$StratumPolygon)
-    stratumPolygon <- geojsonsf::sf_geojson(sf::st_as_sf(processData$StratumPolygon), simplify = FALSE)
+    stratumPolygon <- geojsonsf::sf_geojson(processData$StratumPolygon, simplify = FALSE)
     
     #stratum <- data.table::data.table(
     #    stratum = names(processData), 
@@ -421,14 +421,14 @@ getStationData <- function(projectPath, modelName, processID) {
     Station_Haul <- merge(Station, Haul, by = intersect(names(Station), names(Haul)))
     
     # Split the Station table into the coordinates and the properties:
-    coordinateNames <- c("Longitude", "Latitude")
-    coordinates <- CruiseStation[, ..coordinateNames]
+    #coordinateNames <- c("Longitude", "Latitude")
+    #coordinates <- CruiseStation[, ..coordinateNames]
     
     #rownames(coordinates) <- Station$Station
     #infoToKeep <- c("CruiseKey", "Platform", "StationKey", "Station", "CatchPlatform", "DateTime", "Longitude", "Latitude", "BottomDepth")
     stationInfoToKeep <- c("Station", "Platform", "DateTime", "Longitude", "Latitude", "BottomDepth")
     stationInfo <- CruiseStation[, ..stationInfoToKeep]
-    properties <- stationInfo[, "Station"]
+    #properties <- stationInfo[, "Station"]
     
     haulInfoToKeep <- c("Station", "Haul", "Gear", "EffectiveTowDistance", "MinHaulDepth", "MaxHaulDepth")
     haulInfo <- Station_Haul[, ..haulInfoToKeep]
@@ -442,9 +442,11 @@ getStationData <- function(projectPath, modelName, processID) {
     #properties$HaulInfo <- HaulInfo$HaulInfo
     
     # Create a spatial points data frame and convert to geojson:
-    stationPoints <- sp::SpatialPointsDataFrame(coordinates, properties, match.ID = TRUE)
+    #stationPoints <- sp::SpatialPointsDataFrame(coordinates, properties, match.ID = TRUE)
+    stationPoints <- dataTable2sf_POINT(CruiseStation, coords = c("Longitude", "Latitude"), idCol = "Station")
     #stationPoints <- geojsonio::geojson_json(stationPoints)
-    stationPoints <- geojsonsf::sf_geojson(sf::st_as_sf(stationPoints))
+    #stationPoints <- geojsonsf::sf_geojson(sf::st_as_sf(stationPoints))
+    stationPoints <- geojsonsf::sf_geojson(stationPoints)
     
     return(
         list(
@@ -483,33 +485,40 @@ getEDSUData <- function(projectPath, modelName, processID) {
     
     # (1) Click points:
     # Extract the click points:
-    coordinateNames <- c("Longitude", "Latitude")
-    clickPointNames <- c("clickLongitude", "clickLatitude")
-    clickPoints <- CruiseLog[, ..clickPointNames]
-    data.table::setnames(clickPoints, old = clickPointNames, new = coordinateNames)
+    #coordinateNames <- c("Longitude", "Latitude")
+    #clickPointNames <- c("clickLongitude", "clickLatitude")
+    #clickPoints <- CruiseLog[, ..clickPointNames]
+    #data.table::setnames(clickPoints, old = clickPointNames, new = coordinateNames)
     
     # ...and define the properties:
     #infoToKeep <- c("CruiseKey", "Platform", "LogKey", "Log", "EDSU", "DateTime", "Longitude", "Latitude", "LogOrigin", "Longitude2", "Latitude2", "LogOrigin2", "LogDuration", "LogDistance", "EffectiveLogDistance", "BottomDepth")
     EDSUInfo <- CruiseLog[, ..EDSUInfoToKeep]
-    properties <- EDSUInfo[, "EDSU"]
+    #properties <- EDSUInfo[, "EDSU"]
     
     # Create a spatial points data frame and convert to geojson:
-    EDSUPoints <- sp::SpatialPointsDataFrame(clickPoints, properties, match.ID = FALSE)
+    #EDSUPoints <- sp::SpatialPointsDataFrame(clickPoints, properties, match.ID = FALSE)
+    EDSUPoints <- dataTable2sf_POINT(CruiseLog, coords = c("Longitude", "Latitude"), idCol = "EDSU")
     #EDSUPoints <- geojsonio::geojson_json(EDSUPoints)
-    EDSUPoints <- geojsonsf::sf_geojson(sf::st_as_sf(EDSUPoints))
+    #EDSUPoints <- geojsonsf::sf_geojson(sf::st_as_sf(EDSUPoints))
+    EDSUPoints <- geojsonsf::sf_geojson(EDSUPoints, simplify = FALSE)
     
     # (2) Line segments:
-    #lineStrings <- CruiseLog[, sp::Line(cbind(c(startLongitude, endLongitude), c(startLatitude, endLatitude))), by = EDSU]
-    LineList <- apply(
-        CruiseLog[, c("startLongitude", "endLongitude", "startLatitude", "endLatitude")], 
-        1, 
-        function(x) sp::Line(array(x, dim = c(2, 2)))
-    )
-    LinesList <- lapply(seq_along(LineList), function(ind) sp::Lines(LineList[[ind]], ID = CruiseLog$EDSU[ind]))
-    EDSULines <- sp::SpatialLines(LinesList)
-    EDSULines <- sp::SpatialLinesDataFrame(EDSULines, data = CruiseLog[, "interpolated"], match.ID = FALSE)
-    #EDSULines <- geojsonio::geojson_json(EDSULines)
-    EDSULines <- geojsonsf::sf_geojson(sf::st_as_sf(EDSULines))
+    ##lineStrings <- CruiseLog[, sp::Line(cbind(c(startLongitude, endLongitude), c(startLatitude, endLatitude))), by = EDSU]
+    #LineList <- apply(
+    #    CruiseLog[, c("startLongitude", "endLongitude", "startLatitude", "endLatitude")], 
+    #    1, 
+    #    function(x) sp::Line(array(x, dim = c(2, 2)))
+    #)
+    #LinesList <- lapply(seq_along(LineList), function(ind) sp::Lines(LineList[[ind]], ID = CruiseLog$EDSU[ind]))
+    #EDSULines <- sp::SpatialLines(LinesList)
+    #EDSULines <- sp::SpatialLinesDataFrame(EDSULines, data = CruiseLog[, "interpolated"], match.ID = FALSE)
+    ##EDSULines <- geojsonio::geojson_json(EDSULines)
+    #EDSULines <- geojsonsf::sf_geojson(sf::st_as_sf(EDSULines))
+    
+    # geojsonsf::sf_geojson could not handle an extra column in the linestrings:
+    #EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "endLongitude", "startLatitude", "endLatitude"), idCol = "interpolated")
+    EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"))
+    EDSULines <- geojsonsf::sf_geojson(EDSULines, simplify = FALSE)
     
     ## List the points and lines and return:
     #EDSUData <- list(
@@ -696,7 +705,7 @@ extrapolateLongitudeLatitude <- function(Log) {
 #' @rdname StoXGUI_interfaces
 #' 
 getEDSUColours <- function(n = 5, as.rgb = FALSE, col = c("pink", "red4", "darkorange2")) {
-    col <- colorRampPalette(col)(n)
+    col <- grDevices::colorRampPalette(col)(n)
     if(as.rgb) {
         col <- grDevices::col2rgb(col)
     }
@@ -711,7 +720,7 @@ getEDSUColours <- function(n = 5, as.rgb = FALSE, col = c("pink", "red4", "darko
 getStationColours <- function(n = 5, as.rgb = FALSE, col = c("steelblue2", "darkblue", "mediumvioletred")) {
     col <- grDevices::colorRampPalette(col)(n)
     if(as.rgb) {
-        col <- col2rgb(col)
+        col <- grDevices::col2rgb(col)
     }
     return(col)
 }

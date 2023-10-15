@@ -508,15 +508,17 @@ addStratum <- function(stratum, projectPath, modelName, processID) {
     if(is.character(stratum)) {
         #stratum <- geojsonio::geojson_sp(geojsonio::as.json(stratum))
         #stratum <- rgdal::readOGR(stratum, stringsAsFactors = FALSE)
-        stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
+        #stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
+        stratum <- geojsonsf::geojson_sf(stratum)
         
-        stratum <- copyStratumNameToID(stratum)
+        #stratum <- copyStratumNameToID(stratum)
         # Add "x", "y" as column names of the coords, since readOGR() does not do this:
-        stratum <- addCoordsNames(stratum)
+        #stratum <- addCoordsNames(stratum)
         # added by aasmund: Set projection to empty by default, rbind will then work.
         #stratum@proj4string <- sp::CRS()
-        suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
+        #suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat"))
         #suppressWarnings(sp::proj4string(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string"))
+        sf::st_crs(stratum) <- RstoxBase::getRstoxBaseDefinitions("proj4string_longlat")
     }
     
     # Add the new strata, but check that the stratum names are not in use:
@@ -646,10 +648,11 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
     if(is.character(stratum)) {
         #stratum <- geojsonio::geojson_sp(geojsonio::as.json(stratum))
         #stratum <- rgdal::readOGR(stratum)
-        stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
+        #stratum <- sf::as_Spatial(geojsonsf::geojson_sf(stratum))
+        stratum <- geojsonsf::geojson_sf(stratum)
         
         # Add "x", "y" as column names of the coords, since readOGR() does not do this:
-        stratum <- addCoordsNames(stratum)
+        #stratum <- addCoordsNames(stratum)
     }
     
     # Modify the coordinates:
@@ -762,34 +765,34 @@ renameStratum <- function(stratumName, newStratumName, projectPath, modelName, p
 }
 
 
-# Function to add colnames to the coords slot of a SpatialPolygonsDataFrame:
-addCoordsNames <- function(stratum, names = c("x", "y")) {
-    # Hack to change the names of the coords to "x" and "y":
-    for(i in seq_along(stratum@polygons)) {
-        for(j in seq_along(stratum@polygons[[i]]@Polygons)) {
-            colnames(stratum@polygons[[i]]@Polygons[[j]]@coords) <- names
-        }
-    }
-    
-    return(stratum)
-}
+# # Function to add colnames to the coords slot of a SpatialPolygonsDataFrame:
+# addCoordsNames <- function(stratum, names = c("x", "y")) {
+#     # Hack to change the names of the coords to "x" and "y":
+#     for(i in seq_along(stratum@polygons)) {
+#         for(j in seq_along(stratum@polygons[[i]]@Polygons)) {
+#             colnames(stratum@polygons[[i]]@Polygons[[j]]@coords) <- names
+#         }
+#     }
+#     
+#     return(stratum)
+# }
 
-# Function to rename the IDs to the column StratumName of a SpatialPolygonsDataFrame:
-copyStratumNameToID <- function(stratum) {
-    
-    # Get the polygon names and IDs:
-    StratumName <- stratum$StratumName
-    
-    # Rename all IDs to the polygon names:
-    for (ind in seq_along(stratum@polygons)) {
-        stratum@polygons[[ind]]@ID <- StratumName[ind]
-    }
-    
-    # Update rownames of the data slot:
-    rownames(methods::slot(stratum, "data")) <- StratumName
-    
-    return(stratum)
-}
+## Function to rename the IDs to the column StratumName of a SpatialPolygonsDataFrame:
+#copyStratumNameToID <- function(stratum) {
+#    
+#    # Get the polygon names and IDs:
+#    StratumName <- stratum$StratumName
+#    
+#    # Rename all IDs to the polygon names:
+#    for (ind in seq_along(stratum@polygons)) {
+#        stratum@polygons[[ind]]@ID <- StratumName[ind]
+#    }
+#    
+#    # Update rownames of the data slot:
+#    rownames(methods::slot(stratum, "data")) <- StratumName
+#    
+#    return(stratum)
+#}
 
 ## Function to rename the IDs to the column polygonNames of a SpatialPolygonsDataFrame:
 #setEmptyID <- function(stratum) {

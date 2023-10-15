@@ -38,6 +38,8 @@
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
+\item{msg.GUI}{Logical: If TRUE, exlcude certain messages (used by the StoX GUI).}
+
 \item{archive}{Logical: Should the project memory state be archived using \code{archiveProject}? This stores one step in the history.}
 
 \item{template}{A string naming the template to use when generating the project. See \code{getAvaiableTemplates} for a list of available templates.}

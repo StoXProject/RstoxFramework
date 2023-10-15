@@ -28,8 +28,9 @@ compareSweptAreaBaseline(
 
 The \code{comparisonModel} is a list with the following required elements:
 \itemize{
- \item{dataType}{The StoX >= 3.0.0 datatypes to compare.}
- \item{dataVariable}{The specific variable to compare in the StoX >= 3.0.0 datatypes.}
+ \item{dataType}{The StoX >= 3.0.0 datatypes to compare. Used only for reference.}
+ \item{dataVariable_Old}{The specific variable to compare in the old datatypes.}
+ \item{dataVariable_New}{The specific variable to compare in the new datatypes.}
  \item{processName_Old,processName_New}{The process named in the old and new project, respectively. Must correspond to the \code{dataType}.}
  \item{compareAction}{A string vector specifyfing whether to merge ("merge") or cbind ("cbind") when comparing. Cbind is only for SuperIndividuals in StoX 2.7, which does not have unique keys in.}
  \item{keys_Old,keys_New"}{A list of the keys of the datatypes in the old and new project, respectively. Specify only for datatypes to be merged (use NA for those that use compareAction = "cbind").}

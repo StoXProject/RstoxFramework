@@ -14,20 +14,18 @@
 
 # Global variables
 utils::globalVariables(c(
-	 "..BootstrapID", "..EDSUInfoToKeep", "..PSU", "..activeProcessID", "..clickPointNames",
-	 "..coordinateNames", "..functionInputs", "..functionName", "..functionParameters",
-	 "..haulInfoToKeep", "..ind", "..newProcessName", "..presentVariables", "..processDirty",
-	 "..propertyDirty", "..skipNAAt", "..stationInfoToKeep", "..subsetByNAOn_New",
-	 "..subsetByNAOn_Old", "..toKeep", "..validInd", "AcoCat", "BeamKey", "BootstrapData",
-	 "BootstrapID", "BootstrapNetCDF4Data", "BootstrapSampleFactor", "CruiseKey", "Haul", "Layer",
-	 "LogKey", "LogOrigin", "LogOrigin2", "PSU", "Package", "PolygonKey", "ProcessName",
-	 "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum", "TableName",
-	 "Version", "WeightingFactor", "assignmentPasted", "binaryPath", "canShowInMap",
-	 "capture.output", "ch", "col2rgb", "colorRampPalette", "download.file", "filePath", "freq",
-	 "functionInputError", "functionName", "functionOutputDataType", "hasProcessData", "modelName",
-	 "name", "newVersion", "numStations", "offset", "possibleValues", "processID", "processIndex",
-	 "processName", "projectPath", "read.table", "remove.packages", "resampledCountWithUniqueName",
-	 "start_time", "transceiver", "value", "variable", "verbose", "weightsPasted"))
+	 "..EDSUInfoToKeep", "..PSU", "..activeProcessID", "..digits", "..functionInputs",
+	 "..functionName", "..functionParameters", "..haulInfoToKeep", "..idCol", "..newProcessName",
+	 "..presentVariables", "..processDirty", "..propertyDirty", "..signifDigits", "..skipNAAt",
+	 "..stationInfoToKeep", "..subsetByNAOn_New", "..subsetByNAOn_Old", "..toKeep", "..validInd",
+	 "..x1x2y1y2", "AcoCat", "BeamKey", "BootstrapNetCDF4Data", "BootstrapSampleFactor",
+	 "CruiseKey", "Haul", "Layer", "LogKey", "LogOrigin", "LogOrigin2", "PSU", "PolygonKey",
+	 "ProcessName", "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum",
+	 "TableName", "WeightingFactor", "assignmentPasted", "canShowInMap", "capture.output", "ch",
+	 "freq", "functionInputError", "functionName", "functionOutputDataType", "hasProcessData",
+	 "lenght", "modelName", "name", "numStations", "offset", "possibleValues", "processID",
+	 "processIndex", "processName", "projectPath", "resampledCountWithUniqueName", "st_linestring",
+	 "st_sf", "st_sfc", "start_time", "transceiver", "value", "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

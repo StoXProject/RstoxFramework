@@ -9,6 +9,7 @@ runProcess(
   modelName,
   processID,
   msg = TRUE,
+  msg.GUI = FALSE,
   saveProcessData = TRUE,
   returnProcessOutput = FALSE,
   fileOutput = NULL,
@@ -27,6 +28,8 @@ runProcess(
 \item{processID}{The ID of the process.}
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
+
+\item{msg.GUI}{Logical: If TRUE, exlcude certain messages (used by the StoX GUI).}
 
 \item{saveProcessData}{Logical: If TRUE save the output as ProcessData, if the proecss is a ProcessData process.}
 

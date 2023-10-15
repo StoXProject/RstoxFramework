@@ -38,17 +38,17 @@ getPossibleVariables <- function(BootstrapNetCDF4Data, BaselineProcess) {
 stoxFunctionAttributes <- list(
     # Add this in StoX 4.0.0:
     # Bootstrap baseline:
-    #BootstrapNetCDF4 = list(
-    #    functionType = "bootstrapNetCDF4", 
-    #    functionCategory = "analysis", 
-    #    functionOutputDataType = "BootstrapNetCDF4Data", 
-    #    functionParameterFormat = list(
-    #        BootstrapMethodTable = "bootstrapMethodTable", 
-    #        OutputProcesses = "outputProcesses", 
-    #        OutputVariables = "outputVariables_BootstrapNetCDF4", 
-    #        BaselineSeedTable = "baselineSeedTable"
-    #    )
-    #), 
+    BootstrapNetCDF4 = list(
+        functionType = "bootstrapNetCDF4", 
+        functionCategory = "analysis", 
+        functionOutputDataType = "BootstrapNetCDF4Data", 
+        functionParameterFormat = list(
+            BootstrapMethodTable = "bootstrapMethodTable", 
+            OutputProcesses = "outputProcesses", 
+            OutputVariables = "outputVariables_BootstrapNetCDF4", 
+            BaselineSeedTable = "baselineSeedTable"
+        )
+    ), 
     
     # Original bootstrap function using RData:
     Bootstrap = list(
@@ -91,35 +91,35 @@ stoxFunctionAttributes <- list(
     ), 
     
     # Add this in StoX 4.0.0:
-    #ReportBootstrapNetCDF4 = list(
-    #    functionType = "modelData", 
-    #    functionCategory = "report", 
-    #    functionOutputDataType = "ReportBootstrapNetCDF4Data", 
-    #    # This is an example of using an expression to determine when to show a parameter:
-    #    functionParameterFormat = list(
-    #        BaselineProcess = "baselineProcess_ReportBootstrapNetCDF4", 
-    #        TargetVariable = "targetVariable_ReportBootstrapNetCDF4", 
-    #        TargetVariableUnit = "targetVariableUnit_ReportBootstrapNetCDF4", 
-    #        GroupingVariables = "groupingVariables_ReportBootstrapNetCDF4", 
-    #        InformationVariables = "informationVariables_ReportBootstrapNetCDF4", 
-    #        Percentages = "percentages_ReportBootstrap"
-    #    ), 
-    #    functionArgumentHierarchy = list(
-    #        AggregationWeightingVariable = list(
-    #            AggregationFunction = expression(RstoxBase::getWeightingFunctions())
-    #        ), 
-    #        BootstrapReportWeightingVariable = list(
-    #            BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
-    #        ), 
-    #        Percentages = list(
-    #            BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
-    #        )
-    #    ), 
-    #    functionParameterDefaults = list(
-    #        Percentages = c(5, 50, 95), 
-    #        NetCDF4ChunkSize = Inf
-    #    )
-    #), 
+    ReportBootstrapNetCDF4 = list(
+        functionType = "modelData", 
+        functionCategory = "report", 
+        functionOutputDataType = "ReportBootstrapNetCDF4Data", 
+        # This is an example of using an expression to determine when to show a parameter:
+        functionParameterFormat = list(
+            BaselineProcess = "baselineProcess_ReportBootstrapNetCDF4", 
+            TargetVariable = "targetVariable_ReportBootstrapNetCDF4", 
+            TargetVariableUnit = "targetVariableUnit_ReportBootstrapNetCDF4", 
+            GroupingVariables = "groupingVariables_ReportBootstrapNetCDF4", 
+            InformationVariables = "informationVariables_ReportBootstrapNetCDF4", 
+            Percentages = "percentages_ReportBootstrap"
+        ), 
+        functionArgumentHierarchy = list(
+            AggregationWeightingVariable = list(
+                AggregationFunction = expression(RstoxBase::getWeightingFunctions())
+            ), 
+            BootstrapReportWeightingVariable = list(
+                BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
+            ), 
+            Percentages = list(
+                BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
+            )
+        ), 
+        functionParameterDefaults = list(
+            Percentages = c(5, 50, 95), 
+            NetCDF4ChunkSize = Inf
+        )
+    ), 
     
     ### ReportBootstrapNetCDF4_lowMemory = list(
     ###     functionType = "modelData", 

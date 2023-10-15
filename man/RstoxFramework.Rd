@@ -35,6 +35,7 @@ Authors:
   \item Sindre Vatnehol
   \item Espen Johnsen
   \item Atle Totland
+  \item Anthony Hennessey
   \item Mikko Juhani Vihtakari
 }
 

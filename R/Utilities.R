@@ -716,11 +716,12 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
 #' @param checkOutputFiles Logical, if TRUE compare the file names of the output files.
 #' @param tolerance The tolerance to use in all.equal.
+#' @param debug Logical: If TRUE, interrupt the execution just before priting the test results.
 #' @param ... Used in runModel().
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), ...) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -742,9 +743,10 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     }
     
     
-    message(projectPath_copy)
     openProject(projectPath_copy)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = FALSE, try = try, msg = FALSE, ...)
+    # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
+    #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, msg = FALSE, ...)
     
     
     # Read the original data:
@@ -821,8 +823,11 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                 # This caused trouble when converting character to POSIXct:
                 #data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfSecond(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
-            else if("SpatialPolygonsDataFrame" %in% class(dat_orig[[name]][[subname]])){
-                data_equal[[name]][[subname]] <- compareSPDF(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+            else if("sf" %in% class(dat_orig[[name]][[subname]])){
+                data_equal[[name]][[subname]] <- all.equal(
+                    sf::st_coordinates(dat_orig[[name]][[subname]]), 
+                    sf::st_coordinates(dat[[name]][[subname]])
+                )
             }
             else {
                 data_equal[[name]][[subname]] <- paste(all.equal(dat_orig[[name]][[subname]], dat[[name]][[subname]], check.attributes = FALSE, tolerance = tolerance), collapse = "\n")
@@ -835,8 +840,10 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         unlist(x)[!unlist(x) == "TRUE"]
     }
     
+    if(debug) {
+        browser()
+    }
     
-    #browser()
     
     diffWarning <- function(x) {
         x_info <- unlistDiff(x)
@@ -1232,19 +1239,21 @@ setLogicalColumnsToNA <- function(x) {
 }
 
 
-# Get all coordinates of a SpatialPolygonsDataFrame in one data.table:
-getAllCoords <- function(x) {
-    out <- RstoxBase::getStratumPolygonList(x)
-    out <- data.table::rbindlist(lapply(out, unname))
-    return(out)
-}
+## Get all coordinates of a SpatialPolygonsDataFrame in one data.table:
+#getAllCoords <- function(x) {
+#    out <- RstoxBase::getStratumPolygonList(x)
+#    out <- data.table::rbindlist(lapply(out, unname))
+#    return(out)
+#}
+#
+## Compare two SpatialPolygonsDataFrames using only the polygons:
+#compareSPDF <- function(x, y) {
+#    xc <- getAllCoords(x)
+#    yc <- getAllCoords(y)
+#    all.equal(xc, yc)
+#}
 
-# Compare two SpatialPolygonsDataFrames using only the polygons:
-compareSPDF <- function(x, y) {
-    xc<- getAllCoords(x)
-    yc<- getAllCoords(y)
-    all.equal(xc, yc)
-}
+
 
 #' Function for comparing existing output files with the memory read using runProject()
 #' 
@@ -1458,6 +1467,7 @@ readsItsOwnOutputDataType <- function(functionName) {
 #' @inheritParams ncdf4::ncvar_def
 #' @param list A list of tables to write to NetCDF4.
 #' @param filePath The path to the file.
+#' @param nc A netCDF4 object, overiding the \code{filePath}.
 #' @param index The index of the current data to write, with number of rows indicated in the \code{dims} argument.
 #' @param dims A list of lists of dimensions of the tables to write.
 #' @param nchars A list of lists of lists holding the maximum number of characters for each variable of each table of each process.
@@ -1467,7 +1477,7 @@ readsItsOwnOutputDataType <- function(functionName) {
 #' 
 #' @export
 #' 
-write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = 1, verbose = FALSE) {
+write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = NA, verbose = FALSE) {
     
     # Thoughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
     
@@ -1593,7 +1603,11 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
         variableNames <- names(variables)
     }
     else {
-        if(file.exists(filePath)) {
+        # Use the open file if given:
+        if(inherits(nc, "ncdf4")) {
+            ncout <- nc
+        }
+        else if(file.exists(filePath)) {
             ncout <- ncdf4::nc_open(filePath, write = TRUE, verbose = verbose)
         }
         else {
@@ -1684,8 +1698,14 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, index, dims, nchars, a
         #ncdf4::nc_sync( ncout )
     }
     
-    # Close the file:
-    ncdf4::nc_close(ncout)
+    # Close the file if an open file was not given:
+    if(inherits(nc, "ncdf4")) {
+        return(nc)
+    }
+    else {
+        ncdf4::nc_close(ncout)
+        return(filePath)
+    }
 }
 
 
@@ -1766,4 +1786,142 @@ getPrecOne <- function(x) {
         NA
     }
 }
+
+
+
+
+
+
+
+setRstoxPrecision <- function(x) {
+    # Get the defines number of digits:
+    digits <- getRstoxFrameworkDefinitions("digits")
+    signifDigits <- getRstoxFrameworkDefinitions("signifDigits")
+    
+    currentClass <- class(x)
+    currentAttributes <- attributes(x)
+    
+    if(is.list(x) && ! any(c("sf", "data.frame") %in% class(x))){
+        output <- lapply(x, setRstoxPrecision)
+        class(output) <- currentClass
+        output <- setNonStandardAttributes(output, currentAttributes)
+                
+        return(output)
+    }
+    else {
+        if(data.table::is.data.table(x)) {
+            x <- roundSignifDT(x, digits = digits, signifDigits = signifDigits)
+        }
+        else if(is.numeric(x) && !is.integer(x) && !all(is.na(x))) {
+            x  <- roundSignif(x, digits = digits, signifDigits = signifDigits)
+        }
+        else if(getRelevantClass(x) == "sf") {
+            # The precision of geographical coordinates will only be set to the specified digits, with no consideration of significant digits. Using digits = 12 implies a precision of approximately 100 nanometers, which should be enough:
+            precision <- 10^digits
+            
+            # Write the data to a file to utilize the function sf::st_set_precision:
+            outdata <- sf::st_set_precision(x, precision = precision)
+            tmp  <- paste0(tempfile(), "nc.shp")
+            # Keep the stratum names and crs: 
+            stratumNames <- outdata$StratumName
+            crs <- sf::st_crs(outdata)
+            
+            # Write the multipolygons to a temporary file:
+            sf::st_write(outdata, tmp, quiet = TRUE)
+            x <- sf::st_read(tmp, quiet = TRUE)
+            
+            # Add the stratum names and crs again: 
+            x <- x[, NULL]
+            x$StratumName <- stratumNames
+            sf::st_crs(x) <- crs
+            # sf::st_read may read as POLYGON. We want MULTIPOLYGON always:
+            x <- sf::st_cast(x, "MULTIPOLYGON")
+            
+            # Place geometry last, as this seems to be the default in sf, e.g. in st_cast:
+            newOrder <- c(setdiff(names(x), "geometry"), "geometry")
+            x <- x[, newOrder]
+            
+            
+            file.remove(tmp)
+        }
+        # None of the other validOutputDataClasses need setting precision to.
+        
+        return(x)
+    }
+}
+
+# Function setting the precision of one data table:
+roundSignifDT <- function(x, digits, signifDigits) {
+    if(NROW(x)) {
+        # Detect numeric columns and round off to the specified number of digits:
+        atNumericButNotInteger <- sapply(x, is.numeric) & ! sapply(x, is.integer) & sapply(x, function(y) ! all(is.na(y)))
+        if(any(atNumericButNotInteger)) {
+            numericButNotIntegerCols <- names(x)[atNumericButNotInteger]
+            for(numericButNotIntegerCol in numericButNotIntegerCols) {
+                x[, eval(numericButNotIntegerCol) := roundSignif(get(numericButNotIntegerCol), digits = ..digits, signifDigits = ..signifDigits)]
+            }
+        }
+    }
+    
+    return(x)
+}
+
+roundSignif <- function(x, digits = 12, signifDigits = NULL) {
+    # Get the digits to round off to:
+    digits <- getPrecisionDigits(x, digits = digits, signifDigits = signifDigits)
+    # Round off:
+    out <- round(x, digits)
+    
+    return(out)
+}
+
+
+getPrecisionDigits <- function(x, digits = 12, signifDigits = NULL) {
+    if(length(signifDigits)) {
+        # The output is the maximum of the user specified 'digits' and the number of digits needed to obtain 'signifDigits' significant digits:
+        digits <- pmax(signifDigits - floor(log10(abs(x))) - 1, digits)
+    }
+    
+    return(digits)
+}
+
+
+
+dataTable2sf_POINT <- function(x, coords = c("Longitude", "Latitude"), idCol = NULL, crs = NULL) {
+    
+    # Keep only the idCol and the coords:
+    pos <- subset(x, select = c(idCol, coords))
+    
+    # Convert to POINT sf object:
+    points <- sf::st_as_sf(pos, coords = coords)
+    # Set projection:
+    sf::st_crs(points) <- if(length(crs)) crs else getRstoxBaseDefinitions("proj4string_longlat")
+    
+    return(points)
+}
+
+dataTable2sf_LINESTRING <- function(x, x1x2y1y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"), idCol = NULL, crs = NULL) {
+    
+    # Create a geometry column:
+    linestrings  <- data.frame(geometry = sf::st_sfc(sapply(seq_len(nrow(x)), function(i) create_segment(x[i, ..x1x2y1y2]), simplify = FALSE)))
+    
+    # Add info:
+    if(length(idCol) && idCol %in% names(x)) {
+        linestrings[[idCol]] <- x[, ..idCol]
+    } 
+    
+    # Convert to proper sf data frame:
+    linestrings <-  sf::st_sf(linestrings)
+    
+    # Set projection:
+    sf::st_crs(linestrings) <- if(length(crs)) crs else getRstoxBaseDefinitions("proj4string_longlat")
+
+    return(linestrings)                   
+}
+
+# Simple function to create a segment:
+create_segment <- function(r) {
+    sf::st_linestring(t(matrix(unlist(r), 2, 2)))
+}
+
 

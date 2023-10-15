@@ -92,7 +92,7 @@ readOfficialRstoxPackageVersionsFile <- function(officialRstoxPackageVersionsFil
        
     # Read the officialRstoxPackageVersionsFile:
     official <- tryCatch(
-        read.table(
+        utils::read.table(
             officialRstoxPackageVersionsFile, 
             header = TRUE, 
             stringsAsFactors = FALSE, 

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3-9001</span>
       </span>
     </div>
 
@@ -101,6 +101,7 @@
 <span>  ow <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  empty.output <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  empty.input <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  empty.memory <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  close <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  msg <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
@@ -167,11 +168,15 @@
 
 
 <dt>empty.output</dt>
-<dd><p>Logical: If TRUE, do not include the output files when copying.</p></dd>
+<dd><p>Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.</p></dd>
 
 
 <dt>empty.input</dt>
-<dd><p>Logical: If TRUE, do not include the input files when copying.</p></dd>
+<dd><p>Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.</p></dd>
+
+
+<dt>empty.memory</dt>
+<dd><p>Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.</p></dd>
 
 
 <dt>close</dt>
@@ -187,7 +192,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
+  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Anthony Hennessey, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
 </div>
 
 <div class="pkgdown">

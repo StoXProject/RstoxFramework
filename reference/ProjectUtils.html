@@ -20,7 +20,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3-9001</span>
       </span>
     </div>
 
@@ -63,7 +63,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
 <span></span>
 <span><span class="fu">isSaved</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">isOpenProject</span><span class="op">(</span><span class="va">projectPath</span><span class="op">)</span></span>
+<span><span class="fu">isOpenProject</span><span class="op">(</span><span class="va">projectPath</span>, strict <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">readProjectDescription</span><span class="op">(</span></span>
 <span>  <span class="va">projectPath</span>,</span>
@@ -87,6 +87,10 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
     <h2>Arguments</h2>
     <dl><dt>projectPath</dt>
 <dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+
+
+<dt>strict</dt>
+<dd><p>Logical: If TRUE, require that all folders of the projectSession folder exist in isOpenProject(). Otherwise only require that the projectSession folder exists.</p></dd>
 
 
 <dt>verbose</dt>
@@ -122,7 +126,7 @@ Check or set if a project is running or not."><!-- mathjax --><script src="https
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
+  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Anthony Hennessey, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
 </div>
 
 <div class="pkgdown">

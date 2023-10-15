@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3-9001</span>
       </span>
     </div>
 
@@ -87,8 +87,9 @@
 
 <dt>data.out</dt>
 <dd><p>The StoX 2.7 table.</p>
-<p>The <code>comparisonModel</code> is a list with the following required elements:</p><ul><li><p>dataTypeThe StoX &gt;= 3.0.0 datatypes to compare.</p></li>
-<li><p>dataVariableThe specific variable to compare in the StoX &gt;= 3.0.0 datatypes.</p></li>
+<p>The <code>comparisonModel</code> is a list with the following required elements:</p><ul><li><p>dataTypeThe StoX &gt;= 3.0.0 datatypes to compare. Used only for reference.</p></li>
+<li><p>dataVariable_OldThe specific variable to compare in the old datatypes.</p></li>
+<li><p>dataVariable_NewThe specific variable to compare in the new datatypes.</p></li>
 <li><p>processName_Old,processName_NewThe process named in the old and new project, respectively. Must correspond to the <code>dataType</code>.</p></li>
 <li><p>compareActionA string vector specifyfing whether to merge ("merge") or cbind ("cbind") when comparing. Cbind is only for SuperIndividuals in StoX 2.7, which does not have unique keys in.</p></li>
 <li><p>keys_Old,keys_New"A list of the keys of the datatypes in the old and new project, respectively. Specify only for datatypes to be merged (use NA for those that use compareAction = "cbind").</p></li>
@@ -107,7 +108,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
+  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Anthony Hennessey, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
 </div>
 
 <div class="pkgdown">

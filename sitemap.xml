@@ -25,6 +25,12 @@
     <loc>/reference/BootstrapData.html</loc>
   </url>
   <url>
+    <loc>/reference/BootstrapNetCDF4.html</loc>
+  </url>
+  <url>
+    <loc>/reference/BootstrapNetCDF4Data.html</loc>
+  </url>
+  <url>
     <loc>/reference/DataTypes.html</loc>
   </url>
   <url>
@@ -55,7 +61,16 @@
     <loc>/reference/ReportBootstrapData.html</loc>
   </url>
   <url>
-    <loc>/reference/ResampleBioticAssignment.html</loc>
+    <loc>/reference/ReportBootstrapNetCDF4.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ReportBootstrapNetCDF4Data.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ResampleBioticAssignmentByPSU.html</loc>
+  </url>
+  <url>
+    <loc>/reference/ResampleBioticAssignmentByStratum.html</loc>
   </url>
   <url>
     <loc>/reference/ResampleMeanLengthDistributionData.html</loc>
@@ -137,6 +152,9 @@
   </url>
   <url>
     <loc>/reference/getOfficialRstoxPackageVersion.html</loc>
+  </url>
+  <url>
+    <loc>/reference/getProcess.html</loc>
   </url>
   <url>
     <loc>/reference/getProcessIDByOffset.html</loc>

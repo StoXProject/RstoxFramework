@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3-9001</span>
       </span>
     </div>
 
@@ -61,9 +61,21 @@
 <span>  onlyStoxMessages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  onlyStoxWarnings <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  onlyStoxErrors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  maxLength.Message <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  maxLength.Warning <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  maxLength.Error <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  maxLength.Message <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  maxLength.Warning <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  maxLength.Error <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  nwarnings <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  collapseMessages <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  collapseWarnings <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  collapseErrors <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  messageLogFile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  warningLogFile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  errorLogFile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  messageAppend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  warningAppend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  errorAppend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  uniquify <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  header <span class="op">=</span> <span class="st">"&gt; "</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">runFunction.JSON</span><span class="op">(</span><span class="va">cmd</span><span class="op">)</span></span></code></pre></div>
@@ -105,6 +117,30 @@
 <dd><p>The maximum number of characters to return for messages, warnings and errors, respectively (with allowed values 100...8170, default 1000).</p></dd>
 
 
+<dt>nwarnings</dt>
+<dd><p>The number of warnings to save.</p></dd>
+
+
+<dt>collapseMessages, collapseWarnings, collapseErrors</dt>
+<dd><p>Logical: If TRUE report only unique messages, warnings and errors, respectively, adding the number of occurrences in parenthesis.</p></dd>
+
+
+<dt>messageLogFile, warningLogFile, errorLogFile</dt>
+<dd><p>If given, messages, warnings and errors are printed to these files.</p></dd>
+
+
+<dt>messageAppend, warningAppend, errorAppend</dt>
+<dd><p>Logical: If TRUE, append to the log files (<code>messageLogFile</code>, <code>warningLogFile</code> or <code>errorLogFile</code>, respectively)</p></dd>
+
+
+<dt>uniquify</dt>
+<dd><p>Logical: If TRUE (the default) return unique messages, warnings and errors, with the nnumber of occurrences in parenthesis.</p></dd>
+
+
+<dt>header</dt>
+<dd><p>The string to start each line with.</p></dd>
+
+
 <dt>cmd</dt>
 <dd><p>A JSON string containing parameters listed above.</p></dd>
 
@@ -118,7 +154,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
+  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Anthony Hennessey, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
 </div>
 
 <div class="pkgdown">

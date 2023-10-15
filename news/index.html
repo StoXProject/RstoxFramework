@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.2-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">3.6.3-9001</span>
       </span>
     </div>
 
@@ -48,6 +48,32 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.3-9001" id="rstoxframework-v363-9001-2023-08-31">RstoxFramework v3.6.3-9001 (2023-08-31)<a class="anchor" aria-label="anchor" href="#rstoxframework-v363-9001-2023-08-31"></a></h2>
+<ul><li>Removed dependency on the retiring package sp.</li>
+<li>Speeding up openProject() for StoX projects with large process data tables.</li>
+<li>Moved functions to set precision to RstoxFramework, and fixed the following ttwo bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.</li>
+<li>Fixing a problem with setting default precision in StoX. Before, precision was not set for process outputs which were lists of lists of tables (ReadBioic() and ReadAcousic()). Also, all numeric columns, even integer ones were set precision to, which is now changed to exclude integer columns.</li>
+<li>Changed isOpenProject() to only require that the projectSession folder exits, with an option strict = TRUE to use the old requirement that all folders must exist.</li>
+<li>Added BootstrapNetCDF4() and ReportBootstrapNetCDF4(). These will replace Bootstrap() and ReportBootstrap() in StoX 4.0.0.</li>
+<li>Added ResampleBioticAssignmentByPSU() and ResampleBioticAssignmentByStratum(), where the latter is identical to the ResampleBioticAssignment() of StoX &lt;= 3.6.2.</li>
+<li>Fixed bug where runProject() did not open the project.</li>
+<li>Added printing of messages, warnings and errors for parallel bootstrapping (by applying runFunction() in each core).</li>
+<li>Added the number of identical warnings in the warning printout. This is needed e.g. to get an idea of how many bootstrap replicates that has a problem of missing assignment length distribution for AcousticPSUs.</li>
+<li>Changed how runFunction() saves messages, warnings and errors.</li>
+<li>Added the option empty.memory to copyProject().</li>
+<li>Added the option msg.GUI to runProcess() and runProcesses() to support not printing the “Running baseline process” type of messages in backend but rather in frontend, so that this gets printed before the process runs and not after.</li>
+<li>Added warning when replaceArgs contains non-existent arguments.</li>
+<li>Changed to using unlistDepth2 = FALSE in compareProjectToStoredOutputFiles(), as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data.</li>
+<li>Increased tolerance in test-tobis_20_depth.R.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="3.6.2" id="rstoxframework-v362-2023-06-28">RstoxFramework v3.6.2 (2023-06-28)<a class="anchor" aria-label="anchor" href="#rstoxframework-v362-2023-06-28"></a></h2>
+<ul><li>Added example of using replaceArgsList in runModel().</li>
+<li>Exporting the new process getProcess() and renaming the internal function getProcess() to getProcessArguments().</li>
+<li>Fixed bug in replaceArgsList, where replacements identical to replacements for other processes were removed.</li>
+<li>Modified check-full.yaml to deal with ordinary releases on the StoXProject/repo and pre-releases on the StoXProject/testingRepo</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="3.6.2-9001" id="rstoxframework-v362-9001-2023-06-26">RstoxFramework v3.6.2-9001 (2023-06-26)<a class="anchor" aria-label="anchor" href="#rstoxframework-v362-9001-2023-06-26"></a></h2>
 <ul><li>The functions runModel(), runProject() and runProject() have gained a parameter ‘force.save’ which saves a project even if there are no changes, as opposed to save = TRUE.</li>
 <li>Updated the test projects coastalCod_20 and cod_19 to have RData as Bootstrap output, since StoX 3.6.1 introduced the error that this file was txt.</li>
@@ -71,10 +97,7 @@
 <li>Preparations for writing bootstrap data to NetCDF4.</li>
 <li>Fixed bug where slash and backslash were mixed in file name in json schema validation error message. Now using only slash. Also changed this to a warning instead of an error, so that StoX tries to open the project anyhow.</li>
 <li>Added LogDistance to tooltip for EDSUs in the map.</li>
-</ul></div>
-    <div class="section level2">
-<h2 class="page-header" data-toc-text="3.7.0-9001" id="rstoxframework-v370-9001-2023-02-15">RstoxFramework v3.7.0-9001 (2023-02-15)<a class="anchor" aria-label="anchor" href="#rstoxframework-v370-9001-2023-02-15"></a></h2>
-<ul><li>Changed the requirements of the the BaselineSeedTable of the function Bootstrap to only need the ImputeSuperIndividuals processes which use ImputationMethod = “RandomSampling”.</li>
+<li>Changed the requirements of the the BaselineSeedTable of the function Bootstrap to only need the ImputeSuperIndividuals processes which use ImputationMethod = “RandomSampling”.</li>
 <li>Added the option prependProcessList in runProcesses(), runModel(), runProject() and runProjects().</li>
 <li>Added the option of giving a string vector holding the names of the models to return data from in returnModelData in runModel(), runProject() and runProjects().</li>
 <li>Improved error message when there are missing LogOrigin or LogOrigin2.</li>
@@ -388,7 +411,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
+  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Anthony Hennessey, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
 </div>
 
 <div class="pkgdown">

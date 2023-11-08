@@ -251,8 +251,8 @@ getMapData  <- function(projectPath, modelName, processID) {
     }
     else {
         warning("StoX: No map data available from the process ", processID, " of model ", modelName, " of project ", projectPath)
-        #geojsonio::geojson_json(getRstoxFrameworkDefinitions("emptyStratumPolygon"))
-        getRstoxFrameworkDefinitions("emptyStratumPolygonGeojson")
+        #geojsonio::geojson_json(RstoxBase::getRstoxBaseDefinitions("emptyStratumPolygon"))
+        RstoxBase::getRstoxBaseDefinitions("emptyStratumPolygonGeojson")
     }
 }
 
@@ -265,7 +265,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     # Return an empty StratumPolygon if processData is empty:
     # Change this to an error?????????????????
     if(length(processData) == 0) {
-        return(getRstoxFrameworkDefinitions("emptyStratumPolygon"))
+        return(RstoxBase::getRstoxBaseDefinitions("emptyStratumPolygon"))
     }
     
     # Issue an error of the process data are not of StratumPolygon type:
@@ -1095,7 +1095,7 @@ cellToJSONStringOne <- function(x) {
         x <- ""
     }
     if(!is.character(x)) {
-        x <- as.character(toJSON_Rstox(x))
+        x <- as.character(RstoxBase::toJSON_Rstox(x))
     }
     return(x)
 }
@@ -1127,7 +1127,7 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
         # Why was this used??????
         ### if(!is.character(x)) {
         ###     browser()
-        ###     x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
+        ###     x <- sapply(x, function(y) as.character(RstoxBase::toJSON_Rstox(y)))
         ### }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):
@@ -1136,7 +1136,7 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
     }
     
     if(stringifyVector) {
-        x <- as.character(toJSON_Rstox(x))
+        x <- as.character(RstoxBase::toJSON_Rstox(x))
     }
     return(x)
 }
@@ -1151,7 +1151,7 @@ possibleValuesToJSONStringOne <- function(x, nrow) {
     # Convert to JSON string for each element if not already character:
     else {
         if(!is.character(x)) {
-            x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
+            x <- sapply(x, function(y) as.character(RstoxBase::toJSON_Rstox(y)))
         }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):
@@ -1466,6 +1466,149 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
 
 
 
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getTableNames <- function(projectPath, modelName, processID, warn = TRUE) {
+    
+    # Get the files:
+    processOutputFilesSansExt <- tools::file_path_sans_ext(unlist(getProcessOutputFiles(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        warn = warn
+    )))
+    folderPath <- getProcessOutputFolder(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        type = "memory"
+    )
+    processOutputTableNames <- unname(sapply(
+        processOutputFilesSansExt, 
+        getRelativePath,
+        folderPath
+    ))
+    
+    # Return a list of the tableNames, columnNames and possibleValues:
+    return(processOutputTableNames)
+}
+
+
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getFilterTableNames <- function(projectPath, modelName, processID, warn = TRUE) {
+    
+    # Get process ID of the single input to the filter process:
+    inputProcessID <- getSingleInputProcessID(projectPath, modelName, processID)
+    
+    # Get the output table names:
+    processOutputTableNames <- getTableNames(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = inputProcessID, 
+        warn = warn
+    ) 
+        
+    # Return a list of the tableNames, columnNames and possibleValues:
+    return(processOutputTableNames)
+}
+
+
+
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableName, include.numeric = TRUE, stopIfEmptyPossibleValues = FALSE) {
+    
+    # Get the output of the input process, which is only one for all filters:
+    inputProcessID <- getSingleInputProcessID(projectPath, modelName, processID)
+    processOutput <- getProcessOutput(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = inputProcessID, 
+        tableName = tableName
+    )
+    processOutput <- unlistToDataType(processOutput, sep = "/")[[1]]
+    
+    # Add a warning if the process output is empty:
+    if(!length(processOutput)) {
+        warnText <- paste0("StoX: The process used as input the process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " must bee run to use the filter expression builder.")
+        if(stopIfEmptyPossibleValues) {
+            stop(warnText)
+        }
+        #else {
+        #    warning(warnText)
+        #}
+        return(emptyNamedList())
+    }
+    
+    # Get the column names:
+    name <- names(processOutput)
+    
+    # Get the data types:
+    type <- sapply(processOutput, getRelevantClass)
+    
+    # Get the operators:
+    operators <- getRstoxFrameworkDefinitions("filterOperators")[type]
+    
+    # Get a list of unique values for each column of each table:
+    #options <- lapply(processOutput, getPossibleValuesOneTable, include.numeric = include.numeric)
+    options <- getOptionList(getPossibleValuesOneTable(processOutput, type, include.numeric = include.numeric))
+    
+    # Return the
+    output <- structure(
+        list(
+            mapply(
+                list,
+                name = name,
+                type = type,
+                operators = operators,
+                options = options,
+                SIMPLIFY = FALSE
+            )
+        ), 
+        names = "fields"
+    )
+    
+    # Return a list of the tableNames, columnNames and possibleValues:
+    return(output)
+}
+
+
+
+getSingleInputProcessID <- function(projectPath, modelName, processID) {
+    # Get the output of the input process, which is only one for all filters:
+    process <- getProcessArguments(projectPath = projectPath, modelName = modelName, processID = processID)
+    # Get the (single) input process:
+    inputProcessName <- unlist(process$functionInputs)
+    if(length(inputProcessName) != 1) {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        stop("The process ", processName, " is not a filter process. Filter options not found.")
+    }
+    else {
+        inputProcessID <- getProcessIDFromProcessName(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processName = inputProcessName[1]
+        )$processID
+    }
+    
+    return(inputProcessID)
+}
+
+
 #' 
 #' @export
 #' @rdname StoXGUI_interfaces
@@ -1575,26 +1718,20 @@ getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, incl
 }
 
 # Simple function to sort the unique values:
-sortUnique <- function(y) {
+sortUnique <- function(y, use.stringi = TRUE) {
     # 2020-06-18 Added na.last = FALSE to include NAs in the filter options:
     #sort(unique(y), na.last = FALSE)
     
     # Get first the unique values, then check that the length of these are not identical to the length of the vector, and then sort:
     uniquey <- unique(y)
     
-    #if(length(uniquey) < length(y)) {
-    #    sort(uniquey, na.last = FALSE)
-    #}
-    #else {
-    #    NULL
-    #}
-    # Get unique values only if not all are unique
-    ###if(length(uniquey) == length(y) && length(y) > 1) {
-    ###    NULL
-    ###}
-    ###else {
+    # Use stringi instead, which is upp to 4 times faster:
+    if(is.character(y) && use.stringi) {
+        stringi::stri_sort(uniquey, na_last = FALSE)
+    }
+    else {
         sort(uniquey, na.last = FALSE)
-    ###}
+    }
 }
 
 

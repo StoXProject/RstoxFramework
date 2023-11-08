@@ -40,7 +40,7 @@ compareProjectToStoredOutputFilesAll(
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
-\item{data.out}{Logical, if TRUE output the original and new data along with the tests.}
+\item{data.out}{Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.}
 
 \item{...}{\code{replaceArgsList} can also be given directly.}
 }

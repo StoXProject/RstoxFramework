@@ -24,6 +24,8 @@ compareProjectToStoredOutputFiles(
   tolerance = sqrt(.Machine$double.eps),
   debug = FALSE,
   save = FALSE,
+  check.columnNames_identical = FALSE,
+  testAllTRUE = FALSE,
   ...
 )
 }
@@ -50,7 +52,7 @@ compareProjectToStoredOutputFiles(
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
-\item{data.out}{Logical, if TRUE output the original and new data along with the tests.}
+\item{data.out}{Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.}
 
 \item{mergeWhenDifferentNumberOfRows}{Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.}
 
@@ -65,6 +67,10 @@ compareProjectToStoredOutputFiles(
 \item{debug}{Logical: If TRUE, interrupt the execution just before priting the test results.}
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{check.columnNames_identical}{Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.}
+
+\item{testAllTRUE}{Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.}
 
 \item{...}{Used in runModel().}
 }

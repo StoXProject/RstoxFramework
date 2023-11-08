@@ -202,6 +202,15 @@ stoxFunctionAttributes <- list(
             # Default file options:
             RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions
         )
+    ),
+    
+    ListFilesInFolder = list(
+        functionType = "modelData", 
+        functionCategory = "baseline", 
+        functionOutputDataType = "NASCData",
+        functionParameterFormat = list(
+            FolderName = "directoryPath"
+        )
     )
 )
 
@@ -542,6 +551,18 @@ processPropertyFormats <- list(
             return(output)
         }, 
         variableTypes <- "character"
+    ), 
+    
+    directoryPath = list(
+        class = "single", 
+        title = "The path to a folder", 
+        variableTypes = "character"
+    ), 
+    
+    filePaths = list(
+        class = "vector", 
+        title = "The path to one or more files", 
+        variableTypes = "character"
     )
     
 )

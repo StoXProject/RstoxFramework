@@ -2,7 +2,7 @@
 % Please edit documentation in R/Framework.R
 \name{unlistToDataType}
 \alias{unlistToDataType}
-\title{Function to flatten a list of output datat and add names from the levels of the list}
+\title{Function to flatten a list of output data and add names from the levels of the list}
 \usage{
 unlistToDataType(
   processOutput,
@@ -23,6 +23,9 @@ unlistToDataType(
 
 \item{keepNonStandardAttributes}{Logical: If TRUE, keep attributes other than the standard \code{dim}, \code{names} and \code{dimnames}.}
 }
+\value{
+A list of tables
+}
 \description{
-Function to flatten a list of output datat and add names from the levels of the list
+Function to flatten a list of output data and add names from the levels of the list
 }

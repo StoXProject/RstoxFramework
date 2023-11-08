@@ -149,6 +149,10 @@ initiateRstoxFramework <- function(){
     availableFunctions <- names(stoxLibrary)
     availablePackageFunctionNames <- unname(sapply(stoxLibrary, "[[", "functionName"))
     
+    # Get all process data functions:
+    processDataFunctions <- availableFunctions[sapply(stoxLibrary, "[[", "functionType") == "processData"]
+    
+    
     
     # Define the supported backward compatibility actions. The order of the actions is defined here!!!:
     backwardCompatibilityActionNames <- c(
@@ -256,6 +260,7 @@ initiateRstoxFramework <- function(){
         return(columnTypes)
     }
     processDataColumnTypes <- getProcessDataColumnTypes(processDataSchemas)
+    processDataTypes <- names(processDataColumnTypes)
     
     
     
@@ -339,9 +344,6 @@ initiateRstoxFramework <- function(){
     # Define the number of digits (12) and the number of significant digits (6, used if values are very low) used by the Rstox packages:
     digits <- 12
     signifDigits <- 12
-    
-    # The time format used in the project.json:
-    StoxDateTimeFormat <- "%Y-%m-%dT%H:%M:%OS"
     
     # Value of numeric NA in processData stored in the project.json:
     #jsonNA <- -999999
@@ -519,15 +521,6 @@ initiateRstoxFramework <- function(){
     bioticAssignmentDataType <- "BioticAssignment"
     stationDataType <- "StoxBioticData"
     EDSUDataType <- "StoxAcousticData"
-    
-    # Define empty StratumPolygon data type:
-    #emptyStratumPolygon <- sp::SpatialPolygons(list())
-    #emptyStratumPolygon <- sp::SpatialPolygonsDataFrame(
-    #    sp::SpatialPolygons(list()), 
-    #    data = data.frame()
-    #)
-    emptyStratumPolygon <- sf::st_sf(sf::st_sfc())
-    emptyStratumPolygonGeojson <- "{\n\t\"type\": \"FeatureCollection\",\n\t\"features\": []\n}\n"
     
     # Define the process parameters with default values, display names and descriptions:
     processParameters <- list(
@@ -1010,7 +1003,7 @@ getDefaultOutputFileType <- function(processOutput) {
         }
         else if("ggplot" %in% classes) {
             # Set file extension:
-            ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+            ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
             # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
         }
         # List of lists of outputs:
@@ -1028,7 +1021,7 @@ getDefaultOutputFileType <- function(processOutput) {
         }
         else if("ggplot" %in% class(processOutput[[1]][[1]])) {
             # Set file extension:
-            ext <- getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+            ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
             # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
         }
         else {

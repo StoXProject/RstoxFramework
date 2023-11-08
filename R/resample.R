@@ -2129,3 +2129,17 @@ initialAggregateBootstrapNetCDF4DataOne <- function(
 }
 
     
+
+
+#' List files in a folder
+#' 
+#' @param FolderName The path to the folder
+#' 
+#' @export
+#' 
+ListFilesInFolder <- function(
+        FolderName = character()
+) {
+    data.table::data.table(Files = list.files(FolderName))
+}
+

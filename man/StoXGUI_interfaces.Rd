@@ -12,6 +12,9 @@
 \alias{setProcessPropertyValue}
 \alias{getFunctionHelpAsHtml}
 \alias{getObjectHelpAsHtml}
+\alias{getTableNames}
+\alias{getFilterTableNames}
+\alias{getFilterOptionsOneTable}
 \alias{getFilterOptionsAll}
 \alias{getParameterTableInfo}
 \alias{getParameterVectorInfo}
@@ -47,6 +50,19 @@ setProcessPropertyValue(
 getFunctionHelpAsHtml(projectPath, modelName, processID, stylesheet = "")
 
 getObjectHelpAsHtml(packageName, objectName, stylesheet = "")
+
+getTableNames(projectPath, modelName, processID, warn = TRUE)
+
+getFilterTableNames(projectPath, modelName, processID, warn = TRUE)
+
+getFilterOptionsOneTable(
+  projectPath,
+  modelName,
+  processID,
+  tableName,
+  include.numeric = TRUE,
+  stopIfEmptyPossibleValues = FALSE
+)
 
 getFilterOptionsAll(
   projectPath,
@@ -96,6 +112,10 @@ getParameterVectorInfo(
 \item{packageName}{The package holding the object to get help as html for.}
 
 \item{objectName}{The R object to get help as html for.}
+
+\item{warn}{Logical: If TRUE show warnings that are not highly important.}
+
+\item{tableName}{The name of the output table to get from the process.}
 
 \item{include.numeric}{Logical: If TRUE get possible values for numeric ariables as well as categorical variables.}
 

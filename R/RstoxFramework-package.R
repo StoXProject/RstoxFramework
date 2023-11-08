@@ -22,10 +22,12 @@ utils::globalVariables(c(
 	 "CruiseKey", "Haul", "Layer", "LogKey", "LogOrigin", "LogOrigin2", "PSU", "PolygonKey",
 	 "ProcessName", "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum",
 	 "TableName", "WeightingFactor", "assignmentPasted", "canShowInMap", "capture.output", "ch",
-	 "freq", "functionInputError", "functionName", "functionOutputDataType", "hasProcessData",
-	 "lenght", "modelName", "name", "numStations", "offset", "possibleValues", "processID",
-	 "processIndex", "processName", "projectPath", "resampledCountWithUniqueName", "st_linestring",
-	 "st_sf", "st_sfc", "start_time", "transceiver", "value", "verbose", "weightsPasted"))
+	 "freq", "functionInputProcessIDs", "functionInputs", "functionInputError", "functionName",
+	 "functionOutputDataType", "hasProcessData", "lenght", "modelName", "name", "numStations",
+	 "offset", "possibleValues", "processID", "processIndex", "processName", "projectPath",
+	 "resampledCountWithUniqueName", "st_linestring", "st_sf", "st_sfc", "start_time",
+	 "terminalProcess", "transceiver", "usedInProcessIDs", "usedInProcessIndices",
+	 "usedInProcessNames", "value", "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

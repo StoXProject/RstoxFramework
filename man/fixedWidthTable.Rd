@@ -23,6 +23,8 @@ fixedWidthTable(
 \item{na}{The string to replace NAs by, defaulted to "-".}
 
 \item{enable.auto_unbox}{Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.}
+
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
 }
 \description{
 Function to convert data.table to fixed width:

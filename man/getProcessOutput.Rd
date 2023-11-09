@@ -89,6 +89,8 @@ getProcessGeoJsonOutput(
 
 \item{warn}{Logical: If TRUE warn if the process has not bee run.}
 
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
+
 \item{geoJsonName}{The name of the GeoJSON object to extract from the process.}
 }
 \description{

@@ -24,7 +24,8 @@ getProcessOutput(
   drop = FALSE,
   drop.datatype = TRUE,
   splitGeoJson = TRUE,
-  warn = TRUE
+  warn = TRUE,
+  add.line.index = TRUE
 )
 
 getProcessTableOutput(
@@ -38,7 +39,8 @@ getProcessTableOutput(
   linesPerPage = 1000L,
   columnSeparator = " ",
   na = "-",
-  drop = FALSE
+  drop = FALSE,
+  add.line.index = TRUE
 )
 
 getProcessGeoJsonOutput(

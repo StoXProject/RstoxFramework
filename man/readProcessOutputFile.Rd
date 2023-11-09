@@ -15,7 +15,8 @@ readProcessOutputFile(
   lineSeparator = NULL,
   na = "-",
   enable.auto_unbox = FALSE,
-  splitGeoJson = TRUE
+  splitGeoJson = TRUE,
+  add.line.index = TRUE
 )
 }
 \arguments{

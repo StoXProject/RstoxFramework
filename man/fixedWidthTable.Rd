@@ -9,7 +9,8 @@ fixedWidthTable(
   columnSeparator = " ",
   lineSeparator = NULL,
   na = "-",
-  enable.auto_unbox = TRUE
+  enable.auto_unbox = TRUE,
+  add.line.index = FALSE
 )
 }
 \arguments{

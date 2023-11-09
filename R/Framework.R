@@ -5337,7 +5337,7 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
 #' 
 #' @export
 #' 
-getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE, warn = TRUE) {
+getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE, warn = TRUE, add.line.index = TRUE) {
     
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
@@ -5410,7 +5410,8 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         na = na, 
         enable.auto_unbox = enable.auto_unbox, 
         how = "replace", 
-        splitGeoJson = splitGeoJson
+        splitGeoJson = splitGeoJson, 
+        add.line.index = add.line.index
     )
 
     # Add data type as attribute if the file is present (currentlly only for boostrap):
@@ -5446,7 +5447,7 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
 #' @rdname getProcessOutput
 #' @export
 #' 
-getProcessTableOutput <- function(projectPath, modelName, processID, tableName = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", na = "-", drop = FALSE) {
+getProcessTableOutput <- function(projectPath, modelName, processID, tableName = NULL, flatten = FALSE, pretty = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", na = "-", drop = FALSE, add.line.index = TRUE) {
     getProcessOutput(
         projectPath = projectPath, 
         modelName = modelName, 
@@ -5459,7 +5460,8 @@ getProcessTableOutput <- function(projectPath, modelName, processID, tableName =
         columnSeparator = columnSeparator, 
         na = na, 
         drop = drop, 
-        warn = FALSE
+        warn = FALSE, 
+        add.line.index = add.line.index
     )
 }
 #' 
@@ -5599,7 +5601,7 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
 #' @param splitGeoJson Logical: If TRUE split the geojson into a vector of separate lines.
 #' 
-readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE) {
+readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE, add.line.index = TRUE) {
     
     
     # Read the process output file:
@@ -5663,7 +5665,8 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
                 columnSeparator = columnSeparator, 
                 lineSeparator = lineSeparator, 
                 na = na, 
-                enable.auto_unbox = enable.auto_unbox
+                enable.auto_unbox = enable.auto_unbox, 
+                add.line.index = add.line.index
             )
             
             # Add a line "... truncated" if the page is not first and not the last:

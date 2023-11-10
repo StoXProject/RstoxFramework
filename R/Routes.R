@@ -1561,7 +1561,7 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     
     # Get a list of unique values for each column of each table:
     #options <- lapply(processOutput, getPossibleValuesOneTable, include.numeric = include.numeric)
-    options <- getOptionList(getPossibleValuesOneTable(processOutput, type, include.numeric = include.numeric))
+    options <- lapply(getPossibleValuesOneTable(processOutput, type, include.numeric = include.numeric), getOptionList)
     
     # Return the
     output <- structure(

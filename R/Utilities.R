@@ -86,8 +86,9 @@ flattenDataTable <- function(x, replace = NA) {
 #' @param lineSeparator The string to separate lines by, defaulted to a NULL, which keeps the output as a vector of strings.
 #' @param na The string to replace NAs by, defaulted to "-".
 #' @param enable.auto_unbox Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.
+#' @param add.line.index Logical: If TRUE (the default) print row indices as in data.table.
 #' 
-fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE) {
+fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, add.line.index = FALSE) {
     # Return immediately if x has length 0:
     if(length(x) == 0) {
         return(x)
@@ -101,6 +102,11 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         # Add the column names:
         if(length(colnames(x))) {
             x <- rbind(colnames(x), x)
+        }
+        
+        # Add data.table style line indices which is a sequence from 1:
+        if(add.line.index) {
+            x <- cbind(c("", paste0(seq_len(nrow(x)), ":")), x)
         }
         
         # Right pad with spaecs:
@@ -124,6 +130,12 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add the column names:
         x <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))
+        
+        # Add data.table style line indices which is a sequence from 1:
+        if(add.line.index) {
+            x <- cbind(c("", paste0(seq_len(nrow(x) - 1), ":")), x)
+        }
+        
         # Right pad with spaecs:
         x <- x[, lapply(.SD, function(y) stringi::stri_pad_left(y, max(nchar(y)), pad = " "))]
         

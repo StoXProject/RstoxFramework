@@ -15,7 +15,8 @@ readProcessOutputFile(
   lineSeparator = NULL,
   na = "-",
   enable.auto_unbox = FALSE,
-  splitGeoJson = TRUE
+  splitGeoJson = TRUE,
+  add.line.index = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ readProcessOutputFile(
 \item{enable.auto_unbox}{Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.}
 
 \item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
+
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
 }
 \description{
 Function to read a single process output file, possibly by pages and in flattened and pretty view:

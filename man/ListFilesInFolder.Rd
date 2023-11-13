@@ -8,6 +8,8 @@ ListFilesInFolder(FolderName = character(), FileExtension = character())
 }
 \arguments{
 \item{FolderName}{The path to the folder}
+
+\item{FileExtension}{File extension}
 }
 \description{
 List files in a folder

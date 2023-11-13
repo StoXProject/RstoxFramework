@@ -2134,6 +2134,7 @@ initialAggregateBootstrapNetCDF4DataOne <- function(
 #' List files in a folder
 #' 
 #' @param FolderName The path to the folder
+#' @param FileExtension File extension
 #' 
 #' @export
 #' 

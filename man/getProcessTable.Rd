@@ -17,7 +17,7 @@ getProcessTable(
   argumentFilePaths = NULL,
   only.valid = TRUE,
   return.processIndex = FALSE,
-  return.processFlow = FALSE
+  return.processFlow = TRUE
 )
 
 scanForModelError(

@@ -209,7 +209,8 @@ stoxFunctionAttributes <- list(
         functionCategory = "baseline", 
         functionOutputDataType = "NASCData",
         functionParameterFormat = list(
-            FolderName = "directoryPath"
+            FolderName = "directoryPath", 
+            FileExtension = "fileExtension" 
         )
     )
 )
@@ -562,6 +563,12 @@ processPropertyFormats <- list(
     filePaths = list(
         class = "vector", 
         title = "The path to one or more files", 
+        variableTypes = "character"
+    ),
+    
+    fileExtension = list(
+        class = "vector", 
+        title = "File extension", 
         variableTypes = "character"
     )
     

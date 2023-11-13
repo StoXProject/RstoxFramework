@@ -4,7 +4,7 @@
 \alias{ListFilesInFolder}
 \title{List files in a folder}
 \usage{
-ListFilesInFolder(FolderName = character())
+ListFilesInFolder(FolderName = character(), FileExtension = character())
 }
 \arguments{
 \item{FolderName}{The path to the folder}

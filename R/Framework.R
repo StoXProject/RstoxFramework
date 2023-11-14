@@ -2957,7 +2957,7 @@ modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processNam
 #' 
 #' @export
 #' 
-getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, only.valid = TRUE, return.processIndex = FALSE, return.processFlow = FALSE) {
+getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, only.valid = TRUE, return.processIndex = FALSE, return.processFlow = TRUE) {
     
     # Maybe we should set only.valid to FALSE by default, just as is done in scanForModelError()???
     
@@ -6597,7 +6597,7 @@ purgeOutput <- function(projectPath, modelName) {
 #' @inheritParams runProcess
 #' @inheritParams Projects
 #' @param force.restart Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.
-#' @param prugeStopFile Logical: Should the file that signals that the model should be stopped be deleted if present before running? This parameter does not yet seem to in use by any other function.
+#' @param prugeStopFile Logical: Should the file that signals that the model should be stopped be deleted if present before running (used by the GUI).
 #' @param replaceDataList A list named by the processes to replace output data for. See \code{\link{runProcess}}.
 #' @param replaceArgsList A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.
 #' @param prependProcessList A list of \code{values} used in \code{\link{prependProcess}}, named by the processes to prepend a process to.

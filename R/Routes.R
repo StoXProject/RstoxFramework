@@ -23,7 +23,10 @@
 #' @param name The name of the property, such as "processName", "functionName", one of the process parameters ("enabled", "showInMap" and "fileOutput"), the name of a funciton input, or the name of a function parameter. 
 #' @param value The value to set to the property (string).
 #' @param stylesheet The html stylesheet to use, defaulted to no stylesheet.
-#' @param include.numeric Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
+#' @param include.integer Logical: If TRUE get possible values for integer variables. Default: TRUE.
+#' @param include.numericInteger Logical: If TRUE get possible values for numeric variables that are all whole numbers. Default: TRUE.
+#' @param include.numeric Logical: If TRUE get possible values for numeric variables. Default: FALSE
+#' @param include.POSIXct Logical: If TRUE get possible values for POSIXct variables. Default: FALSE
 #' @param stopIfEmptyPossibleValues Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
 #' @param format A character string naming the format to get info for.
 #' @param objectName The R object to get help as html for.
@@ -1526,7 +1529,7 @@ getFilterTableNames <- function(projectPath, modelName, processID, warn = TRUE) 
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableName, include.numeric = TRUE, stopIfEmptyPossibleValues = FALSE) {
+getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableName, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE, stopIfEmptyPossibleValues = FALSE) {
     
     # Get the output of the input process, which is only one for all filters:
     inputProcessID <- getSingleInputProcessID(projectPath, modelName, processID)
@@ -1555,13 +1558,18 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     
     # Get the data types:
     type <- sapply(processOutput, getRelevantClass)
+    type_with_numeric_integer <- type
+    areNumeric <- type_with_numeric_integer %in% c("numeric", "double")
+    areNumericInteger <- sapply(processOutput[, ..areNumeric], detectInteger)
+    
+    type_with_numeric_integer[areNumeric][areNumericInteger] <- "integer"
     
     # Get the operators:
     operators <- getRstoxFrameworkDefinitions("filterOperators")[type]
     
     # Get a list of unique values for each column of each table:
     #options <- lapply(processOutput, getPossibleValuesOneTable, include.numeric = include.numeric)
-    options <- lapply(getPossibleValuesOneTable(processOutput, type, include.numeric = include.numeric), getOptionList)
+    options <- lapply(getPossibleValuesOneTable(processOutput, type = type_with_numeric_integer, include.integer = include.integer, include.numericInteger = include.numericInteger, include.numeric = include.numeric, include.POSIXct = include.POSIXct), getOptionList)
     
     # Return the
     output <- structure(
@@ -1582,7 +1590,9 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     return(output)
 }
 
-
+detectInteger <- function(x, tol = .Machine$double.eps^0.5) {
+    all(abs(x - round(x)) < tol)
+}
 
 getSingleInputProcessID <- function(projectPath, modelName, processID) {
     # Get the output of the input process, which is only one for all filters:
@@ -1685,7 +1695,7 @@ getOptionList <- function(option, digits = 6) {
 }
 
 
-getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, include.POSIXct = FALSE) {
+getPossibleValuesOneTable <- function(table, type, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE) {
     
     # Return empty named list if no input:
     if(length(table) == 0) {
@@ -1694,8 +1704,15 @@ getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, incl
     
     # Get the indices of the variables to get possible values from:
     validInd <- seq_len(ncol(table))
-    if(!include.numeric) {
-        validInd <- setdiff(validInd, which(type %in% c("numeric", "integer", "double")))
+    
+    if(!include.integer) {
+        validInd <- setdiff(validInd, which(type %in% c("integer")))
+    }
+    if(!include.numericInteger) {
+        validInd <- setdiff(validInd, which(type %in% c("numeric.integer")))
+    }
+    else if(!include.numeric) {
+        validInd <- setdiff(validInd, which(type %in% c("numeric", "double", "numeric.integer")))
     }
     if(!include.POSIXct) {
         validInd <- setdiff(validInd, which(type %in% c("POSIXct")))

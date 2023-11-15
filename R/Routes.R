@@ -23,7 +23,10 @@
 #' @param name The name of the property, such as "processName", "functionName", one of the process parameters ("enabled", "showInMap" and "fileOutput"), the name of a funciton input, or the name of a function parameter. 
 #' @param value The value to set to the property (string).
 #' @param stylesheet The html stylesheet to use, defaulted to no stylesheet.
-#' @param include.numeric Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
+#' @param include.integer Logical: If TRUE get possible values for integer variables. Default: TRUE.
+#' @param include.numericInteger Logical: If TRUE get possible values for numeric variables that are all whole numbers. Default: TRUE.
+#' @param include.numeric Logical: If TRUE get possible values for numeric variables. Default: FALSE
+#' @param include.POSIXct Logical: If TRUE get possible values for POSIXct variables. Default: FALSE
 #' @param stopIfEmptyPossibleValues Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
 #' @param format A character string naming the format to get info for.
 #' @param objectName The R object to get help as html for.

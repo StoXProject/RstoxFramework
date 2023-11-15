@@ -120,7 +120,13 @@ getParameterVectorInfo(
 
 \item{tableName}{The name of the output table to get from the process.}
 
-\item{include.numeric}{Logical: If TRUE get possible values for numeric ariables as well as categorical variables.}
+\item{include.integer}{Logical: If TRUE get possible values for integer variables. Default: TRUE.}
+
+\item{include.numericInteger}{Logical: If TRUE get possible values for numeric variables that are all whole numbers. Default: TRUE.}
+
+\item{include.numeric}{Logical: If TRUE get possible values for numeric variables. Default: FALSE}
+
+\item{include.POSIXct}{Logical: If TRUE get possible values for POSIXct variables. Default: FALSE}
 
 \item{stopIfEmptyPossibleValues}{Logical: If TRUE get possible values for numeric ariables as well as categorical variables.}
 

@@ -567,7 +567,7 @@ processPropertyFormats <- list(
     ),
     
     fileExtension = list(
-        class = "vector", 
+        class = "single", 
         title = "File extension", 
         variableTypes = "character"
     )

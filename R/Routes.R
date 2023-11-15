@@ -1526,7 +1526,7 @@ getFilterTableNames <- function(projectPath, modelName, processID, warn = TRUE) 
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableName, include.numeric = TRUE, stopIfEmptyPossibleValues = FALSE) {
+getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableName, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE, stopIfEmptyPossibleValues = FALSE) {
     
     # Get the output of the input process, which is only one for all filters:
     inputProcessID <- getSingleInputProcessID(projectPath, modelName, processID)
@@ -1555,13 +1555,18 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     
     # Get the data types:
     type <- sapply(processOutput, getRelevantClass)
+    type_with_numeric_integer <- type
+    areNumeric <- type_with_numeric_integer %in% c("numeric", "double")
+    areNumericInteger <- sapply(processOutput[, ..areNumeric], detectInteger)
+    
+    type_with_numeric_integer[areNumeric][areNumericInteger] <- "integer"
     
     # Get the operators:
     operators <- getRstoxFrameworkDefinitions("filterOperators")[type]
     
     # Get a list of unique values for each column of each table:
     #options <- lapply(processOutput, getPossibleValuesOneTable, include.numeric = include.numeric)
-    options <- lapply(getPossibleValuesOneTable(processOutput, type, include.numeric = include.numeric), getOptionList)
+    options <- lapply(getPossibleValuesOneTable(processOutput, type = type_with_numeric_integer, include.integer = include.integer, include.numericInteger = include.numericInteger, include.numeric = include.numeric, include.POSIXct = include.POSIXct), getOptionList)
     
     # Return the
     output <- structure(
@@ -1582,7 +1587,9 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     return(output)
 }
 
-
+detectInteger <- function(x, tol = .Machine$double.eps^0.5) {
+    all(abs(x - round(x)) < tol)
+}
 
 getSingleInputProcessID <- function(projectPath, modelName, processID) {
     # Get the output of the input process, which is only one for all filters:
@@ -1685,7 +1692,7 @@ getOptionList <- function(option, digits = 6) {
 }
 
 
-getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, include.POSIXct = FALSE) {
+getPossibleValuesOneTable <- function(table, type, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE) {
     
     # Return empty named list if no input:
     if(length(table) == 0) {
@@ -1694,8 +1701,15 @@ getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, incl
     
     # Get the indices of the variables to get possible values from:
     validInd <- seq_len(ncol(table))
-    if(!include.numeric) {
-        validInd <- setdiff(validInd, which(type %in% c("numeric", "integer", "double")))
+    
+    if(!include.integer) {
+        validInd <- setdiff(validInd, which(type %in% c("integer")))
+    }
+    if(!include.numericInteger) {
+        validInd <- setdiff(validInd, which(type %in% c("numeric.integer")))
+    }
+    else if(!include.numeric) {
+        validInd <- setdiff(validInd, which(type %in% c("numeric", "double", "numeric.integer")))
     }
     if(!include.POSIXct) {
         validInd <- setdiff(validInd, which(type %in% c("POSIXct")))

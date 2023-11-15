@@ -60,7 +60,10 @@ getFilterOptionsOneTable(
   modelName,
   processID,
   tableName,
-  include.numeric = TRUE,
+  include.integer = TRUE,
+  include.numericInteger = TRUE,
+  include.numeric = FALSE,
+  include.POSIXct = FALSE,
   stopIfEmptyPossibleValues = FALSE
 )
 

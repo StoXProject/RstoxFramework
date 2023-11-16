@@ -18,6 +18,7 @@
 \alias{getFilterOptionsAll}
 \alias{getParameterTableInfo}
 \alias{getParameterVectorInfo}
+\alias{getParameterSingleInfo}
 \title{Get objects for use in the GUI}
 \usage{
 getModelInfo()
@@ -84,6 +85,14 @@ getParameterTableInfo(
 )
 
 getParameterVectorInfo(
+  projectPath,
+  modelName,
+  processID,
+  format,
+  stopIfEmptyPossibleValues = FALSE
+)
+
+getParameterSingleInfo(
   projectPath,
   modelName,
   processID,

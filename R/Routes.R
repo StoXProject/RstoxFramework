@@ -958,7 +958,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
                 #    isSingleParameter(format), 
                 #    # Format class "single" used for data dependent possigle values:
                 #    mapply(
-                #        getParameterVectorPossibleValues,
+                #        getParameterElementPossibleValues,
                 #        projectPath = projectPath, 
                 #        modelName = modelName, 
                 #        processID = processID, 
@@ -1550,7 +1550,7 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
         #else {
         #    warning(warnText)
         #}
-        return(emptyNamedList())
+        return(list(fields = list()))
     }
     
     # Get the column names:
@@ -1844,7 +1844,7 @@ getParameterTablePossibleValues <- function(projectPath, modelName, processID, f
 }
 
 # Get the possible values of a parameter table:
-getParameterVectorPossibleValues <- function(projectPath, modelName, processID, format, stopIfEmptyPossibleValues = FALSE, length1ToList = FALSE) {
+getParameterElementPossibleValues <- function(projectPath, modelName, processID, format, stopIfEmptyPossibleValues = FALSE, length1ToList = FALSE) {
     possibleValues <- getParameterFormatElement(
         projectPath = projectPath, 
         modelName = modelName, 
@@ -1932,7 +1932,39 @@ getParameterVectorInfo <- function(projectPath, modelName, processID, format, st
             processID = processID, 
             format = format
         ), 
-        parameterVectorPossibleValues = getParameterVectorPossibleValues(
+        parameterVectorPossibleValues = getParameterElementPossibleValues(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format, 
+            stopIfEmptyPossibleValues = stopIfEmptyPossibleValues, 
+            length1ToList = TRUE
+        )
+    )
+}
+
+
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getParameterSingleInfo <- function(projectPath, modelName, processID, format, stopIfEmptyPossibleValues = FALSE) {
+    list(
+        parameterSingleTitle = getParameterFormatElement(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format, 
+            element = "title"
+        ), 
+        parameterSingleVariableTypes = getParameterVariableTypes(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format
+        ), 
+        parameterSinglePossibleValues = getParameterElementPossibleValues(
             projectPath = projectPath, 
             modelName = modelName, 
             processID = processID, 

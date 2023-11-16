@@ -1560,9 +1560,10 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     type <- sapply(processOutput, getRelevantClass)
     type_with_numeric_integer <- type
     areNumeric <- type_with_numeric_integer %in% c("numeric", "double")
-    areNumericInteger <- sapply(processOutput[, ..areNumeric], detectInteger)
-    
-    type_with_numeric_integer[areNumeric][areNumericInteger] <- "integer"
+    if(any(areNumeric)) {
+        areNumericInteger <- sapply(processOutput[, ..areNumeric], detectInteger)
+        type_with_numeric_integer[areNumeric][areNumericInteger] <- "integer"
+    }
     
     # Get the operators:
     operators <- getRstoxFrameworkDefinitions("filterOperators")[type]

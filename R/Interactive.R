@@ -192,7 +192,7 @@ assignment_removeHaul <- function(Stratum, PSU, Haul, BioticAssignment) {
 
 
 # General function to modify PSUProcessData:
-modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic"), returnOnlyElements = TRUE) {
     
     # Get the PSUType:
     PSUType <- RstoxData::match_arg_informative(PSUType)
@@ -208,17 +208,18 @@ modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PS
     
     # Apply the modification function, which needs to have PSUProcessData as input and output:
     if("PSUType" %in% names(formals(fun))) {
-        PSUProcessData <- fun(PSUProcessData, ..., PSUType = PSUType)
+        result <- fun(PSUProcessData, ..., PSUType = PSUType)
     }
     else {
-        PSUProcessData <- fun(PSUProcessData, ...)
+        result <- fun(PSUProcessData, ...)
     }
     
-    # Rename back from SSU:
-    PSUProcessData <- RstoxBase::renameSSULabelInPSUProcessData(PSUProcessData, PSUType = PSUType, reverse = FALSE)
+    # Rename back from SSU (processData and other information like the SSU being changed):
+    result <- lapply(result, RstoxBase::renameSSULabelInPSUProcessData, PSUType = PSUType, reverse = FALSE)
+    
     
     # Format the output:
-    RstoxBase::formatOutput(PSUProcessData, dataType = dataType, keep.all = FALSE)
+    RstoxBase::formatOutput(result$PSUProcessData, dataType = dataType, keep.all = FALSE)
     
     # Set the AcousticPSU back to the process data of the process:
     setProcessMemory(
@@ -226,20 +227,28 @@ modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PS
         modelName = modelName, 
         processID = processID, 
         argumentName = "processData", 
-        argumentValue = list(PSUProcessData) # We need to list this to make it correspond to the single value of the argumentName parameter.
+        argumentValue = list(result$PSUProcessData) # We need to list this to make it correspond to the single value of the argumentName parameter.
     )
     
     # Revert the active process ID to the previous process:
     resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
     
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
+    if(returnOnlyElements) {
+        return(result$elements)
+    }
+    else {
+        # Return the active process:
+        activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+        return(
+            c(
+                list(
+                    activeProcess = activeProcess, 
+                    saved = isSaved(projectPath)
+                ),
+                result
+            )
         )
-    )
+    }
     
 }
 
@@ -278,7 +287,14 @@ addPSUToPSUProcessData <- function(PSUProcessData, Stratum, PSU = NULL, PSUType)
         toAdd
     )
     
-    return(PSUProcessData)
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU
+        )
+    )
+    
+    return(output)
 }
 
 
@@ -301,7 +317,14 @@ removePSUFromPSUProcessData <- function(PSUProcessData, PSU = NULL) {
     PSUProcessData$Stratum_PSU <- PSUProcessData$Stratum_PSU[PSUsToKeepInStratum_PSU, ]
     PSUProcessData$SSU_PSU[PSUsToSetToNAInSSU_PSU, PSU := NA]
     
-    return(PSUProcessData)
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU
+        )
+    )
+    
+    return(output)
 }
 
 
@@ -324,7 +347,15 @@ renamePSUInPSUProcessData <- function(PSUProcessData, PSU, newPSUName) {
     PSUProcessData$Stratum_PSU$PSU[atPSUsToRename] <- newPSUName
     PSUProcessData$SSU_PSU$PSU[atSSUsToRename] <- newPSUName
     
-    return(PSUProcessData)
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU, 
+            newPSUName = newPSUName
+        )
+    )
+    
+    return(output)
 }
 
 
@@ -344,27 +375,42 @@ addSSUToPSUProcessData <- function(PSUProcessData, PSU, SSU) {
     atSSUs <- PSUProcessData$SSU_PSU$SSU %in% SSU
     PSUProcessData$SSU_PSU[atSSUs, PSU := ..PSU]
     
-    return(PSUProcessData)
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU, 
+            SSU = SSU
+        )
+    )
+    
+    return(output)
 }
 
 
-removeSSU <- function(PSU, SSU, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+removeSSU <- function(SSU, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
     
     modifyPSUProcessData(
         removeSSUFromPSUProcessData, 
-        PSU = PSU, SSU = SSU, # The arguments of the removeSSUFromPSUProcessData()
+        SSU = SSU, # The arguments of the removeSSUFromPSUProcessData()
         projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
     )
     
 }
 
-removeSSUFromPSUProcessData <- function(PSUProcessData, PSU, SSU) {
+removeSSUFromPSUProcessData <- function(PSUProcessData, SSU) {
     
     # Set the PSU column to empty string for the given SSUs:
     atSSUs <- PSUProcessData$SSU_PSU$SSU %in% SSU
     PSUProcessData$SSU_PSU[atSSUs, PSU := NA]
     
-    return(PSUProcessData)
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            SSU = SSU
+        )
+    )
+    
+    return(output)
 }
 
 
@@ -389,7 +435,14 @@ removeAllPSUsOfStratumFromPSUProcessData <- function(PSUProcessData, Stratum) {
     PSUProcessData$Stratum_PSU <- PSUProcessData$Stratum_PSU[!atPSUsToRemoveInStratum_PSU, ]
     PSUProcessData$SSU_PSU[atPSUsToSetToNAInSSU_PSU, PSU := NA]
     
-    return(PSUProcessData)
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSUsToRemove = PSUsToRemove
+        )
+    )
+    
+    return(output)
 }
 
 
@@ -478,7 +531,7 @@ addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
 removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     
     removeSSU(
-        PSU = PSU, SSU = EDSU, 
+        SSU = EDSU, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
@@ -593,7 +646,7 @@ addStation <- function(PSU, Station, projectPath, modelName, processID) {
 removeStation <- function(Station, projectPath, modelName, processID) {
     
     removeSSU(
-        PSU = PSU, SSU = Station, 
+        SSU = Station, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 

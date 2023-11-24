@@ -37,7 +37,7 @@ initiateRstoxFramework <- function(){
     officialStoxLibraryPackagesAll <- c("RstoxFramework", officialStoxLibraryPackages)
     # Get installed versions:
     InstalledRstoxPackageVersion <- getPackageVersion(officialStoxLibraryPackagesAll, only.version = FALSE)
-
+    
     # Get the versions of the dependencies:
     ### dependentPackagesOnlyRstoxFramework <- getPackageVersion(
     ###     getDependencies(

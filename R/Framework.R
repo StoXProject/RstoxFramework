@@ -520,73 +520,53 @@ openProjectAsTemplate <- function(
     copyProject(projectPath, newProjectPath, ow = ow, empty.output = TRUE, empty.input = TRUE, empty.memory = TRUE, empty.processData = TRUE, close = FALSE)
         
         
-    return(newProjectPath)
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-openProjectAsTemplate_old <- function(
-        projectPath, 
-        newProjectPath, 
-        ow = FALSE, 
-        newValues = NULL#, 
-        #keepFilterExpressions = FALSE
-) {
-    
-    # Check whether the project to be used as template exists:
-    if(!dir.exists(projectPath) || !isProject(projectPath)) {
-        stop("The path ", projectPath, " does not point to a StoX project.")
-    }
-    
-    # Check whether the project exists:
-    if(dir.exists(newProjectPath)) {
-        if(!ow) {
-            stop("StoX: The project '", newProjectPath, "' exists. Choose a different project path for the new project.")
-        }
-        else {
-            unlink(newProjectPath, recursive = TRUE, force = TRUE)
-        }
-    }
-    
-    # Copy the project as a template:
-    copyProject(projectPath, newProjectPath, ow = ow, empty.output = TRUE, empty.input = TRUE, close = FALSE)
-    
-    # Get processes with AcousticLayer, AcousticPSU, BioticLayer, BioticPSU, BioticAssignment:
-    processDataToBeDeleted <- c("AcousticLayer", "AcousticPSU", "BioticLayer", "BioticPSU", "BioticAssignment")
-    processDataToBeDeleted_processID <- unlist(mapply(
-        getProcessIDFromFunctionName, 
-        functionName = processDataToBeDeleted, 
-        SIMPLIFY = FALSE, 
-        MoreArgs = list(projectPath = newProjectPath, modelName = "baseline")
-    )
-    )
-    # Delete the processData:
-    mapply(
-        deleteProcessData, 
+    list(
         projectPath = newProjectPath, 
-        modelName = "baseline", 
-        processID = processDataToBeDeleted_processID
+        projectName = basename(newProjectPath), 
+        saved = isSaved(newProjectPath)
     )
-    # Save the changes:
-    saveProject(newProjectPath)
-    
-    
-    return(newProjectPath)
 }
+
+
+openIfNotAlreadyOpenProject <- function(projectPath) {
+    
+    # Open the project if not open:
+    if(!isOpenProject(projectPath)) {
+        openProject(projectPath)
+    }
+    # Otherwise check that the project was opened in the current StoX:
+    else {
+        # Get project description attributes:
+        projectDescriptionAttributes <- readStoredProjectDescriptionAttributes(projectPath)
+        
+        if(length(projectDescriptionAttributes$currentRstoxPackageVersion)) {
+            # ... and stored Rstox package versions as a table:
+            oldCurrentRstoxPackageVersion <- projectDescriptionAttributes$currentRstoxPackageVersion
+            oldCurrentRstoxPackageVersionTable <- rbindlist(lapply(strsplit(oldCurrentRstoxPackageVersion, "_"), as.list))
+            names(oldCurrentRstoxPackageVersionTable) <- c("packageName", "oldCurrentVersion")
+            # ... and current Rstox package versions as a table:
+            currentRstoxPackageVersion <- getRstoxFrameworkDefinitions("InstalledRstoxPackageVersion")
+            currentRstoxPackageVersionTable <- rbindlist(lapply(strsplit(currentRstoxPackageVersion, "_"), as.list))
+            names(currentRstoxPackageVersionTable) <- c("packageName", "currentVersion")
+            
+            commonPackageNames <- intersect(oldCurrentRstoxPackageVersionTable$packageName, currentRstoxPackageVersionTable$packageName)
+            
+            allVersionsTable <- merge(
+                subset(oldCurrentRstoxPackageVersionTable, packageName %in% commonPackageNames),
+                subset(currentRstoxPackageVersionTable, packageName %in% commonPackageNames)
+            )
+            
+            differing <- subset(allVersionsTable, oldCurrentVersion != currentVersion)$packageName
+            
+            if(length(differing)) {
+                warning("StoX: The StoX project was opened with a different StoX version than the current. This could cause unexpected errors. Please close (closeProject()) and then repoen the project.")
+            }
+        }
+    }
+}
+
+
+
 
 
 #' 
@@ -716,6 +696,7 @@ saveAsProject <- function(
 #' 
 copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, msg = TRUE) {
     
+    
     # Check whether the project to be used as template exists:
     if(!dir.exists(projectPath) || !isProject(projectPath)) {
         stop("The path ", projectPath, " does not point to a StoX project.")
@@ -841,8 +822,14 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         saveProject(newProjectPath)
     }
     
-    if(close && isOpenProject(newProjectPath)) {
-        closeProject(newProjectPath, save = FALSE, msg = msg)
+    if(isOpenProject(newProjectPath)) {
+        if(close) {
+            closeProject(newProjectPath, save = FALSE, msg = msg)
+        }
+        else {
+            # Make sure the project session is complete:
+            createProjectSessionFolderStructure(newProjectPath)
+        }
     }
     
     
@@ -872,6 +859,8 @@ deleteProcessData <- function(projectPath, modelName, processID) {
         purge.processData = TRUE
     )
 }
+
+
 
 
 ##################################################
@@ -1108,6 +1097,10 @@ readProjectDescriptionJSON <- function(projectDescriptionFile) {
     # Add the headers as attributes:
     projectDescription <- projectDescriptionList$project$models
     attrs <- projectDescriptionList$project[! names(projectDescriptionList$project) %in% "models"]
+    
+    # Add also the current Rstox package versions
+    attrs$currentRstoxPackageVersion <- getRstoxFrameworkDefinitions("InstalledRstoxPackageVersion")
+    
     # Unlist all attributes, as these are vectors only and simplifyVector = FALSE was used when reading:
     attrs <- lapply(attrs, unlist)
     for(attrsName in names(attrs)) {
@@ -2239,7 +2232,7 @@ getStoxFunctionMetaData <- function(functionName, metaDataName = NULL, showWarni
     }
     else if(!length(stoxLibrary[[functionName]])) {
         if(showWarnings) {
-            warning("StoX: The function ", functionName, "is not present. Please install ", sub("\\:.*", "", packageName), ".")
+            warning("StoX: The function ", functionName, " is not present. Please install ", sub("\\:.*", "", packageName), ".")
         }
     }
     else {
@@ -3014,7 +3007,7 @@ getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, end
         processTable[, usedInProcessIDs := lapply(usedInProcessIndices, function(x) processID[x])]
         processTable[, usedInProcessNames := lapply(usedInProcessIndices, function(x) processName[x])]
         
-        # Add a column identtifying processes which are not used in any other processes:
+        # Add a column identifying processes which are not used in any other processes:
         processTable[, terminalProcess := lengths(usedInProcessIDs) == 0]
         
         
@@ -6628,10 +6621,8 @@ runProcesses <- function(
     }
     
     # Open the project if not open:
-    if(!isOpenProject(projectPath)) {
-        # No need for Application here as runProcesses() should be used after opening the project in a Application:
-        openProject(projectPath, ...)
-    }
+    temp <- openIfNotAlreadyOpenProject(projectPath)
+    
     
     if(length(prependProcessList)) {
         mapply(
@@ -6681,11 +6672,11 @@ runProcesses <- function(
     }
     
     
-    # Check that the project is open:
-    if(!isOpenProject(projectPath)) {
-        warning("StoX: The StoX project ", projectPath, " is not open. Use RstoxFramework::openProject() to open the project.")
-        return(failedVector)
-    }
+    ## Check that the project is open:
+    #if(!isOpenProject(projectPath)) {
+    #    warning("StoX: The StoX project ", projectPath, " is not open. Use RstoxFramework::openProject() to open the project.")
+    #    return(failedVector)
+    #}
     
     # Chech that none of the models of the project are running:
     if(isRunning(projectPath, modelName) && !force.restart) {

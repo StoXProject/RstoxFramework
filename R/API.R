@@ -87,10 +87,8 @@ runModel <- function(
     if(run) {
         if(isProject(projectPath)) {
             # Open the project if not open:
-            if(!isOpenProject(projectPath)) {
-                # No need for GUI here as this function should not be used by any GUI, but is merely a converience function replacing a GUI:
-                openProject(projectPath, ...)
-            }
+            temp <- openIfNotAlreadyOpenProject(projectPath)
+            
             # Run the model:
             if(msg) {
                 message(
@@ -189,9 +187,7 @@ runProject <- function(
     }
     if(isProject(projectPath)) {
         # Open the project if not open:
-        if(!isOpenProject(projectPath)) {
-            openProject(projectPath, ...)
-        }
+        temp <- openIfNotAlreadyOpenProject(projectPath)
     }
     
     if(msg) {
@@ -989,9 +985,8 @@ runProject_ReplaceAcousticFiles <- function(projectPath, ReadAcoustic.FileNames,
         warning("Non-existing project ", projectPath, ".")
         return(NULL)
     }
-    if(!isOpenProject(projectPath)) {
-        openProject(projectPath)
-    }
+    # Open the project if not open:
+    temp <- openIfNotAlreadyOpenProject(projectPath)
     
     # Get the process ID of the existing DefineAcousticPSU process:
     processID_existing <- findProcess(

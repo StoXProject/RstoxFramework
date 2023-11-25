@@ -61,6 +61,8 @@ copyProject(
   empty.output = FALSE,
   empty.input = FALSE,
   empty.memory = FALSE,
+  empty.processData = FALSE,
+  processDataToBeEmptied = NULL,
   close = FALSE,
   msg = TRUE
 )
@@ -101,6 +103,10 @@ deleteProject(projectPath)
 \item{empty.input}{Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.}
 
 \item{empty.memory}{Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.}
+
+\item{empty.processData}{Logical: (In \code{copyProject}) If TRUE, empty the process data listed in \code{processDataToBeEmptied}.}
+
+\item{processDataToBeEmptied}{An optional character vector of names of the process data to empty when copying a StoX project. The default (NULL) implies all possible process data (all functions returned from getRstoxFrameworkDefinitions("processDataFunctions")).}
 
 \item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
 }

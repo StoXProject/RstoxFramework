@@ -86,8 +86,9 @@ flattenDataTable <- function(x, replace = NA) {
 #' @param lineSeparator The string to separate lines by, defaulted to a NULL, which keeps the output as a vector of strings.
 #' @param na The string to replace NAs by, defaulted to "-".
 #' @param enable.auto_unbox Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.
+#' @param add.line.index Logical: If TRUE (the default) print row indices as in data.table.
 #' 
-fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE) {
+fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, add.line.index = FALSE) {
     # Return immediately if x has length 0:
     if(length(x) == 0) {
         return(x)
@@ -101,6 +102,11 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         # Add the column names:
         if(length(colnames(x))) {
             x <- rbind(colnames(x), x)
+        }
+        
+        # Add data.table style line indices which is a sequence from 1:
+        if(add.line.index) {
+            x <- cbind(c("", paste0(seq_len(nrow(x)), ":")), x)
         }
         
         # Right pad with spaecs:
@@ -124,6 +130,12 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add the column names:
         x <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))
+        
+        # Add data.table style line indices which is a sequence from 1:
+        if(add.line.index) {
+            x <- cbind(c("", paste0(seq_len(nrow(x) - 1), ":")), x)
+        }
+        
         # Right pad with spaecs:
         x <- x[, lapply(.SD, function(y) stringi::stri_pad_left(y, max(nchar(y)), pad = " "))]
         
@@ -710,18 +722,20 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
 #' @param ignoreEqual Logical: If TRUE, ignore columns where all values are equal.
 #' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
-#' @param data.out Logical, if TRUE output the original and new data along with the tests.
+#' @param data.out Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.
 #' @param mergeWhenDifferentNumberOfRows Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.
 #' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
 #' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
 #' @param checkOutputFiles Logical, if TRUE compare the file names of the output files.
 #' @param tolerance The tolerance to use in all.equal.
 #' @param debug Logical: If TRUE, interrupt the execution just before priting the test results.
+#' @param check.columnNames_identical Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.
+#' @param testAllTRUE Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.
 #' @param ... Used in runModel().
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, ...) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -767,9 +781,11 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
         # Check identical table names: 
         tableNames_identical[[name]] <- identical(sort(names(dat_orig[[name]])), sort(names(dat[[name]])))
         # Check identical column names: 
-        columnNames_identical[[name]] <- list()
-        for(subname in names(dat_orig[[name]])) {
-            columnNames_identical[[name]][[subname]] <- identical(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
+        if(check.columnNames_identical)  {
+            columnNames_identical[[name]] <- list()
+            for(subname in names(dat_orig[[name]])) {
+                columnNames_identical[[name]][[subname]] <- identical(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
+            }
         }
     }
     
@@ -795,7 +811,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                         classOf = classOf, 
                         mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
                         sort = sort, 
-                        tolerance = tolerance
+                        tolerance = tolerance, 
+                        testAllTRUE = testAllTRUE
                     )
                     
                     data_equal[[name]][[subname]] <- result$warn
@@ -813,7 +830,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                         classOf = classOf, 
                         mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
                         sort = sort, 
-                        tolerance = tolerance
+                        tolerance = tolerance, 
+                        testAllTRUE = testAllTRUE
                     )
                     
                     data_equal[[name]][[subname]] <- result$warn
@@ -905,6 +923,9 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     
     
     ok <- all(unlist(allTests) %in% TRUE)
+    if(!length(data.out)) {
+        data.out <- !ok
+    }
     
     out <- lapply(allTests, formatDiffs)
     
@@ -944,7 +965,7 @@ formatDiffs <- function(x) {
     return(out)
 }
 
-all.equal_mergeIfDifferentNumberOfRows <- function(x, y, check.attributes = FALSE, sort = TRUE, NAReplacement = NULL, ignoreEqual = FALSE, tolerance = sqrt(.Machine$double.eps), ...) {
+all.equal_mergeIfDifferentNumberOfRows <- function(x, y, check.attributes = FALSE, sort = TRUE, NAReplacement = NULL, ignoreEqual = FALSE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE, ...) {
     
     if(length(x) == 0 && length(y) == 0 ) {
         return(TRUE)
@@ -957,24 +978,36 @@ all.equal_mergeIfDifferentNumberOfRows <- function(x, y, check.attributes = FALS
     test <- all.equal(as.data.frame(xyList$xy$x), as.data.frame(xyList$xy$y), check.attributes = FALSE, tolerance = tolerance)
     testPlus <-all.equal(as.data.frame(xyList$xyPlus$x), as.data.frame(xyList$xyPlus$y), check.attributes = FALSE, tolerance = tolerance)
     
-    if(isTRUE(test) && isTRUE(testPlus)) {
-        warn <- NULL
-        xyList <- NULL
-    }
-    else if(isTRUE(testPlus)) {
-        warn <- paste(c("From merging with all = FALSE:", test), collapse = "\n")
-        xyList$xyPlus <- NULL
-    }
-    else if(isTRUE(test)) {
-        warn <- paste(c("From merging with all = TRUE antijoined with merging with all = FALSE:", testPlus), collapse = "\n")
-        xyList$xy <- NULL
+    if(testAllTRUE) {
+        if(isTRUE(test) && isTRUE(testPlus)) {
+            warn <- NULL
+            xyList <- NULL
+        }
+        else if(isTRUE(testPlus)) {
+            warn <- paste(c("From merging with all = FALSE:", test), collapse = "\n")
+            xyList$xyPlus <- NULL
+        }
+        else if(isTRUE(test)) {
+            warn <- paste(c("From merging with all = TRUE antijoined with merging with all = FALSE:", testPlus), collapse = "\n")
+            xyList$xy <- NULL
+        }
+        else {
+            warn <- c(
+                paste(c("From merging with all = FALSE:", test), collapse = "\n"), 
+                paste(c("From merging with all = TRUE antijoined with merging with all = FALSE:", testPlus), collapse = "\n")
+            )
+        }
     }
     else {
-        warn <- c(
-            paste(c("From merging with all = FALSE:", test), collapse = "\n"), 
-            paste(c("From merging with all = TRUE antijoined with merging with all = FALSE:", testPlus), collapse = "\n")
-        )
+        if(isTRUE(test)) {
+            warn <- NULL
+            xyList <- NULL
+            }
+        else {
+            warn <- paste(c("From merging with all = FALSE:", test), collapse = "\n")
+        }
     }
+    
     
     return(list(
         warn = warn, 
@@ -1091,7 +1124,7 @@ locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
 
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, tolerance = sqrt(.Machine$double.eps)) {
+compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE) {
     
     
     
@@ -1158,7 +1191,7 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     
     # Check equality:
     if(mergeWhenDifferentNumberOfRows && NROW(x) != NROW(y)) {
-        out <- all.equal_mergeIfDifferentNumberOfRows(x, y, check.attributes = FALSE, all = TRUE, sort = sort, NAReplacement = NAReplacement, ignoreEqual = ignoreEqual, tolerance = tolerance)
+        out <- all.equal_mergeIfDifferentNumberOfRows(x, y, check.attributes = FALSE, all = TRUE, sort = sort, NAReplacement = NAReplacement, ignoreEqual = ignoreEqual, tolerance = tolerance, testAllTRUE = testAllTRUE)
         
         return(out)
     }
@@ -1299,56 +1332,8 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 
 
 
-#' Convert to JSON
-#' 
-#' This function takes care of the defaults preferred by the Rstox packages
-#' 
-#' @param x An object to convert to JSON.
-#' @param ... Parameters overriding the defaults digits = NA, auto_unbox = TRUE, na = "null", null = "null".
-#' 
-toJSON_Rstox <- function(x, ...) {
-    # Define defaults:
-    digits <- NA
-    auto_unbox <- TRUE
-    # Changed on 2021-04-21 to supports NA strings:
-    #na <- "null"
-    na <- "string"
-    na <- "null"
-    null <- "null"
-    
-    # Override by ...:
-    lll <- list(...)
-    
-    if(!"digits" %in% names(lll)) {
-        lll$digits <- digits
-    }
-    if(!"auto_unbox" %in% names(lll)) {
-        lll$auto_unbox <- auto_unbox
-    }
-    if(!"na" %in% names(lll)) {
-        lll$na <- na
-    }
-    if(!"null" %in% names(lll)) {
-        lll$null <- null
-    }
-    
-    #lll$x <- x
-    lll <- c(list(x = x), lll
-    )
-    
-    # Use ISO8601 for time:
-    lll$POSIXt ="ISO8601"
-    
-    do.call(jsonlite::toJSON, lll)
-}
 
-# NOT CURRENTLY USED: Function to convert classes of a data.table given a list of variablename-class pairs:
-convertClassOfDataTable <- function(x, classes) {
-    for(col in intersect(names(x), names(classes))) {
-        fun <- paste("as", classes[[col]], sep = ".")
-        x[, eval(col) := do.call(fun, list(get(col)))]
-    }
-}
+
 
 ##################################################
 ##################################################
@@ -1826,14 +1811,15 @@ setRstoxPrecision <- function(x) {
             stratumNames <- outdata$StratumName
             crs <- sf::st_crs(outdata)
             
-            # Write the multipolygons to a temporary file:
-            sf::st_write(outdata, tmp, quiet = TRUE)
+            # Write the multipolygons to a temporary file (suppress the name abbreviation warning "Field names abbreviated for ESRI Shapefile driver"):
+            suppressWarnings(sf::st_write(outdata, tmp, quiet = TRUE))
             x <- sf::st_read(tmp, quiet = TRUE)
             
             # Add the stratum names and crs again: 
             x <- x[, NULL]
             x$StratumName <- stratumNames
-            sf::st_crs(x) <- crs
+            # Suppress "replacing crs does not reproject data; use st_transform for that":
+            suppressWarnings(sf::st_crs(x) <- crs)
             # sf::st_read may read as POLYGON. We want MULTIPOLYGON always:
             x <- sf::st_cast(x, "MULTIPOLYGON")
             
@@ -1895,7 +1881,7 @@ dataTable2sf_POINT <- function(x, coords = c("Longitude", "Latitude"), idCol = N
     # Convert to POINT sf object:
     points <- sf::st_as_sf(pos, coords = coords)
     # Set projection:
-    sf::st_crs(points) <- if(length(crs)) crs else getRstoxBaseDefinitions("proj4string_longlat")
+    sf::st_crs(points) <- if(length(crs)) crs else RstoxBase::getRstoxBaseDefinitions("proj4string_longlat")
     
     return(points)
 }
@@ -1914,7 +1900,7 @@ dataTable2sf_LINESTRING <- function(x, x1x2y1y2 = c("startLongitude", "startLati
     linestrings <-  sf::st_sf(linestrings)
     
     # Set projection:
-    sf::st_crs(linestrings) <- if(length(crs)) crs else getRstoxBaseDefinitions("proj4string_longlat")
+    sf::st_crs(linestrings) <- if(length(crs)) crs else RstoxBase::getRstoxBaseDefinitions("proj4string_longlat")
 
     return(linestrings)                   
 }

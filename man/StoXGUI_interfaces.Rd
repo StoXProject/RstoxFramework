@@ -12,9 +12,13 @@
 \alias{setProcessPropertyValue}
 \alias{getFunctionHelpAsHtml}
 \alias{getObjectHelpAsHtml}
+\alias{getTableNames}
+\alias{getFilterTableNames}
+\alias{getFilterOptionsOneTable}
 \alias{getFilterOptionsAll}
 \alias{getParameterTableInfo}
 \alias{getParameterVectorInfo}
+\alias{getParameterSingleInfo}
 \title{Get objects for use in the GUI}
 \usage{
 getModelInfo()
@@ -48,6 +52,22 @@ getFunctionHelpAsHtml(projectPath, modelName, processID, stylesheet = "")
 
 getObjectHelpAsHtml(packageName, objectName, stylesheet = "")
 
+getTableNames(projectPath, modelName, processID, warn = TRUE)
+
+getFilterTableNames(projectPath, modelName, processID, warn = TRUE)
+
+getFilterOptionsOneTable(
+  projectPath,
+  modelName,
+  processID,
+  tableName,
+  include.integer = TRUE,
+  include.numericInteger = TRUE,
+  include.numeric = FALSE,
+  include.POSIXct = FALSE,
+  stopIfEmptyPossibleValues = FALSE
+)
+
 getFilterOptionsAll(
   projectPath,
   modelName,
@@ -65,6 +85,14 @@ getParameterTableInfo(
 )
 
 getParameterVectorInfo(
+  projectPath,
+  modelName,
+  processID,
+  format,
+  stopIfEmptyPossibleValues = FALSE
+)
+
+getParameterSingleInfo(
   projectPath,
   modelName,
   processID,
@@ -97,7 +125,17 @@ getParameterVectorInfo(
 
 \item{objectName}{The R object to get help as html for.}
 
-\item{include.numeric}{Logical: If TRUE get possible values for numeric ariables as well as categorical variables.}
+\item{warn}{Logical: If TRUE show warnings that are not highly important.}
+
+\item{tableName}{The name of the output table to get from the process.}
+
+\item{include.integer}{Logical: If TRUE get possible values for integer variables. Default: TRUE.}
+
+\item{include.numericInteger}{Logical: If TRUE get possible values for numeric variables that are all whole numbers. Default: TRUE.}
+
+\item{include.numeric}{Logical: If TRUE get possible values for numeric variables. Default: FALSE}
+
+\item{include.POSIXct}{Logical: If TRUE get possible values for POSIXct variables. Default: FALSE}
 
 \item{stopIfEmptyPossibleValues}{Logical: If TRUE get possible values for numeric ariables as well as categorical variables.}
 

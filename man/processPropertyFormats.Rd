@@ -5,7 +5,7 @@
 \alias{processPropertyFormats}
 \title{Process property formats for RstoxFramework}
 \format{
-An object of class \code{list} of length 21.
+An object of class \code{list} of length 24.
 }
 \usage{
 processPropertyFormats

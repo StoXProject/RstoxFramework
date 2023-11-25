@@ -1546,7 +1546,7 @@ ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
 #' 
 #' @export
 #' 
-ResampleBioticAssignmentByPSU <- function(BioticAssignment, Seed) {
+ResampleBioticAssignmentByAcousticPSU <- function(BioticAssignment, Seed) {
     
     # This function will be renamed to ResampleAssignedHaulsInStratum
     
@@ -2128,4 +2128,30 @@ initialAggregateBootstrapNetCDF4DataOne <- function(
     return(output)
 }
 
+
+
+
+#' List files in a folder
+#' 
+#' @param FolderName The path to the folder
+#' @param FileExtension File extension
+#' 
+#' @export
+#' 
+ListFilesInFolder <- function(
+    FolderName = character(), 
+    FileExtension = character()
+) {
+    files <- list.files(FolderName)
+    ext <- tools::file_ext(files)
+    if(length(FileExtension)) {
+        files <- files[ext == FileExtension]
+    }
     
+    return(data.table::data.table(FileNames = files))
+}
+
+
+
+
+

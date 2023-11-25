@@ -67,7 +67,7 @@ runProcesses(
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
-\item{prugeStopFile}{Logical: Should the file that signals that the model should be stopped be deleted if present before running? This parameter does not yet seem to in use by any other function.}
+\item{prugeStopFile}{Logical: Should the file that signals that the model should be stopped be deleted if present before running (used by the GUI).}
 
 \item{...}{\code{replaceArgsList} can also be given directly.}
 }

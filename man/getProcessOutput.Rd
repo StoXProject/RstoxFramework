@@ -24,7 +24,8 @@ getProcessOutput(
   drop = FALSE,
   drop.datatype = TRUE,
   splitGeoJson = TRUE,
-  warn = TRUE
+  warn = TRUE,
+  add.line.index = TRUE
 )
 
 getProcessTableOutput(
@@ -38,7 +39,8 @@ getProcessTableOutput(
   linesPerPage = 1000L,
   columnSeparator = " ",
   na = "-",
-  drop = FALSE
+  drop = FALSE,
+  add.line.index = TRUE
 )
 
 getProcessGeoJsonOutput(
@@ -86,6 +88,8 @@ getProcessGeoJsonOutput(
 \item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
 
 \item{warn}{Logical: If TRUE warn if the process has not bee run.}
+
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
 
 \item{geoJsonName}{The name of the GeoJSON object to extract from the process.}
 }

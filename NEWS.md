@@ -1,7 +1,24 @@
+# RstoxFramework v3.6.3-9002 (2023-11-08)
+* Added working openProjectAsTemplate().
+* Added arguments empty.processData and processDataToBeEmptied to copyProject().
+* Added argument return.processFlow to getProcessTable() to support visualizing the input and output processes to a process.
+* Moved formatProcessData and dependent functions such as toJSON_Rstox() and convertStringToNA() to RstoxBase, as these are needed to read project.json for DefineStratumPolygon, DefineAcousticPSU, etc.
+* Restructured Interactive.R so that functions like addAcousticPSU() and the new addBioticPSU() use commmon PSU functions.
+* Fixed bug in modifyStratum(), which had some stray sp code.
+* Added getFilterTableNames() and getFilterOptionsOneTable() to support speed up of the filter expression builder in the GUI.
+* Sped up sortUnique() for strings. using the R package strigi.
+* Moved definitions of StoxDateTimeFormat, emptyStratumPolygon and emptyStratumPolygonGeojson to RstoxData and RstoxBase.
+* Added the arguments check.columnNames_identical and testAllTRUE to compareProjectToStoredOutputFiles().
+* Temporarily added ListFilesInFolder() to test selecting a folder in the GUI.
+* Renamed ResampleBioticAssignmentByPSU to ResampleBioticAssignmentByAcousticPSU
+* Changed to returning a list and to create the full projectSession folder structure in openProjectAsTemplate(). 
+* Added check for change of Rstox packages for an open project.
+
+
 # RstoxFramework v3.6.3-9001 (2023-08-31)
 * Removed dependency on the retiring package sp.
 * Speeding up openProject() for StoX projects with large process data tables.
-* Moved functions to set precision to RstoxFramework, and fixed the following ttwo bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.
+* Moved functions to set precision to RstoxFramework, and fixed the following two bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.
 * Fixing a problem with setting default precision in StoX. Before, precision was not set for process outputs which were lists of lists of tables (ReadBioic() and ReadAcousic()). Also, all numeric columns, even integer ones were set precision to, which is now changed to exclude integer columns.
 * Changed isOpenProject() to only require that the projectSession folder exits, with an option strict = TRUE to use the old requirement that all folders must exist.
 * Added BootstrapNetCDF4() and ReportBootstrapNetCDF4(). These will replace Bootstrap() and ReportBootstrap() in StoX 4.0.0.
@@ -136,7 +153,7 @@
 * Added renameStratum() for use by the GUI.
 * Added removeAllAcousticPSUsOfStratum().
 * Disalowed empty string stratum name from the GUI.
-* Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.
+* Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use in Preview in the GUI.
 * Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().
 * Added a line "... truncated" if a table in Preview does not contain all rows (the GUI shows at most 200000 rows).
 * Cleaned up JSON validation test files to enhance the expected error.

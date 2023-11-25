@@ -16,7 +16,8 @@ getProcessTable(
   beforeProcessID = NULL,
   argumentFilePaths = NULL,
   only.valid = TRUE,
-  return.processIndex = FALSE
+  return.processIndex = FALSE,
+  return.processFlow = TRUE
 )
 
 scanForModelError(
@@ -75,6 +76,8 @@ getProcessAndFunctionNames(
 \item{only.valid}{Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).}
 
 \item{return.processIndex}{Logical: If TRUE include the process indices as a sequence starting from 1 in each model.}
+
+\item{return.processFlow}{Logical: If TRUE include columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated.}
 
 \item{check.only.enabled}{Logical: If TRUE check input errors only for enabled procecsses.}
 

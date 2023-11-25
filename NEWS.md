@@ -13,6 +13,7 @@
 * Renamed ResampleBioticAssignmentByPSU to ResampleBioticAssignmentByAcousticPSU
 * Changed to returning a list and to create the full projectSession folder structure in openProjectAsTemplate(). 
 * Added check for change of Rstox packages for an open project.
+* Allowed selecting from possible values in the filter expression builder for numeric values which are mostly whole numbers. Also excluded posssible values for keys.
 
 
 # RstoxFramework v3.6.3-9001 (2023-08-31)

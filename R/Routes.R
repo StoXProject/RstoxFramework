@@ -1556,8 +1556,8 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     type_with_numeric_integer <- type
     areNumeric <- type_with_numeric_integer %in% c("numeric", "double")
     if(any(areNumeric)) {
-        areNumericInteger <- sapply(processOutput[, ..areNumeric], detectInteger)
-        type_with_numeric_integer[areNumeric][areNumericInteger] <- "integer"
+        areNumericOptions <- mapply(detectOptions, processOutput[, ..areNumeric], names(processOutput)[areNumeric])
+        type_with_numeric_integer[areNumeric][areNumericOptions] <- "numeric.options"
     }
     
     # Get the operators:
@@ -1586,8 +1586,15 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     return(output)
 }
 
-detectInteger <- function(x, tol = .Machine$double.eps^0.5) {
-    all(abs(x - round(x)) < tol)
+detectOptions <- function(x, name, tol = .Machine$double.eps^0.5, minimumFraction = 0.5, allowHalf = TRUE, maxOptions = 1000) {
+    u <- unique(x)
+    canHaveOptions <- mean(abs(u - round(u)) < tol | abs(2 * u - round(2 * u)) < tol, na.rm = TRUE) > minimumFraction
+    if(canHaveOptions && length(u) > maxOptions) {
+        warning("StoX: The field ", name, " has more than ", maxOptions, ". Options not returned. ")
+        canHaveOptions <- FALSE
+    }
+    
+    return(canHaveOptions)
 }
 
 getSingleInputProcessID <- function(projectPath, modelName, processID) {
@@ -1615,75 +1622,6 @@ getSingleInputProcessID <- function(projectPath, modelName, processID) {
 }
 
 
-#' 
-#' @export
-#' @rdname StoXGUI_interfaces
-#' 
-getFilterOptionsAll <- function(projectPath, modelName, processID, include.numeric = TRUE, stopIfEmptyPossibleValues = FALSE) {
-
-    # Run the process without saving and without filter:
-    processOutput <- runProcess(projectPath = projectPath, modelName = modelName, processID = processID, msg = FALSE, returnProcessOutput = TRUE, replaceArgs = list(FilterExpression = list()))
-    
-    # Add a warning if the process output is empty:
-    if(!length(processOutput)) {
-        warnText <- paste0("StoX: The process used as input the process ", getProcessNameFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), " must bee run to use the filter expression builder.")
-        if(stopIfEmptyPossibleValues) {
-            stop(warnText)
-        }
-        #else {
-        #    warning(warnText)
-        #}
-        return(emptyNamedList())
-    }
-    
-    # If the process output is a list of lists, unlist the top level and add names separated by slash:
-    processOutput <- unlistProcessOutput(processOutput)
-    
-    # Get the column names:
-    name <- lapply(processOutput, names)
-    
-    # Get the data types:
-    type <- lapply(processOutput, function(x) sapply(x, getRelevantClass))
-    
-    # Get the operators:
-    operators <- lapply(type, function(x) if(length(x)) getRstoxFrameworkDefinitions("filterOperators")[x] else NULL)
-    
-    # Get a list of unique values for each column of each table:
-    #options <- lapply(processOutput, getPossibleValuesOneTable, include.numeric = include.numeric)
-    options <- mapply(getPossibleValuesOneTable, processOutput, type, include.numeric = include.numeric, SIMPLIFY = FALSE)
-    options <- lapply(options, function(x) lapply(x, getOptionList))
-    
-    # Return the
-    output <- lapply(
-        seq_along(options),
-        function(ind)
-            structure(
-                list(
-                    mapply(
-                        list,
-                            name = name[[ind]],
-                            type = type[[ind]],
-                            operators = operators[[ind]],
-                            options = options[[ind]],
-                            SIMPLIFY = FALSE
-                        )
-                    ), 
-                names = "fields"
-                )
-            )
-    
-    names(output) <- names(options)
-    
-    # Add the fields level:
-    output <- list(
-        tableNames = as.list1(names(output)),
-        allFields = output
-    )
-    
-    # Return a list of the tableNames, columnNames and possibleValues:
-    return(output)
-}
-
     
 
 getOptionList <- function(option, digits = 6) {
@@ -1691,7 +1629,7 @@ getOptionList <- function(option, digits = 6) {
 }
 
 
-getPossibleValuesOneTable <- function(table, type, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE) {
+getPossibleValuesOneTable <- function(table, type, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE, includeKeys = FALSE) {
     
     # Return empty named list if no input:
     if(length(table) == 0) {
@@ -1705,14 +1643,19 @@ getPossibleValuesOneTable <- function(table, type, include.integer = TRUE, inclu
         validInd <- setdiff(validInd, which(type %in% c("integer")))
     }
     if(!include.numericInteger) {
-        validInd <- setdiff(validInd, which(type %in% c("numeric.integer")))
+        validInd <- setdiff(validInd, which(type %in% c("numeric.options")))
     }
-    else if(!include.numeric) {
-        validInd <- setdiff(validInd, which(type %in% c("numeric", "double", "numeric.integer")))
+    if(!include.numeric) {
+        validInd <- setdiff(validInd, which(type %in% c("numeric", "double")))
     }
     if(!include.POSIXct) {
         validInd <- setdiff(validInd, which(type %in% c("POSIXct")))
     }
+    if(!includeKeys) {
+        validInd <- setdiff(validInd, which(endsWith(names(table), "Key")))
+    }
+    
+    
     
     #if(include.numeric) {
     #    validInd <- seq_len(ncol(table))

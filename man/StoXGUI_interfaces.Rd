@@ -15,7 +15,6 @@
 \alias{getTableNames}
 \alias{getFilterTableNames}
 \alias{getFilterOptionsOneTable}
-\alias{getFilterOptionsAll}
 \alias{getParameterTableInfo}
 \alias{getParameterVectorInfo}
 \alias{getParameterSingleInfo}
@@ -65,14 +64,6 @@ getFilterOptionsOneTable(
   include.numericInteger = TRUE,
   include.numeric = FALSE,
   include.POSIXct = FALSE,
-  stopIfEmptyPossibleValues = FALSE
-)
-
-getFilterOptionsAll(
-  projectPath,
-  modelName,
-  processID,
-  include.numeric = TRUE,
   stopIfEmptyPossibleValues = FALSE
 )
 

@@ -1,3 +1,8 @@
+# RstoxFramework v3.6.3-9004 (2023-12-01)
+* Added the funcion getProject() for use by the GUI to get saved status of a project.
+* Implemented the "single" format class of parameters like PlottingVariable and CVVariable.
+
+
 # RstoxFramework v3.6.3-9002 (2023-11-08)
 * Added working openProjectAsTemplate().
 * Added arguments empty.processData and processDataToBeEmptied to copyProject().

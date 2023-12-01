@@ -834,9 +834,14 @@ getProcessPropertyFormats <- function(packageName) {
             error = function(err) NULL
         )
     }
+    
+    # Add the package name:
+    for( ind in seq_along(processPropertyFormats)) {
+        processPropertyFormats[[ind]]$packageName <- packageName
+    }
+    
     return(processPropertyFormats)
 }
-
 
 
 

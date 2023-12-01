@@ -418,7 +418,7 @@ processPropertyFormats <- list(
     ), 
     
     targetVariableUnit_ReportBootstrap = list(
-        class = "vector", 
+        class = "single", 
         title = "Select Unit for the TargetVariable", 
         possibleValues = function(BootstrapData, BaselineProcess, TargetVariable) {
             # If the specified process name does not exist in the BootstrapData:
@@ -437,7 +437,7 @@ processPropertyFormats <- list(
         }
     ), 
     targetVariableUnit_ReportBootstrapNetCDF4 = list(
-        class = "vector", 
+        class = "single", 
         title = "Select Unit for the TargetVariable", 
         possibleValues = function(BootstrapNetCDF4Data, BaselineProcess, TargetVariable) {
             nc <- ncdf4::nc_open(unlist(BootstrapNetCDF4Data))
@@ -466,22 +466,22 @@ processPropertyFormats <- list(
     ), 
     
     plottingVariable_PlotReportBootstrap = list(
-        class = "vector", 
+        class = "single", 
         title = "Select plotting variable.", 
         possibleValues = getPlottingVariable_PlotReportBootstrap
     ), 
     plottingVariableLower_PlotReportBootstrap = list(
-        class = "vector", 
+        class = "single", 
         title = "Select variable for upper end of error bars.", 
         possibleValues = getPlottingVariable_PlotReportBootstrap
     ), 
     plottingVariableUpper_PlotReportBootstrap = list(
-        class = "vector", 
+        class = "single", 
         title = "Select variable for lower end of error bars.", 
         possibleValues = getPlottingVariable_PlotReportBootstrap
     ), 
     cvVariable_PlotReportBootstrap = list(
-        class = "vector", 
+        class = "single", 
         title = "Select CV variable.", 
         possibleValues = getPlottingVariable_PlotReportBootstrap
     ),
@@ -497,7 +497,7 @@ processPropertyFormats <- list(
     
     
     baselineProcess_ReportBootstrapNetCDF4 = list(
-        class = "vector", 
+        class = "single", 
         title = "Select one baseline process to report from.", 
         possibleValues = function(BootstrapNetCDF4Data) {
             #  Open the file:
@@ -516,7 +516,7 @@ processPropertyFormats <- list(
     
     
     targetVariable_ReportBootstrapNetCDF4 = list(
-        class = "vector", 
+        class = "single", 
         title = "Select one variable to report from.", 
         possibleValues = function(BootstrapNetCDF4Data, BaselineProcess) {
             possibleVariables <- getPossibleVariables(BootstrapNetCDF4Data, BaselineProcess)
@@ -569,7 +569,18 @@ processPropertyFormats <- list(
     fileExtension = list(
         class = "single", 
         title = "File extension", 
-        variableTypes = "character"
+        variableTypes = "character", 
+        possibleValues = function(FolderName) {
+            if(missing(FolderName) || !length(FolderName)) {
+                ext <- NULL
+            }
+            else {
+                files <- list.files(FolderName)
+                ext <- unique(tools::file_ext(files))
+            }
+            
+            return(ext)
+        }
     )
     
 )

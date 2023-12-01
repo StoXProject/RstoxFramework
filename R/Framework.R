@@ -340,7 +340,7 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param empty.output      Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.
 #' @param empty.memory      Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.
 #' @param empty.input       Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.
-#' @param close Logical: (In \code{copyProject}) If TRUE, close the project after copying.
+#' @param close Logical: (In \code{copyProject}) If TRUE, close the project before copying.
 #' @param empty.processData Logical: (In \code{copyProject}) If TRUE, empty the process data listed in \code{processDataToBeEmptied}.
 #' @param processDataToBeEmptied An optional character vector of names of the process data to empty when copying a StoX project. The default (NULL) implies all possible process data (all functions returned from getRstoxFrameworkDefinitions("processDataFunctions")).
 #' 
@@ -511,13 +511,15 @@ openProject <- function(
 openProjectAsTemplate <- function(
         projectPath, 
         newProjectPath, 
+        close = FALSE, 
+        save = NULL, 
         ow = FALSE#, 
         #newValues = NULL#, 
         #keepFilterExpressions = FALSE
 ) {
     
     # Copy the project as a template:
-    copyProject(projectPath, newProjectPath, ow = ow, empty.output = TRUE, empty.input = TRUE, empty.memory = TRUE, empty.processData = TRUE, close = FALSE)
+    copyProject(projectPath, newProjectPath, ow = ow, empty.output = TRUE, empty.input = TRUE, empty.memory = TRUE, empty.processData = TRUE, close = close, save = save)
         
         
     list(
@@ -657,7 +659,7 @@ saveProject <- function(
     setSavedStatus(projectPath, status = TRUE)
     
     # Return the project path project name and saved status:
-    output <- output <- list(
+    output <- list(
         projectPath = projectPath, 
         projectName = basename(projectPath), 
         saved = isSaved(projectPath)
@@ -694,7 +696,7 @@ saveAsProject <- function(
 #' @export
 #' @rdname Projects
 #' 
-copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, msg = TRUE) {
+copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, save = NULL, msg = TRUE) {
     
     
     # Check whether the project to be used as template exists:
@@ -710,6 +712,10 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         else {
             unlink(newProjectPath, recursive = TRUE, force = TRUE)
         }
+    }
+    
+    if(close) {
+        closeProject(projectPath, save = save, msg = msg)
     }
     
     #suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
@@ -822,14 +828,9 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         saveProject(newProjectPath)
     }
     
+    # Make sure the project session is complete:
     if(isOpenProject(newProjectPath)) {
-        if(close) {
-            closeProject(newProjectPath, save = FALSE, msg = msg)
-        }
-        else {
-            # Make sure the project session is complete:
-            createProjectSessionFolderStructure(newProjectPath)
-        }
+        createProjectSessionFolderStructure(newProjectPath)
     }
     
     
@@ -842,6 +843,26 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
 deleteProject <- function(projectPath) {
     unlink(projectPath, force = TRUE, recursive = TRUE)
 }
+
+
+#' 
+#' @export
+#' @rdname Projects
+#' 
+getProject <- function(projectPath) {
+    projectPath <- resolveProjectPath(projectPath)
+    
+    # Return the project path project name and saved status:
+    output <- list(
+        projectPath = projectPath, 
+        projectName = basename(projectPath), 
+        saved = isSaved(projectPath)
+    )
+    
+    return(output)
+}
+
+
 ### #' 
 ### #' @export
 ### #' 
@@ -2321,6 +2342,7 @@ isBootstrapNetCDF4Function <- function(functionName) {
 getStoxFunctionParameterPossibleValues <- function(functionName, fill.logical = TRUE) {
     
     # Get all defaults:
+    browser()
     output <- getStoxFunctionParameterFormals(functionName)
     
     # Get the parameter (primitive) type to enable the treatments of logicals and numerics:
@@ -2412,7 +2434,7 @@ getStoxFunctionParameterTypes <- function(functionName) {
 # Function which applies the default format on formats not recognized :
 getFunctionParameterFormats <- function(functionName) {
     
-    # Get the types, and interpret all types as format "none":
+    # Get the types, and interpret all types as format "none" by default:
     formats <- getStoxFunctionParameterTypes(functionName)
     formats[] <- "none"
     

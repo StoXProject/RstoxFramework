@@ -10,6 +10,7 @@
 \alias{saveAsProject}
 \alias{copyProject}
 \alias{deleteProject}
+\alias{getProject}
 \title{Create, open, close, save, saveAs, copy and delete a StoX project.}
 \usage{
 createProject(
@@ -30,7 +31,13 @@ openProject(
   verbose = FALSE
 )
 
-openProjectAsTemplate(projectPath, newProjectPath, ow = FALSE)
+openProjectAsTemplate(
+  projectPath,
+  newProjectPath,
+  close = FALSE,
+  save = NULL,
+  ow = FALSE
+)
 
 closeProject(
   projectPath,
@@ -64,10 +71,13 @@ copyProject(
   empty.processData = FALSE,
   processDataToBeEmptied = NULL,
   close = FALSE,
+  save = NULL,
   msg = TRUE
 )
 
 deleteProject(projectPath)
+
+getProject(projectPath)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
@@ -92,6 +102,8 @@ deleteProject(projectPath)
 
 \item{newProjectPath}{The path to the copied StoX project.}
 
+\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project before copying.}
+
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
 
 \item{force.save}{If no changes are made to the project, force save anyway. Overrides the \code{save} option.}
@@ -107,8 +119,6 @@ deleteProject(projectPath)
 \item{empty.processData}{Logical: (In \code{copyProject}) If TRUE, empty the process data listed in \code{processDataToBeEmptied}.}
 
 \item{processDataToBeEmptied}{An optional character vector of names of the process data to empty when copying a StoX project. The default (NULL) implies all possible process data (all functions returned from getRstoxFrameworkDefinitions("processDataFunctions")).}
-
-\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
 }
 \description{
 Create a StoX project using \code{createProject}; open an existing (un-opened) project using \code{openProject}, which involves creating files holding the memory of the project; close a project using  \code{closeProject}, which removes the memory files; save the project using \code{saveProject}, which saves the memory files to the project description file; make a copy using \code{copyProject} or \code{saveAsProject}, where the former closes the given project unsaved and opens the copy, or delete a project using \code{deleteProject}.

@@ -907,7 +907,11 @@ NULL
 #' @rdname ProjectUtils
 #' 
 isProject <- function(projectPath) {
-    sapply(projectPath, isProjectOne)
+    out <- sapply(projectPath, isProjectOne)
+    if(!length(out)) {
+        out <- FALSE
+    }
+    return(out)
 }
 # Checks only one project:
 isProjectOne <- function(projectPath) {

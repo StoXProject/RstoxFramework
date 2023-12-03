@@ -873,6 +873,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                 "\n", 
                 deparse(substitute(x)), 
                 ":\n===========================================>>>>>\n", 
+                "Project: ", projectPath, 
+                "Old project: ", projectPath_original, 
                 x_info, 
                 "\n<<<<<==========================================="
             )

@@ -1,3 +1,9 @@
+# RstoxFramework v3.6.3-9004 (2023-12-01)
+* Added the funcion getProject() for use by the GUI to get saved status of a project.
+* Implemented the "single" format class of parameters like PlottingVariable and CVVariable.
+* Changed inst/test/coastalCod_20.zip and inst/test/tobis_20_depth.zip to comply with the new platform inndependent sortinng when generating StratumLayerIndividualIndex (previous IndividualIndex which had only numbers as the first characters in the test projects).
+
+
 # RstoxFramework v3.6.3-9002 (2023-11-08)
 * Added working openProjectAsTemplate().
 * Added arguments empty.processData and processDataToBeEmptied to copyProject().

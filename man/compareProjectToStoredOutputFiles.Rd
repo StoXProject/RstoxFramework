@@ -9,7 +9,8 @@ compareProjectToStoredOutputFiles(
   projectPath_original = projectPath,
   emptyStringAsNA = FALSE,
   intersect.names = TRUE,
-  ignore = NULL,
+  ignore.variable = NULL,
+  ignore.process = NULL,
   skipNAFraction = FALSE,
   skipNAAt = FALSE,
   NAReplacement = NULL,
@@ -38,7 +39,9 @@ compareProjectToStoredOutputFiles(
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
-\item{ignore}{A vector of names of columns to ignore in all.equal().}
+\item{ignore.variable}{A vector of names of variables/columns to ignore in the comparison.}
+
+\item{ignore.process}{A vector of names of processes to ignore in the comparison.}
 
 \item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
 

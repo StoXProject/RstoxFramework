@@ -15,7 +15,8 @@ write_list_as_tables_NetCDFF4(
   ow = FALSE,
   missval = -9,
   compression = NA,
-  verbose = FALSE
+  verbose = FALSE,
+  validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses")
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ write_list_as_tables_NetCDFF4(
  which will not be compatible with older software that only reads netcdf version 3 files.}
 
 \item{verbose}{Print debugging information.}
+
+\item{validOutputDataClasses}{A vector of valid output data classes, indicating when to stop the unlisting.}
 }
 \description{
 Write/append a table/list of tables to NetCDF4

@@ -1,5 +1,12 @@
 # RstoxFramework v3.6.3-9004 (2023-12-01)
-* Added the funcion getProject() for use by the GUI to get saved status of a project.
+* Changed the functions Bootstrap() and ReportBootstrap() to use the netCDF4 files.
+* Added the function bootstrapRDataToNetCDF4() for converting old bootstrap RData to the new nc files.
+* Added the function getBootstrapData() for reading tthe new bootstrap nc files into R (supplementing the function load() used to read in the old bootstrap RData files)
+* Added the function getProject() for use by the GUI to get saved status of a project.
+* Changed to delete all output folders from the process to be run and onwards.
+* Changed to reset to the previous process if changing the current.
+* Fixed bugg where character vector outputs were displayed with one letter per line in the GUI.
+* Renamed the argument ignore to ignore.variable and added the argument ignore.process in compareProjectToStoredOutputFiles().
 * Implemented the "single" format class of parameters like PlottingVariable and CVVariable.
 * Changed inst/test/coastalCod_20.zip and inst/test/tobis_20_depth.zip to comply with the new platform inndependent sortinng when generating StratumLayerIndividualIndex (previous IndividualIndex which had only numbers as the first characters in the test projects).
 

@@ -340,7 +340,7 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param empty.output      Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.
 #' @param empty.memory      Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.
 #' @param empty.input       Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.
-#' @param close Logical: (In \code{copyProject}) If TRUE, close the project after copying.
+#' @param close Logical: (In \code{copyProject}) If TRUE, close the project before copying.
 #' @param empty.processData Logical: (In \code{copyProject}) If TRUE, empty the process data listed in \code{processDataToBeEmptied}.
 #' @param processDataToBeEmptied An optional character vector of names of the process data to empty when copying a StoX project. The default (NULL) implies all possible process data (all functions returned from getRstoxFrameworkDefinitions("processDataFunctions")).
 #' 
@@ -511,13 +511,15 @@ openProject <- function(
 openProjectAsTemplate <- function(
         projectPath, 
         newProjectPath, 
+        close = FALSE, 
+        save = NULL, 
         ow = FALSE#, 
         #newValues = NULL#, 
         #keepFilterExpressions = FALSE
 ) {
     
     # Copy the project as a template:
-    copyProject(projectPath, newProjectPath, ow = ow, empty.output = TRUE, empty.input = TRUE, empty.memory = TRUE, empty.processData = TRUE, close = FALSE)
+    copyProject(projectPath, newProjectPath, ow = ow, empty.output = TRUE, empty.input = TRUE, empty.memory = TRUE, empty.processData = TRUE, close = close, save = save)
         
         
     list(
@@ -657,7 +659,7 @@ saveProject <- function(
     setSavedStatus(projectPath, status = TRUE)
     
     # Return the project path project name and saved status:
-    output <- output <- list(
+    output <- list(
         projectPath = projectPath, 
         projectName = basename(projectPath), 
         saved = isSaved(projectPath)
@@ -694,7 +696,7 @@ saveAsProject <- function(
 #' @export
 #' @rdname Projects
 #' 
-copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, msg = TRUE) {
+copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, save = NULL, msg = TRUE) {
     
     
     # Check whether the project to be used as template exists:
@@ -710,6 +712,10 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         else {
             unlink(newProjectPath, recursive = TRUE, force = TRUE)
         }
+    }
+    
+    if(close) {
+        closeProject(projectPath, save = save, msg = msg)
     }
     
     #suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
@@ -822,14 +828,9 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         saveProject(newProjectPath)
     }
     
+    # Make sure the project session is complete:
     if(isOpenProject(newProjectPath)) {
-        if(close) {
-            closeProject(newProjectPath, save = FALSE, msg = msg)
-        }
-        else {
-            # Make sure the project session is complete:
-            createProjectSessionFolderStructure(newProjectPath)
-        }
+        createProjectSessionFolderStructure(newProjectPath)
     }
     
     
@@ -842,6 +843,26 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
 deleteProject <- function(projectPath) {
     unlink(projectPath, force = TRUE, recursive = TRUE)
 }
+
+
+#' 
+#' @export
+#' @rdname Projects
+#' 
+getProject <- function(projectPath) {
+    projectPath <- resolveProjectPath(projectPath)
+    
+    # Return the project path project name and saved status:
+    output <- list(
+        projectPath = projectPath, 
+        projectName = basename(projectPath), 
+        saved = isSaved(projectPath)
+    )
+    
+    return(output)
+}
+
+
 ### #' 
 ### #' @export
 ### #' 
@@ -886,7 +907,11 @@ NULL
 #' @rdname ProjectUtils
 #' 
 isProject <- function(projectPath) {
-    sapply(projectPath, isProjectOne)
+    out <- sapply(projectPath, isProjectOne)
+    if(!length(out)) {
+        out <- FALSE
+    }
+    return(out)
 }
 # Checks only one project:
 isProjectOne <- function(projectPath) {
@@ -1697,7 +1722,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' @param processDirty Logical: Indicates whether the model has been modified when resetting. Tf the process to reset to is after the active process, 
 #' @param delete A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.
 #' @param deleteCurrent Logical: If TRUE delete process output also of the process given by processID.
-#' @param purgeOutputFiles Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted eevn though the process was deleted.
+#' @param purgeOutputFiles Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted even though the process was deleted.
 #' 
 #' @export
 #'
@@ -1763,7 +1788,8 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         if(deleteCurrent) {
             processIndex <- processIndex - 1
         }
-        if(currentActiveProcessIndex > processIndex) {
+        # Disabled this condition on 2023-12-16 as it did not delete all outputs from the current process and onwards, which had the implication that the old BootstrapData.RData was not deleted while the BootstapData.nc was written.
+        #if(currentActiveProcessIndex > processIndex) {
             # Get all processes from the process to reset to and onwards:
             allProcessIndex <- getProcessIndexFromProcessID(
                 projectPath = projectPath, 
@@ -1811,7 +1837,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                 )
                 unlink(foldersToDelete, recursive = TRUE, force = TRUE)
             }
-        }
+        #}
     }
     else if(purgeOutputFiles) {
         foldersToDelete <- sapply(
@@ -2302,17 +2328,11 @@ isProcessDataFunction <- function(functionName) {
     identical(getStoxFunctionMetaData(functionName, "functionType"), "processData")
 }
 
+
 # Is the function a bootstrap function?
 isBootstrapFunction <- function(functionName) {
     # Get the function output data type and match against the defined process data types:
-    #functionOutputDataType <- getStoxFunctionMetaData(functionName, "functionOutputDataType")
-    #functionOutputDataType %in% getRstoxFrameworkDefinitions("stoxProcessDataTypes")
-    getStoxFunctionMetaData(functionName, "functionType") %in% c("bootstrap")
-}
-# Is the function a bootstrap function?
-isBootstrapNetCDF4Function <- function(functionName) {
-    # Get the function output data type and match against the defined process data types:
-    getStoxFunctionMetaData(functionName, "functionType") %in% "bootstrapNetCDF4"
+    getStoxFunctionMetaData(functionName, "functionType") %in% "bootstrap"
 }
 
 
@@ -2412,7 +2432,7 @@ getStoxFunctionParameterTypes <- function(functionName) {
 # Function which applies the default format on formats not recognized :
 getFunctionParameterFormats <- function(functionName) {
     
-    # Get the types, and interpret all types as format "none":
+    # Get the types, and interpret all types as format "none" by default:
     formats <- getStoxFunctionParameterTypes(functionName)
     formats[] <- "none"
     
@@ -2993,7 +3013,7 @@ getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, end
             modelName = modelName, 
             processID = activeProcess$processID
         )
-        processTable[seq_len(min(activeProcessIndex, nrow(processTable))), hasBeenRun := TRUE]
+        processTable[seq_len(min(activeProcessIndex - activeProcess$processDirty, nrow(processTable))), hasBeenRun := TRUE]
     }
     
     # Add columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated:
@@ -3007,8 +3027,8 @@ getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, end
         processTable[, usedInProcessIDs := lapply(usedInProcessIndices, function(x) processID[x])]
         processTable[, usedInProcessNames := lapply(usedInProcessIndices, function(x) processName[x])]
         
-        # Add a column identifying processes which are not used in any other processes:
-        processTable[, terminalProcess := lengths(usedInProcessIDs) == 0]
+        # Add a column identifying processes which are not used in any other enabled processes:
+        processTable[, terminalProcess := lapply(usedInProcessIndices, function(ind) !any(enabled[ind])) ]
         
         
     }
@@ -4980,8 +5000,9 @@ runProcess <- function(
     # Reset the model to the process just before the process to be run:
     if(!returnProcessOutput) {
         #resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = TRUE)
-        # Changed to purgeOutputFiles = FALSE, as if TRUE Bootstrap output i deleted when this is changed and is the first process (in which case active proces becomes NA):
-        resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = FALSE)
+        # Changed to purgeOutputFiles = FALSE, as if TRUE Bootstrap output is deleted when this is changed and is the first process (in which case active process becomes NA):
+        # Changed this back again on 2023-12-16. No idea why this was important. Output data SHOULD be deleted when there is a change!
+        resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = TRUE)
     }
     
     # Run the process:
@@ -5065,7 +5086,7 @@ runProcess <- function(
         )
 
         # If a valid output class, wrap the function output to a list named with the data type (but not for BootstrapData, which is a list of valid output classes AND a valid output class itself):
-        if(isValidOutputDataClass(processOutput) && !isBootstrapFunction(process$functionName)) {
+        if(isValidOutputDataClass(processOutput)) {
             processOutput <- list(processOutput)
             names(processOutput) <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
         }
@@ -5106,9 +5127,7 @@ runProcess <- function(
         # Add info of the time spent:
         if(msg) {
             timeSpent <- proc.time()[3] - startTime
-            message(
-                    "StoX: (time used: ", round(timeSpent, digits = 3), " s)"
-            )
+            message("StoX: (time used: ", round(timeSpent, digits = 3), " s)")
         }
         
         #invisible(processOutput)
@@ -5176,23 +5195,10 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             modelName = modelName, 
             processID = process$processID, 
             processOutput = NULL, 
-            file.ext = "RData"
-        )
-    }
-    else if(isBootstrapNetCDF4Function(process$functionName)) {
-        # Set the projectPath:
-        functionArguments$projectPath <- projectPath
-        
-        # Get and read any bootstrap file from before:
-        functionArguments["outputData"] <- getProcessOutputTextFilePath(
-            projectPath = projectPath, 
-            modelName = modelName, 
-            processID = process$processID, 
-            processOutput = NULL, 
             file.ext = "nc"
         )
         
-        # Get the memory file to copy the previous output file to if running BootstrapNetCDF4():
+        # Get the memory file to copy the previous output file to if running Bootstrap():
         folderPath <- getProcessOutputFolder(
             projectPath = projectPath, 
             modelName = modelName, 
@@ -5641,16 +5647,20 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
             )
         }
         # If a table, allow additional options:
-        else if(data.table::is.data.table(data) || is.matrix(data)) {
+        else if(data.table::is.data.table(data) || is.matrix(data) || inherits(data, "StoXNetCDF4File")) {
             
-            # Extract the requested lines:
-            numberOfLines <- nrow(data)
-            numberOfPages <- ceiling(numberOfLines / linesPerPage)
-            if(length(pageindex)) {
-                linesToExtract <- seq_len(linesPerPage) + rep((pageindex - 1) * linesPerPage, each = linesPerPage)
-                linesToExtract <- linesToExtract[linesToExtract <= numberOfLines]
-                data <- data[linesToExtract, ]
-            }
+            ## Extract the requested lines:
+            #numberOfLines <- nrow(data)
+            #numberOfPages <- ceiling(numberOfLines / linesPerPage)
+            #if(length(pageindex)) {
+            #    linesToExtract <- seq_len(linesPerPage) + rep((pageindex - 1) * linesPerPage, each = linesPerPage)
+            #    linesToExtract <- linesToExtract[linesToExtract <= numberOfLines]
+            #    data <- data[linesToExtract, ]
+            #}
+            temp <- extractPage(data, pageindex = pageindex, linesPerPage = linesPerPage) 
+            numberOfLines <- temp$numberOfLines
+            numberOfPages <- temp$numberOfPages
+            data <- temp$data
             
             # Convert to pretty view, which inserts spaces to obtain 
             data <- fixedWidthTable(
@@ -5659,8 +5669,13 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
                 lineSeparator = lineSeparator, 
                 na = na, 
                 enable.auto_unbox = enable.auto_unbox, 
-                add.line.index = add.line.index
+                add.line.index = add.line.index, 
+                line.index.start = (pageindex - 1) * numberOfLines + 1
             )
+            # Add one to the number of lines if add.line.index (this must happen AFTER fixedWidthTable() is called!!!):
+            if(add.line.index) {
+                numberOfLines <- numberOfLines + 1
+            }
             
             # Add a line "... truncated" if the page is not first and not the last:
             if(pageindex > 1) {
@@ -5689,7 +5704,7 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
             # Add numberOfLines = 0 and numberOfPages = 0 to conform to the output used for tables in the GUI:
             if(length(data)) {
                 
-                # The GUI need this data with no StoX class (as BootstrapNetCDF4 is a class)
+                # The GUI need this data with no StoX class (as Bootstrap is a class)
                 data <- as.character(data)
                 
                 # Extract the requested lines:
@@ -5714,6 +5729,39 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
     
     
     return(data)
+}
+
+
+extractPage <- function(data, pageindex = NULL, linesPerPage = 1000L) {
+    if(length(dim(data)) == 2) {
+        numberOfLines <- nrow(data)
+        numberOfPages <- ceiling(numberOfLines / linesPerPage)
+        if(length(pageindex)) {
+            linesToExtract <- seq_len(linesPerPage) + rep((pageindex - 1) * linesPerPage, each = linesPerPage)
+            linesToExtract <- linesToExtract[linesToExtract <= numberOfLines]
+            data <- data[linesToExtract, ]
+        }
+    }
+    else if(length(dim(data)) < 2) {
+        numberOfLines <- length(data)
+        numberOfPages <- ceiling(numberOfLines / linesPerPage)
+        if(length(pageindex)) {
+            linesToExtract <- seq_len(linesPerPage) + rep((pageindex - 1) * linesPerPage, each = linesPerPage)
+            linesToExtract <- linesToExtract[linesToExtract <= numberOfLines]
+            data <- data[linesToExtract]
+        }
+    }
+    else {
+        "Arrays of 3 or more dimensions are not supported."
+    }
+    
+    return(
+        list(
+            numberOfLines = numberOfLines,
+            numberOfPages = numberOfPages,
+            data = data
+        )
+    )
 }
 
 
@@ -6323,7 +6371,7 @@ unlistOneStep <- function(processOutput, sep = "_", validOutputDataClasses = get
     # Unlist and add the names:
     if(!areAllValidOutputDataClasses(processOutput, validOutputDataClasses = validOutputDataClasses)){
         # A trick to prepare for unlist(). Add one list level to all elements which are valid class:
-        validClass <- sapply(processOutput, isValidOutputDataClass)
+        validClass <- sapply(processOutput, isValidOutputDataClass, validOutputDataClasses = validOutputDataClasses)
         processOutput[validClass] <- lapply(processOutput[validClass], list)
         
         # Define the names of the files first, by pasting the level and the sub-level names separated by underscore:
@@ -6777,38 +6825,38 @@ getreplaceArgsList <- function(replaceArgsList = list(), ...){
 
 
 
-# Check that a process has been run:
-hasBeenRun <- function(projectPath, modelName, processID) {
-    processIndex <- getProcessIndexFromProcessID(
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = processID
-    )
-    activeProcessIndex <- getProcessIndexFromProcessID(
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = getActiveProcess(
-            projectPath = projectPath, 
-            modelName = modelName
-        )$processID
-    )
-    # TRUE if the process is not later than the active process:
-    if(processIndex < activeProcessIndex) {
-        out <- TRUE
-    }
-    # If the active process, whech whether it is ditry:
-    else if(processIndex == activeProcessIndex) {
-        out <- getActiveProcess(
-            projectPath = projectPath, 
-            modelName = modelName
-        )$processDirty
-    }
-    else {
-        out <- FALSE
-    }
-    
-    return(out)
-}
+### # Check that a process has been run:
+### hasBeenRun <- function(projectPath, modelName, processID) {
+###     processIndex <- getProcessIndexFromProcessID(
+###         projectPath = projectPath, 
+###         modelName = modelName, 
+###         processID = processID
+###     )
+###     activeProcessIndex <- getProcessIndexFromProcessID(
+###         projectPath = projectPath, 
+###         modelName = modelName, 
+###         processID = getActiveProcess(
+###             projectPath = projectPath, 
+###             modelName = modelName
+###         )$processID
+###     )
+###     # TRUE if the process is not later than the active process:
+###     if(processIndex < activeProcessIndex) {
+###         out <- TRUE
+###     }
+###     # If the active process, whech whether it is ditry:
+###     else if(processIndex == activeProcessIndex) {
+###         out <- getActiveProcess(
+###             projectPath = projectPath, 
+###             modelName = modelName
+###         )$processDirty
+###     }
+###     else {
+###         out <- FALSE
+###     }
+###     
+###     return(out)
+### }
 
 
 

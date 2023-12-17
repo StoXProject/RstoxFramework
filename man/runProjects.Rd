@@ -70,7 +70,7 @@ runProjects(
 
 \item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
 
-\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
+\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project before copying.}
 
 \item{...}{\code{replaceArgsList} can also be given directly.}
 }

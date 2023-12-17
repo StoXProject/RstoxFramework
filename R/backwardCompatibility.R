@@ -44,6 +44,12 @@ backwardCompatibility <- list(
             modelName = "report", 
             parameterName = "Percentages", 
             parameterValue = c(5, 50, 95)
+        ), 
+        list(
+            changeVersion = "3.6.3-9004", 
+            functionName = "Bootstrap", 
+            modelName = "analysis", 
+            parameterName = "OutputVariables"
         )
     ), 
     

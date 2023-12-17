@@ -137,7 +137,7 @@ initiateRstoxFramework <- function(){
         # Changed on 2020-10-22 to use the actual data and not the file:
         #"outputDataPath"
         "outputData", 
-        # Added the outputMemoryFile for BootstrapNetCDF4:
+        # Added the outputMemoryFile for Bootstrap with netCDF4:
         "outputMemoryFile"
     )
     
@@ -365,7 +365,7 @@ initiateRstoxFramework <- function(){
         #"StoX_multipolygon_WKT", 
         #"StoX_shapefile"
         "ggplot", 
-        "BootstrapData", 
+        #"BootstrapData", 
         "StoXNetCDF4File"
     )
     
@@ -834,9 +834,14 @@ getProcessPropertyFormats <- function(packageName) {
             error = function(err) NULL
         )
     }
+    
+    # Add the package name:
+    for( ind in seq_along(processPropertyFormats)) {
+        processPropertyFormats[[ind]]$packageName <- packageName
+    }
+    
     return(processPropertyFormats)
 }
-
 
 
 
@@ -984,9 +989,9 @@ getDefaultOutputFileType <- function(processOutput) {
         if("StoXNetCDF4File" %in% classes) {
             ext <- "nc"
         }
-        else if("BootstrapData" %in% classes) {
-            ext <- "RData"
-        }
+        #else if("BootstrapData" %in% classes) {
+        #    ext <- "RData"
+        #}
         
         # List of outputs:
         else if("sf" %in% classes) {

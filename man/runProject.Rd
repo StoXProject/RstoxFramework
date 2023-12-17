@@ -69,7 +69,7 @@ runProject(
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
-\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project after copying.}
+\item{close}{Logical: (In \code{copyProject}) If TRUE, close the project before copying.}
 
 \item{unlist.models}{Logical: If TRUE unlist the top level so that all processes are in one list.}
 

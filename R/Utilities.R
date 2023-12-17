@@ -87,8 +87,9 @@ flattenDataTable <- function(x, replace = NA) {
 #' @param na The string to replace NAs by, defaulted to "-".
 #' @param enable.auto_unbox Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.
 #' @param add.line.index Logical: If TRUE (the default) print row indices as in data.table.
+#' @param line.index.start The start of the line indices.
 #' 
-fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, add.line.index = FALSE) {
+fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, add.line.index = FALSE, line.index.start = 1) {
     # Return immediately if x has length 0:
     if(length(x) == 0) {
         return(x)
@@ -106,7 +107,27 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add data.table style line indices which is a sequence from 1:
         if(add.line.index) {
-            x <- cbind(c("", paste0(seq_len(nrow(x)), ":")), x)
+            x <- cbind(c("", paste0(line.index.start - 1 + seq_len(nrow(x)), ":")), x)
+        }
+        
+        # Right pad with spaecs:
+        x <- apply(x, 2, function(y) stringi::stri_pad_left(y, max(nchar(y)), pad = " "))
+        
+        # Collapse to lines:
+        x <- apply(x, 1, paste, collapse = columnSeparator)
+    }
+    else if(is.character(x) && length(dim(x)) == 0) {
+        # Replace all NA with the user specified na:
+        x[is.na(x)] <- na
+        
+        # Add the name:
+        if(length(names(x))) {
+            x <- unname(c(names(x), x))
+        }
+        
+        # Add data.table style line indices which is a sequence from 1:
+        if(add.line.index) {
+            x <- cbind(c("", paste0(line.index.start - 1 + seq_len(length(x) - 1), ":")), x)
         }
         
         # Right pad with spaecs:
@@ -133,7 +154,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add data.table style line indices which is a sequence from 1:
         if(add.line.index) {
-            x <- cbind(c("", paste0(seq_len(nrow(x) - 1), ":")), x)
+            x <- cbind(c("", paste0(line.index.start - 1 + seq_len(nrow(x) - 1), ":")), x)
         }
         
         # Right pad with spaecs:
@@ -605,6 +626,7 @@ expandLogical <- function(x) {
 
 
 createStoXNetCDF4FileDataType <- function(x) {
+    names(x) <- "FilePath"
     class(x) <- "StoXNetCDF4File"
     return(x)
 }
@@ -716,7 +738,8 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @param intersect.names Logical: If TRUE, compare only same named columns.
-#' @param ignore A vector of names of columns to ignore in all.equal().
+#' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
+#' @param ignore.process A vector of names of processes to ignore in the comparison.
 #' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
 #' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip.
 #' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
@@ -735,7 +758,7 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, ...) {
+compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore.variable = NULL, ignore.process = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, ...) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -749,14 +772,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
     
-    # Store the file paths of the output files to compare to the new output file paths:
-    if(checkOutputFiles) {
-        # List the output files:
-        outputDir <- file.path(projectPath_copy, "output")
-        outputFiles <- list.files(outputDir, recursive = TRUE, full.names = TRUE)
-    }
-    
-    
+    # Open the project:
     openProject(projectPath_copy)
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
     #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
@@ -777,7 +793,21 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     # Expect all column names:
     tableNames_identical <- list()
     columnNames_identical <- list()
-    for(name in names(dat_orig)) {
+    processesToCheck <- setdiff(names(dat_orig), ignore.process)
+    
+    # Store the file paths of the output files to compare to the new output file paths:
+    if(checkOutputFiles) {
+        # List the output files:
+        outputDir <- file.path(projectPath_copy, "output")
+        outputDirs <- list.dirs(outputDir)
+        # Keep only the output folders of the processes to check:
+        outputDirs <- outputDirs[basename(outputDirs) %in% processesToCheck]
+        # List the files:
+        outputFiles <- unlist(lapply(outputDirs, list.files, full.names = TRUE))
+    }
+    
+    
+    for(name in processesToCheck) {
         # Check identical table names: 
         tableNames_identical[[name]] <- identical(sort(names(dat_orig[[name]])), sort(names(dat[[name]])))
         # Check identical column names: 
@@ -794,7 +824,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     diffData <- list()
     
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
-    for(name in names(dat_orig)) {
+    for(name in processesToCheck) {
         data_equal[[name]] <- list()
         for(subname in names(dat_orig[[name]])) {
             if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
@@ -803,7 +833,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                     result <- compareDataTablesUsingClassOf(
                         dat_orig[[name]][[subname]][, intersectingNames, with = FALSE], 
                         dat[[name]][[subname]][, intersectingNames, with = FALSE], 
-                        ignore = ignore, 
+                        ignore.variable = ignore.variable, 
                         skipNAFraction = skipNAFraction, 
                         skipNAAt = skipNAAt, 
                         NAReplacement = NAReplacement, 
@@ -822,7 +852,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                     result <- compareDataTablesUsingClassOf(
                         dat_orig[[name]][[subname]], 
                         dat[[name]][[subname]], 
-                        ignore = ignore, 
+                        ignore.variable = ignore.variable, 
                         skipNAFraction = skipNAFraction, 
                         skipNAAt = skipNAAt, 
                         NAReplacement = NAReplacement, 
@@ -873,6 +903,8 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                 "\n", 
                 deparse(substitute(x)), 
                 ":\n===========================================>>>>>\n", 
+                "Project: ", projectPath, 
+                "Old project: ", projectPath_original, 
                 x_info, 
                 "\n<<<<<==========================================="
             )
@@ -917,7 +949,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     # Store the file paths of the output files to compare to the new output file paths:
     if(checkOutputFiles) {
         # List the output files:
-        newOutputFiles <- list.files(outputDir, recursive = TRUE, full.names = TRUE)
+        newOutputFiles <- unlist(lapply(outputDirs, list.files, full.names = TRUE))
         allTests$outputFileNames_equal <- outputFiles == newOutputFiles
     }
     
@@ -1124,18 +1156,18 @@ locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
 
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE) {
+compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore.variable = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE) {
     
     
     
     
     classOf <- RstoxData::match_arg_informative(classOf)
     
-    if(length(ignore)) {
-        ignore <- intersect(ignore, names(x))
-        if(length(ignore)) {
-            x <- x[, (ignore):=NULL]
-            y <- y[, (ignore):=NULL]
+    if(length(ignore.variable)) {
+        ignore.variable <- intersect(ignore.variable, names(x))
+        if(length(ignore.variable)) {
+            x <- x[, (ignore.variable):=NULL]
+            y <- y[, (ignore.variable):=NULL]
         }
     }
     
@@ -1178,6 +1210,7 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
         if(isTRUE(skipNAFraction)) {
             skipNAFraction <- 0.5
         }
+        
         x <- subset(x, rowMeans(is.na(x)) < skipNAFraction)
         y <- subset(y, rowMeans(is.na(y)) < skipNAFraction)
     }
@@ -1298,7 +1331,7 @@ setLogicalColumnsToNA <- function(x) {
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_original = projectPaths, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
+compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_original = projectPaths, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore.variable = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, classOf = c("first", "second"), try = TRUE, data.out = FALSE, ...) {
     
     out <- mapply(
         compareProjectToStoredOutputFiles, 
@@ -1307,7 +1340,7 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
         MoreArgs = list(
             emptyStringAsNA = emptyStringAsNA, 
             intersect.names = intersect.names, 
-            ignore = ignore, 
+            ignore.variable = ignore.variable, 
             skipNAFraction = skipNAFraction, 
             skipNAAt = skipNAAt, 
             NAReplacement = NAReplacement, 
@@ -1450,6 +1483,7 @@ readsItsOwnOutputDataType <- function(functionName) {
 #' Write/append a table/list of tables to NetCDF4
 #' 
 #' @inheritParams ncdf4::ncvar_def
+#' @inheritParams unlistToDataType
 #' @param list A list of tables to write to NetCDF4.
 #' @param filePath The path to the file.
 #' @param nc A netCDF4 object, overiding the \code{filePath}.
@@ -1462,20 +1496,18 @@ readsItsOwnOutputDataType <- function(functionName) {
 #' 
 #' @export
 #' 
-write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = NA, verbose = FALSE) {
+write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = NA, verbose = FALSE, validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses")) {
     
-    # Thoughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
+    # Throughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
     
     # Unlist to the StoX data type with sep = "/" to produce groups.
-    list <- unlistToDataType(list, sep = "/", keepNonStandardAttributes = TRUE)
+    list <- unlistToDataType(list, sep = "/", validOutputDataClasses = validOutputDataClasses, keepNonStandardAttributes = TRUE)
+    
     
     dimsTable <- data.table::rbindlist(lapply(lapply(dims, unlistToDataType, sep = "/"), function(x) lapply(x, utils::head, 1)))
-    ncharsTable  <- data.table::rbindlist(lapply(nchars, unlistToDataType, sep = "/"))
     
     nsteps <- nrow(dimsTable)
     stepDim <- ncdf4::ncdim_def("step", "cardinality", seq_len(nsteps), unlim = FALSE)
-    
-    
     
     #  Run through the tables and format the DateTime:
     for(name in names(list)) {
@@ -1483,14 +1515,15 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
         formatPOSIXAsISO8601(list[[name]])
     }
     
-    
-    
     # Define variables and dimensions if not appending:
     if(!append) {
         
         variables <- list()
         
         nrowVariables <- list()
+        
+        # For convenience convert the nchars list to a table (but only when !append): 
+        ncharsTable  <- data.table::rbindlist(lapply(nchars, unlistToDataType, sep = "/"))
         
         #  Run through the tables:
         for(name in names(list)) {
@@ -1599,7 +1632,6 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
             stop("Cannot append to the non-existing file ", filePath)
         }
         
-        
         variableNames <- names(ncout$var)
         # Do not write the nrow variables:
         variableNames <- variableNames[!endsWith(variableNames, "/nrow")]
@@ -1657,10 +1689,12 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
         }
         thisNrow <- dimsTable[index, get(tableName)]
         
+        
         if(is.character(list[[tableName]][[variableName]])) {
             
             # Get maximum number of characters of the variable to write:
             suppressWarnings(max_length <- max(1, max(nchar(list[[tableName]][[variableName]]), na.rm = TRUE)))
+            
             ncdf4::ncvar_put(
                 ncout, 
                 varid = tableVariableName, 
@@ -1680,17 +1714,19 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
                 verbose = verbose
             )
         }
+        
         #ncdf4::nc_sync( ncout )
     }
     
     # Close the file if an open file was not given:
-    if(inherits(nc, "ncdf4")) {
-        return(nc)
-    }
-    else {
-        ncdf4::nc_close(ncout)
-        return(filePath)
-    }
+    #if(inherits(nc, "ncdf4")) {
+    #    return(ncout)
+    #}
+    #else {
+    #    ncdf4::nc_close(ncout)
+    #    return(filePath)
+    #}
+    return(ncout)
 }
 
 

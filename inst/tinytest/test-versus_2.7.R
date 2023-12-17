@@ -8,7 +8,7 @@ projectPath3_cod <- system.file("test", "versus_2.7", "cod_20.zip", package = "R
 projectPath3_cod <- unzipProject(projectPath3_cod, exdir = tempdir())
 
 # Run the cod_20 in current StoX:
-new_cod <- runModel(projectPath3_cod, modelName = "baseline")
+new_cod <- runModel(projectPath3_cod, modelName = "baseline", msg = FALSE)
 
 # Get the new results:
 # Abundance:
@@ -61,7 +61,7 @@ projectPath3_tobis <- system.file("test", "versus_2.7", "tobis_11.zip", package 
 projectPath3_tobis <- unzipProject(projectPath3_tobis, exdir = tempdir())
 
 # Run the tobis_11 in current StoX:
-new_tobis <- runModel(projectPath3_tobis, modelName = "baseline")
+new_tobis <- runModel(projectPath3_tobis, modelName = "baseline", msg = FALSE)
 
 # Get the new results:
 # Abundance:
@@ -106,7 +106,7 @@ projectPath3_Angola <- system.file("test", "versus_2.7", "Angola_15.zip", packag
 projectPath3_Angola <- unzipProject(projectPath3_Angola, exdir = tempdir())
 
 # Run the Angola_15 in current StoX:
-new_Angola <- runModel(projectPath3_Angola, modelName = "baseline")
+new_Angola <- runModel(projectPath3_Angola, modelName = "baseline", msg = FALSE)
 
 # Get the new SplitNASC:
 sn_new <- new_Angola$SplitNASC
@@ -132,7 +132,7 @@ projectPath3_capelin <- system.file("test", "versus_2.7", "capelin_21.zip", pack
 projectPath3_capelin <- unzipProject(projectPath3_capelin, exdir = tempdir())
 
 # Run the capelin_21 in current StoX:
-new_capelin <- runModel(projectPath3_capelin, modelName = "baseline")
+new_capelin <- runModel(projectPath3_capelin, modelName = "baseline", msg = FALSE)
 
 # Get the new results:
 # Abundance:
@@ -174,7 +174,7 @@ projectPath3_coastalCod <- system.file("test", "versus_2.7", "coastalCod_21.zip"
 projectPath3_coastalCod <- unzipProject(projectPath3_coastalCod, exdir = tempdir())
 
 # Run the coastalCod_21 in current StoX:
-new_coastalCod <- runModel(projectPath3_coastalCod, modelName = "baseline")
+new_coastalCod <- runModel(projectPath3_coastalCod, modelName = "baseline", msg = FALSE)
 
 # Get the new results:
 # Abundance:

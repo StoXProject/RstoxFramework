@@ -167,6 +167,9 @@ jobs:
           
           # Additional installs to secure specific versions:
           
+          # Temporary install sf from GitHub, as sf 1.0-15 was releasing at the same time of the StoX pre-release:
+          remotes::install_github("r-spatial/sf")
+          
         shell: Rscript {0}
         
       

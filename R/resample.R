@@ -171,7 +171,7 @@ Bootstrap <- function(
     nc <- NULL
     
     # Run through the bootstrap runs and rename the saved baseline folders to the original name:
-    message("Writing NetCDF4 file...")
+    message("StoX: Writing netCDF4 file (the file can be read into R using RstoxFramework::getBootstrapData) ...")
     
     nc <- writeBootstrapOutputFromIndividualProjects(
         memoryDataSubFolders = memoryDataSubFolders, 

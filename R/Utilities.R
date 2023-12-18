@@ -107,7 +107,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add data.table style line indices which is a sequence from 1:
         if(add.line.index) {
-            x <- cbind(c("", paste0(line.index.start - 1 + seq_len(nrow(x)), ":")), x)
+            x <- cbind(c(line.index_column_ = "", paste0(line.index.start - 1 + seq_len(nrow(x)), ":")), x)
         }
         
         # Right pad with spaecs:
@@ -127,7 +127,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add data.table style line indices which is a sequence from 1:
         if(add.line.index) {
-            x <- cbind(c("", paste0(line.index.start - 1 + seq_len(length(x) - 1), ":")), x)
+            x <- cbind(line.index_column_ = c("", paste0(line.index.start - 1 + seq_len(length(x) - 1), ":")), x)
         }
         
         # Right pad with spaecs:
@@ -154,7 +154,7 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Add data.table style line indices which is a sequence from 1:
         if(add.line.index) {
-            x <- cbind(c("", paste0(line.index.start - 1 + seq_len(nrow(x) - 1), ":")), x)
+           x <- cbind(line.index_column_ = c("", paste0(line.index.start - 1 + seq_len(nrow(x) - 1), ":")), x)
         }
         
         # Right pad with spaecs:

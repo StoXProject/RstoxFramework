@@ -1,3 +1,7 @@
+# RstoxFramework v3.6.3-9005 (2023-12-18)
+* Fixed bug in Preview of ReportSpeciesCategoryCatchData, where the column V1 was overwritten when adding line indices.
+
+
 # RstoxFramework v3.6.3-9004 (2023-12-01)
 * Changed the functions Bootstrap() and ReportBootstrap() to use the netCDF4 files.
 * Added the function bootstrapRDataToNetCDF4() for converting old bootstrap RData to the new nc files.

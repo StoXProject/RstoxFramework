@@ -1,3 +1,7 @@
+# RstoxFramework v3.6.3-9006 (2023-12-19)
+* Fixed bug where TargetVariable and GroupingVariables did not get possible values.
+
+
 # RstoxFramework v3.6.3-9005 (2023-12-18)
 * Fixed bug in Preview of ReportSpeciesCategoryCatchData, where the column V1 was overwritten when adding line indices.
 

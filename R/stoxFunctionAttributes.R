@@ -82,34 +82,6 @@ stoxFunctionAttributes <- list(
         )
     ), 
     
-    ### ReportBootstrapNetCDF4_lowMemory = list(
-    ###     functionType = "modelData", 
-    ###     functionCategory = "report", 
-    ###     functionOutputDataType = "ReportBootstrapNetCDF4Data", 
-    ###     # This is an example of using an expression to determine when to show a parameter:
-    ###     functionParameterFormat = list(
-    ###         BaselineProcess = "baselineProcess_ReportBootstrapNetCDF4", 
-    ###         TargetVariable = "targetVariable_ReportBootstrapNetCDF4", 
-    ###         TargetVariableUnit = "targetVariableUnit_ReportBootstrapNetCDF4", 
-    ###         GroupingVariables = "groupingVariables_ReportBootstrapNetCDF4", 
-    ###         InformationVariables = "informationVariables_ReportBootstrapNetCDF4", 
-    ###         Percentages = "percentages_ReportBootstrap"
-    ###     ), 
-    ###     functionArgumentHierarchy = list(
-    ###         AggregationWeightingVariable = list(
-    ###             AggregationFunction = expression(RstoxBase::getWeightingFunctions())
-    ###         ), 
-    ###         BootstrapReportWeightingVariable = list(
-    ###             BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
-    ###         ), 
-    ###         Percentages = list(
-    ###             BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
-    ###         )
-    ###     ), 
-    ###     functionParameterDefaults = list(
-    ###         Percentages = c(5, 50, 95)
-    ###     )
-    ### ), 
     
     PlotReportBootstrap = list(
         functionType = "modelData", 
@@ -292,23 +264,6 @@ processPropertyFormats <- list(
         }
     ), 
     
-    targetVariable_ReportBootstrap = list(
-        class = "single", 
-        title = "Select TargetVariable for ReportBootstrap",
-        possibleValues = function(BootstrapData, BaselineProcess) {
-            sort(setdiff(names(BootstrapData[[BaselineProcess]]), "BootstrapID"))
-        }
-    ), 
-    
-    groupingVariables_ReportBootstrap = list(
-        class = "vector", 
-        title = "One or more variables to group super-individuals by when reporting BootstrapData", 
-        #possibleValues = function(BootstrapData, BaselineProcess) {
-        #    sort(setdiff(names(BootstrapData[[BaselineProcess]]), "BootstrapID"))
-        #}, 
-        possibleValues = list(), 
-        variableTypes <- "character"
-    ), 
     
     outputProcesses = list(
         class = "vector", 

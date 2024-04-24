@@ -31,7 +31,7 @@ compareProjectToStoredOutputFiles(
 )
 }
 \arguments{
-\item{projectPath}{The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.}
+\item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
 \item{projectPath_original}{The project holding the existing output files, defaulted to \code{projectPath}.}
 

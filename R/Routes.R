@@ -1420,9 +1420,6 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
     # Add 00Index:
     db[["00Index.Rd"]] <- tools::parse_Rd(system.file('html', "00Index.html", package = packageName))
     
-    # Write the help to file as html and read back:
-    objectName.Rd <- paste0(objectName, ".Rd")
-    
     # Get the links of the package:
     Links <- tools::findHTMLlinks(pkgDir = find.package(packageName))
     ## Add the index links of the Rstox packages:
@@ -1430,6 +1427,20 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
     #    Links, 
     #    structure(paste0("../../", packageName, "/html/00Index.html"), names = packageName)
     #)
+    
+    # Write the help to file as html and read back:
+    objectName.Rd <- paste0(objectName, ".Rd")
+    # If the objectName.Rd is not present, find the link:
+    if(! objectName.Rd %in% names(db)) {
+        if(objectName %in% names(Links)) {
+            objectName <- basename( tools::file_path_sans_ext(Links[objectName]) )
+            objectName.Rd <- paste0(objectName, ".Rd")
+        }
+        else {
+            warning("")
+        }
+    }
+    
     
     # Return empty string if the function 
     if(! objectName.Rd %in% names(db)) {

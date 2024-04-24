@@ -20,16 +20,16 @@ utils::globalVariables(c(
 	 "..signifDigits", "..skipNAAt", "..stationInfoToKeep", "..subsetByNAOn_New",
 	 "..subsetByNAOn_Old", "..toKeep", "..validInd", "..x1x2y1y2", "AcoCat", "BeamKey",
 	 "BootstrapID", "BootstrapNetCDF4Data", "BootstrapSampleFactor", "CruiseKey", "Haul", "Layer",
-	 "LogKey", "LogOrigin", "LogOrigin2", "PSU", "PolygonKey", "ProcessName", "ResampleFunction",
-	 "SampleUnit", "Station", "StationWeight", "StoX", "Stratum", "TableName", "WeightingFactor",
-	 "assignmentPasted", "canShowInMap", "capture.output", "ch", "currentVersion", "enabled",
-	 "freq", "functionInputProcessIDs", "functionInputs", "functionInputError", "functionName",
-	 "functionOutputDataType", "hasBeenRun", "hasProcessData", "lenght", "modelName", "name",
-	 "numStations", "oldCurrentVersion", "offset", "packageName", "possibleValues", "processID",
-	 "processIndex", "processName", "projectPath", "resampledCountWithUniqueName", "st_linestring",
-	 "st_sf", "st_sfc", "start_time", "tableName", "terminalProcess", "transceiver",
-	 "usedInProcessIDs", "usedInProcessIndices", "usedInProcessNames", "value", "verbose",
-	 "weightsPasted"))
+	 "LogKey", "LogOrigin", "LogOrigin2", "N", "PSU", "PolygonKey", "ProcessName",
+	 "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum", "TableName",
+	 "WeightingFactor", "assignmentPasted", "canShowInMap", "capture.output", "ch",
+	 "currentVersion", "enabled", "freq", "functionInputProcessIDs", "functionInputs",
+	 "functionInputError", "functionName", "functionOutputDataType", "hasBeenRun", "hasProcessData",
+	 "lenght", "modelName", "name", "numStations", "oldCurrentVersion", "offset", "packageName",
+	 "possibleValues", "processID", "processIndex", "processName", "projectPath",
+	 "resampledCountWithUniqueName", "st_linestring", "st_sf", "st_sfc", "start_time", "tableName",
+	 "terminalProcess", "transceiver", "usedInProcessIDs", "usedInProcessIndices",
+	 "usedInProcessNames", "value", "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

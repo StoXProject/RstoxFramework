@@ -6,6 +6,7 @@
 #' 
 #' @param projectPath The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.
 #' @param projectPaths A vector of paths to the StoX projects.
+#' @param projectDescriptionFile The path to the file holding the projectDescription (project.json).
 #' @param modelName The name of the model (possible values are "baseline", "analysis" and "report").
 #' @param modelNames The name of the models (possible values are "baseline", "analysis" and "report").
 #' @param processID The ID of the process.
@@ -30,6 +31,8 @@
 #' @param argumentFilePaths A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.
 #' @param only.valid Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).
 #' @param returnProcessTable Logical: If TRUE return the process table (much used in functions used by the GUI).
+#' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
+#' @param Seed The seed, given as a single integer.
 #' 
 #' @name general_arguments
 #' 

@@ -515,6 +515,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         
         
         if(verifyFiles) {
+            # Do not validate since we are only reading the project description file to check the process names:
             projectDescription <- readProjectDescription(projectPath, applyBackwardCompatibility = FALSE, formatProcesses = FALSE, validateJSON = FALSE)$projectDescription
             
             processNames <- lapply(projectDescription, function(x) unname(sapply(x, "[[", "processName")))

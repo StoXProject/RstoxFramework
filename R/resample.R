@@ -796,13 +796,19 @@ getSelectionString <- function(selection) {
 
 
 
-getProcessNameTableNameVariableName <- function(nc) {
+getProcessNameTableNameVariableName <- function(nc, add.class = FALSE) {
     list <- getVariableNameElementsList(nc)
     # Add NA table name for the single table data that are dropped of the data type (table name):
     list <- lapply(list, function(x) if(length(x) == 2) c(x[1], NA, x[2]) else x)
     
     table <- data.table::rbindlist(lapply(list, as.list))
     data.table::setnames(table, c("processName", "tableName", "variableName"))
+    
+    # Add the class stored in the file:
+    if(add.class) {
+        table[, class := sapply(nc$var, "[[", "prec")]
+    }
+    
     return(table)
 }
 
@@ -830,8 +836,11 @@ getProcessNamesAndTableNames <- function(nc) {
 getDataTypeFromBootstrap <- function(nc, processName) {
     
     # Get the dataType and processName global attributes:
-    processNames <- ncdf4::ncatt_get(nc, varid = 0, attname = "processName")$value
-    dataTypes <- ncdf4::ncatt_get(nc, varid = 0, attname = "dataType")$value
+    #processNames <- ncdf4::ncatt_get(nc, varid = 0, attname = "processName")$value
+    #dataTypes <- ncdf4::ncatt_get(nc, varid = 0, attname = "dataType")$value
+    processNames <- readStringVectorAttribute(nc, varid = 0, attname = "processName")
+    dataTypes <- readStringVectorAttribute(nc, varid = 0, attname = "dataType")
+    
     
     if(! processName %in% processNames) {
         warning("The process ", processName, " is not present with a dataType in the file \"", nc$filename, "\". Present processes are ", paste(processNames, collapse = ", "), ".")
@@ -1297,7 +1306,7 @@ resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
     
-    # Build a table of resampleBy and Seed and merge with the MeanLengthDistributionData:
+    # Build a table of resampleBy and Seed and merge with the data:
     seedTable <- data.table::data.table(
         resampleBy = uniqueResampleBy, 
         seed = RstoxBase::getSeedVector(seed, size = length(uniqueResampleBy))
@@ -1354,13 +1363,22 @@ resampleOne <- function(subData, seed, varToResample, varToScale) {
 #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 #' 
 #' @inheritParams RstoxBase::ModelData
-#' @param Seed The seed, given as a sinigle initeger.
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
 ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed) {
     
-    # This function will be renamed to ResampleBioticPSUsInStratum
+    # 2024-04: This function will be renamed to ResampleBioticPSUsInStratum
+    
+    # Warn if there are strata with only one PSU, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        MeanLengthDistributionData$Data, 
+        toResample = "PSU",
+        within  = "Stratum", 
+        functionName = "ResampleMeanLengthDistributionData", 
+        toResamplePrefix = "Biotic"
+    )
     
     # Resample PSUs within Strata, modifying the weighting variable of MeanLengthDistributionData:
     MeanLengthDistributionData$Data <- resampleDataBy(
@@ -1383,13 +1401,22 @@ ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed)
 #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
 #' 
 #' @inheritParams RstoxBase::ModelData
-#' @param Seed The seed, given as a sinigle initeger.
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
 ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, Seed) {
     
     # This function will be renamed to ResampleBioticPSUsInStratum
+    
+    # Warn if there are strata with only one PSU, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        MeanSpeciesCategoryCatchData$Data, 
+        toResample = "PSU",
+        within  = "Stratum", 
+        functionName = "ResampleMeanSpeciesCategoryCatchData", 
+        toResamplePrefix = "Biotic"
+    )
     
     # Resample PSUs within Strata, modifying the weighting variable of MeanSpeciesCategoryCatchData:
     MeanSpeciesCategoryCatchData$Data <- resampleDataBy(
@@ -1410,7 +1437,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
 ### #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 ### #' 
 ### #' @param MeanLengthDistributionData The \code{\link[RstoxBase]{MeanLengthDistributionData}} data.
-### #' @param Seed The seed, given as a sinigle initeger.
+### #' @param Seed The seed, given as a single integer.
 ### #' 
 ### #' @export
 ### #' 
@@ -1429,32 +1456,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
 ### }
 
 
-#' Resamples biotic PSUs
-#' 
-#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
-#' 
-#' @inherit RstoxBase::ProcessData
-#' @param Seed The seed, given as a sinigle initeger.
-#' 
-#' @noRd
-#' 
-ResampleBioticAssignment <- function(BioticAssignment, Seed) {
-    
-    # This function will be renamed to ResampleAssignedHaulsInStratum
-    
-    # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
-    BioticAssignment <- resampleDataBy(
-        #data = BioticAssignment$BioticAssignment, 
-        data = BioticAssignment, 
-        seed = Seed, 
-        varToScale = "WeightingFactor", 
-        # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
-        varToResample = "Haul", 
-        resampleBy = "Stratum"
-    )
-    
-    return(BioticAssignment)
-}
+
 
 
 #' Resamples biotic PSUs
@@ -1462,7 +1464,7 @@ ResampleBioticAssignment <- function(BioticAssignment, Seed) {
 #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 #' 
 #' @inherit RstoxBase::ProcessData
-#' @param Seed The seed, given as a sinigle initeger.
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
@@ -1470,6 +1472,14 @@ ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
     
     # This function will be renamed to ResampleAssignedHaulsInStratum
     
+    # Warn if there are strata with only one Haul, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        BioticAssignment, 
+        toResample = "Haul",
+        within  = "Stratum",
+        functionName = "ResampleBioticAssignmentByStratum"
+    )
+    
     # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
     BioticAssignment <- resampleDataBy(
         #data = BioticAssignment$BioticAssignment, 
@@ -1489,13 +1499,22 @@ ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
 #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
 #' 
 #' @inherit RstoxBase::ProcessData
-#' @param Seed The seed, given as a sinigle initeger.
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
 ResampleBioticAssignmentByAcousticPSU <- function(BioticAssignment, Seed) {
     
     # This function will be renamed to ResampleAssignedHaulsInStratum
+    
+    # Warn if there are PSUs with only one Haul, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        BioticAssignment, 
+        toResample = "Haul",
+        within  = "PSU", 
+        functionName = "ResampleBioticAssignmentByAcousticPSU",
+        toResamplePrefix = "Acoustic"
+    )
     
     # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
     BioticAssignment <- resampleDataBy(
@@ -1518,13 +1537,22 @@ ResampleBioticAssignmentByAcousticPSU <- function(BioticAssignment, Seed) {
 #' This function resamples acoustic PSUs with replacement within each Stratum, changing the MeanNASC
 #' 
 #' @inheritParams RstoxBase::ModelData
-#' @param Seed The seed, given as a sinigle initeger.
+#' @inheritParams general_arguments
 #' 
 #' @export
 #' 
 ResampleMeanNASCData <- function(MeanNASCData, Seed) {
     
     # This function will be renamed to ResampleAcousticPSUsInStratum
+    
+    # Warn if there are strata with only one PSU, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        MeanNASCData$Data, 
+        toResample = "PSU",
+        within  = "Stratum", 
+        functionName = "ResampleMeanNASCData",
+        toResamplePrefix = "Acoustic"
+    )
     
     # Resample PSUs within Strata, modifying the weighting variable of MeanLengthDistributionData:
     MeanNASCData$Data <- resampleDataBy(
@@ -1559,15 +1587,12 @@ ResampleMeanNASCData <- function(MeanNASCData, Seed) {
 #' @inheritParams ModelData
 #' @inheritParams RstoxBase::general_report_arguments
 #' @param BaselineProcess A strings naming the baseline process to report from the \code{\link{BootstrapData}}. If a process with 
-#' @param AggregationFunction The function to apply to each bootstrap run. This must be a function returning a single value.
 #' @param BootstrapReportFunction The function to apply across bootstrap run, such as "cv" or "c".
 #' @param Percentages The percentages to report Percentiles for when BootstrapReportFunction = "summaryStox".
-#' @param AggregationWeightingVariable The variable to weight by in the \code{AggregationFunction}.
-#' @param BootstrapReportWeightingVariable The variable to weight by in the \code{BootstrapReportFunction}.
 #'
-#' @details This function works in two steps. First, the \code{AggregationFunction} is applied to the \code{TargetVariable} of the table given by \code{BaselineProcess} for each unique combination of the \code{GroupingVariables} and for each bootstrap run. Second, a grid of all possible combinations of the \code{GroupingVariables} is formed and the result from the first step placed onto the grid. This creates 0 for each position in the grid where data from the first step are not present. E.g., if a particularly large fish is found in only one haul, and this haul by random is not selected in a bootstrap run, the \code{TargetVariable} will be 0 to reflect the variability in the data. To complete the second step, the \code{BootstrapReportFunction} is applied over the bootstrap runs for each cell in the grid.
+#' @details This function works in two steps. First, the \code{ReportFunction} is applied to the \code{TargetVariable} of the table given by \code{BaselineProcess} for each unique combination of the \code{GroupingVariables} and for each bootstrap run. Second, a grid of all possible combinations of the \code{GroupingVariables} is formed and the result from the first step placed onto the grid. This creates 0 for each position in the grid where data from the first step are not present. E.g., if a particularly large fish is found in only one haul, and this haul by random is not selected in a bootstrap run, the \code{TargetVariable} will be 0 to reflect the variability in the data. To complete the second step, the \code{BootstrapReportFunction} is applied over the bootstrap runs for each cell in the grid.
 #' 
-#' The parameter \code{RemoveMissingValues} should be used with extreme caution. The effect of setting \code{RemoveMissingValues} to TRUE is that missing values (NAs) are removed in both the first and second step. This can be dangerous both in the first and in the second step. E.g., if the Abundance of \code{\link[RstoxBase]{SuperIndividualsData}} is positive for super-individuals with missing IndividualWeight, then the Biomass of those super-individuals will be missing as well. If one the wants to sum the Biomass by using \code{AggregationFunction} = "sum" one will get NA if \code{RemoveMissingValues} = FALSE. If \code{RemoveMissingValues} = TRUE one will ignore the missing Biomass, and the summed Biomass will only include the super-individuals that have non-missing IndividualWeight, effectively discarding a portion of the observed abundance. The summed Biomass will in this case be underestimated!
+#' The parameter \code{RemoveMissingValues} should be used with extreme caution. The effect of setting \code{RemoveMissingValues} to TRUE is that missing values (NAs) are removed in both the first and second step. This can be dangerous both in the first and in the second step. E.g., if the Abundance of \code{\link[RstoxBase]{SuperIndividualsData}} is positive for super-individuals with missing IndividualWeight, then the Biomass of those super-individuals will be missing as well. If one the wants to sum the Biomass by using \code{ReportFunction} = "sum" one will get NA if \code{RemoveMissingValues} = FALSE. If \code{RemoveMissingValues} = TRUE one will ignore the missing Biomass, and the summed Biomass will only include the super-individuals that have non-missing IndividualWeight, effectively discarding a portion of the observed abundance. The summed Biomass will in this case be underestimated!
 #' 
 #' In the second step, setting \code{RemoveMissingValues} to TRUE can be even more dangerous, as the only option currently available for the \code{BootstrapReportFunction} is the function RstoxBase::summaryStox(), which includes average and standard deivation which are highly influenced by removing missing data.
 #' 
@@ -1583,19 +1608,24 @@ ReportBootstrap <- function(
     BaselineProcess = character(), 
     TargetVariable = character(), 
     TargetVariableUnit = character(), 
-    AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE), 
-    BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE), 
-    Percentages = double(), 
+    # The aggregation on Baseline:
+    ReportFunction = RstoxBase::getReportFunctions(use = "Baseline"), 
     GroupingVariables = character(), 
     InformationVariables = character(), 
+    WeightingVariable = character(), 
+    ConditionOperator = character(), 
+    ConditionValue = character(), 
+    FractionOverVariable = character(), 
+    # The aggreggation over bootstraps:
+    BootstrapReportFunction = RstoxBase::getReportFunctions(use = "Bootstrap"), 
+    Percentages = double(), 
+    # General arguments:
     Filter = character(), 
-    RemoveMissingValues = FALSE, 
-    AggregationWeightingVariable = character(), 
-    BootstrapReportWeightingVariable = character()
+    RemoveMissingValues = FALSE
 ) 
 {
     
-    AggregationFunction <- RstoxData::match_arg_informative(AggregationFunction)
+    ReportFunction <- RstoxData::match_arg_informative(ReportFunction)
     BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
     
     if(!length(BootstrapData)) {
@@ -1618,7 +1648,7 @@ ReportBootstrap <- function(
     
     
     # Read the relevant variables from the BootstrapData file:
-    toKeep <- c(TargetVariable, GroupingVariables, InformationVariables, AggregationWeightingVariable, BootstrapReportWeightingVariable)
+    toKeep <- c(TargetVariable, GroupingVariables, InformationVariables, WeightingVariable)
     
     selection <- list(processNameSlashTableName, toKeep)
     
@@ -1644,13 +1674,18 @@ ReportBootstrap <- function(
     output <- lapply(bootstrapIDs, initialAggregateBootstrapDataOne, 
         nc = nc, 
         selection = selection, 
-        AggregationFunction = AggregationFunction, 
+        ReportFunction = ReportFunction, 
         TargetVariable = TargetVariable, 
         TargetVariableUnit = TargetVariableUnit, 
         GroupingVariables = c(GroupingVariables, "BootstrapID"), 
         InformationVariables = InformationVariables, 
         RemoveMissingValues = RemoveMissingValues, 
-        AggregationWeightingVariable = AggregationWeightingVariable, 
+        Specification = list(
+            WeightingVariable = WeightingVariable,
+            ConditionOperator = ConditionOperator, 
+            ConditionValue = ConditionValue, 
+            FractionOverVariable = FractionOverVariable
+        ),
         dataType = dataType
     )
     unit <- output[[1]]$unit
@@ -1664,7 +1699,7 @@ ReportBootstrap <- function(
     
     # Get the name of the new TargetVariable:
     TargetVariableAfterInitialAggregation <- RstoxBase::getReportFunctionVariableName(
-        functionName = AggregationFunction, 
+        functionName = ReportFunction, 
         TargetVariable = TargetVariable
     )
     
@@ -1682,13 +1717,14 @@ ReportBootstrap <- function(
     output <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = output, 
         TargetVariable = TargetVariableAfterInitialAggregation, 
-        aggregationFunction = BootstrapReportFunction, 
+        ReportFunction = BootstrapReportFunction, 
         GroupingVariables = GroupingVariables, 
         InformationVariables = InformationVariables, 
         na.rm = RemoveMissingValues, 
         padWithZerosOn = "BootstrapID", 
-        WeightingVariable = BootstrapReportWeightingVariable, 
-        SpecificationParameter = Percentages, 
+        Specification = list(
+            Percentages = Percentages
+        ),
         uniqueGroupingVariablesToKeep = uniqueGroupingVariablesToKeep
     )
     
@@ -1759,13 +1795,13 @@ initialAggregateBootstrapDataOne <- function(
     bootstrapID, 
     nc, 
     selection, 
-    AggregationFunction, 
+    ReportFunction, 
     TargetVariable, 
     TargetVariableUnit,
     GroupingVariables, 
     InformationVariables, 
     RemoveMissingValues, 
-    AggregationWeightingVariable, 
+    Specification,
     dataType
 ) {
     
@@ -1788,11 +1824,11 @@ initialAggregateBootstrapDataOne <- function(
     output <- RstoxBase::aggregateBaselineDataOneTable(
         stoxData = relevantBootstrapDataOne, 
         TargetVariable = TargetVariable, 
-        aggregationFunction = AggregationFunction, 
+        ReportFunction = ReportFunction, 
         GroupingVariables = GroupingVariables, 
         InformationVariables = InformationVariables, 
         na.rm = RemoveMissingValues, 
-        WeightingVariable = AggregationWeightingVariable
+        Specification = Specification
     )
     
     output <- list(

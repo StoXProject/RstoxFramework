@@ -9,7 +9,7 @@ ResampleBioticAssignmentByAcousticPSU(BioticAssignment, Seed)
 \arguments{
 \item{BioticAssignment}{The \code{\link[RstoxBase]{BioticAssignment}} process data.}
 
-\item{Seed}{The seed, given as a sinigle initeger.}
+\item{Seed}{The seed, given as a single integer.}
 }
 \description{
 This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.

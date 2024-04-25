@@ -9,7 +9,7 @@ ResampleMeanSpeciesCategoryCatchData(MeanSpeciesCategoryCatchData, Seed)
 \arguments{
 \item{MeanSpeciesCategoryCatchData}{The \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}} data.}
 
-\item{Seed}{The seed, given as a sinigle initeger.}
+\item{Seed}{The seed, given as a single integer.}
 }
 \description{
 This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData

@@ -468,7 +468,7 @@ openProject <- function(
     # Read the project description file:
     #projectDescription <- readProjectDescription(projectPath, type = type)
     
-    temp <- readProjectDescription(projectPath, verbose = verbose)
+    temp <- readProjectDescription(projectPath, verbose = verbose, validateJSON = TRUE)
     projectDescription <- temp$projectDescription
     saved <- temp$saved
     
@@ -893,10 +893,7 @@ deleteProcessData <- function(projectPath, modelName, processID) {
 #' Utilities for projects.
 #' 
 #' @inheritParams general_arguments
-#' @param projectDescriptionFile The path to the file holding the projectDescription.
 #' @param applyBackwardCompatibility Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.
-#' @param formatProcesses Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.
-#' @param validateJSON Logical: If TRUE validate the project.json.
 #' @param strict Logical: If TRUE, require that all folders of the projectSession folder exist in isOpenProject(). Otherwise only require that the projectSession folder exists.
 #' 
 #' @name ProjectUtils
@@ -982,6 +979,10 @@ isOpenProject <- function(projectPath, strict = FALSE) {
 
 #' Read the project description.
 #' 
+#' @inheritParams general_arguments
+#' @param validateJSON Logical: If TRUE validate the project.json.
+#' @param formatProcesses Logical: If TRUE format the processes after reading the projectDescription file, ensuring correct primitive types. This has a use of FALSE in \code{readModelData}, but should otherwise be set to TRUE.
+#' 
 #' @export
 #' @rdname ProjectUtils
 #' 
@@ -1061,17 +1062,19 @@ readProjectDescription <- function(
     
     # Validate the project.json here, and try to validate the project.json to be saved if the initial validation fails. 
     if(validateJSON) {
-        valid <- validateProjectDescriptionFile(projectDescriptionFile)
-        if(!isTRUE(valid)) {
+        #valid <- validateProjectDescriptionFile(projectDescriptionFile)
+        #if(!isTRUE(valid)) {
             # Try writing to a tempfile and validating this file:
+            reducedProjectDescription <- projectDescription
+            reducedProjectDescription$baseline <- lapply(reducedProjectDescription$baseline, reduceProcessDataOneProcess, n = 6L)
             tempProjectDescriptionFile <- tempfile()
             writeProjectDescription(
-                projectDescription = projectDescription, 
+                projectDescription = reducedProjectDescription, 
                 projectDescriptionFile = tempProjectDescriptionFile, 
                 optionalDependencies = TRUE
             )
             valid <- validateProjectDescriptionFile(tempProjectDescriptionFile)
-        }
+        #}
         
         if(!isTRUE(valid)) {
             # Write the error to a temp file:
@@ -1090,6 +1093,13 @@ readProjectDescription <- function(
         )
     )
 }
+
+
+reduceProcessDataOneProcess <- function(process, n = 6L) {
+    process$processData <- lapply(process$processData, utils::head, n)
+    return(process)
+}
+
 
 
 readProjectDescriptionJSON <- function(projectDescriptionFile) {
@@ -1145,10 +1155,30 @@ readProjectDescriptionJSON <- function(projectDescriptionFile) {
 
 
 
-validateProjectDescriptionFile <- function(projectDescriptionFile, warn = TRUE) {
+validateProjectDescriptionFile <- function(projectDescriptionFile, engine = "ajv") {
+    
     # Validate the project description file against schema
-    projectValidatorAJV <- getRstoxFrameworkDefinitions("projectValidatorAJV")
-    valid <- projectValidatorAJV(projectDescriptionFile, verbose = TRUE)
+    if(engine == "ajv") {
+        projectValidator <- getRstoxFrameworkDefinitions("projectValidatorAJV")
+    }
+    else if(engine == "imjv") {
+        projectValidator <- getRstoxFrameworkDefinitions("projectValidatorIMJV")
+        }
+    else {
+        stop("Unsupported JSON validator!")
+    }
+        
+    #valid <- projectValidatorAJV(projectDescriptionFile, verbose = TRUE)
+    
+    tryCatch({
+        valid <- projectValidator(projectDescriptionFile, verbose = TRUE)
+    }, warning = function(warning_condition) {
+        warning_condition$message
+    }, error = function(error_condition) {
+        error_condition$message
+    })
+    
+    
     return(valid)
 }
 
@@ -1238,7 +1268,6 @@ writeProjectDescription <- function(projectPath, projectDescription = NULL, proj
 #' 
 #' @inheritParams general_arguments
 #' @param projectDescription  a list of lists with project description.
-#' @param projectDescriptionFile  a file name.
 #' 
 writeProjectDescriptionJSON <- function(projectDescription, projectDescriptionFile, Application) {
     
@@ -4168,17 +4197,18 @@ modifyProjects <- function(projectPaths, modelNames = getRstoxFrameworkDefinitio
 #' Remove a StoX process
 #' 
 #' @inheritParams general_arguments
+#' @param ... Used in \code{\link{openProject}}.
 #' 
 #' @export
 #' 
-removeProcesses <- function(projectPath, processNames) {
+removeProcesses <- function(projectPath, processNames, ...) {
     
     if(isOpenProject(projectPath)) {
         warning("You are trying to modify the already open project ", projectPath, ". Close the project with RstoxFramework::closeProject() first and then retry.")
         return(NULL)
     }
     else {
-        openProject(projectPath)
+        openProject(projectPath, ...)
         on.exit(closeProject(projectPath, save = TRUE))
     }
     

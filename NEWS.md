@@ -1,3 +1,13 @@
+# RstoxFramework v3.6.3-9007 (2024-04-23)
+* Relaxed validation of the project.json to only consider the first 6 rows (using utils::head()) of each table or sf object. This was due to an observed crash of jsonvalidate::json_validator() for project.json of size larger than 1/2 GB.
+* Renamed AggregationFunction to ReportFunction.
+* Renamed AggregationWeightingVariable to WeightingVariable.
+* Fixed bug where help for a topic aliased by another topic did not work in getObjectHelpAsHtml() used  by the GUI (e.g. var which is documented in cor).
+* Moved all warnings about only one value in stratum to onlyOneToResample_Warning() used in boot
+strapping.
+* Fixed bug where the bootstrap attributes processNames and dataTypes were not written past the first value.
+
+
 # RstoxFramework v3.6.3-9006 (2023-12-19)
 * Fixed bug where TargetVariable and GroupingVariables did not get possible values.
 

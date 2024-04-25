@@ -712,7 +712,7 @@ capitalizeFirstLetter <- function(x) {
 
 #' Function for unzipping a zipped StoX project
 #' 
-#' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
+#' @inheritParams general_arguments
 #' @param exdir The direcory to unzip to, defaulted to the current directory.
 #' 
 #' @export
@@ -735,7 +735,7 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' 
 #' @inheritParams readModelData
 #' @inheritParams runProcesses
-#' @param projectPath The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.
+#' @inheritParams general_arguments
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @param intersect.names Logical: If TRUE, compare only same named columns.
 #' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
@@ -1661,7 +1661,14 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
             # attributesToBeWritten <- setdiff(names(allAttritues), standardAttritues)
             
             for(attributeName in names(attributesToBeWritten)) {
-                ncdf4::ncatt_put( ncout, varid = 0, attname = attributeName, attval = attributesToBeWritten[[attributeName]], verbose= verbose)
+                #ncdf4::ncatt_put( ncout, varid = 0, attname = attributeName, attval = attributesToBeWritten[[attributeName]], verbose= verbose)
+                writeStringVectorAsAttribute(
+                    nc = ncout, 
+                    varid = 0, 
+                    attname = attributeName, 
+                    attval = attributesToBeWritten[[attributeName]], 
+                    verbose = verbose
+                )
             }
             
             # Sync, so that not all is written at nc_close:
@@ -1727,6 +1734,28 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
     #    return(filePath)
     #}
     return(ncout)
+}
+
+
+writeStringVectorAsAttribute <- function(nc, varid, attname, attval, verbose = FALSE) {
+    # Paste as a CSV:
+    attval <- paste(attval, collapse = ",")
+    ncdf4::ncatt_put(
+        nc, 
+        varid = varid, 
+        attname = attname, 
+        attval = attval, 
+        verbose = verbose
+    )
+}
+
+readStringVectorAttribute <- function(nc, varid, attname, attval, verbose = FALSE) {
+    # Read the attribute:
+    out <- ncdf4::ncatt_get(nc, varid = varid, attname = attname, verbose = verbose)$value
+    # ... and split by comma:
+    out  <- strsplit(out, ",")[[1]]
+    
+    return(out)
 }
 
 
@@ -1944,6 +1973,36 @@ dataTable2sf_LINESTRING <- function(x, x1x2y1y2 = c("startLongitude", "startLati
 # Simple function to create a segment:
 create_segment <- function(r) {
     sf::st_linestring(t(matrix(unlist(r), 2, 2)))
+}
+
+
+
+
+onlyOneToResample_Warning <- function(x, toResample, within, functionName = NULL, toResamplePrefix = "", withinPrefix = "") {
+    
+    if(NROW(x)) {
+        # Count the number toResample per within:
+        ux <- unique(x, by = c(toResample, within))
+        number <- ux[, .N, by = within]
+        number1 <- subset(number, N == 1)[[within]]
+        # Ignore missing values (e.g. missing Stratum):
+        number1 <- stats::na.omit(number1)
+        # Issue the waring:
+        if(length(number1)) {
+            text <- paste0(
+                "StoX: ", if(length(functionName)) paste0("(", functionName, ") "), "The following ", 
+                paste0(withinPrefix, within), 
+                " have only one ",
+                paste0(toResamplePrefix, toResample), 
+                ", which is in conflict with the principle of bootstrapping as there will be no contribution to the variance from these ", 
+                paste0(withinPrefix, within), 
+                ". Please consider merging strata to avoid this problem:", 
+                RstoxData::printErrorIDs(number1)
+            )
+            
+            warning(text)
+        }
+    }
 }
 
 

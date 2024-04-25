@@ -4,12 +4,14 @@
 \alias{removeProcesses}
 \title{Remove a StoX process}
 \usage{
-removeProcesses(projectPath, processNames)
+removeProcesses(projectPath, processNames, ...)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
 \item{processNames}{A vector of names of the processes.}
+
+\item{...}{Used in \code{\link{openProject}}.}
 }
 \description{
 Remove a StoX process

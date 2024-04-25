@@ -27,7 +27,32 @@ getPossibleVariables <- function(BootstrapData, BaselineProcess) {
     output <- sort(unique(processNameTableNameVariableName$variableName))
     
     return(output)
+}   
+    
+    
+    
+    
+    
+getPossibleVariables.nc <- function(BootstrapData, BaselineProcess, exceptions, nc.classes = c("double", "int")) {
+    
+    # Open the ncc file:
+    nc <- ncdf4::nc_open(unlist(BootstrapData))
+    on.exit(ncdf4::nc_close(nc))
+    
+    # Get the process, table and variable names, with classes:
+    processNameTableNameVariableName <- getProcessNameTableNameVariableName(nc, add.class = TRUE)
+    possibleVariables <- subset(processNameTableNameVariableName, processName == BaselineProcess & class %in% nc.classes)$variableName
+    
+    # The NetCDF4 file has an nrow defined that is not part of the actual data:
+    possibleVariables <- setdiff(possibleVariables, "nrow")
+    
+    # Get the columns not used as TargetVariable, GroupingVariables or  InformationVariables:
+    possibleVariables <- 
+        sort(setdiff(possibleVariables, exceptions))
+    
+    return(possibleVariables)
 }
+
 
 
 #' A list of the attributes of the exported StoX functions:
@@ -64,21 +89,19 @@ stoxFunctionAttributes <- list(
             TargetVariableUnit = "targetVariableUnit_ReportBootstrap", 
             GroupingVariables = "groupingVariables_ReportBootstrap", 
             InformationVariables = "informationVariables_ReportBootstrap", 
-            Percentages = "percentages_ReportBootstrap"
+            Percentages = "percentages_ReportBootstrap",
+            WeightingVariable = "weightingVariable_ReportBootstrap", 
+            ConditionOperator = "conditionOperator", 
+            FractionOverVariable = "fractionOverVariable"
         ), 
-        functionArgumentHierarchy = list(
-            AggregationWeightingVariable = list(
-                AggregationFunction = expression(RstoxBase::getWeightingFunctions())
-            ), 
-            BootstrapReportWeightingVariable = list(
-                BootstrapReportFunction = expression(RstoxBase::getWeightingFunctions())
-            ), 
-            Percentages = list(
-                BootstrapReportFunction = expression(RstoxBase::getSpecificationFunctions())
+        functionArgumentHierarchy = c(
+            # The specification parameters for Baseline:
+            RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Baseline", functionName = "ReportFunction"), 
+            # The specification parameters for Boostrap:
+            RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Bootstrap", functionName = "BootstrapReportFunction"), 
+            functionParameterDefaults = list(
+                Percentages = c(5, 50, 95)
             )
-        ), 
-        functionParameterDefaults = list(
-            Percentages = c(5, 50, 95)
         )
     ), 
     
@@ -388,11 +411,18 @@ processPropertyFormats <- list(
         class = "single", 
         title = "Select one variable to report from.", 
         possibleValues = function(BootstrapData, BaselineProcess) {
-            possibleVariables <- getPossibleVariables(BootstrapData, BaselineProcess)
+            #possibleVariables <- getPossibleVariables(BootstrapData, BaselineProcess)
             
-            output <- setdiff(possibleVariables, "nrow")
+            #output <- setdiff(possibleVariables, "nrow")
             
-            return(output)
+            getPossibleVariables.nc(
+                BootstrapData, 
+                BaselineProcess, 
+                exceptions = NULL, 
+                nc.classes = c("double", "int")
+            )
+            
+            #return(output)
         }, 
         variableTypes <- "character"
     ), 
@@ -423,6 +453,34 @@ processPropertyFormats <- list(
         variableTypes <- "character"
     ), 
     
+    weightingVariable_ReportBootstrap = list(
+        class = "single", 
+        title = "Select weighting variable", 
+        possibleValues = function(BootstrapData, BaselineProcess, TargetVariable, GroupingVariables, InformationVariables) {
+            #nc <- ncdf4::nc_open(unlist(BootstrapData))
+            #on.exit(ncdf4::nc_close(nc))
+            ## Get the process, table and variable names, with classes:
+            #processNameTableNameVariableName <- getProcessNameTableNameVariableName(nc, add.class = TRUE)
+            #possibleVariables <- subset(processNameTableNameVariableName, processName == BaselineProcess & class %in% c("double", "int"))$variableName
+            ## The NetCDF4 file has an nrow defined that is not part of the actual data:
+            #possibleVariables <- setdiff(possibleVariables, "nrow")
+            #
+            ## Get the columns not used as TargetVariable, GroupingVariables or  InformationVariables:
+            #possibleVariables <- 
+            #    sort(setdiff(possibleVariables, c(TargetVariable, GroupingVariables, InformationVariables)))
+            #
+            #return(possibleVariables)
+            
+            getPossibleVariables.nc(
+                BootstrapData, 
+                BaselineProcess, 
+                exceptions = c(TargetVariable, GroupingVariables, InformationVariables), 
+                nc.classes = c("double", "int")
+            )
+        }, 
+        variableTypes = "character"
+    ), 
+    
     directoryPath = list(
         class = "single", 
         title = "The path to a folder", 
@@ -433,7 +491,23 @@ processPropertyFormats <- list(
         class = "vector", 
         title = "The path to one or more files", 
         variableTypes = "character"
-    )#,
+    ), 
+    
+    conditionOperator = list(
+        class = "single", 
+        title = "Select ConditionOperator", 
+        possibleValues = c("%in%", "%notin%", "==", "!=", "%notequal%", "<", "<=", ">=", ">")
+    ),
+    
+    fractionOverVariable = list(
+        class = "single", 
+        title = "Select variable to sum over in the denominator of the fraction", 
+        possibleValues = function(GroupingVariables) {
+            GroupingVariables
+        }, 
+        variableTypes = "character"
+    )
+    #,
     #
     #fileExtension = list(
     #    class = "single", 

@@ -8,6 +8,8 @@
 
 \item{projectPaths}{A vector of paths to the StoX projects.}
 
+\item{projectDescriptionFile}{The path to the file holding the projectDescription (project.json).}
+
 \item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
@@ -55,6 +57,10 @@
 \item{only.valid}{Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).}
 
 \item{returnProcessTable}{Logical: If TRUE return the process table (much used in functions used by the GUI).}
+
+\item{applyBackwardCompatibility}{Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.}
+
+\item{Seed}{The seed, given as a single integer.}
 }
 \description{
 All functions referring to a project, a model, a process or an output table use the same parameters, listed here.

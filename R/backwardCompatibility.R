@@ -1,3 +1,32 @@
+renameResampleFunctionInBootstrapMethodTableOne <- function(projectDescriptionOne, oldName, newName) {
+    # Find any use of the ResampleBioticAssignment resampling function:
+    hasOldName <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == oldName)
+    if(any(hasOldName)) {
+        atOldName <- which(hasOldName)
+        for(ind in atOldName) {
+            projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- newName
+        }
+    }
+    
+    return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+}
+
+renameResampleFunctionInBootstrapMethodTable <- function(projectDescriptionOne, oldName, newName) {
+    if(length(oldName) != length(newName)) {
+        stop("oldName and newName must have equal length!")
+    }
+    for(ind in seq_along(oldName)) {
+        projectDescriptionOne$functionParameters$BootstrapMethodTable <- renameResampleFunctionInBootstrapMethodTableOne(
+            projectDescriptionOne = projectDescriptionOne, 
+            oldName = oldName[ind], 
+            newName = newName[ind]
+        )
+    }
+    
+    return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+}
+
+
 # Backward compabitibility actions. These need not to be exported as is the case for any other Rstox-packages, since RstoxFramework is the package that collects the backwardCompatibility objects:
 backwardCompatibility <- list(
     renameAttribute = list(
@@ -20,6 +49,15 @@ backwardCompatibility <- list(
             attributeValue = FALSE
         )
     ), 
+    
+    removeParameter = list(
+        list(
+            changeVersion = "3.6.3-9007", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "BootstrapReportWeightingVariable"
+        )
+    ),  
     
     addParameter  = list(
         list(
@@ -50,6 +88,41 @@ backwardCompatibility <- list(
             functionName = "Bootstrap", 
             modelName = "analysis", 
             parameterName = "OutputVariables"
+        ), 
+        list(
+            changeVersion = "3.6.3-9007", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "ConditionOperator"
+        ), 
+        list(
+            changeVersion = "3.6.3-9007", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "ConditionValue"
+        ), 
+        list(
+            changeVersion = "3.6.3-9007", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "FractionOverVariable"
+        )
+    ), 
+    
+    renameParameter = list(
+        list(
+            changeVersion = "3.6.3-9007", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "AggregationWeightingVariable",
+            newParameterName = "WeightingVariable"
+        ),
+        list(
+            changeVersion = "3.6.3-9007", 
+            functionName = "ReportBootstrap", 
+            modelName = "report", 
+            parameterName = "AggregationFunction",
+            newParameterName = "ReportFunction"
         )
     ), 
     
@@ -61,23 +134,33 @@ backwardCompatibility <- list(
             parameterName = "BootstrapMethodTable",
             # Multiple values must be given in a list!!! Also if only :
             value = function(value) {
-                TRUE
-            }, # Translate regardless of the value.
+                TRUE # Translate regardless of the value.
+            }, 
             newValue = function(projectDescriptionOne) {
-                # Find any use of the ResampleBioticAssignment resampling function:
-                hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
-                if(any(hasResampleBioticAssignment)) {
-                    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
-                    for(ind in atResampleBioticAssignment) {
-                        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
-                    }
-                }
                 
-                return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+                renameResampleFunctionInBootstrapMethodTable(
+                    projectDescriptionOne, 
+                    oldName = "ResampleBioticAssignment", 
+                    newName = "ResampleBioticAssignmentByStratum"
+                )
+                ## Find any use of the ResampleBioticAssignment resampling function:
+                #hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
+                #if(any(hasResampleBioticAssignment)) {
+                #    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
+                #    for(ind in atResampleBioticAssignment) {
+                #        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
+                #    }
+                #}
+                
+                #return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
             }
         )
     )
 )
+
+
+
+
 
 
 

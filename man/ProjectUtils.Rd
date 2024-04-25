@@ -42,7 +42,7 @@ setNotRunning(projectPath, modelName)
 
 \item{verbose}{Logical: If TRUE extra messages are printed to console.}
 
-\item{projectDescriptionFile}{The path to the file holding the projectDescription.}
+\item{projectDescriptionFile}{The path to the file holding the projectDescription (project.json).}
 
 \item{applyBackwardCompatibility}{Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.}
 

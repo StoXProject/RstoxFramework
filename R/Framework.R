@@ -2181,8 +2181,19 @@ writeProjectMemoryIndex <- function(projectPath, projectMemoryIndex) {
 #' @export
 #' 
 unReDoProject <- function(projectPath, shift = 0) {
+    
+    if(length(shift) && shift == 0)  {
+        warning("Current memory status kept unchannged. Specify shift as the number of streps to undo/redo with shift larger/smaller than 0.")
+        return(NULL)
+    }
     # Read the projectDescriptionIndexFile, and add the shift value to the index:
     projectMemoryIndex <- readProjectMemoryIndex(projectPath)
+    # Accept only valid shifts:
+    if(! shift %in% projectMemoryIndex$Index) {
+        warning("Current memory status kept unchannged. Specify shift between ", min(projectMemoryIndex$Index), " and ", max(projectMemoryIndex$Index), ".")
+        return(NULL)
+    }
+    
     projectMemoryIndex$Index <- projectMemoryIndex$Index - shift
     writeProjectMemoryIndex(projectPath, projectMemoryIndex)
     
@@ -2199,11 +2210,11 @@ unReDoProject <- function(projectPath, shift = 0) {
     #)
     
     # Rewrite the text file holding processIndexTable, activeProcessIDTable and maxProcessIntegerID:
-    unwrapProjectMemoryFile(fileWithNewCurrentProjectMemory)
+    unwrapProjectMemoryFile(fileWithNewCurrentProjectMemory, projectPath)
 }
 
 # Function to unwrap a project memory history file to multiple individual files
-unwrapProjectMemoryFile <- function(projectMemoryFile) {
+unwrapProjectMemoryFile <- function(projectMemoryFile, projectPath) {
     # Read the project memory to get the data to write to the text files:
     #projectMemory <- readRDS(projectMemoryFile)
     projectMemory <- readMemoryFile(
@@ -2219,7 +2230,9 @@ unwrapProjectMemoryFile <- function(projectMemoryFile) {
     # Unwrap and overwrite the maximum process integer ID file:
     writeMaxProcessIntegerID(projectPath, projectMemory$maxProcessIntegerID)
     
-    stop("StoX: Here we need to code replacing the memory files!!!!!!!!!!!!!")
+    # Write the current pointer files:
+    mapply(saveRDS, projectMemory$pointerFilesTable$argumentFile, file = projectMemory$pointerFilesTable$pointerFile)
+    #savePointerFilesTableAsPointerFiles(projectPath, projectMemory$pointerFilesTable)
 }
 
 

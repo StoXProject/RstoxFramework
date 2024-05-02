@@ -1,3 +1,8 @@
+# RstoxFramework v3.6.3-9008 (2024-05-02)
+* Fixed bug in getFilterTableNames() where the json array was unboxed in runFunction.JSON() (due to auto_unbox = TRUE) when only one name was returned. Fixed by enclosing in a list if length is 1.
+* Fixed the function unReDoProject(). This is now ready to be implemeted in the GUI.
+
+
 # RstoxFramework v3.6.3-9007 (2024-04-23)
 * Relaxed validation of the project.json to only consider the first 6 rows (using utils::head()) of each table or sf object. This was due to an observed crash of jsonvalidate::json_validator() for project.json of size larger than 1/2 GB.
 * Renamed AggregationFunction to ReportFunction.

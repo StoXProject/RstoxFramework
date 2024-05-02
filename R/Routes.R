@@ -1522,9 +1522,16 @@ getFilterTableNames <- function(projectPath, modelName, processID, warn = TRUE) 
         modelName = modelName, 
         processID = inputProcessID, 
         warn = warn
-    ) 
+    )
+    
+    
         
-    # Return a list of the tableNames, columnNames and possibleValues:
+    # Return a list if only one element, since runFunction.JSON uses auto.unbox = TRUE:
+    if(length(processOutputTableNames) == 1) {
+        processOutputTableNames <- list(processOutputTableNames)
+    }
+    
+    
     return(processOutputTableNames)
 }
 

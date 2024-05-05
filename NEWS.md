@@ -1,6 +1,8 @@
 # RstoxFramework v3.6.3-9008 (2024-05-02)
 * Fixed bug in getFilterTableNames() where the json array was unboxed in runFunction.JSON() (due to auto_unbox = TRUE) when only one name was returned. Fixed by enclosing in a list if length is 1.
 * Fixed the function unReDoProject(). This is now ready to be implemeted in the GUI.
+* Fixed bug where empty process output due to modification of process data caused error on right click on the process (changing from return(NULL) to return(list()) in getProcessOutputElements()).
+* Fixed bug where modifying process data in DefineAcousticPSU() or DefineBioticPSU() could not be saved past the first click on the save icon.
 
 
 # RstoxFramework v3.6.3-9007 (2024-04-23)

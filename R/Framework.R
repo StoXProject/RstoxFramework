@@ -1757,6 +1757,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #'
 resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE) {
     
+    browser()
     # Get the process ID to reset the model to:
     processIndexTable <- readProcessIndexTable(projectPath, modelName)
     
@@ -5959,7 +5960,7 @@ getProcessOutputElements <- function(projectPath, modelName, processID) {
     elementName <- getProcessOutputFiles(projectPath = projectPath, modelName = modelName, processID = processID, onlyTableNames = TRUE, warn = FALSE)
     
     if(!length(elementName)) {
-        return(NULL)
+        return(list())
     }
     
     processName <- getProcessNameFromProcessID(

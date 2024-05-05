@@ -155,6 +155,7 @@ jobs:
           sudo apt-get install -y libudunits2-dev
           sudo apt-get install -y libnetcdf-dev
           sudo aptitude install libgdal-dev
+          sudo apt-get install -y libproj-dev
         shell: bash
       
       

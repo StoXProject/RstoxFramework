@@ -211,6 +211,7 @@ writeBootstrapOutputFromIndividualProjects <- function(memoryDataSubFolders, out
         originalFolder <- file.path(dirname(memoryDataSubFolders[ind]), "baseline")
         file.rename(memoryDataSubFolders[ind], originalFolder)
         
+        
         # Read the data:
         processOutput <- getModelData(
             projectPath = thisProjectPath, 
@@ -687,7 +688,8 @@ getBootstrapDataOne <- function(selectionOneTable, nc, BootstrapIDStart = 1, Boo
     BootstrapIDEnd <- min(BootstrapIDEnd, length(nrows))
     count <- sum(nrows[seq(BootstrapIDStart, BootstrapIDEnd)])
     
-    # Read the variables:   
+    # Read the variables:
+    #browser()
     list <- lapply(requestedVariablesFullName, function(var) ncdf4::ncvar_get(nc, var, start = if(ndims[[var]] == 2) c(1, start) else start, count = if(ndims[[var]] == 2) c(-1, count) else count))
     
     # ncvar_get() may add a single dimension to the output, so we drop dimensions:
@@ -701,6 +703,16 @@ getBootstrapDataOne <- function(selectionOneTable, nc, BootstrapIDStart = 1, Boo
     atCharacter <- which(sapply(table, is.character))
     for(ind in atCharacter){
         set(table, i = which(table[[ind]] == "NA"), j = ind, value = NA)
+    }
+    
+    # Set time:
+    atTime <- which(names(table) == "DateTime")
+    if(length(atTime)) {
+        # Get the DateTime format used by StoX:
+        StoxDateTimeFormat <- RstoxData::getRstoxDataDefinitions("StoxDateTimeFormat")
+        StoxTimeZone <- RstoxData::getRstoxDataDefinitions("StoxTimeZone")
+        # Convert to POSIX:
+        table[, DateTime := as.POSIXct(DateTime, format = StoxDateTimeFormat, tz = StoxTimeZone)]
     }
     
     # Add the BootstrapID:
@@ -1052,7 +1064,7 @@ getMaxNchar <- function(x) {
         24 # format = "%Y-%m-%dT%H:%M:%OS3Z")
     }
     else if(is.character(x)){
-        suppressWarnings(max(nchar(x), na.rm = TRUE))
+        suppressWarnings(max(1, if(any(is.na(x))) 2, nchar(x, type = "bytes"), na.rm = TRUE))
     }
     else {
         NA

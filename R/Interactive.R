@@ -217,7 +217,6 @@ modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PS
     # Rename back from SSU (processData and other information like the SSU being changed):
     result <- lapply(result, RstoxBase::renameSSULabelInPSUProcessData, PSUType = PSUType, reverse = FALSE)
     
-    
     # Format the output:
     RstoxBase::formatOutput(result$PSUProcessData, dataType = dataType, keep.all = FALSE)
     
@@ -245,7 +244,7 @@ modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PS
                     activeProcess = activeProcess, 
                     saved = isSaved(projectPath)
                 ),
-                result
+                result$elements
             )
         )
     }
@@ -262,7 +261,8 @@ addPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processID, PSUTy
     modifyPSUProcessData(
         addPSUToPSUProcessData, 
         Stratum = Stratum, PSU = PSU, # The arguments of the addPSUToPSUProcessData()
-        projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
     )
     
 }
@@ -303,7 +303,8 @@ removePSU <- function(PSU = NULL, projectPath, modelName, processID, PSUType = c
     modifyPSUProcessData(
         removePSUFromPSUProcessData, 
         PSU = PSU, # The arguments of the removePSUFromPSUProcessData()
-        projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
     )
     
 }
@@ -333,7 +334,8 @@ renamePSU <- function(PSU, newPSUName, projectPath, modelName, processID, PSUTyp
     modifyPSUProcessData(
         renamePSUInPSUProcessData, 
         PSU = PSU, newPSUName = newPSUName, # The arguments of the renamePSUInPSUProcessData()
-        projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
     )
     
 }
@@ -364,7 +366,8 @@ addSSU <- function(PSU, SSU, projectPath, modelName, processID, PSUType = c("Aco
     modifyPSUProcessData(
         addSSUToPSUProcessData, 
         PSU = PSU, SSU = SSU, # The arguments of the addSSUToPSUProcessData()
-        projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
     )
     
 }
@@ -392,7 +395,8 @@ removeSSU <- function(SSU, projectPath, modelName, processID, PSUType = c("Acous
     modifyPSUProcessData(
         removeSSUFromPSUProcessData, 
         SSU = SSU, # The arguments of the removeSSUFromPSUProcessData()
-        projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
     )
     
 }
@@ -419,7 +423,8 @@ removeAllPSUsOfStratum <- function(Stratum, projectPath, modelName, processID, P
     modifyPSUProcessData(
         removeAllPSUsOfStratumFromPSUProcessData, 
         Stratum, # The arguments of the removeAllPSUsOfStratumFromPSUProcessData()
-        projectPath = projectPath, modelName = modelName, processID = processID, PSUType = PSUType
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
     )
     
 }

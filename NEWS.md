@@ -1,3 +1,14 @@
+# RstoxFramework v3.6.3-9008 (2024-05-02)
+* Fixed bug in getFilterTableNames() where the json array was unboxed in runFunction.JSON() (due to auto_unbox = TRUE) when only one name was returned. Fixed by enclosing in a list if length is 1.
+* Fixed the function unReDoProject(). This is now ready to be implemeted in the GUI.
+* Fixed bug where empty process output due to modification of process data caused error on right click on the process (changing from return(NULL) to return(list()) in getProcessOutputElements()).
+* Fixed bug where modifying process data in DefineAcousticPSU() or DefineBioticPSU() could not be saved past the first click on the save icon.
+* Fixed bug in Bootstrap() where character columns with all missing values were written as "N" and not "NA".
+* Fixed bug in Bootstrap() where SpeciesCategory containing nordic characters were truncated.
+* Fixed bug in getBootstrapData() where DateTime was not converted to POSIX.
+
+
+
 # RstoxFramework v3.6.3-9007 (2024-04-23)
 * Relaxed validation of the project.json to only consider the first 6 rows (using utils::head()) of each table or sf object. This was due to an observed crash of jsonvalidate::json_validator() for project.json of size larger than 1/2 GB.
 * Renamed AggregationFunction to ReportFunction.

@@ -379,13 +379,13 @@ savePointerFilesTableAsPointerFiles <- function(projectPath, pointerFilesTable) 
     # Get the paths to the files holding the memory file paths:
     filePaths <- file.path(
         memoryCurrentModelsFolder, 
-        pointerFilesTable$modelname, 
+        pointerFilesTable$modelName, 
         pointerFilesTable$processID, 
-        paste0(pointerFilesTable$argumentName, ".rds"), 
+        paste0(pointerFilesTable$argumentName, ".rds")
     )
     
     # Write the files with memory file paths:
-    lapply(pointerFilesTable$argumentFile, pointerFilesTable, saveRDS)
+    mapply(saveRDS, pointerFilesTable$argumentFile, file = filePaths)
 }
 
 getPointerFilesTable <- function(projectPath) {
@@ -394,17 +394,21 @@ getPointerFilesTable <- function(projectPath) {
     memoryCurrentModelsFolder <- getProjectPaths(projectPath, "memoryCurrentModelsFolder")
     
     # Get the paths to the files holding the memory file paths:
-    filePaths <- list.files(memoryCurrentModelsFolder, full.names = TRUE, recursive = TRUE)
-    fileparts <- strsplit(filePaths, "/")
+    pointerFilePaths <- list.files(memoryCurrentModelsFolder, full.names = TRUE, recursive = TRUE)
+    fileparts <- strsplit(pointerFilePaths, "/")
     filepartsRev <- lapply(fileparts, rev)
     modelname <- sapply(filepartsRev, "[", 3)
     processID <- sapply(filepartsRev, "[", 2)
     argumentName <- sapply(filepartsRev, "[", 1)
     argumentName <- sub(".rds", "", argumentName, fixed = TRUE)
     
+    # Get the argument file paths:
+    argumentFilePaths <- sapply(pointerFilePaths, readRDS)
+    
     # Write the files with memory file paths:
     pointerFilesTable <- data.table::data.table(
-        argumentFile = filePaths,
+        pointerFile = pointerFilePaths,
+        argumentFile = argumentFilePaths,
         modelName = modelname,
         processID = processID,
         argumentName = argumentName

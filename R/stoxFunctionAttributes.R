@@ -33,7 +33,7 @@ getPossibleVariables <- function(BootstrapData, BaselineProcess) {
     
     
     
-getPossibleVariables.nc <- function(BootstrapData, BaselineProcess, exceptions, nc.classes = c("double", "int")) {
+getPossibleVariables.nc <- function(BootstrapData, BaselineProcess, exceptions, nc.classes = c("double", "int", "character")) {
     
     # Open the ncc file:
     nc <- ncdf4::nc_open(unlist(BootstrapData))
@@ -419,7 +419,7 @@ processPropertyFormats <- list(
                 BootstrapData, 
                 BaselineProcess, 
                 exceptions = NULL, 
-                nc.classes = c("double", "int")
+                nc.classes = c("double", "int", "char")
             )
             
             #return(output)

@@ -3,6 +3,10 @@
 * Fixed the function unReDoProject(). This is now ready to be implemeted in the GUI.
 * Fixed bug where empty process output due to modification of process data caused error on right click on the process (changing from return(NULL) to return(list()) in getProcessOutputElements()).
 * Fixed bug where modifying process data in DefineAcousticPSU() or DefineBioticPSU() could not be saved past the first click on the save icon.
+* Fixed bug in Bootstrap() where character columns with all missing values were written as "N" and not "NA".
+* Fixed bug in Bootstrap() where SpeciesCategory containing nordic characters were truncated.
+* Fixed bug in getBootstrapData() where DateTime was not converted to POSIX.
+
 
 
 # RstoxFramework v3.6.3-9007 (2024-04-23)

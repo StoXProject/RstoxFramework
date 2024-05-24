@@ -5128,7 +5128,7 @@ runProcess <- function(
             processDirty = FALSE
         )
 
-        # If a valid output class, wrap the function output to a list named with the data type (but not for BootstrapData, which is a list of valid output classes AND a valid output class itself):
+        # If a valid output class, wrap the function output to a list named with the data type:
         if(isValidOutputDataClass(processOutput)) {
             processOutput <- list(processOutput)
             names(processOutput) <- getStoxFunctionMetaData(process$functionName, "functionOutputDataType")
@@ -5750,15 +5750,38 @@ readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pre
                 # The GUI need this data with no StoX class (as Bootstrap is a class)
                 data <- as.character(data)
                 
-                # Extract the requested lines:
-                numberOfLines <- length(data)
-                numberOfPages <- ceiling(numberOfLines / linesPerPage)
+                temp <- extractPage(data, pageindex = pageindex, linesPerPage = linesPerPage) 
+                numberOfLines <- temp$numberOfLines
+                numberOfPages <- temp$numberOfPages
+                data <- temp$data
+                
+                
+                # Add a line "... truncated" if the page is not first and not the last:
+                if(pageindex > 1) {
+                    data <- c(
+                        "... truncated", 
+                        data
+                    )
+                }
+                if(pageindex < numberOfPages) {
+                    data <- c(
+                        data,
+                        "... truncated"
+                    )
+                }
+                
+                
+                
+                ## Extract the requested lines:
+                #numberOfLines <- length(data)
+                #numberOfPages <- ceiling(numberOfLines / linesPerPage)
                 
                 data <- list(
                     data = data, 
                     numberOfLines = numberOfLines, 
                     numberOfPages = numberOfPages
                 )
+                
             }
             else {
                 data <- list(
@@ -6232,6 +6255,14 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             )
             
             file.copy(processOutput[[1]], filePath)
+            
+            message(
+                "StoX: The bootstrap file can be read into R using the following command:", "\n", 
+                "bootstrapData <- RstoxFramework::getBootstrapData(\"", filePath, "\", selection = NA)",  "\n", 
+                "Note that using selection = NA reads in the entire file. To replicate load() on the RData output file in StoX <= 3.6.2 use unlist = 1 in getBootstrapData()."#, 
+                #"Run the following command in R for futher details:", "\n", 
+                #"help(\"getBootstrapData\", package = \"RstoxFramework\")"
+            )
         }
         else {
             # Unlist introduces dots, and we replace by underscore:

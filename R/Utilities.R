@@ -90,6 +90,7 @@ flattenDataTable <- function(x, replace = NA) {
 #' @param line.index.start The start of the line indices.
 #' 
 fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, add.line.index = FALSE, line.index.start = 1) {
+    
     # Return immediately if x has length 0:
     if(length(x) == 0) {
         return(x)
@@ -148,6 +149,11 @@ fixedWidthTable <- function(x, columnSeparator = " ", lineSeparator = NULL, na =
         
         # Replace all NA with the user specified na:
         x[is.na(x)] <- na
+        
+        # If the data has no rows, do not add line index:
+        if(!NROW(x)) {
+            add.line.index <- FALSE
+        }
         
         # Add the column names:
         x <- rbindlist(list(structure(as.list(names(x)), names = names(x)), x))

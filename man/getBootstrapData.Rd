@@ -10,7 +10,7 @@ getBootstrapData(
   selection = list(),
   BootstrapIDStart = 1,
   BootstrapIDEnd = Inf,
-  dropList1 = FALSE,
+  unlist = 0,
   close = TRUE
 )
 }
@@ -23,7 +23,7 @@ getBootstrapData(
 
 \item{BootstrapIDStart, BootstrapIDEnd}{The start and end bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
 
-\item{dropList1}{Logical: For use when a single table is requested. If FALSE (the default) return a list named by the \code{selection}. If TRUE return only the table.}
+\item{unlist}{For use when a single table is requested. If \code{unlist} = 0 (the default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If \code{unlist} = 1 return a list named by the \code{selection} holding the output data. If \code{unlist} = 2 return the output data directly. Use \code{unlist} = 1 to replicate the output of Bootstrap() in StoX <= 3.6.2.}
 
 \item{close}{Logical: If TRUE (the default) close the netCDF4 file after reading the data.}
 }

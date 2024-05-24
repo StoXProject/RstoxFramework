@@ -1,3 +1,13 @@
+# RstoxFramework v3.6.3-9009 (2024-05-22)
+* Added truncation of output from ICESDatsusc() and similar functions in the Preview in the GUI.
+* Added message about how to read a bootstrap NetCDF4 file into R to replicate the old bootstrap RData file.
+* Fixed bug where empty tables showed with duplicated header row in Preview in the GUI.
+* Added the option 'unlist' to getBootstrapData().
+* Added support for AggregationFunction in ReportBootstrap() for backward compatibility of R scripts.
+* Added support for nc files in readStoxOutputFile().
+* Updated the following test projects for the breaking change in RstoxBase where rows with 0 Abundance are deleted from the QuantityData before merging with the IndividualsData in SuperIndividuals(), which removes unwanted rows with present SpeciesCategory and IndividualTotalLength but missing Abundance when Biotic PSUs with rare IndividualTotalLength are not re-sampled in a bootstrap run.
+
+
 # RstoxFramework v3.6.3-9008 (2024-05-02)
 * Fixed bug in getFilterTableNames() where the json array was unboxed in runFunction.JSON() (due to auto_unbox = TRUE) when only one name was returned. Fixed by enclosing in a list if length is 1.
 * Fixed the function unReDoProject(). This is now ready to be implemeted in the GUI.

@@ -171,8 +171,7 @@ Bootstrap <- function(
     nc <- NULL
     
     # Run through the bootstrap runs and rename the saved baseline folders to the original name:
-    message("StoX: Writing netCDF4 file (the file can be read into R using RstoxFramework::getBootstrapData) ...")
-    
+    message("StoX: Writing netCDF4 file ...")
     nc <- writeBootstrapOutputFromIndividualProjects(
         memoryDataSubFolders = memoryDataSubFolders, 
         outputProcesses = OutputProcesses, 
@@ -189,6 +188,9 @@ Bootstrap <- function(
     
     
     filePath <- createStoXNetCDF4FileDataType(filePath)
+    
+    # Moved this message to writeProcessOutputTextFile():
+    #message("StoX: The bootstrap file can be read into R using bootstrapData <- RstoxFramework::getBootstrapData(\"", filePath, "\", selection = NA). Note that using selection = NA reads in the entire file. Use ?RstoxFramework::getBootstrapData in R for futher details.")
     
     #names(filePath) <- "StoXNetCDF4File"
     return(filePath)
@@ -582,12 +584,13 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
 #' @param nc A netCDF4 object, overiding the \code{filePath}.
 #' @param selection Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.
 #' @param BootstrapIDStart,BootstrapIDEnd The start and end bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.
-#' @param dropList1 Logical: For use when a single table is requested. If FALSE (the default) return a list named by the \code{selection}. If TRUE return only the table.
+
+#' @param unlist For use when a single table is requested. If \code{unlist} = 0 (the default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If \code{unlist} = 1 return a list named by the \code{selection} holding the output data. If \code{unlist} = 2 return the output data directly. Use \code{unlist} = 1 to replicate the output of Bootstrap() in StoX <= 3.6.2.
 #' @param close Logical: If TRUE (the default) close the netCDF4 file after reading the data.
 #' 
 #' @export
 #' 
-getBootstrapData <- function(filePath, nc, selection = list(), BootstrapIDStart = 1, BootstrapIDEnd = Inf, dropList1 = FALSE, close = TRUE) {
+getBootstrapData <- function(filePath, nc, selection = list(), BootstrapIDStart = 1, BootstrapIDEnd = Inf, unlist = 0, close = TRUE) {
     
     # Use the open file if given:
     if(!missing(filePath) && file.exists(filePath)) {
@@ -638,9 +641,9 @@ getBootstrapData <- function(filePath, nc, selection = list(), BootstrapIDStart 
     groupNames <- sub("/.*", "", names(output))
     names(output) <- groupNames
     
-    # If there is only one table and dropList1 is TRUE, return only the table:
-    if(dropList1 && length(output) == 1) {
-        output <- unlistToDataType(output)[[1]]
+    # If there is only one table and unlist is larger than 0 (1 or 2):
+    if(unlist > 0 && length(output) == 1) {
+        output <- unlistToDataType(output, nlevel = unlist)[[1]]
     }
     else {
         output <- lapply(
@@ -1247,12 +1250,13 @@ estimateTimeOfProcesses <- function(projectPath, modelName, string.out = TRUE) {
 
 # This function resamples varToResample with replacement by altering the input data. Used in ResampleMeanLengthDistributionData(), ResampleBioticAssignment() and ResampleMeanNASCData():
 resampleDataBy_new4.0.0_excludingPSUsThatAreNotResampled <- function(data, seed, varToScale, varToResample, resampleBy) {
-    
+#resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
+        
     # Get the unique resampleBy, and sort in C-locale for consistensy across platforms:
     #uniqueResampleBy <- unique(data[[resampleBy]])
     #uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "C")
     
-    # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
+    # Get the unique resampleBy, and sort in en_US_POSIX for consistency across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX", na_last = FALSE)
     
     # Build a table of (usually) Stratum and Seed and merge with the MeanLengthDistributionData:
@@ -1315,7 +1319,7 @@ resampleDataBy <- function(data, seed, varToScale, varToResample, resampleBy) {
     #uniqueResampleBy <- unique(data[[resampleBy]])
     #uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "C")
     
-    # Get the unique resampleBy, and sort in en_US_POSIX for consistensy across platforms:
+    # Get the unique resampleBy, and sort in en_US_POSIX for consistency across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
     
     # Build a table of resampleBy and Seed and merge with the data:
@@ -1601,6 +1605,7 @@ ResampleMeanNASCData <- function(MeanNASCData, Seed) {
 #' @param BaselineProcess A strings naming the baseline process to report from the \code{\link{BootstrapData}}. If a process with 
 #' @param BootstrapReportFunction The function to apply across bootstrap run, such as "cv" or "c".
 #' @param Percentages The percentages to report Percentiles for when BootstrapReportFunction = "summaryStox".
+#' @param AggregationFunction Deprecated, use ReportFunction instead. An alias for \code{ReportFunction}, kept for backward compatibility.
 #'
 #' @details This function works in two steps. First, the \code{ReportFunction} is applied to the \code{TargetVariable} of the table given by \code{BaselineProcess} for each unique combination of the \code{GroupingVariables} and for each bootstrap run. Second, a grid of all possible combinations of the \code{GroupingVariables} is formed and the result from the first step placed onto the grid. This creates 0 for each position in the grid where data from the first step are not present. E.g., if a particularly large fish is found in only one haul, and this haul by random is not selected in a bootstrap run, the \code{TargetVariable} will be 0 to reflect the variability in the data. To complete the second step, the \code{BootstrapReportFunction} is applied over the bootstrap runs for each cell in the grid.
 #' 
@@ -1633,11 +1638,19 @@ ReportBootstrap <- function(
     Percentages = double(), 
     # General arguments:
     Filter = character(), 
-    RemoveMissingValues = FALSE
+    RemoveMissingValues = FALSE, 
+    AggregationFunction = character()
 ) 
 {
+    # AggregationFunction is kept for backward compatibility, but deprecated:
+    if(length(AggregationFunction)) {
+        warning("AggregationFunction is deprecated. Use ReportFunction instead. AggregationFunction is kept for backward compatibility and overrides ReportFunction.")
+        ReportFunction <- RstoxData::match_arg_informative(AggregationFunction, RstoxBase::getReportFunctions(use = "Baseline"))
+    }
+    else {
+        ReportFunction <- RstoxData::match_arg_informative(ReportFunction)
+    }
     
-    ReportFunction <- RstoxData::match_arg_informative(ReportFunction)
     BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
     
     if(!length(BootstrapData)) {
@@ -1818,7 +1831,7 @@ initialAggregateBootstrapDataOne <- function(
 ) {
     
     # Get the table of current bootstrapID:
-    relevantBootstrapDataOne <- getBootstrapData(nc = nc, selection = selection, BootstrapIDStart = min(bootstrapID), BootstrapIDEnd = max(bootstrapID), dropList1 = TRUE, close = FALSE)
+    relevantBootstrapDataOne <- getBootstrapData(nc = nc, selection = selection, BootstrapIDStart = min(bootstrapID), BootstrapIDEnd = max(bootstrapID), unlist = 2, close = FALSE)
     
     # Set the unit of the target variable:
     relevantBootstrapDataOne[[TargetVariable]] <- RstoxBase::setUnitRstoxBase(

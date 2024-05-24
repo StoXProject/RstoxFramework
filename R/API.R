@@ -622,7 +622,8 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
         output <- unname(as.matrix(utils::read.csv(path, encoding = "UTF-8", header = FALSE, na.strings = c(""))))
     }
     else if(tolower(ext) == "nc") {
-        stop("NetCDF4 file not yet implemented.")
+        #stop("NetCDF4 file not yet implemented.")
+        output <- RstoxFramework::getBootstrapData(path, selection = NA)
     }
     else {
         stop("Unknown file extension for StoX output file: ", ext, ". Path: ", path, ".")

@@ -1574,7 +1574,7 @@ compareByCbinding <- function(output_Old, output_New, processName_Old, processNa
 #' @param data.out The StoX 2.7 table.
 #' 
 #' The \code{comparisonModel} is a list with the following required elements:
-#' \itemize{
+#' \describe{
 #'  \item{dataType}{The StoX >= 3.0.0 datatypes to compare. Used only for reference.}
 #'  \item{dataVariable_Old}{The specific variable to compare in the old datatypes.}
 #'  \item{dataVariable_New}{The specific variable to compare in the new datatypes.}

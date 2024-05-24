@@ -95,6 +95,11 @@ stoxFunctionAttributes <- list(
             FractionOverVariable = "fractionOverVariable"
         ), 
         functionArgumentHierarchy = c(
+            list(
+                AggregationFunction = list(
+                    ReportFunction = "CompletelyUnlikelyFunctionNameDesignedJustToNotShowTheAggregationFunctionInTheGUI"
+                )
+            ), 
             # The specification parameters for Baseline:
             RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Baseline", functionName = "ReportFunction"), 
             # The specification parameters for Boostrap:

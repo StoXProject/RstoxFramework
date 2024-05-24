@@ -19,7 +19,8 @@ ReportBootstrap(
   BootstrapReportFunction = RstoxBase::getReportFunctions(use = "Bootstrap"),
   Percentages = double(),
   Filter = character(),
-  RemoveMissingValues = FALSE
+  RemoveMissingValues = FALSE,
+  AggregationFunction = character()
 )
 }
 \arguments{
@@ -50,6 +51,8 @@ ReportBootstrap(
 \item{Filter}{A string with an R expression to filter out unwanted rows of the report, e.g. "IndividualAge \%notin\% NA" or "Survey \%notin\% NA & SpeciesCategory \%notin\% NA".}
 
 \item{RemoveMissingValues}{Logical: If TRUE, remove missing values (NAs) from the \code{TargetVariable}. The default (FALSE) implies to report NA if at least one of the values used in the \code{ReportFunction} is NA. Use \code{RemoveMissingValues} = TRUE with extreme caution, as it may lead to under-estimation. E.g., if \code{RemoveMissingValues} = TRUE and a super-individual lacks \code{IndividualRoundWeight}, \code{Biomass} will be NA, and the portion of \code{Abundance} distributed to that super-individual will be excluded when summing \code{Biomass} (but included when summing \code{Abundance}). It is advised to always run with \code{RemoveMissingValues} = FALSE first, and make a thorough investigation to identify the source of any missing values. The function \code{link{ImputeSuperIndividuals}} can be used to impute the missing information from other super-individuals.}
+
+\item{AggregationFunction}{Deprecated, use ReportFunction instead. An alias for \code{ReportFunction}, kept for backward compatibility.}
 }
 \value{
 A \code{\link{ReportBootstrapData}} object.

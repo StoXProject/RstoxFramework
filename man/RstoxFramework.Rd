@@ -2,8 +2,8 @@
 % Please edit documentation in R/RstoxFramework-package.R
 \docType{package}
 \name{RstoxFramework}
-\alias{RstoxFramework}
 \alias{RstoxFramework-package}
+\alias{RstoxFramework}
 \title{The Engine of StoX}
 \description{
 The framwork of StoX >= 3.0.

@@ -1,3 +1,8 @@
+# RstoxFramework v3.6.3-9010 (2024-05-28)
+* Renamed "Function" to "Function name" in the GUI.
+* Added "Survey" and "SpeciesCategory" as GroupingVariables in ReportBootstrap().
+
+
 # RstoxFramework v3.6.3-9009 (2024-05-22)
 * Added truncation of output from ICESDatsusc() and similar functions in the Preview in the GUI.
 * Added message about how to read a bootstrap NetCDF4 file into R to replicate the old bootstrap RData file.

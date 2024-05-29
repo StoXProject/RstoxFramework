@@ -819,7 +819,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         # 2. displayName:
         displayName = as.list(c(
             "Process name", 
-            "Function", 
+            "Function name", 
             unname(unlist(processParametersDisplayNames))
         )), 
         # 3. description:

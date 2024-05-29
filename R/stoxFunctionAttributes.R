@@ -105,7 +105,8 @@ stoxFunctionAttributes <- list(
             # The specification parameters for Boostrap:
             RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Bootstrap", functionName = "BootstrapReportFunction"), 
             functionParameterDefaults = list(
-                Percentages = c(5, 50, 95)
+                Percentages = c(5, 50, 95), 
+                GroupingVariables = c("Survey", "SpeciesCategory")
             )
         )
     ), 

@@ -601,8 +601,16 @@ writeMemoryFiles <- function(objects, filePathsSansExt, writeOrderFile = TRUE, e
     }
 }
 
-
-readMemoryFile <- function(filePath) {
+#' Read a StoX memory file
+#' 
+#' @inheritParams readBootstrapData
+#' @param filePath The path to the file.
+#' @param returnBootstrapData Logical: If TRUE read the content of bootstrap NetCDF4 file.
+#' 
+readMemoryFile <- function(
+    filePath, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE
+) {
     
     # Get the file extension:
     ext <- tools::file_ext(filePath)
@@ -616,7 +624,17 @@ readMemoryFile <- function(filePath) {
         output <- readRDS(file = filePath)
     }
     else if(grepl("nc", ext, ignore.case = TRUE)) {
-        output <- createStoXNetCDF4FileDataType(filePath)
+        # Read the content of the NetCDF4 files:
+        if(returnBootstrapData) {
+            # The 'unlist' argument is not relevant here, as we specify unlisting arguments in e.g. runModel():
+            output <- readBootstrapData(filePath, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable)
+            # Add class BootstrapData to the output, as the datatype is currently not written to a textfile "outputClass.txt" like the Baseline and Report processes:
+            class(output) <- "BootstrapData"
+        }
+        
+        else {
+            output <- createStoXNetCDF4FileDataType(filePath)
+        }
     }
     else {
         stop("StoX: Unsupported file format")
@@ -742,17 +760,19 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' @inheritParams readModelData
 #' @inheritParams runProcesses
 #' @inheritParams general_arguments
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @param intersect.names Logical: If TRUE, compare only same named columns.
-#' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
+#' @param ignore.variable Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).
 #' @param ignore.process A vector of names of processes to ignore in the comparison.
-#' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.
-#' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip.
+#' @param ignore.process.variable A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth"))
+#' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.
+#' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.
 #' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
 #' @param ignoreEqual Logical: If TRUE, ignore columns where all values are equal.
 #' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
 #' @param data.out Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.
-#' @param mergeWhenDifferentNumberOfRows Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.
 #' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
 #' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
 #' @param checkOutputFiles Logical, if TRUE compare the file names of the output files.
@@ -764,7 +784,20 @@ unzipProject <- function(projectPath, exdir = ".") {
 #' 
 #' @export
 #'
-compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original = projectPath, emptyStringAsNA = FALSE, intersect.names = TRUE, ignore.variable = NULL, ignore.process = NULL, skipNAFraction = FALSE, skipNAAt = FALSE, NAReplacement = NULL, ignoreEqual = FALSE, classOf = c("first", "second"), try = TRUE, data.out = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, compareReports = FALSE, checkOutputFiles = TRUE, tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, ...) {
+compareProjectToStoredOutputFiles <- function(
+    projectPath, projectPath_original = projectPath, 
+    emptyStringAsNA = FALSE, intersect.names = TRUE, 
+    ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, 
+    skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
+    ignoreEqual = FALSE, classOf = c("first", "second"), 
+    try = TRUE, data.out = FALSE, 
+    #mergeWhenDifferentNumberOfRows = FALSE, 
+    sort = TRUE, 
+    compareReports = FALSE, checkOutputFiles = TRUE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, 
+    tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
+    ...
+) {
     
     # Unzip if zipped:
     if(tolower(tools::file_ext(projectPath)) == "zip") {
@@ -778,16 +811,20 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
     
+    
     # Open the project:
     openProject(projectPath_copy)
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
     #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, msg = FALSE, ...)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, msg = FALSE, returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, ...)
     
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
-    dat_orig <- readModelData(projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA, verifyFiles = TRUE)
+    dat_orig <- readModelData(
+        projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA, verifyFiles = TRUE, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
+    )
     
     # Reorder the original data to the order of the new data:
     newOrder <- c(intersect(names(dat), names(dat_orig)), setdiff(names(dat_orig), names(dat)))
@@ -839,13 +876,14 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                     result <- compareDataTablesUsingClassOf(
                         dat_orig[[name]][[subname]][, intersectingNames, with = FALSE], 
                         dat[[name]][[subname]][, intersectingNames, with = FALSE], 
-                        ignore.variable = ignore.variable, 
+                        # Support ignoring specific variables of specific processes:
+                        ignore.variable = c(ignore.variable, ignore.process.variable[[name]]), 
                         skipNAFraction = skipNAFraction, 
-                        skipNAAt = skipNAAt, 
+                        skipNAAt = if(is.list(skipNAAt)) skipNAAt[[name]] else skipNAAt, 
                         NAReplacement = NAReplacement, 
                         ignoreEqual = ignoreEqual,
                         classOf = classOf, 
-                        mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
+                        #mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
                         sort = sort, 
                         tolerance = tolerance, 
                         testAllTRUE = testAllTRUE
@@ -858,13 +896,14 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                     result <- compareDataTablesUsingClassOf(
                         dat_orig[[name]][[subname]], 
                         dat[[name]][[subname]], 
-                        ignore.variable = ignore.variable, 
+                        # Support ignoring specific variables of specific processes:
+                        ignore.variable = c(ignore.variable, ignore.process.variable[[name]]), 
                         skipNAFraction = skipNAFraction, 
-                        skipNAAt = skipNAAt, 
+                        skipNAAt = if(is.list(skipNAAt)) skipNAAt[[name]] else skipNAAt, 
                         NAReplacement = NAReplacement, 
                         ignoreEqual = ignoreEqual, 
                         classOf = classOf, 
-                        mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
+                        #mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
                         sort = sort, 
                         tolerance = tolerance, 
                         testAllTRUE = testAllTRUE
@@ -910,6 +949,7 @@ compareProjectToStoredOutputFiles <- function(projectPath, projectPath_original 
                 deparse(substitute(x)), 
                 ":\n===========================================>>>>>\n", 
                 "Project: ", projectPath, 
+                "\n", 
                 "Old project: ", projectPath_original, 
                 x_info, 
                 "\n<<<<<==========================================="
@@ -1003,18 +1043,35 @@ formatDiffs <- function(x) {
     return(out)
 }
 
-all.equal_mergeIfDifferentNumberOfRows <- function(x, y, check.attributes = FALSE, sort = TRUE, NAReplacement = NULL, ignoreEqual = FALSE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE, ...) {
+all_equal_mergeIfDifferentNumberOfRows <- function(
+    x, y, 
+    keys_x, keys_y, 
+    check.attributes = FALSE, 
+    sort = TRUE, 
+    #NAReplacement = NULL, 
+    ignoreEqual = FALSE, 
+    tolerance = sqrt(.Machine$double.eps), 
+    testAllTRUE = TRUE, 
+    ...
+) {
     
     if(length(x) == 0 && length(y) == 0 ) {
         return(TRUE)
     }
     
-    xyList <- getListOfXYByMerging(x, y, sort = sort, ignoreEqual = ignoreEqual, NAReplacement = NAReplacement, ...)
+    xyList <- getListOfXYByMerging(
+        x, y, 
+        keys_x = keys_x, keys_y = keys_y, 
+        sort = sort, 
+        ignoreEqual = ignoreEqual, 
+        #NAReplacement = NAReplacement, 
+        ...
+    )
     
     
     #all.equal(xy$x, xy$y, check.attributes = check.attributes)
     test <- all.equal(as.data.frame(xyList$xy$x), as.data.frame(xyList$xy$y), check.attributes = FALSE, tolerance = tolerance)
-    testPlus <-all.equal(as.data.frame(xyList$xyPlus$x), as.data.frame(xyList$xyPlus$y), check.attributes = FALSE, tolerance = tolerance)
+    testPlus <- all.equal(as.data.frame(xyList$xyPlus$x), as.data.frame(xyList$xyPlus$y), check.attributes = FALSE, tolerance = tolerance)
     
     if(testAllTRUE) {
         if(isTRUE(test) && isTRUE(testPlus)) {
@@ -1054,19 +1111,30 @@ all.equal_mergeIfDifferentNumberOfRows <- function(x, y, check.attributes = FALS
 }
 
 
-getListOfXYByMerging <- function(x, y, sort = TRUE, ignoreEqual = FALSE, NAReplacement = NULL, ...) {
+getListOfXYByMerging <- function(
+    x, y, 
+    keys_x, keys_y, 
+    sort = TRUE, 
+    ignoreEqual = FALSE, 
+    #NAReplacement = NULL, 
+    ...
+){
+    
+    # Copy the tables, as we are replacing by reference:
     x <- data.table::copy(x)
     y <- data.table::copy(y)
+    
+    # This only applies to data.table:
     if(data.table::is.data.table(x) && data.table::is.data.table(y) && NROW(x) != NROW(y)) {
-        # Locate keys of each table:
-        keys_x <- locateUniqueKeys(x, requireNextPositive = TRUE)
-        keys_y <- locateUniqueKeys(y, requireNextPositive = TRUE)
         
-        if(identical(sort(keys_x), sort(keys_y))) {
+        # We can only do this if the same keys are located in both tables:
+        if(length(keys_x) && identical(sort(keys_x), sort(keys_y))) {
             keys <- keys_x
             
+            # Merge both with all = FALSE and TRUE:
             merged <- merge(x, y, by = keys, all = FALSE)
             mergedAll <- merge(x, y, by = keys, all = TRUE)
+            # Get the additional rows we get when changing from all = FALSE to all = TRUE: 
             mergedPlus <- mergedAll[!merged, on = keys]
             
             
@@ -1079,8 +1147,12 @@ getListOfXYByMerging <- function(x, y, sort = TRUE, ignoreEqual = FALSE, NARepla
                 xyPlus <- subsetByAllEqual(xyPlus, keys)
             }
             
-            lapply(xy, RstoxBase::replaceNAByReference, replacement = NAReplacement)
-            lapply(xyPlus, RstoxBase::replaceNAByReference, replacement = NAReplacement)
+            #lapply(xy, RstoxBase::replaceNAByReference, replacement = NAReplacement)
+            #lapply(xyPlus, RstoxBase::replaceNAByReference, replacement = NAReplacement)
+        }
+        else {
+            warning("Locating common keys failed. The keys found for x (", if(length(keys_x)) paste(keys_x, collapse = ", ") else "no keys", ") and y (", if(length(keys_y)) paste(keys_y, collapse = ", ") else "no keys", ") differ.")
+            return(list(xy = list(x = x, y = y), xyPlus = NULL))
         }
     }
     
@@ -1143,28 +1215,47 @@ locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
         warning("Cannot locate keys if there are duplicated rows of the entire table.")
         return(NULL)
     }
+    
+    keys <- NULL
     for(ind in seq_along(x)) {
         if(!any(duplicated(x[, seq_len(ind), with = FALSE]))) {
-            return(names(x)[seq_len(ind)])
+            keys <- names(x)[seq_len(ind)]
+            return(keys)
         }
         else if(requireNextPositive) {
             atPositive <- x[[ind + 1]] > 0
             afterRemovingNonPositive <- subset(x, atPositive)
             if(!any(duplicated(afterRemovingNonPositive[, seq_len(ind), with = FALSE]))) {
-                return(names(x)[seq_len(ind)])
+                keys <- names(x)[seq_len(ind)]
+                return(keys)
             }
         }
     }
-    warning("Could not locate keys (unknown error).")
+    
+    if(!length(keys)) {
+        warning("Could not locate keys (unknown error).")
+    }
+    
     return(NULL)
 }
 
 
 
 # Compare two data.tables while ignoring attributes and coercing classes of the first to classes of the second:
-compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), ignore.variable = NULL, skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, ignoreEqual = FALSE, mergeWhenDifferentNumberOfRows = FALSE, sort = TRUE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE) {
+compareDataTablesUsingClassOf <- function(
+    x, y, 
+    classOf = c("first", "second"), 
+    ignore.variable = NULL, 
+    skipNAFraction = FALSE, skipNAAt = NULL, 
+    NAReplacement = NULL, 
+    ignoreEqual = FALSE, 
+    #mergeWhenDifferentNumberOfRows = FALSE, 
+    sort = TRUE, tolerance = sqrt(.Machine$double.eps), testAllTRUE = TRUE
+) {
     
-    
+    if(isFALSE(skipNAAt)) {
+        skipNAAt <- NULL
+    }
     
     
     classOf <- RstoxData::match_arg_informative(classOf)
@@ -1213,48 +1304,85 @@ compareDataTablesUsingClassOf <- function(x, y, classOf = c("first", "second"), 
     }
     
     if(!isFALSE(skipNAFraction)) {
+        # TRUE translates to 0.5:
         if(isTRUE(skipNAFraction)) {
             skipNAFraction <- 0.5
         }
-        
-        x <- subset(x, rowMeans(is.na(x)) < skipNAFraction)
-        y <- subset(y, rowMeans(is.na(y)) < skipNAFraction)
+        # Subset both in x and y, possibly making these of different size. It may be more robust t o use mergeWhenDifferentNumberOfRows = TRUE:
+        if(NROW(x) && NROW(y)) {
+            x <- subset(x, rowMeans(is.na(x)) < skipNAFraction)
+            y <- subset(y, rowMeans(is.na(y)) < skipNAFraction)
+        }
     }
-    
+    # Skip also all rows with at least one NAs in the rows given by skipNAAt:
     if(length(skipNAAt)) {
         x <- skipRowsAtNA(x, skipNAAt)
         y <- skipRowsAtNA(y, skipNAAt)
     }
     
+    # Detect keys and use these in all_equal_mergeIfDifferentNumberOfRows:
+    keys_x <- locateUniqueKeys(x, requireNextPositive = TRUE)
+    keys_y <- locateUniqueKeys(y, requireNextPositive = TRUE)
+    
+    # Apply the NA replacement:
+    if(length(NAReplacement) && (!isFALSE(skipNAFraction) || length(skipNAAt))) {
+        message("Using NAReplacement in combination with skipNAFraction or skipNAAt will happen after skipping the rows specified by skipNAFraction and skipNAAt.")
+    }
+    RstoxBase::replaceNAByReference(x, cols = setdiff(names(x), keys_x), replacement = NAReplacement)
+    RstoxBase::replaceNAByReference(y, cols = setdiff(names(y), keys_y), replacement = NAReplacement)
     
     
     # Check equality:
-    if(mergeWhenDifferentNumberOfRows && NROW(x) != NROW(y)) {
-        out <- all.equal_mergeIfDifferentNumberOfRows(x, y, check.attributes = FALSE, all = TRUE, sort = sort, NAReplacement = NAReplacement, ignoreEqual = ignoreEqual, tolerance = tolerance, testAllTRUE = testAllTRUE)
-        
-        return(out)
+    if(NROW(x) != NROW(y)) {
+        out <- all_equal_mergeIfDifferentNumberOfRows(
+            x, y, 
+            keys_x = keys_x, keys_y = keys_y, 
+            check.attributes = FALSE, 
+            sort = sort, 
+            #NAReplacement = NAReplacement, 
+            ignoreEqual = ignoreEqual, 
+            tolerance = tolerance, 
+            testAllTRUE = testAllTRUE
+        )
     }
     else {
-        RstoxBase::replaceNAByReference(x, replacement = NAReplacement)
-        RstoxBase::replaceNAByReference(y, replacement = NAReplacement)
-        
-        # Try first all.equal on the tables, and if not TRUE try again after reordering:
-        testAllEqual <- all.equal(as.data.frame(x), as.data.frame(y), check.attributes = FALSE, all = TRUE, tolerance = tolerance)
-        if(sort && !isTRUE(testAllEqual) && data.table::is.data.table(x) && data.table::is.data.table(y)) {
-            data.table::setorder(x)
-            data.table::setorder(y)
-            testAllEqual <- all.equal(as.data.frame(x), as.data.frame(y), check.attributes = FALSE, all = TRUE, tolerance = tolerance)
-        }
-        
-        warn <- paste(testAllEqual, collapse = "\n")
-        
-        return(list(
-            warn = warn, 
-            diffData = NULL
-        ))
+        out <- all_equal_reorder(
+            x, y, 
+            check.attributes = FALSE, 
+            #NAReplacement = NAReplacement, 
+            tolerance = tolerance
+        )
     }
+    
+    return(out)
 }
 
+
+all_equal_reorder <- function(
+    x, y, 
+    check.attributes = TRUE, sort = TRUE, 
+    #NAReplacement = NULL, 
+    tolerance = sqrt(.Machine$double.eps)
+) {
+    
+    # Try first all.equal on the tables, and if not TRUE try again after reordering:
+    testAllEqual <- all.equal(as.data.frame(x), as.data.frame(y), check.attributes = check.attributes, all = TRUE, tolerance = tolerance)
+    if(sort && !isTRUE(testAllEqual) && data.table::is.data.table(x) && data.table::is.data.table(y)) {
+        data.table::setorder(x)
+        data.table::setorder(y)
+        testAllEqual <- all.equal(as.data.frame(x), as.data.frame(y), check.attributes = check.attributes, all = TRUE, tolerance = tolerance)
+    }
+    
+    warn <- paste(testAllEqual, collapse = "\n")
+    
+    return(list(
+        warn = warn, 
+        diffData = NULL
+    ))
+}
+
+
+# Function to skip row where at least one of the variables given by skipNAAt are NA:
 skipRowsAtNA <- function(x, skipNAAt) {
     skipNAAt <- intersect(skipNAAt, names(x))
     if(length(skipNAAt)) {
@@ -1505,7 +1633,6 @@ readsItsOwnOutputDataType <- function(functionName) {
 write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchars, append = FALSE, ow = FALSE, missval = -9, compression = NA, verbose = FALSE, validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses")) {
     
     # Throughout this function for loops are used instead of *apply, as the ncdf4 functions did not seem to work as expected in *apply functions:
-    
     # Unlist to the StoX data type with sep = "/" to produce groups.
     list <- unlistToDataType(list, sep = "/", validOutputDataClasses = validOutputDataClasses, keepNonStandardAttributes = TRUE)
     
@@ -1517,8 +1644,8 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
     
     #  Run through the tables and format the DateTime:
     for(name in names(list)) {
-        # Convert any POSIX to character ISO 8601:
-        formatPOSIXAsISO8601(list[[name]])
+        # Convert any POSIX to character ISO 8601 (while making sure that POSIXct are not shifted one millisecond down):
+        formatPOSIXAsISO8601(list[[name]], cols = NA, add = 1e-4, format = "%Y-%m-%dT%H:%M:%OS3Z")
     }
     
     # Define variables and dimensions if not appending:
@@ -1528,7 +1655,8 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
         
         nrowVariables <- list()
         
-        # For convenience convert the nchars list to a table (but only when !append): 
+        # For convenience convert the nchars list to a table (but only when !append):
+        # Using unlistToDataType() here is maybe confusing, but the  advantage is that we get to set the sep:
         ncharsTable  <- data.table::rbindlist(lapply(nchars, unlistToDataType, sep = "/"))
         
         #  Run through the tables:
@@ -1581,6 +1709,7 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
                     
                     # Get the maximum number of characters:
                     max_length <- max(1, max(ncharsTable[[thisFullVariableName]]))
+                    
                     thisStringDim <- ncdf4::ncdim_def(thisStringDimName, "", seq_len(max_length), create_dimvar = FALSE)
                     
                     # Define the variable:
@@ -1708,6 +1837,7 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
             # Get maximum number of characters of the variable to write:
             max_length <- getMaxNchar(list[[tableName]][[variableName]])
             
+            
             ncdf4::ncvar_put(
                 ncout, 
                 varid = tableVariableName, 
@@ -1788,8 +1918,11 @@ setNonStandardAttributes <- function(x, att) {
 
 
 # Utility functions for write_table_NetCDFF4():
-formatPOSIXAsISO8601 <- function(table, cols = NULL) {
+formatPOSIXAsISO8601 <- function(table, cols = NULL, add = 0, format = "%Y-%m-%dT%H:%M:%OS3Z") {
     if(!length(cols)) {
+        return(NULL)
+    }
+    else if(length(cols) == 1 && is.na(cols)) {
         cols <- names(table)
     }
     
@@ -1799,10 +1932,20 @@ formatPOSIXAsISO8601 <- function(table, cols = NULL) {
     
     if(length(toConvertToCharacter)) {
         for(col in toConvertToCharacter) {
-            table[, (col) := format(get(col), format = "%Y-%m-%dT%H:%M:%OS3Z")]
+            if(add != 0 && inherits(table[[col]], "POSIXct")) {
+                table[, (col) := format(as.POSIXct(unclass(get(col)) + add), format = format, tz = "UTC")]
+            }
+            else {
+                table[, (col) := format(get(col), format = format, tz = "UTC")]
+            }
+            #table[, (col) := format(shiftPosix(get(col), add =  add), format = format)]
+            #table[, (col) := format(get(col), format = format)]
         }
     }
+    
+    return(NULL)
 }
+
 
 getStoxUnits <- function(x) {
     if(is.list(x)) {
@@ -1857,14 +2000,20 @@ setRstoxPrecision <- function(x) {
     currentClass <- class(x)
     currentAttributes <- attributes(x)
     
-    if(is.list(x) && ! any(c("sf", "data.frame") %in% class(x))){
+    # Do not set precision to ggplot objects:
+    if("ggplot" %in% class(x)){
+        return(x)
+    }
+    else if(is.list(x) && ! any(c("sf", "data.frame") %in% class(x))){
         output <- lapply(x, setRstoxPrecision)
         class(output) <- currentClass
         output <- setNonStandardAttributes(output, currentAttributes)
                 
         return(output)
     }
-    else {
+    # Added this on 2024-06-21 to aviod setting precision to ggplot objects, which caused errors:
+    else{
+        # These make StoX robust to rounding errors. Be extremely careful to remove or modify any of these!!!:
         if(data.table::is.data.table(x)) {
             x <- roundSignifDT(x, digits = digits, signifDigits = signifDigits)
         }

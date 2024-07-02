@@ -36,27 +36,31 @@ Bootstrap <- function(
     BaselineSeedTable = data.table::data.table()
 ) {
     
-    # Use preivously generated output data if specified:
+    # Use previously generated output data if specified:
     if(UseOutputData) {
         warning("StoX: Using UseOutputData = TRUE in the function Bootstrap implies reading the BootstrapData from a previous run (stored in the output folder)). Any changes made to the Baseline model or to the parameters of the Bootstrap itself will not be accounted for unless UseOutputData = FALSE. The option UseOutputData = TRUE is intended only for saving time when one needs to generate a report from an existing Bootstrap run.")
         
-        # Read the outputData (from a former run of the proecss). Use functionArguments["outputData"] to add the data, since using functionArguments$outputData will delete this element if trying to giev it the value NULL:
+        # Read the outputData (from a former run of the proecss). Use functionArguments["outputData"] to add the data, since using functionArguments$outputData will delete this element if trying to give it the value NULL:
         if(is.character(outputData)) {
+            
             if(length(outputData)) {
                 if(!file.exists(outputData)) {
                     oldRataFile <- file.path(dirname(outputData), "BootstrapData.RData")
                     if(file.exists(oldRataFile)) {
-                        stop(
-                            "The file ", 
-                            outputData, 
-                            " does not exist. However, there is an RData file which indicates that this Bootstrap output file was created using StoX <= 3.6.2. Using UseOutputData = TRUE will not immediately work between StoX <= 3.6.2 and StoX >= 4.0.0. We recommend re-run the Bootstrap process. Alternatively, try to run the following code in R to convert the RData file to a netCDF4 file:\n\n", 
-                            "RstoxFramework::bootstrapRDataToNetCDF4(\"", oldRataFile, "\", ow = T)\n\nThis may take semeral minuttes depending on the size of the original RData file. To reduce the time you may want to specify the variable to keep with the argument outputVariables (run ?RstoxFramework::bootstrapRDataToNetCDF4 in R to see suggested values for outputVariables).")
+                        # We decided not to convert existing RData file and rather assume that the use re-runs the bootstrapping in StoX 4.0.0.
+                        # Convert the old bootstrap RData file to a new NetCDF4 file:
+                        #timeUsed <- system.time(bootstrapRDataToNetCDF4(oldRataFile, processName = processName, ow = T))
+                        #  ... with a message:
+                        #warning(
+                        #    "An old bootstrap RData file was found and coverted to a NetCDF4 file fitted for StoX >= 4.0.0. This operation is usually time cosuming, and lasted for ", timeUsed[[3]], " seconds.")
+                        stop("A bootstra output file produced with StoX <= 3.6.2 (RData file) exists, but this file is not compatible with StoX >= 4.0.0. Please re-run the Bootstrap process.")
                     }
                     else {
                         stop("The file ", outputData, " does not exist. Please re-run the Bootstrap process.")
                     }
                 }
-                else {
+                
+                #if(file.exists(outputData)) {
                     outputData <- tryCatch(
                         {
                             if(!file.exists(dirname(outputMemoryFile))) {
@@ -69,7 +73,10 @@ Bootstrap <- function(
                         }, 
                         error = function(err) list(NULL)
                     )
-                }
+                #}
+                #else {
+                #    stop("Somethting went wrong when converting RData to NetCDF4...")
+                #}
             }
             else {
                 outputData <- list(NULL)
@@ -190,12 +197,27 @@ Bootstrap <- function(
     filePath <- createStoXNetCDF4FileDataType(filePath)
     
     # Moved this message to writeProcessOutputTextFile():
-    #message("StoX: The bootstrap file can be read into R using bootstrapData <- RstoxFramework::getBootstrapData(\"", filePath, "\", selection = NA). Note that using selection = NA reads in the entire file. Use ?RstoxFramework::getBootstrapData in R for futher details.")
+    #message("StoX: The bootstrap file can be read into R using bootstrapData <- RstoxFramework::readBootstrapData(\"", filePath, "\", selection = NA). Note that using selection = NA reads in the entire file. Use ?RstoxFramework::readBootstrapData in R for futher details.")
     
     #names(filePath) <- "StoXNetCDF4File"
     return(filePath)
 }
 
+
+
+#' List variables used in the reports of a project
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @export
+#'
+getOutputVariablesUsedInReport <- function(projectPath) {
+    # The report parameters to get variable names from:
+    parameters <- c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable")
+    
+    pr <- getProcessesSansProcessData(projectPath, modelName = "report")
+    unique(unlist(lapply(pr$functionParameters, function(x) x[parameters])))
+}
 
 
 
@@ -263,8 +285,8 @@ writeBootstrapOutputFromIndividualProjects <- function(memoryDataSubFolders, out
 
 
 getDimsAndNcharsFromOldBootstrapData <- function(oldBootstrapData) {
-    # Assume that there are no multi-table outputs:
-    numberOfBootstraps <- oldBootstrapData[[1]][, max(BootstrapID)]
+    # Assume processName - tableName - variableName:
+    numberOfBootstraps <- oldBootstrapData[[1]][[1]][, max(BootstrapID)]
     
     dims <- lapply(
         seq_len(numberOfBootstraps), function(ind) lapply(
@@ -335,14 +357,12 @@ getBootstrapOneTable <- function(BootstrapDataOneTable, ind, outputVariables) {
 
 
 
-#' Convert a bootstrap RData file to NetCDF4
+#' Convert a bootstrap RData file to NetCDF4. THIS FUNCTION IS NOT FINISHED, AND SHOULD NOT BE!!!
 #' 
 #' @param bootstrapRDataFile The path to file holding the BoostrapData from a StoX <= 3.6.2 project run.
 #' @param bootstrapNetCDF4File The path to the new netCDF4 file.
 #' @param outputVariables An optional list of variables to keep in the output. A typical set of variables could be ["Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"], which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in \code{outputVariables}. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects and faster writing/reading of that file.
 #' @param ow Logical: If TRUE, overwrite the \code{bootstrapNetCDF4File}.
-#' 
-#' @export
 #' 
 bootstrapRDataToNetCDF4 <- function(
     bootstrapRDataFile, 
@@ -358,13 +378,30 @@ bootstrapRDataToNetCDF4 <- function(
     timeSpent <- proc.time()[3] - startTime
     message("StoX: Time used: ", round(timeSpent, digits = 3), " s")
     
+    # Try to intepret the table name:
+    namesSplit <- strsplit(names(BootstrapData), "_")
+    processName <- sapply(namesSplit, "[", 1)
+    tableName <- lapply(namesSplit, "[", 2)
+    atMissingTableName <- which(is.na(tableName))
+    for(ind in atMissingTableName) {
+        tableName[[ind]] <- interpretTableNameFromVariables(BootstrapData[[ind]])
+    }
+        
+    
+        
+    BootstrapData <- split(BootstrapData, processName)
+    tableNameSplit <- split(tableName, processName)
+    
+    for(ind in seq_along(BootstrapData)) {
+        names(BootstrapData[[ind]]) <- tableNameSplit[[ind]]
+    }
     
     # Get dims and nchars:
     dimsNchars <- getDimsAndNcharsFromOldBootstrapData(BootstrapData)
     
     midTime <- proc.time()[3]
     message("StoX: Writing nc file ", bootstrapNetCDF4File)
-    nc <-writeBootstrapOutputFromOldBootstrapData(
+    nc <- writeBootstrapOutputFromOldBootstrapData(
         oldBootstrapData = BootstrapData, 
         outputVariables = outputVariables, 
         filePath = bootstrapNetCDF4File, 
@@ -384,6 +421,19 @@ bootstrapRDataToNetCDF4 <- function(
     return(bootstrapNetCDF4File)
 }
 
+interpretTableNameFromVariables <- function(x) {
+    individualsVariableNames <- c("Stratum", "Layer", "Individual")
+    superIndividualsVariableNames <- c(individualsVariableNames, "Abundance")
+    if(all(superIndividualsVariableNames %in% names(x))) {
+        return("SuperIndividualsData")
+    }
+    else if(all(individualsVariableNames %in% names(x))) {
+        return("IndividualsData")
+    }
+    else {
+        stop("Unknown bootstrap output table.")
+    }
+}
 
 # Function to load RData to a variable (https://stackoverflow.com/questions/5577221/can-i-load-a-saved-r-object-into-a-new-object-name):
 loadRData <- function(fileName){
@@ -404,7 +454,7 @@ writeBootstrapOutputFromOldBootstrapData <- function(oldBootstrapData, outputVar
     #}
     
     # Assume that there are no multi-table outputs:
-    numberOfBootstraps <- oldBootstrapData[[1]][, max(BootstrapID)]
+    numberOfBootstraps <- oldBootstrapData[[1]][[1]][, max(BootstrapID)]
     
     # Get this only once to save time:
     validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses")
@@ -583,14 +633,14 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
 #' @param filePath The path to the file.
 #' @param nc A netCDF4 object, overiding the \code{filePath}.
 #' @param selection Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.
-#' @param BootstrapIDStart,BootstrapIDEnd The start and end bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.
+#' @param BootstrapID A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.
 
-#' @param unlist For use when a single table is requested. If \code{unlist} = 0 (the default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If \code{unlist} = 1 return a list named by the \code{selection} holding the output data. If \code{unlist} = 2 return the output data directly. Use \code{unlist} = 1 to replicate the output of Bootstrap() in StoX <= 3.6.2.
+#' @param unlistSingleTable Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.
 #' @param close Logical: If TRUE (the default) close the netCDF4 file after reading the data.
 #' 
 #' @export
 #' 
-getBootstrapData <- function(filePath, nc, selection = list(), BootstrapIDStart = 1, BootstrapIDEnd = Inf, unlist = 0, close = TRUE) {
+readBootstrapData <- function(filePath, nc, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, close = TRUE) {
     
     # Use the open file if given:
     if(!missing(filePath) && file.exists(filePath)) {
@@ -610,59 +660,60 @@ getBootstrapData <- function(filePath, nc, selection = list(), BootstrapIDStart 
         on.exit(ncdf4::nc_close(nc))
     }
     
-    if(!length(selection)) {
-        warning("No selection of table/variables. Returning NULL. Use selection = NA to get all variables.")
-        return(NULL)
-    }
-    else if(length(selection) == 1 && is.na(selection)) {
-        selection <- sapply(nc$var, "[[", "name")
-    }
-    else{
-        selection <- getSelectionString(selection) 
-    }
+    # Get the list of selections:
+    selection <- getSelection(selection, nc) 
     
-    
-    # Discard the nrow variables:
-    selection <- selection[!endsWith(selection, "/nrow")]
-    
-    # Split by table:
-    selectionList <- split(selection, sub('/([^/]*)$', '', selection))
     
     # Get each table separately:
     output <- lapply(
-        selectionList, 
-        getBootstrapDataOne, 
+        selection, 
+        readBootstrapDataOne, 
         nc = nc, 
-        BootstrapIDStart = BootstrapIDStart, 
-        BootstrapIDEnd = BootstrapIDEnd
+        BootstrapID = BootstrapID
     )
     
     # Unlist to a list of the individual tables:
     groupNames <- sub("/.*", "", names(output))
-    names(output) <- groupNames
     
-    # If there is only one table and unlist is larger than 0 (1 or 2):
-    if(unlist > 0 && length(output) == 1) {
-        output <- unlistToDataType(output, nlevel = unlist)[[1]]
+    
+    # The output of the lapply above must be unlisted:
+    output <- lapply(output, "[[", 1)
+    #names(output) <- groupNames
+    # Split by the groupNames, while keeping the order intact (by setting the levels of the factor):
+    output <- split(output, factor(groupNames,  levels = unique(groupNames)))
+    # The output of readBootstrapDataOne() requires we unlist one level to get down to the table:
+    output <- lapply(output, function(x) structure(unlist(x, recursive = FALSE), names = sapply(x, names)))
+    
+    # If there are only single table outputs, recreate the StoX <= 3.6.2 output, as a list named by the processes:
+    if(unlistSingleTable) {
+        # Find single table processes:
+        singleTable <- lengths(output) == 1
+        # Unlist those:
+        output[singleTable] <- lapply(output[singleTable], "[[", 1)
+        #names(output[singleTable]) <- groupNames[singleTable]
+        
+        #processNames <- names(output)
+        #output <- unlistToDataType(output, nlevel = 2)
+        #names(output) <- processNames
     }
-    else {
-        output <- lapply(
-            unique(groupNames), function(name) {
-                at <- which(names(output) == name)
-                # If the current list element is a valid StoX class (e.g. data.table) return it unchcanged:
-                if(length(at) == 1 && isValidOutputDataClass(output[[at]][[1]])) {
-                    output[[at]][[1]]
-                }
-                # Otherwise, unlist out the lapply using getBootstrapDataOne() above, and c tables of the same process:
-                else {
-                    unlisted1 <- unlist(output[at], recursive = FALSE)
-                    tableNames <- sapply(unlisted1, names)
-                    structure(c(unlist(unlisted1, recursive = FALSE)), names = tableNames)
-                }
-            }
-        )
-        names(output) <- unique(groupNames)
-    }
+    #else {
+    #    output <- lapply(
+    #        unique(groupNames), function(name) {
+    #            at <- which(names(output) == name)
+    #            # If the current list element is a valid StoX class (e.g. data.table) return it unchcanged:
+    #            if(length(at) == 1 && isValidOutputDataClass(output[[at]][[1]])) {
+    #                output[[at]][[1]]
+    #            }
+    #            # Otherwise, unlist out the lapply using readBootstrapDataOne() above, and c tables of the same process:
+    #            else {
+    #                unlisted1 <- unlist(output[at], recursive = FALSE)
+    #                tableNames <- sapply(unlisted1, names)
+    #                structure(c(unlist(unlisted1, recursive = FALSE)), names = tableNames)
+    #            }
+    #        }
+    #    )
+    #    names(output) <- unique(groupNames)
+    #}
     
     
     
@@ -672,14 +723,35 @@ getBootstrapData <- function(filePath, nc, selection = list(), BootstrapIDStart 
 }
 
 
-getBootstrapDataOne <- function(selectionOneTable, nc, BootstrapIDStart = 1, BootstrapIDEnd = Inf) {
+getVarList <- function(nc, flatten = TRUE) {
+    # Get all the variable ids as slash separated strings:
+    varStrings <- sapply(nc$var, "[[", "name")
+    
+    # Split by "/":
+    varStringsSplit <- strsplit(varStrings, "/")
+    # Rbind to a data.table:
+    dt <- data.table::rbindlist(lapply(varStringsSplit, as.list))
+    names(dt) <- c("processName", "tableName", "variableName")
+    
+    # Split by the first two columns, which are processName and tableName
+    output <- split(dt, by = c("processName", "tableName"), flatten = flatten)
+    
+    if(flatten) {
+        names(output) <- sapply(output, function(x) paste(x[1,1], x[1,2], sep = "/"))
+    }
+    
+    return(output)
+}
+
+
+readBootstrapDataOne <- function(selectionOneTable, nc, BootstrapID = NA) {
     
     # Get the variables: 
     var <- nc$var
     ndims <- lapply(var, "[[", "ndims")
     
     # Get the selection elements:
-    selection <- getSelectionOneTable(selectionOneTable)
+    selection <- splitSelectionOneTable(selectionOneTable)
     listNames <- selection$listNames
     requestedVariables <- selection$requestedVariables
     requestedVariablesFullName <- selection$requestedVariablesFullName
@@ -687,9 +759,27 @@ getBootstrapDataOne <- function(selectionOneTable, nc, BootstrapIDStart = 1, Boo
     # Get the nrow variable, which determines what to read, and which will be added as BootstrapID to the output table:
     nrowsVariable <- paste(paste(listNames, collapse = "/"), "nrow", sep = "/")
     nrows <- ncdf4::ncvar_get(nc, nrowsVariable)
-    start <- 1 + sum(nrows[seq_len(BootstrapIDStart - 1)])
-    BootstrapIDEnd <- min(BootstrapIDEnd, length(nrows))
-    count <- sum(nrows[seq(BootstrapIDStart, BootstrapIDEnd)])
+    
+    
+    # Check that BootstrapID is an unbroken sequence:
+    if(length(BootstrapID) == 1 && is.na(BootstrapID)) {
+        BootstrapID <- seq_len( length(nrows))
+    }
+    if(any(diff(BootstrapID) != 1)) {
+        warning("BootstrapID must be an unbroken sequence. Converted to the sequence from min(BootstrapID) to max(BootstrapID) (", min(BootstrapID), " - ", max((BootstrapID)), ").")
+        BootstrapID <- seq(min(BootstrapID), max(BootstrapID))
+    }
+    # Exclude BootstrapID larger than length(nrows):
+    if(any(BootstrapID < 1)) {
+        BootstrapID <- BootstrapID[BootstrapID > 1]
+    }
+    if(any(BootstrapID > length(nrows))) {
+        BootstrapID <- BootstrapID[BootstrapID <= length(nrows)]
+    }
+    
+    
+    start <- 1 + sum(nrows[seq_len(min(BootstrapID) - 1)])
+    count <- sum(nrows[BootstrapID])
     
     # Read the variables:
     #browser()
@@ -719,8 +809,8 @@ getBootstrapDataOne <- function(selectionOneTable, nc, BootstrapIDStart = 1, Boo
     }
     
     # Add the BootstrapID:
-    BootstrapID <- rep(seq(BootstrapIDStart, BootstrapIDEnd), nrows[seq(BootstrapIDStart, BootstrapIDEnd)])
-    data.table::set(table, j = "BootstrapID", value = BootstrapID)
+    BootstrapID_repeated <- rep(BootstrapID, nrows[BootstrapID])
+    data.table::set(table, j = "BootstrapID", value = BootstrapID_repeated)
     #table[, BootstrapID := ..BootstrapID]
     
     # Expand to a list like the output from a Bootstrap process:
@@ -749,7 +839,8 @@ getNumberOfBootstraps <- function(nc, selection = list()) {
         warning("No selection of table/variables. Returning NULL.")
         return(NULL)
     }
-    selection <- getSelectionOneTable(selection)
+    
+    selection <- splitSelectionOneTable(selection)
     listNames <- selection$listNames
     #requestedVariables <- selectionList$requestedVariables
     #requestedVariablesFullName <- selectionList$requestedVariablesFullName
@@ -765,15 +856,12 @@ getNumberOfBootstraps <- function(nc, selection = list()) {
 
 
 
-getSelectionOneTable <- function(selectionOneTable) {
-    
-    # Get the selection strings:
-    selectionString <- getSelectionString(selectionOneTable)
+splitSelectionOneTable <- function(selectionOneTable) {
     
     # Extract list elements:
-    listNames <- unlist(utils::head(strsplit(selectionString[1], "/", fixed = TRUE)[[1]], -1))
-    requestedVariables <- unlist(lapply(strsplit(selectionString, "/", fixed = TRUE), utils::tail, 1))
-    requestedVariablesFullName <- selectionString
+    listNames <- unlist(utils::head(strsplit(selectionOneTable[1], "/", fixed = TRUE)[[1]], -1))
+    requestedVariables <- unlist(lapply(strsplit(selectionOneTable, "/", fixed = TRUE), utils::tail, 1))
+    requestedVariablesFullName <- selectionOneTable
     
     
     list(
@@ -785,27 +873,70 @@ getSelectionOneTable <- function(selectionOneTable) {
 
 
 
-getSelectionString <- function(selection) {
+getSelection <- function(selection, nc) {
+    
     if(!length(selection)) {
-        warning("No selection of table/variables. Returning NULL.")
+        warning("No selection of tables/variables in the NetCDF4 file. Returning NULL. Use selection = NA to get all variables.")
         return(NULL)
     }
-    
-    # If the selection is given as a list, paste all but the last element to the last element to get full names of the variables:
-    if(is.list(selection)) {
-        lens <- lengths(selection)
-        if(any(utils::head(lens, -1) != 1)) {
-            stop("Can only get one table at the time, but possible more than one variables of a table (last element of selection can have length > 1, but the other elements must have length 1).")
+    else if(length(selection) == 1 && (is.na(selection) || is.na(selection[[1]]))) {
+        # Get all variables in a list by table:
+        output <- getVarList(nc, flatten = TRUE)
+    }
+    else{
+        if(is.list(selection)) {
+            # Get the hierarchical structure of processName, tableName and variableName:
+            varList <- getVarList(nc, flatten = FALSE)
+            
+            # Select the processes:
+            output <- varList[selection[[1]]]
+            
+            # Select the tables:
+            if(length(selection) >= 2) {
+                output <- mapply(
+                    function(table, element) if(length(element) == 1 && is.na(element)) table else table[element], 
+                    output, 
+                    selection[[2]], 
+                    SIMPLIFY = FALSE
+                )
+                # Unlist non-recursively and concatenate the names:
+                output <- unlist(output, recursive = FALSE)
+                names(output)  <- sapply(output, function(x) paste(x[1,1], x[1,2], sep = "/"))
+            }
+            
+            # Select the variables:
+            if(length(selection) == 3) {
+                # But only if all elements of selection have equal length (where lists are allwed as elements in selection):
+                lens <- lengths(selection)
+                if(! all(lens == lens[1])) {
+                    stop("If selection has length 3, all elements must have equal length, implying to get the variables specified in the third element from the tables specified by the first two (process name and table name).")
+                }
+                
+                processTableNames <- paste(selection[[1]], selection[[2]], sep = "/")
+                
+                output <- mapply(
+                    function(table, element) if(length(element) == 1 && is.na(element)) table else table[ intersect(table$variableName, element), on = "variableName"], 
+                    output, 
+                    selection[[3]], 
+                    SIMPLIFY = FALSE
+                )
+            }
         }
-        
-        # Paste the table name and the variable names given by the selection, to create full paths of the variables:
-        selectionString <- do.call(paste, c(selection, list(sep = "/")))
+        else {
+            output <- selection
+        }
+    }
+    
+    if(is.list(output)) {
+        # Paste:
+        output <- lapply(output, function(x) apply(subset(x, variableName != "nrow"), 1, paste, collapse = "/"))
     }
     else {
-        selectionString <- selection
+        processTableNames <- sub('/[^/]*$', '',  output)
+        output <- split(output, processTableNames)
     }
     
-    return(selectionString)
+    return(output)
 }
 
 
@@ -991,10 +1122,7 @@ runOneBootstrap <- function(ind, replaceArgsList, replaceDataList, projectPath, 
         collapseErrors = FALSE,
         header = NULL
     )
-    
-    
-    
-    
+
     # Get the output dimensions for use when writing NetCDF4 later:
     processOutput <- getModelData(
         projectPath = projectPath, 
@@ -1675,7 +1803,7 @@ ReportBootstrap <- function(
     # Read the relevant variables from the BootstrapData file:
     toKeep <- c(TargetVariable, GroupingVariables, InformationVariables, WeightingVariable)
     
-    selection <- list(processNameSlashTableName, toKeep)
+    selection <- paste(processNameSlashTableName, toKeep, sep = "/")
     
     # Get the data type:
     dataType <- getDataTypeFromBootstrap(nc, BaselineProcess)
@@ -1683,7 +1811,7 @@ ReportBootstrap <- function(
     # Set the NetCDF4ChunkSize:
     NumberOfBootstraps <- getNumberOfBootstraps(nc, selection = selection)
     # Check the size of one bootstrap:
-    test1 <- getBootstrapData(nc = nc, selection = selection, BootstrapIDStart = 1, BootstrapIDEnd = 1, close = FALSE)
+    test1 <- readBootstrapData(nc = nc, selection = selection, BootstrapID = 1, close = FALSE)
     size <- utils::object.size(test1)
     maximumSize <- 1e10 # 10 GB
     NetCDF4ChunkSize <- pretty(maximumSize / size)[1]
@@ -1831,7 +1959,7 @@ initialAggregateBootstrapDataOne <- function(
 ) {
     
     # Get the table of current bootstrapID:
-    relevantBootstrapDataOne <- getBootstrapData(nc = nc, selection = selection, BootstrapIDStart = min(bootstrapID), BootstrapIDEnd = max(bootstrapID), unlist = 2, close = FALSE)
+    relevantBootstrapDataOne <- readBootstrapData(nc = nc, selection = selection, BootstrapID = bootstrapID, unlistSingleTable = TRUE, close = FALSE)[[1]]
     
     # Set the unit of the target variable:
     relevantBootstrapDataOne[[TargetVariable]] <- RstoxBase::setUnitRstoxBase(

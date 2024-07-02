@@ -10,7 +10,8 @@ readModelData(
   processName = NULL,
   verifyFiles = FALSE,
   unlist = FALSE,
-  emptyStringAsNA = FALSE
+  emptyStringAsNA = FALSE,
+  ...
 )
 }
 \arguments{
@@ -25,10 +26,12 @@ readModelData(
 \item{unlist}{Either 1 to unlist the models, 2 to unlist the models and the process. TRUE is interpreted as 2.}
 
 \item{emptyStringAsNA}{Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.}
+
+\item{...}{Arguments passed to \code{\link{readBootstrapData}}, e.g. \code{selection}, which must be set to NA to read the entire file.}
 }
 \value{
 A list of model output.
 }
 \description{
-This function reads all or some of the output files of a project, indicated by model and proccess names.
+This function reads all or some of the output files of a project, indicated by model and process names.
 }

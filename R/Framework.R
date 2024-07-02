@@ -1629,10 +1629,11 @@ resolveProjectPath <- function(filePath) {
 #' Get the active process.
 #' 
 #' @inheritParams general_arguments
+#' @param drop Logical: If TRUE and \code{modelName} is given as a  single string, drop the table of processID, processDirty and propertyDirty to a list.
 #'
 #' @export
 #'
-getActiveProcess <- function(projectPath, modelName = NULL) {
+getActiveProcess <- function(projectPath, modelName = NULL, drop = TRUE) {
     # Read the active process ID for the model:
     activeProcessIDFile <- getProjectPaths(projectPath, "activeProcessIDFile")
     if(!file.exists(activeProcessIDFile)) {
@@ -1644,7 +1645,13 @@ getActiveProcess <- function(projectPath, modelName = NULL) {
         #return(activeProcessIDTable[[modelName]])
         thisModelName <- modelName
         output <- activeProcessIDTable[modelName == thisModelName, ]
-        output <- as.list(output[, modelName := NULL])
+        if(drop) {
+            output <- as.list(output[, modelName := NULL])
+            return(output)
+        }
+        else {
+            return(output[])
+        }
         return(output[])
         #return(activeProcessIDTable[modelName == modelName, ])
     }
@@ -1774,6 +1781,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
     
     # Read the active proces ID and reset if that is not NA:
     currentActiveProcessID <- getActiveProcess(projectPath = projectPath, modelName = modelName)$processID
+    
     
     # If activeprocessID is NA, do nothing, as this indicates that the model has not been run:
     if(!is.na(currentActiveProcessID)) {
@@ -3047,16 +3055,25 @@ getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, end
     processTable[, hasProcessData := lapply(functionName, isProcessDataFunction)]
     
     # Add hasBeenRun:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName, drop = FALSE)
     processTable[, hasBeenRun := FALSE]
-    if(!is.na(activeProcess$processID)) {
-        activeProcessIndex <- getProcessIndexFromProcessID(
-            projectPath = projectPath, 
-            modelName = modelName, 
-            processID = activeProcess$processID
-        )
-        processTable[seq_len(min(activeProcessIndex - activeProcess$processDirty, nrow(processTable))), hasBeenRun := TRUE]
+    for(thisModelName in modelName) {
+        if(!is.na(activeProcess[modelName == thisModelName, processID])) {
+            activeProcessIndex <- getProcessIndexFromProcessID(
+                projectPath = projectPath, 
+                modelName = modelName, 
+                processID = activeProcess[modelName == thisModelName, processID]
+            )
+            numHasBeenRun <- min(
+                activeProcessIndex - activeProcess[modelName == thisModelName, processDirty], 
+                nrow(processTable)
+            )
+            firstProcessIndexOfModel <- activeProcess[, min(which(modelName == thisModelName))] 
+            
+            processTable[seq_len(numHasBeenRun) + firstProcessIndexOfModel - 1, hasBeenRun := TRUE]
+        }
     }
+
     
     # Add columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated:
     if(return.processFlow) {
@@ -5037,6 +5054,7 @@ runProcess <- function(
             appendLF = TRUE
         )
     }
+
     
     # Store the current active process ID:
     currentActiveProcessID <- getActiveProcess(projectPath = projectPath, modelName = modelName)$processID
@@ -5045,7 +5063,9 @@ runProcess <- function(
         #resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = TRUE)
         # Changed to purgeOutputFiles = FALSE, as if TRUE Bootstrap output is deleted when this is changed and is the first process (in which case active process becomes NA):
         # Changed this back again on 2023-12-16. No idea why this was important. Output data SHOULD be deleted when there is a change!
-        resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = TRUE)
+        #resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = TRUE)
+        # Changed on 2024-06-25 to use purgeOutputFiles only if fileOutput is TRUE, since always using TRUE deletes bootstrap output data even if UseOutputData is TRUE:
+        resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = fileOutput)
     }
     
     # Run the process:
@@ -5371,6 +5391,8 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
 #' @inheritParams readProcessOutputFile
 #' @inheritParams getProcessOutputFiles
 #' @inheritParams general_arguments
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param tableName The name of the table to extract from the process.
 #' @param geoJsonName The name of the GeoJSON object to extract from the process.
 #' @param subFolder If the process returns subfolders (ReadBiotic and ReadAcoustic, where the subfolders represent files), specify the name of the folder with this parameter.
@@ -5379,7 +5401,11 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
 #' 
 #' @export
 #' 
-getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL, subFolder = NULL, flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE, warn = TRUE, add.line.index = TRUE) {
+getProcessOutput <- function(
+    projectPath, modelName, processID, tableName = NULL, subFolder = NULL, 
+    flatten = FALSE, pretty = FALSE, pretty.json = FALSE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = TRUE, drop = FALSE, drop.datatype = TRUE, splitGeoJson = TRUE, warn = TRUE, add.line.index = TRUE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE
+) {
     
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
@@ -5395,6 +5421,7 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         processID = processID, 
         warn = warn
     )
+    
     if(!length(processOutputFiles)) {
         return(NULL)
     }
@@ -5453,16 +5480,23 @@ getProcessOutput <- function(projectPath, modelName, processID, tableName = NULL
         enable.auto_unbox = enable.auto_unbox, 
         how = "replace", 
         splitGeoJson = splitGeoJson, 
-        add.line.index = add.line.index
+        add.line.index = add.line.index, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
     )
 
-    # Add data type as attribute if the file is present (currentlly only for boostrap):
+    # Add data type as attribute if the file is present (currently only for bootstrap):
     dataTypeFileName <- file.path(folderPath, "dataType.txt")
     if(is.list(processOutput) && file.exists(dataTypeFileName)) {
         dataType <- data.table::fread(dataTypeFileName)
         for(name in names(processOutput)) {
             attr(processOutput[[name]], "dataType") <- dataType[name == processName, dataType]
         }
+    }
+    
+    # The old bootstrap data was saved as separate rds files, and were thus read in as a alist of baseline dataatypes. The new bootstrap saves all data in a NetCDF4 file with class set to "StoXNetCDF4File" when rurnning the bootstrap process (possibly using UseOutputData = TRUE). However, we have now added the option of returning the actual data stored in the file by setting returnBootstrapData to TRUE in e.g. runModel(). This produces a different class "BootstrapData", set in readMemoryFile(). That means that the output for processes with this class is a list with one element, which in turn is a list of baseline process outputs. Here we remove the first list level when class is "BootstrapData", in order to replicate the old bootstrap output, which was the intention. This is particularly important for comparison to existing StoX projects with output produced with StoX <= 3.6.2:
+    hasClassBootstrapData <- sapply(processOutput, inherits, "BootstrapData")
+    if(length(processOutput) == 1 && any(hasClassBootstrapData)) {
+        processOutput <- processOutput[[1]]
     }
     
     # Unlist the top level if a single tabled data type is wrapped in a list:
@@ -5589,12 +5623,21 @@ unlistProcessOutput <- function(processOutput) {
 #' Get output data from processes of a StoX model
 #' 
 #' @inheritParams general_arguments
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param drop.datatype Logical: If TRUE, drop the top level of the output list if it has length 1 and that single element is named by the datatype name.
 #' @param unlistDepth2 Logical: Related to \code{drop.datatype}, but setting this to TRUE unlists output data that are nested in 2 levels, such as output from \code{\link[RstoxData]{ReadBiotic}}, which outputs a set of tables for each input file. Using unlistDepth2 = TRUE puts all these tables in one list, and uses the concatenation of the file names and the table name separated by underscore. This is how it is displayed in the StoX GUI when selecting "View output".
 #' 
 #' @export
 #' 
-getModelData <- function(projectPath, modelName, processes = NULL, startProcess = 1, endProcess = Inf, drop.datatype = TRUE, warn = TRUE, unlistDepth2 = FALSE) {
+getModelData <- function(
+    projectPath, modelName, 
+    processes = NULL, startProcess = 1, endProcess = Inf, 
+    drop.datatype = TRUE, 
+    warn = TRUE, 
+    unlistDepth2 = FALSE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE
+) {
     
     # Get the processes to get output from, either specified with the 'processes' argument or the 'startProcess' and 'endProcess' arguments:
     processTable <- readProcessIndexTable(
@@ -5614,7 +5657,8 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
             MoreArgs = list(
                 projectPath = projectPath, 
                 modelName = modelName, 
-                drop.datatype = drop.datatype
+                drop.datatype = drop.datatype, 
+                returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
             ), 
             SIMPLIFY = FALSE
         )
@@ -5635,6 +5679,8 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' Function to read a single process output file, possibly by pages and in flattened and pretty view:
 #' 
 #' @inheritParams fixedWidthTable
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param filePath The file path of the process output file to read.
 #' @param flatten Logical: Should the output tables that contain cells of length > 1 be expanded to that the other columns are repeated, resulting in a regular table.
 #' @param pretty Logical: If TRUE pad with space in each cell to the maximum number of characters of the column including header.
@@ -5643,11 +5689,18 @@ getModelData <- function(projectPath, modelName, processes = NULL, startProcess 
 #' @param linesPerPage The number of lines per page if \code{pageindex} is given.
 #' @param splitGeoJson Logical: If TRUE split the geojson into a vector of separate lines.
 #' 
-readProcessOutputFile <- function(filePath, flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE, add.line.index = TRUE) {
+readProcessOutputFile <- function(
+    filePath, 
+    flatten = FALSE, pretty = FALSE, pretty.json = TRUE, pageindex = integer(0), linesPerPage = 1000L, columnSeparator = " ", lineSeparator = NULL, na = "-", enable.auto_unbox = FALSE, splitGeoJson = TRUE, add.line.index = TRUE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE
+) {
     
     
     # Read the process output file:
-    data <- readMemoryFile(filePath)
+    data <- readMemoryFile(
+        filePath, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
+    )
     
     # Check whether the table is rugged:
     if(flatten && data.table::is.data.table(data) && isDataTableRugged(data)) {
@@ -6258,10 +6311,10 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             
             message(
                 "StoX: The bootstrap file can be read into R using the following command:", "\n", 
-                "bootstrapData <- RstoxFramework::getBootstrapData(\"", filePath, "\", selection = NA)",  "\n", 
-                "Note that using selection = NA reads in the entire file. To replicate load() on the RData output file in StoX <= 3.6.2 use unlist = 1 in getBootstrapData()."#, 
+                "bootstrapData <- RstoxFramework::readBootstrapData(\"", filePath, "\", selection = NA)",  "\n", 
+                "Note that using selection = NA reads in the entire file. To replicate load() on the RData output file in StoX <= 3.6.2 use unlist = TRUE in readBootstrapData()."#, 
                 #"Run the following command in R for futher details:", "\n", 
-                #"help(\"getBootstrapData\", package = \"RstoxFramework\")"
+                #"help(\"readBootstrapData\", package = \"RstoxFramework\")"
             )
         }
         else {
@@ -6329,6 +6382,12 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
             if(escape) {
                 escapeTabAndNewline(processOutputOne)
             }
+            
+            # Write the data to file (note that fwrite avoids the R bug that POSIXct objects are shifted one decimal down when passed through format()):
+            # See e.g.:
+            # hasDiff <- function(x) format(as.POSIXlt(x, tz = "UTC"), format = "%Y-%m-%dT%H:%M:%OS3Z") != format(as.POSIXct(x, tz = "UTC"), format = "%Y-%m-%dT%H:%M:%OS3Z")
+            # tt <- paste0("2017-10-06 01:40:15.", sprintf(paste0("%0", 1, "d"), 0:9), "Z")
+            # which(hasDiff(tt))
             data.table::fwrite(processOutputOne, filePath, sep = "\t", na = "NA", quote = TRUE, qmethod = "double")
         }
     }
@@ -6449,7 +6508,11 @@ unlistOneStep <- function(processOutput, sep = "_", validOutputDataClasses = get
         processOutput[validClass] <- lapply(processOutput[validClass], list)
         
         # Define the names of the files first, by pasting the level and the sub-level names separated by underscore:
-        processOutputNames <- unlist(lapply(names(processOutput), function(x) if(length(names(processOutput[[x]]))) paste(x, names(processOutput[[x]]), sep = sep) else x))
+        processOutputNames <- paste(
+            rep(names(processOutput), lengths(processOutput)), 
+            unlist(lapply(processOutput, names)), 
+            sep = sep
+        )
         # Unlist down one level:
         processOutput <- unlist(processOutput, recursive = FALSE)
         # Add the names again:
@@ -6458,6 +6521,7 @@ unlistOneStep <- function(processOutput, sep = "_", validOutputDataClasses = get
     
     processOutput
 }
+
 
 # Function to check that all the output elements are of the valid classes:
 areAllValidOutputDataClasses <- function(x, validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses")) {
@@ -6674,7 +6738,10 @@ getOutputDepthOne <- function(outputDataOne) {
             stop("StoX: Process output must be a list of objects defined by getRstoxFrameworkDefinitions(\"validOutputDataClasses\"), or a list of such lists (not a list of lists of such lists).")
         }
     }
-    
+    else {
+        warning("outputDataOne is of unsopported class ", paste(class(outputDataOne), collapse = " - "))
+        return(NA)
+    }
     
     return(outputDepth)
 }

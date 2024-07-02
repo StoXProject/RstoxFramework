@@ -804,8 +804,8 @@ readBootstrapDataOne <- function(selectionOneTable, nc, BootstrapID = NA) {
         # Get the DateTime format used by StoX:
         StoxDateTimeFormat <- RstoxData::getRstoxDataDefinitions("StoxDateTimeFormat")
         StoxTimeZone <- RstoxData::getRstoxDataDefinitions("StoxTimeZone")
-        # Convert to POSIX:
-        table[, DateTime := as.POSIXct(DateTime, format = StoxDateTimeFormat, tz = StoxTimeZone)]
+        # Convert to POSIX (origin = "1970-01-01" used here to support R 4.2 on Windows and Linux):
+        table[, DateTime := as.POSIXct(DateTime, format = StoxDateTimeFormat, tz = StoxTimeZone, origin = "1970-01-01")]
     }
     
     # Add the BootstrapID:

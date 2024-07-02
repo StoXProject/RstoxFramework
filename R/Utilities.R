@@ -1933,7 +1933,7 @@ formatPOSIXAsISO8601 <- function(table, cols = NULL, add = 0, format = "%Y-%m-%d
     if(length(toConvertToCharacter)) {
         for(col in toConvertToCharacter) {
             if(add != 0 && inherits(table[[col]], "POSIXct")) {
-                table[, (col) := format(as.POSIXct(unclass(get(col)) + add), format = format, tz = "UTC")]
+                table[, (col) := format(as.POSIXct(unclass(get(col)) + add, origin = "1970-01-01"), format = format, tz = "UTC")]
             }
             else {
                 table[, (col) := format(get(col), format = format, tz = "UTC")]

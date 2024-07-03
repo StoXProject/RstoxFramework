@@ -2,7 +2,7 @@
 % Please edit documentation in R/resample.R
 \name{bootstrapRDataToNetCDF4}
 \alias{bootstrapRDataToNetCDF4}
-\title{Convert a bootstrap RData file to NetCDF4}
+\title{Convert a bootstrap RData file to NetCDF4. THIS FUNCTION IS NOT FINISHED, AND SHOULD NOT BE!!!}
 \usage{
 bootstrapRDataToNetCDF4(
   bootstrapRDataFile,
@@ -21,5 +21,5 @@ bootstrapRDataToNetCDF4(
 \item{ow}{Logical: If TRUE, overwrite the \code{bootstrapNetCDF4File}.}
 }
 \description{
-Convert a bootstrap RData file to NetCDF4
+Convert a bootstrap RData file to NetCDF4. THIS FUNCTION IS NOT FINISHED, AND SHOULD NOT BE!!!
 }

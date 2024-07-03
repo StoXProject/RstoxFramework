@@ -1,168 +1,3 @@
-renameResampleFunctionInBootstrapMethodTableOne <- function(projectDescriptionOne, oldName, newName) {
-    # Find any use of the ResampleBioticAssignment resampling function:
-    hasOldName <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == oldName)
-    if(any(hasOldName)) {
-        atOldName <- which(hasOldName)
-        for(ind in atOldName) {
-            projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- newName
-        }
-    }
-    
-    return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
-}
-
-renameResampleFunctionInBootstrapMethodTable <- function(projectDescriptionOne, oldName, newName) {
-    if(length(oldName) != length(newName)) {
-        stop("oldName and newName must have equal length!")
-    }
-    for(ind in seq_along(oldName)) {
-        projectDescriptionOne$functionParameters$BootstrapMethodTable <- renameResampleFunctionInBootstrapMethodTableOne(
-            projectDescriptionOne = projectDescriptionOne, 
-            oldName = oldName[ind], 
-            newName = newName[ind]
-        )
-    }
-    
-    return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
-}
-
-
-# Backward compabitibility actions. These need not to be exported as is the case for any other Rstox-packages, since RstoxFramework is the package that collects the backwardCompatibility objects:
-backwardCompatibility <- list(
-    renameAttribute = list(
-        list(
-            changeVersion = "1.2.39", 
-            attributeName = "OfficalRstoxPackageVersion", 
-            newAttributeName = "CertifiedRstoxPackageVersion"
-        ), 
-        list(
-            changeVersion = "1.2.39", 
-            attributeName = "AllOfficialRstoxPackageVersion", 
-            newAttributeName = "AllCertifiedRstoxPackageVersion"
-        )
-    ), 
-    
-    addAttribute = list(
-        list(
-            changeVersion = "1.2.39", 
-            attributeName = "OfficialRstoxFrameworkVersion", 
-            attributeValue = FALSE
-        )
-    ), 
-    
-    removeParameter = list(
-        list(
-            changeVersion = "3.6.3-9007", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "BootstrapReportWeightingVariable"
-        )
-    ),  
-    
-    addParameter  = list(
-        list(
-            changeVersion = "3.0.19", 
-            functionName = "Bootstrap", 
-            modelName = "analysis", 
-            parameterName = "BaselineSeedTable", 
-            parameterValue = data.table::data.table(
-                ProcessName = "ImputeSuperIndividuals", 
-                Seed = 1
-            )
-        ), 
-        list(
-            changeVersion = "3.5.2", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "TargetVariableUnit"
-        ), 
-        list(
-            changeVersion = "3.6.0-9003", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "Percentages", 
-            parameterValue = c(5, 50, 95)
-        ), 
-        list(
-            changeVersion = "3.6.3-9004", 
-            functionName = "Bootstrap", 
-            modelName = "analysis", 
-            parameterName = "OutputVariables"
-        ), 
-        list(
-            changeVersion = "3.6.3-9007", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "ConditionOperator"
-        ), 
-        list(
-            changeVersion = "3.6.3-9007", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "ConditionValue"
-        ), 
-        list(
-            changeVersion = "3.6.3-9007", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "FractionOverVariable"
-        )
-    ), 
-    
-    renameParameter = list(
-        list(
-            changeVersion = "3.6.3-9007", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "AggregationWeightingVariable",
-            newParameterName = "WeightingVariable"
-        ),
-        list(
-            changeVersion = "3.6.3-9007", 
-            functionName = "ReportBootstrap", 
-            modelName = "report", 
-            parameterName = "AggregationFunction",
-            newParameterName = "ReportFunction"
-        )
-    ), 
-    
-    translateParameter = list(
-        list(
-            changeVersion = "3.6.3-9001", 
-            functionName = "Bootstrap", 
-            modelName = "analysis", 
-            parameterName = "BootstrapMethodTable",
-            # Multiple values must be given in a list!!! Also if only :
-            value = function(value) {
-                TRUE # Translate regardless of the value.
-            }, 
-            newValue = function(projectDescriptionOne) {
-                
-                renameResampleFunctionInBootstrapMethodTable(
-                    projectDescriptionOne, 
-                    oldName = "ResampleBioticAssignment", 
-                    newName = "ResampleBioticAssignmentByStratum"
-                )
-                ## Find any use of the ResampleBioticAssignment resampling function:
-                #hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
-                #if(any(hasResampleBioticAssignment)) {
-                #    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
-                #    for(ind in atResampleBioticAssignment) {
-                #        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
-                #    }
-                #}
-                
-                #return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
-            }
-        )
-    )
-)
-
-
-
-
-
-
 
 # The main function to apply the backward compatibility (BWC) actions:
 applyBackwardCompatibility <- function(projectDescription, verbose = FALSE) {
@@ -463,7 +298,11 @@ applyAddParameter <- function(action, projectDescription, packageName, verbose =
         
         # Add the function parameter as function...:
         if(is.function(action$parameterValue)) {
-            valueToAdd <- action$parameterValue(projectDescription[[action$modelName]][[ind]])
+            valueToAdd <- action$parameterValue(
+                projectDescription, 
+                modelName = action$modelName, 
+                processIndex = ind
+            )
         }
         # Or as a single value:
         else {
@@ -493,8 +332,10 @@ applyTranslateParameter <- function(action, projectDescription, packageName, ver
     for(ind in atFunctionName) {
         # Only relevant for function parameters, as function inputs are without possible values:
         # Remove any relevant function parameter: 
-        projectDescription[[action$modelName]][[ind]] <- translateParameterInOneProcess(
-            projectDescriptionOne = projectDescription[[action$modelName]][[ind]], 
+        projectDescription <- translateParameterInOneProcess(
+            projectDescription = projectDescription, 
+            modelName = action$modelName, 
+            processIndex = ind, 
             action = action, 
             verbose = verbose
         )
@@ -503,29 +344,34 @@ applyTranslateParameter <- function(action, projectDescription, packageName, ver
     return(projectDescription)
 }
 
-translateParameterInOneProcess <- function(projectDescriptionOne, action, verbose = FALSE) {
-    
-    # Possibly add the function parameter using a function:
-    if(is.function(action$newValue)) {
-        action$newValue <- action$newValue(projectDescriptionOne = projectDescriptionOne)
-    }
-    
-    # Print message:
-    if(verbose) {
-        message("StoX: Backward compatibility: Translating parameter '", action$parameterName, "' from '", deparse(action$value), "' to '", action$newValue, "' in process ", projectDescriptionOne$processName, "'", "'")
-    }
+translateParameterInOneProcess <- function(projectDescription, modelName, processIndex, action, verbose = FALSE) {
     
     # Find the parameter to translate:
-    toTranslate <- which(names(projectDescriptionOne$functionParameters) %in% action$parameterName)
+    toTranslate <- which(names(projectDescription[[modelName]][[processIndex]]$functionParameters) %in% action$parameterName)
     
-    # Translate if any to translate:
+    # Translate if tthere is one to translate:
     if(length(toTranslate) == 1) {
-        if(matchParameter(projectDescriptionOne$functionParameters[[toTranslate]], action$value)) {
+        # Possibly add the function parameter using a function:
+        if(is.function(action$newValue)) {
+            action$newValue <- action$newValue(
+                projectDescription = projectDescription, 
+                modelName = modelName,
+                processIndex = processIndex
+            )
+        }
+        
+        # Print message:
+        if(verbose) {
+            message("StoX: Backward compatibility: Translating parameter '", action$parameterName, "' from '", deparse(action$value), "' to '", action$newValue, "' in process ", projectDescription[[modelName]][[processIndex]]$processName, "'", "'")
+        }
+        
+        if(matchParameter(projectDescription[[modelName]][[processIndex]]$functionParameters[[toTranslate]], action$value)) {
             # Translate the parameter:
-            projectDescriptionOne$functionParameters[[toTranslate]] <- action$newValue
+            projectDescription[[modelName]][[processIndex]]$functionParameters[[toTranslate]] <- action$newValue
         }
     }
-    return(projectDescriptionOne)
+    
+    return(projectDescription)
 }
 
 
@@ -562,13 +408,15 @@ applyReshapeParameter <- function(action, projectDescription, packageName, verbo
     for(ind in atFunctionName) {
         
         if(verbose && length(atFunctionName)) {
-            message("StoX: Backward compatibility: Reshaping function parameter '", action$parameterName, "' in             process '", projectDescription[[action$modelName]][[ind]]$processName, "'")
+            message("StoX: Backward compatibility: Reshaping function parameter '", action$parameterName, "' in process '", projectDescription[[action$modelName]][[ind]]$processName, "'")
         }
         
-        # Rename any relevant process data column: 
-        projectDescription[[action$modelName]][[ind]] <- reshapeParameter(
-            projectDescription[[action$modelName]][[ind]], 
-            action, 
+        # Reshape any relevant parameter: 
+        projectDescription <- reshapeParameter(
+            projectDescription = projectDescription, 
+            modelName = action$modelName, 
+            processIndex = ind, 
+            action = action, 
             verbose = verbose
         )
     }
@@ -576,20 +424,32 @@ applyReshapeParameter <- function(action, projectDescription, packageName, verbo
     return(projectDescription)
 }
 
-reshapeParameter <- function(projectDescriptionOne, action, verbose = FALSE) {
-    # Reshape if the parameter is present
-    if(action$parameterName %in% names(projectDescriptionOne$functionParameters)) {
-        # Apply the reshape function:
+reshapeParameter <- function(projectDescription, modelName, processIndex, action, verbose = FALSE) {
+    
+    # Find the parameter to reshape:
+    toReshape <- which(names(projectDescription[[modelName]][[processIndex]]$functionParameters) %in% action$parameterName)
+    
+    # Translate if tthere is one to translate:
+    if(length(toReshape) == 1) {
+        # Possibly add the function parameter using a function:
         if(is.function(action$newValue)) {
-            projectDescriptionOne <- action$newValue(projectDescriptionOne)
+            action$newValue <- action$newValue(
+                projectDescription = projectDescription, 
+                modelName = modelName,
+                processIndex = processIndex
+            )
         }
-        # Or insert a value directl
-        else {
-            projectDescriptionOne$functionParameters[[action$parameterName]] <- action$newValue
+        
+        # Print message:
+        if(verbose) {
+            message("StoX: Backward compatibility: Reshaping parameter '", action$parameterName, "' in process ", projectDescription[[modelName]][[processIndex]]$processName, "'", "'")
         }
+        
+        # Reshape the parameter:
+        projectDescription[[modelName]][[processIndex]]$functionParameters[[toReshape]] <- action$newValue
     }
     
-    return(projectDescriptionOne)
+    return(projectDescription)
 }
 
 
@@ -609,7 +469,7 @@ applyRenameProcessData <- function(action, projectDescription, packageName, verb
             message("StoX: Backward compatibility: Renaming process data '", action$processDataName, "' to '", action$newProcessDataName, "' in process '", projectDescription[[action$modelName]][[ind]]$processName, "'")
         }
         
-        # Rename any relevant function parameter: 
+        # Rename any relevant process data: 
         projectDescription[[action$modelName]][[ind]]$processData <- renameProcessDataInOneProcess(
             projectDescription[[action$modelName]][[ind]]$processData, 
             action, 
@@ -727,6 +587,8 @@ applyReshapeProcessData <- function(action, projectDescription, packageName, ver
         # Reshape any relevant process data column: 
         projectDescription[[action$modelName]][[ind]] <- reshapeProcessData(
             projectDescription[[action$modelName]][[ind]], 
+            modelName = action$modelName, 
+            processIndex = ind, 
             action, 
             verbose = verbose
         )
@@ -735,14 +597,32 @@ applyReshapeProcessData <- function(action, projectDescription, packageName, ver
     return(projectDescription)
 }
 
-reshapeProcessData <- function(projectDescriptionOne, action, verbose = FALSE) {
-    # Reshape if the processData table column has the old name:
-    if(action$processDataName %in% names(projectDescriptionOne$processData)) {
-        # Apply the reshape function:
-        projectDescriptionOne <- action$newProcessData(projectDescriptionOne)
+reshapeProcessData <- function(projectDescription, modelName, processIndex, action, verbose = FALSE) {
+    
+    # Find the parameter to reshape:
+    toReshape <- which(names(projectDescription[[modelName]][[processIndex]]$processData) %in% action$processDataName)
+    
+    # Translate if tthere is one to translate:
+    if(length(toReshape) == 1) {
+        # Possibly add the function parameter using a function. This assumes the reshaping function knows the structure of the processData and reshapes the approprite elements:
+        if(is.function(action$newProcessData)) {
+            action$newProcessData <- action$newProcessData(
+                projectDescription = projectDescription, 
+                modelName = modelName,
+                processIndex = processIndex
+            )
+        }
+        
+        # Print message:
+        if(verbose) {
+            message("StoX: Backward compatibility: Reshaping processData '", action$processDataName, "' in process ", projectDescription[[modelName]][[processIndex]]$processDataName, "'", "'")
+        }
+        
+        # Do the reshaping:
+        projectDescription[[modelName]][[processIndex]]$processData[[toReshape]] <- action$newProcessData
     }
     
-    return(projectDescriptionOne)
+    return(projectDescription)
 }
 
 #applySplitFunction <- function(action, projectDescription, packageName, verbose = FALSE) {

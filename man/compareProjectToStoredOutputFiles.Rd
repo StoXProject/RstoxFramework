@@ -11,17 +11,21 @@ compareProjectToStoredOutputFiles(
   intersect.names = TRUE,
   ignore.variable = NULL,
   ignore.process = NULL,
+  ignore.process.variable = NULL,
   skipNAFraction = FALSE,
-  skipNAAt = FALSE,
+  skipNAAt = NULL,
   NAReplacement = NULL,
   ignoreEqual = FALSE,
   classOf = c("first", "second"),
   try = TRUE,
   data.out = FALSE,
-  mergeWhenDifferentNumberOfRows = FALSE,
   sort = TRUE,
   compareReports = FALSE,
   checkOutputFiles = TRUE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = TRUE,
   tolerance = sqrt(.Machine$double.eps),
   debug = FALSE,
   save = FALSE,
@@ -39,13 +43,15 @@ compareProjectToStoredOutputFiles(
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
-\item{ignore.variable}{A vector of names of variables/columns to ignore in the comparison.}
+\item{ignore.variable}{Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).}
 
 \item{ignore.process}{A vector of names of processes to ignore in the comparison.}
 
-\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
+\item{ignore.process.variable}{A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth"))}
 
-\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip.}
+\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.}
+
+\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.}
 
 \item{NAReplacement}{List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.}
 
@@ -57,13 +63,19 @@ compareProjectToStoredOutputFiles(
 
 \item{data.out}{Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.}
 
-\item{mergeWhenDifferentNumberOfRows}{Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.}
-
 \item{sort}{Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.}
 
 \item{compareReports}{Logical, if TRUE compare the report specifically (old method kept for robustness).}
 
 \item{checkOutputFiles}{Logical, if TRUE compare the file names of the output files.}
+
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
 
 \item{tolerance}{The tolerance to use in all.equal.}
 

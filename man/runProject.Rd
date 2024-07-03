@@ -23,6 +23,10 @@ runProject(
   setUseProcessDataToTRUE = TRUE,
   purge.processData = FALSE,
   returnModelData = TRUE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = FALSE,
   try = TRUE,
   close = FALSE,
   unlist.models = TRUE,
@@ -66,6 +70,14 @@ runProject(
 \item{purge.processData}{Logical: If TRUE replace process data entirely.}
 
 \item{returnModelData}{Logical: If TRUE return the output of the model runs. Can also be given as a string vector holding the names of the models to return data from. If TRUE, the specific models to return data from (across models) can be given by \code{processes}.}
+
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 

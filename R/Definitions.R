@@ -169,15 +169,211 @@ initiateRstoxFramework <- function(){
         "reshapeProcessData" # 11
     )
     
-    # Get the backward compatibility:
-    backwardCompatibility <- lapply(officialStoxLibraryPackagesAll, getBackwardCompatibility)
-    names(backwardCompatibility) <- officialStoxLibraryPackagesAll
+    renameResampleFunctionInBootstrapMethodTableOne <- function(projectDescriptionOne, oldName, newName) {
+        # Find any use of the ResampleBioticAssignment resampling function:
+        hasOldName <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == oldName)
+        if(any(hasOldName)) {
+            atOldName <- which(hasOldName)
+            for(ind in atOldName) {
+                projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- newName
+            }
+        }
+        
+        return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+    }
     
-    # Add pakcageName to all elements:
-    for(pakcageName in names(backwardCompatibility)) {
-        for(actionType in names(backwardCompatibility[[pakcageName]])) {
-            if(length(backwardCompatibility[[pakcageName]][[actionType]])) {
-                backwardCompatibility[[pakcageName]][[actionType]] <- lapply(backwardCompatibility[[pakcageName]][[actionType]], append, list(pakcageName = pakcageName))
+    renameResampleFunctionInBootstrapMethodTable <- function(projectDescriptionOne, oldName, newName) {
+        if(length(oldName) != length(newName)) {
+            stop("oldName and newName must have equal length!")
+        }
+        for(ind in seq_along(oldName)) {
+            projectDescriptionOne$functionParameters$BootstrapMethodTable <- renameResampleFunctionInBootstrapMethodTableOne(
+                projectDescriptionOne = projectDescriptionOne, 
+                oldName = oldName[ind], 
+                newName = newName[ind]
+            )
+        }
+        
+        return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+    }
+    
+    #getOutputVariablesUsedInReportFromProjectDescription <- function(projectDescription, modelName, processIndex) {
+    #    # The report parameters to get variable names from:
+    #    parameters <- c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable")
+    #    variableNames <- unique(unlist(lapply(lapply(projectDescription$report, "[[", "functionParameters"), "[", parameters)))
+    #    
+    #    processName <- projectDescription[[modelName]][[processIndex]]$processName
+    #    if(length(variableNames)) {
+    #        warning("StoX: The process ", processName, " gained the parameter OutputVariables with value", if(length(variableNames) > 1) "s", " ", paste0("\"", variableNames, "\"", collapse = ", "), " in order to speed up the process. If other variables than these are needed in reports, they must be added in the OutputVariables.")
+    #    }
+    #    
+    #    return(variableNames)
+    #}
+    
+    getEmptyOutputVariables <- function(projectDescription, modelName, processIndex) {
+        
+        parameters <- c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable")
+        variableNames <- unique(unlist(lapply(lapply(projectDescription$report, "[[", "functionParameters"), "[", parameters)))
+        processName <- projectDescription[[modelName]][[processIndex]]$processName
+        
+        
+        warning("StoX: The process ", processName, " has gained the parameter OutputVariables. It is recommended to use this parameter to save time and disk space! Existing StoX projects with bootstrapping may be slower in StoX >= 4.0.0 compared to StoX <= 3.6.2 if OutputVaribles is not used.", if(length(variableNames)) paste0(" The following variables are used in the Report model, and should at least be included in OutputVariables: ",  paste0("\"", variableNames, "\"", collapse = ", ") ) )
+        
+        return(NULL)
+    }
+    
+    
+    
+    #### Backward compabitibility actions. These need not to be exported as is the case for any other Rstox-packages, since RstoxFramework is the package that collects the backwardCompatibility objects:
+    backwardCompatibility_RstoxFramework <- list(
+        renameAttribute = list(
+            list(
+                changeVersion = "1.2.39", 
+                attributeName = "OfficalRstoxPackageVersion", 
+                newAttributeName = "CertifiedRstoxPackageVersion"
+            ), 
+            list(
+                changeVersion = "1.2.39", 
+                attributeName = "AllOfficialRstoxPackageVersion", 
+                newAttributeName = "AllCertifiedRstoxPackageVersion"
+            )
+        ), 
+        
+        addAttribute = list(
+            list(
+                changeVersion = "1.2.39", 
+                attributeName = "OfficialRstoxFrameworkVersion", 
+                attributeValue = FALSE
+            )
+        ), 
+        
+        removeParameter = list(
+            list(
+                changeVersion = "3.6.3-9007", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "BootstrapReportWeightingVariable"
+            )
+        ),  
+        
+        addParameter  = list(
+            list(
+                changeVersion = "3.0.19", 
+                functionName = "Bootstrap", 
+                modelName = "analysis", 
+                parameterName = "BaselineSeedTable", 
+                parameterValue = data.table::data.table(
+                    ProcessName = "ImputeSuperIndividuals", 
+                    Seed = 1
+                )
+            ), 
+            list(
+                changeVersion = "3.5.2", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "TargetVariableUnit"
+            ), 
+            list(
+                changeVersion = "3.6.0-9003", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "Percentages", 
+                parameterValue = c(5, 50, 95)
+            ), 
+            list(
+                changeVersion = "3.6.3-9004", 
+                functionName = "Bootstrap", 
+                modelName = "analysis", 
+                parameterName = "OutputVariables",
+                parameterValue = getEmptyOutputVariables
+            ), 
+            list(
+                changeVersion = "3.6.3-9007", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "ConditionOperator"
+            ), 
+            list(
+                changeVersion = "3.6.3-9007", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "ConditionValue"
+            ), 
+            list(
+                changeVersion = "3.6.3-9007", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "FractionOverVariable"
+            )
+        ), 
+        
+        renameParameter = list(
+            list(
+                changeVersion = "3.6.3-9007", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "AggregationWeightingVariable",
+                newParameterName = "WeightingVariable"
+            ),
+            list(
+                changeVersion = "3.6.3-9007", 
+                functionName = "ReportBootstrap", 
+                modelName = "report", 
+                parameterName = "AggregationFunction",
+                newParameterName = "ReportFunction"
+            )
+        ), 
+        
+        translateParameter = list(
+            list(
+                changeVersion = "3.6.3-9001", 
+                functionName = "Bootstrap", 
+                modelName = "analysis", 
+                parameterName = "BootstrapMethodTable",
+                # Multiple values must be given in a list!!! Also if only :
+                value = function(value) {
+                    TRUE # Translate regardless of the value.
+                }, 
+                newValue = function(projectDescription, modelName, processIndex) {
+                    
+                    renameResampleFunctionInBootstrapMethodTable(
+                        projectDescription[[modelName]][[processIndex]], 
+                        oldName = "ResampleBioticAssignment", 
+                        newName = "ResampleBioticAssignmentByStratum"
+                    )
+                    ## Find any use of the ResampleBioticAssignment resampling function:
+                    #hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
+                    #if(any(hasResampleBioticAssignment)) {
+                    #    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
+                    #    for(ind in atResampleBioticAssignment) {
+                    #        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
+                    #    }
+                    #}
+                    
+                    #return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+                }
+            )
+        )
+    )
+    ####
+    
+    # Get the backward compatibility:
+    backwardCompatibility <- lapply(officialStoxLibraryPackages, getBackwardCompatibility)
+    #rm(
+    #    renameResampleFunctionInBootstrapMethodTableOne, 
+    #    renameResampleFunctionInBootstrapMethodTable, 
+    #    getEmptyOutputVariables
+    #)
+    names(backwardCompatibility) <- officialStoxLibraryPackages
+    # Add the backwardCompatibility_RstoxFramework:
+    backwardCompatibility$RstoxFramework <- backwardCompatibility_RstoxFramework
+    
+    
+    # Add packageName to all elements:
+    for(packageName in names(backwardCompatibility)) {
+        for(actionType in names(backwardCompatibility[[packageName]])) {
+            if(length(backwardCompatibility[[packageName]][[actionType]])) {
+                backwardCompatibility[[packageName]][[actionType]] <- lapply(backwardCompatibility[[packageName]][[actionType]], append, list(packageName = packageName))
             }
         }
     }
@@ -969,14 +1165,22 @@ getRstoxFrameworkDefinitions <- function(name = NULL, ...) {
 
 # Function for reading the backwardCompatibility object of a package.
 getBackwardCompatibility <- function(packageName) {
-    if(packageName != "RstoxFramework") {
-        backwardCompatibility <- tryCatch(
-            getExportedValue(packageName, "backwardCompatibility"), 
+    output <- tryCatch(
+        {
+            getExportedValue(packageName, "backwardCompatibility")
+        }, 
+        error = function(err) NULL
+    )
+    if(!length(output)) {
+        output <- tryCatch(
+            {
+                getExportedValue(packageName, paste("backwardCompatibility", packageName, sep = "_"))
+            }, 
             error = function(err) NULL
         )
     }
     
-    backwardCompatibility
+    return(output)
 }
 
 

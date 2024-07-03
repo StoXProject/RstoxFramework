@@ -28,11 +28,11 @@ compareProjectToStoredOutputFilesAll(
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
-\item{ignore.variable}{A vector of names of variables/columns to ignore in the comparison.}
+\item{ignore.variable}{Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).}
 
-\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
+\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.}
 
-\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip.}
+\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.}
 
 \item{NAReplacement}{List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.}
 
@@ -42,7 +42,7 @@ compareProjectToStoredOutputFilesAll(
 
 \item{data.out}{Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.}
 
-\item{...}{\code{replaceArgsList} can also be given directly.}
+\item{...}{Arguments passed to \code{\link{readBootstrapData}}, e.g. \code{selection}, which must be set to NA to read the entire file.}
 }
 \description{
 Function for comparing existing output files with the memory read using runProject()

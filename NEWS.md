@@ -1,3 +1,14 @@
+# RstoxFramework v3.6.3-9011 (2024-07-02)
+* Added the arguments returnBootstrapData, selection, BootstrapID and unlistSingleTable in getModelData(), which can be used to return (a subset) of the actual bootstrap data, and not only the path to the bootstrap NetCDF4 file.
+* Fixed the problem of truncated time steps when writing bootstrap data to NetCDF4 file, due to R's awkward bug with formatting POSIXct objects (the last decimal trucated).
+* Renamed backwardCompatibility to backwardCompatibility_RstoxFramework (and the same in the other Rstox-packages) in order ot avoid clashed with the backwardCompatibility object in other Rstox-packages.
+* Added warning when openProject() informing the used about the OutputVariables argument in Bootstrap().
+*  Fixed bug where existing bootstrap data was deleted even when UseOutputData = TRUE.
+* Improved compareProjectToStoredOutputFiles() to work with comparing bootstrap data, and got rid of the argument mergeWhenDifferentNumberOfRows by applying merge automatically. 
+*  Fixed bug which made some plotting functions failing seemingly randomly, by no longer setting precision in plot functions.
+* Temporarily disabled the tests test-export_ICESAcoustic.R and test-export_ICESbiotic.R due to problems at ICES. 
+
+
 # RstoxFramework v3.6.3-9010 (2024-05-28)
 * Renamed "Function" to "Function name" in the GUI.
 * Added "Survey" and "SpeciesCategory" as GroupingVariables in ReportBootstrap().
@@ -230,7 +241,8 @@ strapping.
 
 # RstoxFramework v3.4.4 (2022-08-07)
 * Added optional validation of the project.jsos in readProjectDescription(). 
-* Added options to compareProjectToStoredOutputFiles() (setNATo0 replaecd by NAReplacement, ignoreEqual to ignore columns where all values are equal, mergeWhenDifferentNumberOfRows to use all.equal_mergeIfDifferentNumberOfRows instead of all.equal, and sort to sort the tables). 
+* Added options to compareProjectToStoredOutputFiles() (setNATo0 replaecd by NAReplacement, ignoreEqual to ignore columns where all values are equal, mergeWhenDifferentNumberOfRows to use all_equal_mergeIfDifferentNumberOfRows
+instead of all.equal, and sort to sort the tables). 
 * Added the diffData as output from compareProjectToStoredOutputFiles() to assist identifying the diffs.
 
 

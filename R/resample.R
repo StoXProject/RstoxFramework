@@ -53,7 +53,7 @@ Bootstrap <- function(
                         #  ... with a message:
                         #warning(
                         #    "An old bootstrap RData file was found and coverted to a NetCDF4 file fitted for StoX >= 4.0.0. This operation is usually time cosuming, and lasted for ", timeUsed[[3]], " seconds.")
-                        stop("A bootstra output file produced with StoX <= 3.6.2 (RData file) exists, but this file is not compatible with StoX >= 4.0.0. Please re-run the Bootstrap process.")
+                        stop("A bootstrap output file produced with StoX <= 3.6.2 (RData file) exists, but this file is not compatible with StoX >= 4.0.0 (nc file). Please re-run the Bootstrap process.")
                     }
                     else {
                         stop("The file ", outputData, " does not exist. Please re-run the Bootstrap process.")

@@ -606,7 +606,7 @@ closeProject <- function(
             )
         }
         else if(!isFALSE(save) && !isSaved(projectPath)) {
-            answer <- readline(paste("The project", projectPath, "has not been saved.\nDo you with to save before closing (y/n)?"))
+            answer <- readline(paste("The project", projectPath, "has not been saved.\nDo you wish to save before closing (y/n)?"))
             if(identical(tolower(answer), "y")) {
                 saveProject(
                     projectPath, 
@@ -922,13 +922,15 @@ isProjectOne <- function(projectPath) {
         files <- utils::unzip(projectPath, list = TRUE)
         projectName <- basename(tools::file_path_sans_ext(projectPath))
         projectNameWithSlash <- paste0(projectName, "/")
-        if(!projectNameWithSlash %in% files$Name) {
-            stop("A zipped StoX project must be a zip with the same name as the project contained in the zip (excluding file extension), such as testProject.zip for a project named testProject.")
+        if(!any(grepl(projectNameWithSlash, files$Name))) {
+            warning("The zipped StoX project (", projectName, ") must be a zip with the same name as the project contained in the zip (excluding file extension), such as testProject.zip for a project named testProject.")
+            valid <- FALSE
         }
         else {
             stoxFolders <- unlist(getRstoxFrameworkDefinitions("stoxFoldersList"))
             stoxFoldersWithSlash <- paste0(projectNameWithSlash, stoxFolders, "/")
-            valid <- all(stoxFoldersWithSlash %in% files$Name)
+            #valid <- all(stoxFoldersWithSlash %in% files$Name)
+            valid <- all(sapply(lapply(stoxFoldersWithSlash,  grepl, files$Name), any))
         }
     }
     else {

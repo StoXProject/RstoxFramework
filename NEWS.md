@@ -1,3 +1,10 @@
+# RstoxFramework v3.6.3-9012 (2024-07-08)
+* Last pre-release before StoX 4.0.0 (jumping 3.6.3), including improvements to compareProjectToStoredOutputFiles() implemented while making all example projects on https://github.com/StoXProject/StoXExamples pass.
+* Added tablesCompared and tablesNotCompared to the output of compareProjectToStoredOutputFiles().
+* Changed unzipProject() to keep times of the files when unzipping.
+* Moved "addParameter" to be before "removeParameter" and "renameParameter" as backwaards compatibility actions.
+
+
 # RstoxFramework v3.6.3-9011 (2024-07-02)
 * Added the arguments returnBootstrapData, selection, BootstrapID and unlistSingleTable in getModelData(), which can be used to return (a subset) of the actual bootstrap data, and not only the path to the bootstrap NetCDF4 file.
 * Fixed the problem of truncated time steps when writing bootstrap data to NetCDF4 file, due to R's awkward bug with formatting POSIXct objects (the last decimal trucated).

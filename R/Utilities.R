@@ -746,7 +746,7 @@ unzipProject <- function(projectPath, exdir = ".") {
         stop("The zip ", projectPath, " does not contain a valid StoX project at the root folder.")
     }
     
-    utils::unzip(projectPath, exdir = exdir)
+    utils::unzip(projectPath, exdir = exdir, setTimes = TRUE)
     projectName <- basename(tools::file_path_sans_ext(projectPath))
     unzippedProjectPath <- file.path(exdir, projectName)
     return(unzippedProjectPath)
@@ -795,7 +795,7 @@ compareProjectToStoredOutputFiles <- function(
     sort = TRUE, 
     compareReports = FALSE, checkOutputFiles = TRUE, 
     returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, 
-    tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
+    tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, verbose = FALSE, 
     ...
 ) {
     
@@ -813,10 +813,10 @@ compareProjectToStoredOutputFiles <- function(
     
     
     # Open the project:
-    openProject(projectPath_copy)
+    openProject(projectPath_copy, verbose = verbose)
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
     #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, msg = FALSE, returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, ...)
+    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, ...)
     
     
     # Read the original data:
@@ -866,10 +866,26 @@ compareProjectToStoredOutputFiles <- function(
     data_equal <- list()
     diffData <- list()
     
+    if(debug) {
+        browser()
+    }
+    
+    
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
+    
+    tablesCompared <- list()
+    tablesNotCompared <- list()
+    
     for(name in processesToCheck) {
         data_equal[[name]] <- list()
         for(subname in names(dat_orig[[name]])) {
+            if(length(dat[[name]][[subname]])) {
+                tablesCompared[[name]] <- append(tablesCompared[[name]], subname)
+            }
+            else {
+                tablesNotCompared[[name]] <- append(tablesNotCompared[[name]], subname)
+            }
+            
             if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
                 if(intersect.names) {
                     intersectingNames <- intersect(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
@@ -932,11 +948,6 @@ compareProjectToStoredOutputFiles <- function(
     unlistDiff <- function(x) {
         unlist(x)[!unlist(x) == "TRUE"]
     }
-    
-    if(debug) {
-        browser()
-    }
-    
     
     diffWarning <- function(x) {
         x_info <- unlistDiff(x)
@@ -1006,6 +1017,8 @@ compareProjectToStoredOutputFiles <- function(
     }
     
     out <- lapply(allTests, formatDiffs)
+    out$tablesCompared <- tablesCompared
+    out$tablesNotCompared <- tablesNotCompared
     
      
     if(data.out) {
@@ -1137,7 +1150,6 @@ getListOfXYByMerging <- function(
             # Get the additional rows we get when changing from all = FALSE to all = TRUE: 
             mergedPlus <- mergedAll[!merged, on = keys]
             
-            
             # Split into x and y again:
             xy <- splitMergedTable(merged, keys = keys, names = c("x", "y"))
             xyPlus <- splitMergedTable(mergedPlus, keys = keys, names = c("x", "y"))
@@ -1183,12 +1195,25 @@ subsetByAllEqual <- function(xy, keys) {
 }
 
 splitMergedTable <- function(DT, keys, names = c("x", "y")) {
-    keyTable <- DT[, keys, with = FALSE]
-    data1 <- getColumnsEndingWith(DT, paste0(".", names[1]), fill = TRUE, stripSuffixInNames = TRUE)
-    data2 <- getColumnsEndingWith(DT, paste0(".", names[2]), fill = TRUE, stripSuffixInNames = TRUE)
-    x <- cbind(keyTable, data1)
-    y <- cbind(keyTable, data2)
-    out <- list(x = x,  y = y)
+    # If all columns are keys, both x and y are equal:
+    if(length(keys) == ncol(DT)) {
+        out <- list(
+            x = DT,  
+            y = DT
+        )
+    }
+    else {
+        keyTable <- DT[, keys, with = FALSE]
+        data1 <- getColumnsEndingWith(DT, paste0(".", names[1]), fill = TRUE, stripSuffixInNames = TRUE)
+        data2 <- getColumnsEndingWith(DT, paste0(".", names[2]), fill = TRUE, stripSuffixInNames = TRUE)
+        x <- cbind(keyTable, data1)
+        y <- cbind(keyTable, data2)
+        out <- list(
+            x = x,  
+            y = y
+        )
+    }
+    
     return(out)
 }
 

@@ -31,6 +31,7 @@ compareProjectToStoredOutputFiles(
   save = FALSE,
   check.columnNames_identical = FALSE,
   testAllTRUE = FALSE,
+  verbose = FALSE,
   ...
 )
 }
@@ -86,6 +87,8 @@ compareProjectToStoredOutputFiles(
 \item{check.columnNames_identical}{Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.}
 
 \item{testAllTRUE}{Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.}
+
+\item{verbose}{Logical: If TRUE extra messages are printed to console.}
 
 \item{...}{Used in runModel().}
 }

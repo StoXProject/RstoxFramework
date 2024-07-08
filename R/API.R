@@ -617,11 +617,31 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, ...) {
     }
     else if(tolower(ext) %in% c("json", "geojson")) {
         # Use DefineStratumPolygon from RstoxBase:
-        output <- RstoxBase::DefineStratumPolygon(
-            DefinitionMethod = "ResourceFile", 
-            FileName = path, 
-            StratumNameLabel = "StratumName"
+        output <- tryCatch(
+            RstoxBase::DefineStratumPolygon(
+                DefinitionMethod = "ResourceFile", 
+                FileName = path, 
+                StratumNameLabel = "StratumName"
+            ), 
+            error = function(e) {
+                NULL
+            }
         )
+        if(!length(output)) {
+            output <- tryCatch(
+                RstoxBase::DefineStratumPolygon(
+                    DefinitionMethod = "ResourceFile", 
+                    FileName = path, 
+                    StratumNameLabel = "polygonName"
+                ), 
+                error = function(e) {
+                    NULL
+                }
+            )
+        }
+        if(!length(output)) {
+            stop("The existing output file from the DefineStratumPolygon process is no longer compatible (tried both StratumNameLabel = \"StratumName\" and \"polygonName\")")
+        }
     }
     else if(tolower(ext) %in% "txt") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:

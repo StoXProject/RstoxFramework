@@ -159,9 +159,9 @@ initiateRstoxFramework <- function(){
         "renameAttribute", # 1
         "addAttribute", # 2
         "renameFunction", # 3
+        "addParameter", # 6
         "removeParameter", # 4
         "renameParameter", # 5
-        "addParameter", # 6
         "translateParameter", # 7
         "reshapeParameter", # 8
         "renameProcessData", # 9

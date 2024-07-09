@@ -1,8 +1,12 @@
+# RstoxFramework v4.0.0 (2024-07-09)
+* Final release for StoX 4.0.0.
+
+
 # RstoxFramework v3.6.3-9012 (2024-07-08)
 * Last pre-release before StoX 4.0.0 (jumping 3.6.3), including improvements to compareProjectToStoredOutputFiles() implemented while making all example projects on https://github.com/StoXProject/StoXExamples pass.
 * Added tablesCompared and tablesNotCompared to the output of compareProjectToStoredOutputFiles().
 * Changed unzipProject() to keep times of the files when unzipping.
-* Moved "addParameter" to be before "removeParameter" and "renameParameter" as backwaards compatibility actions.
+* Moved "addParameter" to be before "removeParameter" and "renameParameter" as backwaards compatibility actions, to facilitate adding a parameter with a value depending on existing values.
 
 
 # RstoxFramework v3.6.3-9011 (2024-07-02)

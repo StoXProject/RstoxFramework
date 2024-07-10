@@ -12,7 +12,11 @@ getModelData(
   endProcess = Inf,
   drop.datatype = TRUE,
   warn = TRUE,
-  unlistDepth2 = FALSE
+  unlistDepth2 = FALSE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = FALSE
 )
 }
 \arguments{
@@ -31,6 +35,14 @@ getModelData(
 \item{warn}{Logical: If TRUE show warnings that are not highly important.}
 
 \item{unlistDepth2}{Logical: Related to \code{drop.datatype}, but setting this to TRUE unlists output data that are nested in 2 levels, such as output from \code{\link[RstoxData]{ReadBiotic}}, which outputs a set of tables for each input file. Using unlistDepth2 = TRUE puts all these tables in one list, and uses the concatenation of the file names and the table name separated by underscore. This is how it is displayed in the StoX GUI when selecting "View output".}
+
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
 }
 \description{
 Get output data from processes of a StoX model

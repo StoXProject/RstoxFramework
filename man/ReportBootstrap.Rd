@@ -9,43 +9,50 @@ ReportBootstrap(
   BaselineProcess = character(),
   TargetVariable = character(),
   TargetVariableUnit = character(),
-  AggregationFunction = RstoxBase::getReportFunctions(getMultiple = FALSE),
-  BootstrapReportFunction = RstoxBase::getReportFunctions(getMultiple = TRUE),
-  Percentages = double(),
+  ReportFunction = RstoxBase::getReportFunctions(use = "Baseline"),
   GroupingVariables = character(),
   InformationVariables = character(),
+  WeightingVariable = character(),
+  ConditionOperator = character(),
+  ConditionValue = character(),
+  FractionOverVariable = character(),
+  BootstrapReportFunction = RstoxBase::getReportFunctions(use = "Bootstrap"),
+  Percentages = double(),
   Filter = character(),
   RemoveMissingValues = FALSE,
-  AggregationWeightingVariable = character(),
-  BootstrapReportWeightingVariable = character()
+  AggregationFunction = character()
 )
 }
 \arguments{
-\item{BootstrapData}{The \code{\link{BootstrapData}} data output from \code{\link{Bootstrap}}.}
+\item{BootstrapData}{The \code{\link{BootstrapData}} data.}
 
 \item{BaselineProcess}{A strings naming the baseline process to report from the \code{\link{BootstrapData}}. If a process with}
 
 \item{TargetVariable}{The variable to report.}
 
-\item{TargetVariableUnit}{The unit to use for the \code{TargetVariable}.}
+\item{TargetVariableUnit}{The unit to use for the \code{TargetVariable}. See RstoxData::StoxUnits for possible units (look for the appropriate quantity, e.g. "length" for IndividualTotalLength, and use the shortname in the \code{TargetVariableUnit}).}
 
-\item{AggregationFunction}{The function to apply to each bootstrap run. This must be a function returning a single value.}
-
-\item{BootstrapReportFunction}{The function to apply across bootstrap run, such as "cv" or "c".}
-
-\item{Percentages}{The percentages to report Percentiles for when BootstrapReportFunction = "summaryStox".}
+\item{ReportFunction}{The name of a function to report the Baseline process output by. This must be a function returning a single value. See \code{\link[RstoxBase]{ReportFunctions}} for implemented funcitons.}
 
 \item{GroupingVariables}{The variables to report by. For most applications \code{GroupingVariables} should include "Survey" and "SpeciesCategory", unless the user needs to sum over all Survey or SpeciesCategory.}
 
 \item{InformationVariables}{Variables to include as columns to the end of the report table. These cannot have more unique combinations than the \code{GroupingVariables}.}
 
+\item{WeightingVariable}{The variable to weight by. Only relevant for \code{ReportFunction} "weighted.mean". Note that missing values in the \code{WeightingVariable} results in missing value from the \code{weighted.mean} function as per the documentation of this function, regardles of any \code{RemoveMissingValues}.}
+
+\item{ConditionOperator, ConditionValue}{Expressions (strings) giving the condition for the \code{ReportFunction} \code{number} and \code{fractionOfOccurrence}. Supported values for \code{ConditionOperator} are "\%in\%", "\%notin\%", "==", "!=", "\%notequal\%", "<", "<=", ">=", ">". The \code{ConditionOperator} and \code{ConditionValue} are pasted for use in data.table.}
+
+\item{FractionOverVariable}{When \code{ReportFunction} is a fraction ("fractionOfOccurrence" or "fractionOfSum") \code{FractionOverVariable} is a string naming the variable (one of the \code{GroupingVariables}) to sum over in the denominator of the fraction.}
+
+\item{BootstrapReportFunction}{The function to apply across bootstrap run, such as "cv" or "c".}
+
+\item{Percentages}{The percentages to report Percentiles for when BootstrapReportFunction = "summaryStox".}
+
 \item{Filter}{A string with an R expression to filter out unwanted rows of the report, e.g. "IndividualAge \%notin\% NA" or "Survey \%notin\% NA & SpeciesCategory \%notin\% NA".}
 
 \item{RemoveMissingValues}{Logical: If TRUE, remove missing values (NAs) from the \code{TargetVariable}. The default (FALSE) implies to report NA if at least one of the values used in the \code{ReportFunction} is NA. Use \code{RemoveMissingValues} = TRUE with extreme caution, as it may lead to under-estimation. E.g., if \code{RemoveMissingValues} = TRUE and a super-individual lacks \code{IndividualRoundWeight}, \code{Biomass} will be NA, and the portion of \code{Abundance} distributed to that super-individual will be excluded when summing \code{Biomass} (but included when summing \code{Abundance}). It is advised to always run with \code{RemoveMissingValues} = FALSE first, and make a thorough investigation to identify the source of any missing values. The function \code{link{ImputeSuperIndividuals}} can be used to impute the missing information from other super-individuals.}
 
-\item{AggregationWeightingVariable}{The variable to weight by in the \code{AggregationFunction}.}
-
-\item{BootstrapReportWeightingVariable}{The variable to weight by in the \code{BootstrapReportFunction}.}
+\item{AggregationFunction}{Deprecated, use ReportFunction instead. An alias for \code{ReportFunction}, kept for backward compatibility.}
 }
 \value{
 A \code{\link{ReportBootstrapData}} object.
@@ -54,11 +61,11 @@ A \code{\link{ReportBootstrapData}} object.
 Reports the sum, mean or other statistics on a variable of the \code{\link{BootstrapData}}.
 }
 \details{
-This function works in two steps. First, the \code{AggregationFunction} is applied to the \code{TargetVariable} of the table given by \code{BaselineProcess} for each unique combination of the \code{GroupingVariables} and for each bootstrap run. Second, a grid of all possible combinations of the \code{GroupingVariables} is formed and the result from the first step placed onto the grid. This creates 0 for each position in the grid where data from the first step are not present. E.g., if a particularly large fish is found in only one haul, and this haul by random is not selected in a bootstrap run, the \code{TargetVariable} will be 0 to reflect the variability in the data. To complete the second step, the \code{BootstrapReportFunction} is applied over the bootstrap runs for each cell in the grid.
+This function works in two steps. First, the \code{ReportFunction} is applied to the \code{TargetVariable} of the table given by \code{BaselineProcess} for each unique combination of the \code{GroupingVariables} and for each bootstrap run. Second, a grid of all possible combinations of the \code{GroupingVariables} is formed and the result from the first step placed onto the grid. This creates 0 for each position in the grid where data from the first step are not present. E.g., if a particularly large fish is found in only one haul, and this haul by random is not selected in a bootstrap run, the \code{TargetVariable} will be 0 to reflect the variability in the data. To complete the second step, the \code{BootstrapReportFunction} is applied over the bootstrap runs for each cell in the grid.
 
-The parameter \code{RemoveMissingValues} should be used with extreme caution. The effect of setting \code{RemoveMissingValues} to TRUE is that missing values (NAs) are removed in both the first and second step. This can be dangerous both in the first and in the second step. E.g., if the Abundance of \code{\link{SuperIndividualsData}} is positive for super-individuals with missing IndividualWeight, then the Biomass of those super-individuals will be missing as well. If one the wants to sum the Biomass by using \code{AggregationFunction} = "sum" one will get NA if \code{RemoveMissingValues} = FALSE. If \code{RemoveMissingValues} = TRUE one will ignore the missing Biomass, and the summed Biomass will only include the super-individuals that have non-missing IndividualWeight, effectively discarding a portion of the observed abundance. The summed Biomass will in this case be underestimated!
+The parameter \code{RemoveMissingValues} should be used with extreme caution. The effect of setting \code{RemoveMissingValues} to TRUE is that missing values (NAs) are removed in both the first and second step. This can be dangerous both in the first and in the second step. E.g., if the Abundance of \code{\link[RstoxBase]{SuperIndividualsData}} is positive for super-individuals with missing IndividualWeight, then the Biomass of those super-individuals will be missing as well. If one the wants to sum the Biomass by using \code{ReportFunction} = "sum" one will get NA if \code{RemoveMissingValues} = FALSE. If \code{RemoveMissingValues} = TRUE one will ignore the missing Biomass, and the summed Biomass will only include the super-individuals that have non-missing IndividualWeight, effectively discarding a portion of the observed abundance. The summed Biomass will in this case be underestimated!
 
 In the second step, setting \code{RemoveMissingValues} to TRUE can be even more dangerous, as the only option currently available for the \code{BootstrapReportFunction} is the function RstoxBase::summaryStox(), which includes average and standard deivation which are highly influenced by removing missing data.
 
-Instead of setting \code{RemoveMissingValues} to TRUE, it is advised to apply the function \code{\link{ImputeSuperIndividuals}} to fill in e.g. IndividualWeight where missing. Missing values in the output from \code{\link{ReportBootstrap}} can also be avoided by adding variables to \code{GroupingVariables}, such as adding "Stratum" e.g. if there are strata that are known from Baseline to contain no fish. These strata will then be present but with missing values, but these missing values will not affect other strata if "Stratum" is included in \code{GroupingVariables}. It is also  recommended to include "Survey" and "SpeciesCategory" in the \code{GroupingVariables}, as these are key variables for which summary statistics should rarely be computed across.
+Instead of setting \code{RemoveMissingValues} to TRUE, it is advised to apply the function \code{\link[RstoxBase]{ImputeSuperIndividuals}} to fill in e.g. IndividualWeight where missing. Missing values in the output of this function can also be avoided by adding variables to \code{GroupingVariables}, such as adding "Stratum" e.g. if there are strata that are known from Baseline to contain no fish. These strata will then be present but with missing values, but these missing values will not affect other strata if "Stratum" is included in \code{GroupingVariables}. It is also  recommended to include "Survey" and "SpeciesCategory" in the \code{GroupingVariables}, as these are key variables for which summary statistics should rarely be computed across.
 }

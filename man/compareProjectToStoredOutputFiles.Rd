@@ -9,26 +9,34 @@ compareProjectToStoredOutputFiles(
   projectPath_original = projectPath,
   emptyStringAsNA = FALSE,
   intersect.names = TRUE,
-  ignore = NULL,
+  ignore.variable = NULL,
+  ignore.process = NULL,
+  ignore.process.variable = NULL,
   skipNAFraction = FALSE,
-  skipNAAt = FALSE,
+  skipNAAt = NULL,
   NAReplacement = NULL,
   ignoreEqual = FALSE,
   classOf = c("first", "second"),
   try = TRUE,
   data.out = FALSE,
-  mergeWhenDifferentNumberOfRows = FALSE,
   sort = TRUE,
   compareReports = FALSE,
   checkOutputFiles = TRUE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = TRUE,
   tolerance = sqrt(.Machine$double.eps),
   debug = FALSE,
   save = FALSE,
+  check.columnNames_identical = FALSE,
+  testAllTRUE = FALSE,
+  verbose = FALSE,
   ...
 )
 }
 \arguments{
-\item{projectPath}{The project to be run and tested against the existing output files of the project gievn by \code{projectPath_original}.}
+\item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
 \item{projectPath_original}{The project holding the existing output files, defaulted to \code{projectPath}.}
 
@@ -36,11 +44,15 @@ compareProjectToStoredOutputFiles(
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
-\item{ignore}{A vector of names of columns to ignore in all.equal().}
+\item{ignore.variable}{Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).}
 
-\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can be set to a value between 0 and 1.}
+\item{ignore.process}{A vector of names of processes to ignore in the comparison.}
 
-\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip.}
+\item{ignore.process.variable}{A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth"))}
+
+\item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.}
+
+\item{skipNAAt}{A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.}
 
 \item{NAReplacement}{List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.}
 
@@ -50,9 +62,7 @@ compareProjectToStoredOutputFiles(
 
 \item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
 
-\item{data.out}{Logical, if TRUE output the original and new data along with the tests.}
-
-\item{mergeWhenDifferentNumberOfRows}{Logical, if TRUE use all.equal_mergeIfDifferentNumberOfRows instead of all.equal.}
+\item{data.out}{Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.}
 
 \item{sort}{Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.}
 
@@ -60,11 +70,25 @@ compareProjectToStoredOutputFiles(
 
 \item{checkOutputFiles}{Logical, if TRUE compare the file names of the output files.}
 
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
+
 \item{tolerance}{The tolerance to use in all.equal.}
 
 \item{debug}{Logical: If TRUE, interrupt the execution just before priting the test results.}
 
 \item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{check.columnNames_identical}{Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.}
+
+\item{testAllTRUE}{Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.}
+
+\item{verbose}{Logical: If TRUE extra messages are printed to console.}
 
 \item{...}{Used in runModel().}
 }

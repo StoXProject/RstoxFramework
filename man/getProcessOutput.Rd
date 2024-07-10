@@ -24,7 +24,12 @@ getProcessOutput(
   drop = FALSE,
   drop.datatype = TRUE,
   splitGeoJson = TRUE,
-  warn = TRUE
+  warn = TRUE,
+  add.line.index = TRUE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = FALSE
 )
 
 getProcessTableOutput(
@@ -38,7 +43,8 @@ getProcessTableOutput(
   linesPerPage = 1000L,
   columnSeparator = " ",
   na = "-",
-  drop = FALSE
+  drop = FALSE,
+  add.line.index = TRUE
 )
 
 getProcessGeoJsonOutput(
@@ -86,6 +92,16 @@ getProcessGeoJsonOutput(
 \item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
 
 \item{warn}{Logical: If TRUE warn if the process has not bee run.}
+
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
+
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
 
 \item{geoJsonName}{The name of the GeoJSON object to extract from the process.}
 }

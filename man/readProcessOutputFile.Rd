@@ -15,7 +15,12 @@ readProcessOutputFile(
   lineSeparator = NULL,
   na = "-",
   enable.auto_unbox = FALSE,
-  splitGeoJson = TRUE
+  splitGeoJson = TRUE,
+  add.line.index = TRUE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = FALSE
 )
 }
 \arguments{
@@ -40,6 +45,16 @@ readProcessOutputFile(
 \item{enable.auto_unbox}{Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.}
 
 \item{splitGeoJson}{Logical: If TRUE split the geojson into a vector of separate lines.}
+
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
+
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
 }
 \description{
 Function to read a single process output file, possibly by pages and in flattened and pretty view:

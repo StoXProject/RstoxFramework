@@ -4,12 +4,14 @@
 \alias{getActiveProcess}
 \title{Get the active process.}
 \usage{
-getActiveProcess(projectPath, modelName = NULL)
+getActiveProcess(projectPath, modelName = NULL, drop = TRUE)
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
 \item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
+
+\item{drop}{Logical: If TRUE and \code{modelName} is given as a  single string, drop the table of processID, processDirty and propertyDirty to a list.}
 }
 \description{
 Get the active process.

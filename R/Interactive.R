@@ -178,15 +178,303 @@ assignment_removeHaul <- function(Stratum, PSU, Haul, BioticAssignment) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+# General function to modify PSUProcessData:
+modifyPSUProcessData <- function(fun, ..., projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic"), returnOnlyElements = TRUE) {
+    
+    # Get the PSUType:
+    PSUType <- RstoxData::match_arg_informative(PSUType)
+    dataType <- paste0(PSUType, "PSU")
+    
+    # Check that the process returns PSU process data:
+    checkDataType(dataType, projectPath = projectPath, modelName = modelName, processID = processID)
+    
+    # Get the process data of the process:
+    PSUProcessData <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
+    # Rename to SSU:
+    PSUProcessData <- RstoxBase::renameSSULabelInPSUProcessData(PSUProcessData, PSUType = PSUType, reverse = TRUE)
+    
+    # Apply the modification function, which needs to have PSUProcessData as input and output:
+    if("PSUType" %in% names(formals(fun))) {
+        result <- fun(PSUProcessData, ..., PSUType = PSUType)
+    }
+    else {
+        result <- fun(PSUProcessData, ...)
+    }
+    
+    # Rename back from SSU (processData and other information like the SSU being changed):
+    result <- lapply(result, RstoxBase::renameSSULabelInPSUProcessData, PSUType = PSUType, reverse = FALSE)
+    
+    # Format the output:
+    RstoxBase::formatOutput(result$PSUProcessData, dataType = dataType, keep.all = FALSE)
+    
+    # Set the AcousticPSU back to the process data of the process:
+    setProcessMemory(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        argumentName = "processData", 
+        argumentValue = list(result$PSUProcessData) # We need to list this to make it correspond to the single value of the argumentName parameter.
+    )
+    
+    # Revert the active process ID to the previous process:
+    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
+    
+    if(returnOnlyElements) {
+        return(result$elements)
+    }
+    else {
+        # Return the active process:
+        activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
+        return(
+            c(
+                list(
+                    activeProcess = activeProcess, 
+                    saved = isSaved(projectPath)
+                ),
+                result$elements
+            )
+        )
+    }
+    
+}
+
+
+
+
+
+# General functions to add, remove and rename PSUs, add and remove SSUs and remove all PSUs of a Stratum:
+addPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+    
+    modifyPSUProcessData(
+        addPSUToPSUProcessData, 
+        Stratum = Stratum, PSU = PSU, # The arguments of the addPSUToPSUProcessData()
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
+    )
+    
+}
+
+addPSUToPSUProcessData <- function(PSUProcessData, Stratum, PSU = NULL, PSUType) {
+    # If the PSU is not given, use the default PSU name:
+    if(length(PSU) == 0) {
+        PSU <- getNewDefaultName(PSUProcessData$Stratum_PSU$PSU, prefix = RstoxBase::getRstoxBaseDefinitions("getPSUPrefix")(PSUType))
+    }
+    # Check whether the PSU already exists:
+    if(any(PSUProcessData$Stratum_PSU$PSU == PSU)) {
+        stop("StoX: The name of the ", PSUType, "PSU (", PSU, ") already exists.")
+    }
+    
+    # Add the PSU:
+    toAdd <- data.table::data.table(
+        Stratum = Stratum, 
+        PSU = PSU
+    )
+    PSUProcessData$Stratum_PSU <- rbind(
+        PSUProcessData$Stratum_PSU, 
+        toAdd
+    )
+    
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU
+        )
+    )
+    
+    return(output)
+}
+
+
+removePSU <- function(PSU = NULL, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+    
+    modifyPSUProcessData(
+        removePSUFromPSUProcessData, 
+        PSU = PSU, # The arguments of the removePSUFromPSUProcessData()
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
+    )
+    
+}
+
+removePSUFromPSUProcessData <- function(PSUProcessData, PSU = NULL) {
+    
+    # Remove the PSUs:
+    PSUsToKeepInStratum_PSU <- !PSUProcessData$Stratum_PSU$PSU %in% PSU
+    PSUsToSetToNAInSSU_PSU <- PSUProcessData$SSU_PSU$PSU %in% PSU
+    
+    PSUProcessData$Stratum_PSU <- PSUProcessData$Stratum_PSU[PSUsToKeepInStratum_PSU, ]
+    PSUProcessData$SSU_PSU[PSUsToSetToNAInSSU_PSU, PSU := NA]
+    
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU
+        )
+    )
+    
+    return(output)
+}
+
+
+renamePSU <- function(PSU, newPSUName, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+    
+    modifyPSUProcessData(
+        renamePSUInPSUProcessData, 
+        PSU = PSU, newPSUName = newPSUName, # The arguments of the renamePSUInPSUProcessData()
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
+    )
+    
+}
+
+renamePSUInPSUProcessData <- function(PSUProcessData, PSU, newPSUName) {
+    
+    # Rename the PSU:
+    atPSUsToRename <- PSUProcessData$Stratum_PSU$PSU %in% PSU
+    atSSUsToRename <- PSUProcessData$SSU_PSU$PSU %in% PSU
+    
+    PSUProcessData$Stratum_PSU$PSU[atPSUsToRename] <- newPSUName
+    PSUProcessData$SSU_PSU$PSU[atSSUsToRename] <- newPSUName
+    
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU, 
+            newPSUName = newPSUName
+        )
+    )
+    
+    return(output)
+}
+
+
+addSSU <- function(PSU, SSU, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+    
+    modifyPSUProcessData(
+        addSSUToPSUProcessData, 
+        PSU = PSU, SSU = SSU, # The arguments of the addSSUToPSUProcessData()
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
+    )
+    
+}
+
+addSSUToPSUProcessData <- function(PSUProcessData, PSU, SSU) {
+    
+    # Set the PSU column for the given SSUs:
+    atSSUs <- PSUProcessData$SSU_PSU$SSU %in% SSU
+    PSUProcessData$SSU_PSU[atSSUs, PSU := ..PSU]
+    
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSU = PSU, 
+            SSU = SSU
+        )
+    )
+    
+    return(output)
+}
+
+
+removeSSU <- function(SSU, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+    
+    modifyPSUProcessData(
+        removeSSUFromPSUProcessData, 
+        SSU = SSU, # The arguments of the removeSSUFromPSUProcessData()
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
+    )
+    
+}
+
+removeSSUFromPSUProcessData <- function(PSUProcessData, SSU) {
+    
+    # Set the PSU column to empty string for the given SSUs:
+    atSSUs <- PSUProcessData$SSU_PSU$SSU %in% SSU
+    PSUProcessData$SSU_PSU[atSSUs, PSU := NA]
+    
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            SSU = SSU
+        )
+    )
+    
+    return(output)
+}
+
+
+removeAllPSUsOfStratum <- function(Stratum, projectPath, modelName, processID, PSUType = c("Acoustic", "Biotic")) {
+    
+    modifyPSUProcessData(
+        removeAllPSUsOfStratumFromPSUProcessData, 
+        Stratum, # The arguments of the removeAllPSUsOfStratumFromPSUProcessData()
+        projectPath = projectPath, modelName = modelName, processID = processID, 
+        PSUType = PSUType, returnOnlyElements = FALSE
+    )
+    
+}
+
+removeAllPSUsOfStratumFromPSUProcessData <- function(PSUProcessData, Stratum) {
+    
+    # Remove the acoustic PSUs:
+    atPSUsToRemoveInStratum_PSU <- PSUProcessData$Stratum_PSU$Stratum %in% Stratum
+    PSUsToRemove <- subset(PSUProcessData$Stratum_PSU, atPSUsToRemoveInStratum_PSU)$PSU
+    atPSUsToSetToNAInSSU_PSU <- PSUProcessData$SSU_PSU$PSU %in% PSUsToRemove
+    
+    
+    PSUProcessData$Stratum_PSU <- PSUProcessData$Stratum_PSU[!atPSUsToRemoveInStratum_PSU, ]
+    PSUProcessData$SSU_PSU[atPSUsToSetToNAInSSU_PSU, PSU := NA]
+    
+    output <- list(
+        PSUProcessData = PSUProcessData, 
+        elements = list(
+            PSUsToRemove = PSUsToRemove
+        )
+    )
+    
+    return(output)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ############################################################
 ############################################################
-#' Add or remove acoustic PSUs and EDSUs
+#' Add, remove and renamme acoustic PSUs and EDSUs
 #' 
-#' The functions \code{addStations} and \code{removeStations} adds or removes biotic stations from the BioticAssignment process data of the specified process.
+#' The functions \code{addAcousticPSU}, \code{removeAcousticPSU} and \code{renameAcousticPSU} adds, removes or renames AcousticPSU from the AcousticPSU process data of the specified process. 
+#' The functions \code{addEDSU} and \code{removeEDSU} adds or removes EDSUSs from the AcousticPSU process data of the specified process. 
+#' The function \code{removeAllAcousticPSUsOfStratum} removes all PSUs from the AcousticPSU process data of the specified process. 
 #' 
 #' @param Stratum The name of a stratum.
 #' @param PSU The name of a PSU.
-#' @param newPSUName The new name of a PSU.
 #' @param EDSU The name of an EDSU.
 #' 
 #' @details 
@@ -202,55 +490,14 @@ NULL
 #' 
 addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processID) {
     
-    # Check that the process returns AcousticPSU process data:
-    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
-    
-    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
-    
-    # If the PSU is not given, use the default PSU name:
-    if(length(PSU) == 0) {
-        PSU <- getNewDefaultName(AcousticPSU$Stratum_PSU$PSU, prefix = RstoxBase::getRstoxBaseDefinitions("getPSUPrefix")("Acoustic"))
-    }
-    # Check whether the acoustic PSU already exists:
-    if(any(AcousticPSU$Stratum_PSU$PSU == PSU)) {
-        stop("StoX: The name of the Acoustic PSU (", PSU, ") already exists.")
-    }
-    
-    # Add the acsoutic PSU:
-    toAdd <- data.table::data.table(
-        Stratum = Stratum, 
-        PSU = PSU
-    )
-    AcousticPSU$Stratum_PSU <- rbind(
-        AcousticPSU$Stratum_PSU, 
-        toAdd
-    )
-    
-    # Format the output:
-    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
-    
-    # Set the AcousticPSU back to the process data of the process:
-    setProcessMemory(
+    addPSU(
+        Stratum = Stratum, PSU = PSU, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        argumentName = "processData", 
-        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
+        PSUType = "Acoustic"
     )
     
-    # Revert the active process ID to the current process (currently it is a requirement that the process is the active process for the GUI to allow modification, so resetting the active process is not effective here) and set it as dirty:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
-    
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            PSU = PSU, 
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
-        )
-    )
 }
 #' 
 #' @export
@@ -258,87 +505,14 @@ addAcousticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processI
 #' 
 removeAcousticPSU <- function(PSU, projectPath, modelName, processID) {
     
-    # Check that the process returns AcousticPSU process data:
-    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
-    
-    # Get the process data of the process:
-    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
-    
-    # Remove the acoustic PSUs:
-    PSUsToKeepInStratum_PSU <- !AcousticPSU$Stratum_PSU$PSU %in% PSU
-    PSUsToSetToNAInEDSU_PSU <- AcousticPSU$EDSU_PSU$PSU %in% PSU
-    
-    AcousticPSU$Stratum_PSU <- AcousticPSU$Stratum_PSU[PSUsToKeepInStratum_PSU, ]
-    #AcousticPSU$EDSU_PSU <- AcousticPSU$EDSU_PSU[EDSUsToKeep, ]
-    AcousticPSU$EDSU_PSU[PSUsToSetToNAInEDSU_PSU, PSU := NA]
-    
-    # Format the output:
-    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
-    
-    # Set the AcousticPSU back to the process data of the process:
-    setProcessMemory(
+    removePSU(
+        PSU = PSU, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        argumentName = "processData", 
-        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
+        PSUType = "Acoustic"
     )
     
-    # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
-    
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
-        )
-    )
-}
-#' 
-#' @export
-#' @rdname AcousticPSU
-#' 
-renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID) {
-    
-    # Check that the process returns AcousticPSU process data:
-    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
-    
-    ## Get the process data of the process:
-    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
-    
-    # Add the acsoutic PSU:
-    atPSUsToRename <- AcousticPSU$Stratum_PSU$PSU %in% PSU
-    atEDSUsToRename <- AcousticPSU$EDSU_PSU$PSU %in% PSU
-    
-    AcousticPSU$Stratum_PSU$PSU[atPSUsToRename] <- newPSUName
-    AcousticPSU$EDSU_PSU$PSU[atEDSUsToRename] <- newPSUName
-    
-    # Format the output:
-    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
-    
-    # Set the AcousticPSU back to the process data of the process:
-    setProcessMemory(
-        projectPath = projectPath, 
-        modelName = modelName, 
-        processID = processID, 
-        argumentName = "processData", 
-        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
-    )
-    
-    # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
-    
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            PSU = PSU, 
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
-        )
-    )
 }
 #' 
 #' @export
@@ -346,39 +520,14 @@ renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID
 #' 
 addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
     
-    # Check that the process returns AcousticPSU process data:
-    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
-    
-    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
-    
-    # Set the PSU column for the given EDSUs:
-    atEDSUs <- AcousticPSU$EDSU_PSU$EDSU %in% EDSU
-    AcousticPSU$EDSU_PSU[atEDSUs, PSU := ..PSU]
-    
-    # Format the output:
-    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
-    
-    # Set the AcousticPSU back to the process data of the process:
-    setProcessMemory(
+    addSSU(
+        PSU = PSU, SSU = EDSU, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        argumentName = "processData", 
-        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
+        PSUType = "Acoustic"
     )
     
-    # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
-    
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
-        )
-    )
 }
 #' 
 #' @export
@@ -386,90 +535,164 @@ addEDSU <- function(PSU, EDSU, projectPath, modelName, processID) {
 #' 
 removeEDSU <- function(EDSU, projectPath, modelName, processID) {
     
-    # Check that the process returns AcousticPSU process data:
-    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
-    
-    # Get the process data of the process, a table of PSU, Layer, AssignmentID, Haul and HaulWeight:
-    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
-    
-    # Set the PSU column to empty string for the given EDSUs:
-    atEDSUs <- AcousticPSU$EDSU_PSU$EDSU %in% EDSU
-    AcousticPSU$EDSU_PSU[atEDSUs, PSU := NA]
-    
-    # Format the output:
-    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
-    
-    ## Add the acsoutic PSU:
-    #EDSUsToKeep <- !AcousticPSU$PSU_EDSU$EDSU %in% EDSU
-    #
-    #AcousticPSU$PSU_EDSU <- AcousticPSU$PSU_EDSU[EDSUsToKeep, ]
-    
-    # Set the AcousticPSU back to the process data of the process:
-    setProcessMemory(
+    removeSSU(
+        SSU = EDSU, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        argumentName = "processData", 
-        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
+        PSUType = "Acoustic"
     )
     
-    # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
+}
+
+# Not currenly used by the GUI. Today it is not possible to rename a PSU:
+renameAcousticPSU <- function(PSU, newPSUName, projectPath, modelName, processID) {
     
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
-        )
+    renamePSU(
+        PSU = PSU, newPSUName = newPSUName, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Acoustic"
     )
+    
+}
+# Not currently used by the GUI, but intended for new delete stratum functionality:
+removeAllAcousticPSUsOfStratum <- function(Stratum, projectPath, modelName, processID) {
+    
+    removeAllPSUsOfStratum(
+        Stratum = Stratum, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Acoustic"
+    )
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+############################################################
+############################################################
+#' Add, remove and renamme biotic PSUs and Stations
+#' 
+#' The functions \code{addBioticPSU}, \code{removeBioticPSU} and \code{renameBioticPSU} adds, removes or renames BioticPSUs from the BioticPSU process data of the specified process. 
+#' The functions \code{addStation} and \code{removeStation} adds or removes Stations from the BioticPSU process data of the specified process. 
+#' The function \code{removeAllBioticPSUsOfStratum} removes all PSUs from the BioticPSU process data of the specified process. 
+#' 
+#' @param Stratum The name of a stratum.
+#' @param PSU The name of a PSU.
+#' @param Station The name of a biotic station.
+#' 
+#' @details 
+#' The assignment IDs are refreshed for every change, after sorting the assignemnts by the PSU column.
+#' 
+#' @inheritParams getProcessOutput
+#' @name BioticPSU
+#' 
+NULL
+#' 
+#' @export
+#' @rdname BioticPSU
+#' 
+addBioticPSU <- function(Stratum, PSU = NULL, projectPath, modelName, processID) {
+    
+    addPSU(
+        Stratum = Stratum, PSU = PSU, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Biotic"
+    )
+    
 }
 #' 
 #' @export
-#' @rdname AcousticPSU
+#' @rdname BioticPSU
 #' 
-removeAllAcousticPSUsOfStratum <- function(Stratum, projectPath, modelName, processID) {
+removeBioticPSU <- function(PSU, projectPath, modelName, processID) {
     
-    # Check that the process returns AcousticPSU process data:
-    checkDataType("AcousticPSU", projectPath = projectPath, modelName = modelName, processID = processID)
-    
-    # Get the process data of the process:
-    AcousticPSU <- getProcessData(projectPath = projectPath, modelName = modelName, processID = processID, check.activeProcess = TRUE)
-    
-    # Remove the acoustic PSUs:
-    atPSUsToRemoveInStratum_PSU <- AcousticPSU$Stratum_PSU$Stratum %in% Stratum
-    PSUsToRemove <- subset(AcousticPSU$Stratum_PSU, atPSUsToRemoveInStratum_PSU)$PSU
-    atPSUsToSetToNAInEDSU_PSU <- AcousticPSU$EDSU_PSU$PSU %in% PSUsToRemove
-    
-    
-    AcousticPSU$Stratum_PSU <- AcousticPSU$Stratum_PSU[!atPSUsToRemoveInStratum_PSU, ]
-    AcousticPSU$EDSU_PSU[atPSUsToSetToNAInEDSU_PSU, PSU := NA]
-    
-    # Format the output:
-    RstoxBase::formatOutput(AcousticPSU, dataType = "AcousticPSU", keep.all = FALSE)
-    
-    # Set the AcousticPSU back to the process data of the process:
-    setProcessMemory(
+    removePSU(
+        PSU = PSU, 
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        argumentName = "processData", 
-        argumentValue = list(AcousticPSU) # We need to list this to make it correspond to the single value of the argumentName parameter.
+        PSUType = "Biotic"
     )
     
-    # Revert the active process ID to the previous process:
-    resetModel(projectPath = projectPath, modelName = modelName, processID = processID, processDirty = TRUE, deleteCurrent = TRUE)
-    
-    # Return the active process:
-    activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName)
-    return(
-        list(
-            activeProcess = activeProcess, 
-            saved = isSaved(projectPath)
-        )
-    )
 }
+#' 
+#' @export
+#' @rdname BioticPSU
+#' 
+addStation <- function(PSU, Station, projectPath, modelName, processID) {
+    
+    addSSU(
+        PSU = PSU, SSU = Station, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Biotic"
+    )
+    
+}
+#' 
+#' @export
+#' @rdname BioticPSU
+#' 
+removeStation <- function(Station, projectPath, modelName, processID) {
+    
+    removeSSU(
+        SSU = Station, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Biotic"
+    )
+    
+}
+
+
+# Not currenly used by the GUI. Today it is not possible to rename a PSU:
+renameBioticPSU <- function(PSU, newPSUName, projectPath, modelName, processID) {
+    
+    renamePSU(
+        PSU = PSU, newPSUName = newPSUName, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Biotic"
+    )
+    
+}
+# Not currently used by the GUI, but intended for new delete stratum functionality:
+removeAllBioticPSUsOfStratum <- function(Stratum, projectPath, modelName, processID) {
+    
+    removeAllPSUsOfStratum(
+        Stratum = Stratum, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        PSUType = "Biotic"
+    )
+    
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -665,13 +888,15 @@ modifyStratum <- function(stratum, projectPath, modelName, processID) {
         RstoxBase::getStratumNames(StratumPolygon$StratumPolygon)
     )
     if(!any(is.na(atModify))) {
-        # Set ID of the modified strata:
-        for(ind in seq_along(stratum@polygons)) {
-            stratum@polygons[[ind]]@ID <- StratumPolygon$StratumPolygon@polygons[[atModify[ind]]]@ID
-        }
+        ## Set ID of the modified strata:
+        #for(ind in seq_along(stratum@polygons)) {
+        #    stratum@polygons[[ind]]@ID <- StratumPolygon$StratumPolygon@polygons[[atModify[ind]]]@ID
+        #}
+        #
+        ## Insert the modified strata
+        #StratumPolygon$StratumPolygon@polygons[atModify] <- stratum@polygons
         
-        # Insert the modified strata
-        StratumPolygon$StratumPolygon@polygons[atModify] <- stratum@polygons
+        StratumPolygon$StratumPolygon$geometry[atModify] <- stratum$geometry
     }
     else {
         processName <- getProcessNameFromProcessID(

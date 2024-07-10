@@ -18,7 +18,7 @@ writeProjectDescription(
 
 \item{projectDescription}{The project description to write to the project.json file. Defaulted to NULL, in which case the project description is read for the project.}
 
-\item{projectDescriptionFile}{The path to the file holding the projectDescription.}
+\item{projectDescriptionFile}{The path to the file holding the projectDescription (project.json).}
 
 \item{Application}{The application running StoX. Defaulted to the R.version.string, but can be a StoX version when run from the GUI.}
 

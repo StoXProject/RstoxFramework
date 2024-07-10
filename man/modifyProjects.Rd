@@ -7,7 +7,7 @@
 modifyProjects(
   projectPaths,
   modelNames = getRstoxFrameworkDefinitions("stoxModelNames"),
-  newValues,
+  newValuesList,
   add.defaults = FALSE,
   purge.processData = FALSE,
   strict = TRUE,
@@ -19,7 +19,7 @@ modifyProjects(
 
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
-\item{newValues}{A list named by the elements to modify (see getRstoxFrameworkDefinitions("processProperties") for possible elements), holding the values to modify to (e.g., list(functionParameter = list(DefinitionMethod = "Stratum"))).}
+\item{newValuesList}{A list of \code{newValues} named by the processes to modify. See also \code{\link{modifyProcess}}.}
 
 \item{add.defaults}{Logical: If TRUE defaults of a function are added when setting the function of the process.}
 

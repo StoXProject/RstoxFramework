@@ -9,7 +9,9 @@ fixedWidthTable(
   columnSeparator = " ",
   lineSeparator = NULL,
   na = "-",
-  enable.auto_unbox = TRUE
+  enable.auto_unbox = TRUE,
+  add.line.index = FALSE,
+  line.index.start = 1
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ fixedWidthTable(
 \item{na}{The string to replace NAs by, defaulted to "-".}
 
 \item{enable.auto_unbox}{Logical: If TRUE wrap the output in a list if  \code{pretty} is TRUE and the output is of length 1. This keeps the array when converting to JSON also for length 1.}
+
+\item{add.line.index}{Logical: If TRUE (the default) print row indices as in data.table.}
+
+\item{line.index.start}{The start of the line indices.}
 }
 \description{
 Function to convert data.table to fixed width:

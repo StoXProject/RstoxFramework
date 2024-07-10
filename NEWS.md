@@ -1,7 +1,104 @@
+# RstoxFramework v4.0.0 (2024-07-09)
+* Final release for StoX 4.0.0.
+
+
+# RstoxFramework v3.6.3-9012 (2024-07-08)
+* Last pre-release before StoX 4.0.0 (jumping 3.6.3), including improvements to compareProjectToStoredOutputFiles() implemented while making all example projects on https://github.com/StoXProject/StoXExamples pass.
+* Added tablesCompared and tablesNotCompared to the output of compareProjectToStoredOutputFiles().
+* Changed unzipProject() to keep times of the files when unzipping.
+* Moved "addParameter" to be before "removeParameter" and "renameParameter" as backwaards compatibility actions, to facilitate adding a parameter with a value depending on existing values.
+
+
+# RstoxFramework v3.6.3-9011 (2024-07-02)
+* Added the arguments returnBootstrapData, selection, BootstrapID and unlistSingleTable in getModelData(), which can be used to return (a subset) of the actual bootstrap data, and not only the path to the bootstrap NetCDF4 file.
+* Fixed the problem of truncated time steps when writing bootstrap data to NetCDF4 file, due to R's awkward bug with formatting POSIXct objects (the last decimal trucated).
+* Renamed backwardCompatibility to backwardCompatibility_RstoxFramework (and the same in the other Rstox-packages) in order ot avoid clashed with the backwardCompatibility object in other Rstox-packages.
+* Added warning when openProject() informing the used about the OutputVariables argument in Bootstrap().
+*  Fixed bug where existing bootstrap data was deleted even when UseOutputData = TRUE.
+* Improved compareProjectToStoredOutputFiles() to work with comparing bootstrap data, and got rid of the argument mergeWhenDifferentNumberOfRows by applying merge automatically. 
+*  Fixed bug which made some plotting functions failing seemingly randomly, by no longer setting precision in plot functions.
+* Temporarily disabled the tests test-export_ICESAcoustic.R and test-export_ICESbiotic.R due to problems at ICES. 
+
+
+# RstoxFramework v3.6.3-9010 (2024-05-28)
+* Renamed "Function" to "Function name" in the GUI.
+* Added "Survey" and "SpeciesCategory" as GroupingVariables in ReportBootstrap().
+
+
+# RstoxFramework v3.6.3-9009 (2024-05-22)
+* Added truncation of output from ICESDatsusc() and similar functions in the Preview in the GUI.
+* Added message about how to read a bootstrap NetCDF4 file into R to replicate the old bootstrap RData file.
+* Fixed bug where empty tables showed with duplicated header row in Preview in the GUI.
+* Added the option 'unlist' to getBootstrapData().
+* Added support for AggregationFunction in ReportBootstrap() for backward compatibility of R scripts.
+* Added support for nc files in readStoxOutputFile().
+* Updated the following test projects for the breaking change in RstoxBase where rows with 0 Abundance are deleted from the QuantityData before merging with the IndividualsData in SuperIndividuals(), which removes unwanted rows with present SpeciesCategory and IndividualTotalLength but missing Abundance when Biotic PSUs with rare IndividualTotalLength are not re-sampled in a bootstrap run.
+
+
+# RstoxFramework v3.6.3-9008 (2024-05-02)
+* Fixed bug in getFilterTableNames() where the json array was unboxed in runFunction.JSON() (due to auto_unbox = TRUE) when only one name was returned. Fixed by enclosing in a list if length is 1.
+* Fixed the function unReDoProject(). This is now ready to be implemeted in the GUI.
+* Fixed bug where empty process output due to modification of process data caused error on right click on the process (changing from return(NULL) to return(list()) in getProcessOutputElements()).
+* Fixed bug where modifying process data in DefineAcousticPSU() or DefineBioticPSU() could not be saved past the first click on the save icon.
+* Fixed bug in Bootstrap() where character columns with all missing values were written as "N" and not "NA".
+* Fixed bug in Bootstrap() where SpeciesCategory containing nordic characters were truncated.
+* Fixed bug in getBootstrapData() where DateTime was not converted to POSIX.
+
+
+
+# RstoxFramework v3.6.3-9007 (2024-04-23)
+* Relaxed validation of the project.json to only consider the first 6 rows (using utils::head()) of each table or sf object. This was due to an observed crash of jsonvalidate::json_validator() for project.json of size larger than 1/2 GB.
+* Renamed AggregationFunction to ReportFunction.
+* Renamed AggregationWeightingVariable to WeightingVariable.
+* Fixed bug where help for a topic aliased by another topic did not work in getObjectHelpAsHtml() used  by the GUI (e.g. var which is documented in cor).
+* Moved all warnings about only one value in stratum to onlyOneToResample_Warning() used in boot
+strapping.
+* Fixed bug where the bootstrap attributes processNames and dataTypes were not written past the first value.
+
+
+# RstoxFramework v3.6.3-9006 (2023-12-19)
+* Fixed bug where TargetVariable and GroupingVariables did not get possible values.
+
+
+# RstoxFramework v3.6.3-9005 (2023-12-18)
+* Fixed bug in Preview of ReportSpeciesCategoryCatchData, where the column V1 was overwritten when adding line indices.
+
+
+# RstoxFramework v3.6.3-9004 (2023-12-01)
+* Changed the functions Bootstrap() and ReportBootstrap() to use the netCDF4 files.
+* Added the function bootstrapRDataToNetCDF4() for converting old bootstrap RData to the new nc files.
+* Added the function getBootstrapData() for reading tthe new bootstrap nc files into R (supplementing the function load() used to read in the old bootstrap RData files)
+* Added the function getProject() for use by the GUI to get saved status of a project.
+* Changed to delete all output folders from the process to be run and onwards.
+* Changed to reset to the previous process if changing the current.
+* Fixed bugg where character vector outputs were displayed with one letter per line in the GUI.
+* Renamed the argument ignore to ignore.variable and added the argument ignore.process in compareProjectToStoredOutputFiles().
+* Implemented the "single" format class of parameters like PlottingVariable and CVVariable.
+* Changed inst/test/coastalCod_20.zip and inst/test/tobis_20_depth.zip to comply with the new platform inndependent sortinng when generating StratumLayerIndividualIndex (previous IndividualIndex which had only numbers as the first characters in the test projects).
+
+
+# RstoxFramework v3.6.3-9002 (2023-11-08)
+* Added working openProjectAsTemplate().
+* Added arguments empty.processData and processDataToBeEmptied to copyProject().
+* Added argument return.processFlow to getProcessTable() to support visualizing the input and output processes to a process.
+* Moved formatProcessData and dependent functions such as toJSON_Rstox() and convertStringToNA() to RstoxBase, as these are needed to read project.json for DefineStratumPolygon, DefineAcousticPSU, etc.
+* Restructured Interactive.R so that functions like addAcousticPSU() and the new addBioticPSU() use commmon PSU functions.
+* Fixed bug in modifyStratum(), which had some stray sp code.
+* Added getFilterTableNames() and getFilterOptionsOneTable() to support speed up of the filter expression builder in the GUI.
+* Sped up sortUnique() for strings. using the R package strigi.
+* Moved definitions of StoxDateTimeFormat, emptyStratumPolygon and emptyStratumPolygonGeojson to RstoxData and RstoxBase.
+* Added the arguments check.columnNames_identical and testAllTRUE to compareProjectToStoredOutputFiles().
+* Temporarily added ListFilesInFolder() to test selecting a folder in the GUI.
+* Renamed ResampleBioticAssignmentByPSU to ResampleBioticAssignmentByAcousticPSU
+* Changed to returning a list and to create the full projectSession folder structure in openProjectAsTemplate(). 
+* Added check for change of Rstox packages for an open project.
+* Allowed selecting from possible values in the filter expression builder for numeric values which are mostly whole numbers. Also excluded posssible values for keys.
+
+
 # RstoxFramework v3.6.3-9001 (2023-08-31)
 * Removed dependency on the retiring package sp.
 * Speeding up openProject() for StoX projects with large process data tables.
-* Moved functions to set precision to RstoxFramework, and fixed the following ttwo bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.
+* Moved functions to set precision to RstoxFramework, and fixed the following two bugs: 1. Datatypes which are lists of lists (AcousticData and BioticData) were not set precision to. 2. Integer fields were set precision to.
 * Fixing a problem with setting default precision in StoX. Before, precision was not set for process outputs which were lists of lists of tables (ReadBioic() and ReadAcousic()). Also, all numeric columns, even integer ones were set precision to, which is now changed to exclude integer columns.
 * Changed isOpenProject() to only require that the projectSession folder exits, with an option strict = TRUE to use the old requirement that all folders must exist.
 * Added BootstrapNetCDF4() and ReportBootstrapNetCDF4(). These will replace Bootstrap() and ReportBootstrap() in StoX 4.0.0.
@@ -136,7 +233,7 @@
 * Added renameStratum() for use by the GUI.
 * Added removeAllAcousticPSUsOfStratum().
 * Disalowed empty string stratum name from the GUI.
-* Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use inn Preview in the GUI.
+* Added getProcessOutputElements(), getProcessTableOutput(), getProcessGeoJsonOutput() and getProcessOutput() for use in Preview in the GUI.
 * Added the file outputClass.txt to identify the class of the outputs of each process, used in getProcessOutputElements().
 * Added a line "... truncated" if a table in Preview does not contain all rows (the GUI shows at most 200000 rows).
 * Cleaned up JSON validation test files to enhance the expected error.
@@ -155,7 +252,8 @@
 
 # RstoxFramework v3.4.4 (2022-08-07)
 * Added optional validation of the project.jsos in readProjectDescription(). 
-* Added options to compareProjectToStoredOutputFiles() (setNATo0 replaecd by NAReplacement, ignoreEqual to ignore columns where all values are equal, mergeWhenDifferentNumberOfRows to use all.equal_mergeIfDifferentNumberOfRows instead of all.equal, and sort to sort the tables). 
+* Added options to compareProjectToStoredOutputFiles() (setNATo0 replaecd by NAReplacement, ignoreEqual to ignore columns where all values are equal, mergeWhenDifferentNumberOfRows to use all_equal_mergeIfDifferentNumberOfRows
+instead of all.equal, and sort to sort the tables). 
 * Added the diffData as output from compareProjectToStoredOutputFiles() to assist identifying the diffs.
 
 

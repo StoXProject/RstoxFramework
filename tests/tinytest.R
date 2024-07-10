@@ -3,5 +3,5 @@ if ( requireNamespace("tinytest", quietly=TRUE) ){
     #Sys.setenv("_R_CHECK_LIMIT_CORES_" = "warn")
     #tinytest::test_package("RstoxFramework", ncpu = 4)
     
-    tinytest::test_package("RstoxFramework", ncpu = 2)
+    tinytest::test_package("RstoxFramework")
 }

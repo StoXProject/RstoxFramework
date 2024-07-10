@@ -26,6 +26,6 @@ The package replaces the old Java library in StoX versions prior to StoX 3.0.0.
 
 LGPL-3 © Norwegian Institute of Marine research (IMR) ([homepage](https://www.hi.no/en)).
 
-The development of RstoxFramework package is mainly supported by IMR's [REDUS](http://www.redus.no) and SEA2DATA projects.
+The development of RstoxFramework package is mainly supported by IMR's REDUS, SEA2DATA and SIDO projects.
 
 RstoxFramework is part of the bigger [StoX ecosystem](https://stoxproject.github.io).

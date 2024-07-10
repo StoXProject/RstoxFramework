@@ -4,23 +4,17 @@
 \alias{AcousticPSU}
 \alias{addAcousticPSU}
 \alias{removeAcousticPSU}
-\alias{renameAcousticPSU}
 \alias{addEDSU}
 \alias{removeEDSU}
-\alias{removeAllAcousticPSUsOfStratum}
-\title{Add or remove acoustic PSUs and EDSUs}
+\title{Add, remove and renamme acoustic PSUs and EDSUs}
 \usage{
 addAcousticPSU(Stratum, PSU = NULL, projectPath, modelName, processID)
 
 removeAcousticPSU(PSU, projectPath, modelName, processID)
 
-renameAcousticPSU(PSU, newPSUName, projectPath, modelName, processID)
-
 addEDSU(PSU, EDSU, projectPath, modelName, processID)
 
 removeEDSU(EDSU, projectPath, modelName, processID)
-
-removeAllAcousticPSUsOfStratum(Stratum, projectPath, modelName, processID)
 }
 \arguments{
 \item{Stratum}{The name of a stratum.}
@@ -33,12 +27,12 @@ removeAllAcousticPSUsOfStratum(Stratum, projectPath, modelName, processID)
 
 \item{processID}{The ID of the process.}
 
-\item{newPSUName}{The new name of a PSU.}
-
 \item{EDSU}{The name of an EDSU.}
 }
 \description{
-The functions \code{addStations} and \code{removeStations} adds or removes biotic stations from the BioticAssignment process data of the specified process.
+The functions \code{addAcousticPSU}, \code{removeAcousticPSU} and \code{renameAcousticPSU} adds, removes or renames AcousticPSU from the AcousticPSU process data of the specified process. 
+The functions \code{addEDSU} and \code{removeEDSU} adds or removes EDSUSs from the AcousticPSU process data of the specified process. 
+The function \code{removeAllAcousticPSUsOfStratum} removes all PSUs from the AcousticPSU process data of the specified process.
 }
 \details{
 The assignment IDs are refreshed for every change, after sorting the assignemnts by the PSU column.

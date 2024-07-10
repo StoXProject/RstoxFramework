@@ -8,12 +8,15 @@
 #' @inheritParams getModelData
 #' @inheritParams runProcesses
 #' @inheritParams Projects
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param run Logical: If TRUE run the model.
 #' @param save Logical: If TRUE save the project after running.
 #' @param force.restart Logical: If TRUE restart the model before running.
 #' @param close Logical: If TRUE close the project after running and getting the output.
 #' @param returnModelData Logical: If TRUE return the output of the model runs. Can also be given as a string vector holding the names of the models to return data from. If TRUE, the specific models to return data from (across models) can be given by \code{processes}.
-#' @param ... Arguments passed on to \code{\link{openProject}}, \code{\link{closeProject}} and \code{\link{runProcesses}}.
+#' @param returnBootstrapData Logical: If TRUE read the content of any NetCDF4 files (i.e. output from \code{\link{Bootstrap}}).
+#' @param ... Arguments passed on to \code{\link{runProcesses}}.
 #' 
 #' @return
 #' A list of model output.
@@ -69,7 +72,7 @@ runModel <- function(
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
-    returnModelData = TRUE, 
+    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, 
     try = TRUE, 
     close = FALSE, 
     msg = TRUE, 
@@ -87,10 +90,8 @@ runModel <- function(
     if(run) {
         if(isProject(projectPath)) {
             # Open the project if not open:
-            if(!isOpenProject(projectPath)) {
-                # No need for GUI here as this function should not be used by any GUI, but is merely a converience function replacing a GUI:
-                openProject(projectPath, ...)
-            }
+            temp <- openIfNotAlreadyOpenProject(projectPath)
+            
             # Run the model:
             if(msg) {
                 message(
@@ -127,7 +128,8 @@ runModel <- function(
                     endProcess = endProcess, 
                     drop.datatype = drop.datatype, 
                     warn = FALSE, 
-                    unlistDepth2 = unlistDepth2
+                    unlistDepth2 = unlistDepth2, 
+                    returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
                 )
             }
         }
@@ -152,6 +154,8 @@ runModel <- function(
 #' @inheritParams runProcesses
 #' @inheritParams Projects
 #' @inheritParams runModel
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param startProcess The process index, name or ID at which to start the model run. A list can be given named by the models if one needs to specify start process for each model. Models given inn \code{modelNames} but not in the list will be run from the start of the model.
 #' @param endProcess The process index, name or ID at which to stop the model run. A list can be given named by the models if one needs to specify end process for each model. Models given inn \code{modelNames} but not in the list will be run to the end of the model.
 #' @param unlist.models Logical: If TRUE unlist the top level so that all processes are in one list.
@@ -170,7 +174,7 @@ runProject <- function(
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
-    returnModelData = TRUE, 
+    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, 
     try = TRUE, 
     close = FALSE, 
     unlist.models = TRUE, 
@@ -189,9 +193,7 @@ runProject <- function(
     }
     if(isProject(projectPath)) {
         # Open the project if not open:
-        if(!isOpenProject(projectPath)) {
-            openProject(projectPath, ...)
-        }
+        temp <- openIfNotAlreadyOpenProject(projectPath)
     }
     
     if(msg) {
@@ -267,6 +269,7 @@ runProject <- function(
             processes = processes, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
             purge.processData = purge.processData, 
+            returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable,
             try = try, 
             close = FALSE, 
             msg = msg, 
@@ -308,6 +311,8 @@ runProject <- function(
 #' @inheritParams Projects
 #' @inheritParams runModel
 #' @inheritParams runProject
+#' @inheritParams readBootstrapData
+#' @inheritParams readMemoryFile
 #' @param startProcess The process index, name or ID at which to start the model run. A list can be given named by the models if one needs to specify start process for each model. Models given inn \code{modelNames} but not in the list will be run from the start of the model.
 #' @param endProcess The process index, name or ID at which to stop the model run. A list can be given named by the models if one needs to specify end process for each model. Models given inn \code{modelNames} but not in the list will be run to the end of the model.
 #' 
@@ -325,7 +330,7 @@ runProjects <- function(
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
-    returnModelData = TRUE, 
+    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, 
     try = TRUE, 
     unlist.models = FALSE, 
     close = FALSE, 
@@ -344,6 +349,7 @@ runProjects <- function(
         fileOutput = fileOutput, 
         setUseProcessDataToTRUE = setUseProcessDataToTRUE, purge.processData = purge.processData, 
         returnModelData = returnModelData, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, 
         try = try, 
         unlist.models = unlist.models, 
         close = close, 
@@ -478,20 +484,22 @@ createNestedListElement <- function(x, namesVector) {
 ##################################################
 #' Read the output files of a project
 #' 
-#' This function reads all or some of the output files of a project, indicated by model and proccess names.
+#' This function reads all or some of the output files of a project, indicated by model and process names.
 #' 
 #' @inheritParams general_arguments
 #' @inheritParams runProject
 #' @param verifyFiles Logical: If TRUE verify that the files are from processes that exist in the project.
 #' @param unlist Either 1 to unlist the models, 2 to unlist the models and the process. TRUE is interpreted as 2.
 #' @param emptyStringAsNA Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.
+#' @param ... Arguments passed to \code{\link{readBootstrapData}}, e.g. \code{selection}, which must be set to NA to read the entire file.
 #' 
 #' @return
 #' A list of model output.
 #' 
 #' @export
 #'  
-readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist = FALSE, emptyStringAsNA = FALSE) {
+readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist = FALSE, emptyStringAsNA = FALSE, ...) {
+    
     # List the files of the project:
     if(isProject(projectPath)) {
         outputFolders <- getProjectPaths(projectPath)$outputFolders
@@ -519,6 +527,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         
         
         if(verifyFiles) {
+            # Do not validate since we are only reading the project description file to check the process names:
             projectDescription <- readProjectDescription(projectPath, applyBackwardCompatibility = FALSE, formatProcesses = FALSE, validateJSON = FALSE)$projectDescription
             
             processNames <- lapply(projectDescription, function(x) unname(sapply(x, "[[", "processName")))
@@ -535,10 +544,13 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
             }
         }
         
-        # Read the files using the apropriate function:
+        # Read the files using the appropriate function:
         #output <- lapply(outputFiles, function(x) lapply(x, readStoxOutputFile))
-        output <- rapply(outputFiles, readStoxOutputFiles, emptyStringAsNA = emptyStringAsNA, how = "replace")
-        
+        output <- rapply(
+            outputFiles, readStoxOutputFiles, emptyStringAsNA = emptyStringAsNA, how = "replace", 
+            ...  # Used in readBootstrapData()
+        )
+
         # Drop the list over models:
         if(isTRUE(unlist)) {
             unlist <- 2
@@ -569,8 +581,15 @@ hasOnlyOneTabble <- function(x) {
     is.list(x) && !data.table::is.data.table(x) && length(x) == 1
 }
 
-readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE) {
-    output <- structure(lapply(paths, readStoxOutputFile, emptyStringAsNA = emptyStringAsNA), names = basename(tools::file_path_sans_ext(paths)))
+readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE, ...) {
+    output <- structure(
+        lapply(
+            paths, readStoxOutputFile, emptyStringAsNA = emptyStringAsNA, 
+            ...  # Used in readBootstrapData()
+        ), 
+        names = basename(tools::file_path_sans_ext(paths))
+    )
+    
     # Unlist the top level of an RData file, as an RData file is a joint file of several outputs, and we do not want the extra BootstrapData level on top of this list:
     areRDataFiles <- tolower(tools::file_ext(paths)) == "rdata"
     # isTRUE is TRUE only for one TRUE:
@@ -581,8 +600,8 @@ readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE) {
 }
 
 
-readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
-    # This function only read one file:
+readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, ...) {
+    # This function only reads one file:
     if(length(path) != 1) {
         stop("Exactly one file required")
     }
@@ -592,14 +611,37 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
     
     if(tolower(ext) == "rdata") {
         output <- readOutputRDataFile(path)
+        
+        # Apply subset given in ...:
+        output <- subsetModelData(output, subsetList = list(...))
     }
     else if(tolower(ext) %in% c("json", "geojson")) {
         # Use DefineStratumPolygon from RstoxBase:
-        output <- RstoxBase::DefineStratumPolygon(
-            DefinitionMethod = "ResourceFile", 
-            FileName = path, 
-            StratumNameLabel = "StratumName"
+        output <- tryCatch(
+            RstoxBase::DefineStratumPolygon(
+                DefinitionMethod = "ResourceFile", 
+                FileName = path, 
+                StratumNameLabel = "StratumName"
+            ), 
+            error = function(e) {
+                NULL
+            }
         )
+        if(!length(output)) {
+            output <- tryCatch(
+                RstoxBase::DefineStratumPolygon(
+                    DefinitionMethod = "ResourceFile", 
+                    FileName = path, 
+                    StratumNameLabel = "polygonName"
+                ), 
+                error = function(e) {
+                    NULL
+                }
+            )
+        }
+        if(!length(output)) {
+            stop("The existing output file from the DefineStratumPolygon process is no longer compatible (tried both StratumNameLabel = \"StratumName\" and \"polygonName\")")
+        }
     }
     else if(tolower(ext) %in% "txt") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:
@@ -617,15 +659,21 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
         #    }
         #}
         
+        
+        # If here are any keys that are time (such as LogKey of the StoxAcoustic format), convert these to character with 3 digits. Note that we use the hack to add 1e-4 to avoid the POSIXc formatting bug in R:
         keys <- names(output)[endsWith(names(output), "Key")]
-        formatPOSIXAsISO8601(output, cols = keys)
+        formatPOSIXAsISO8601(output, cols = keys, add = 1e-4, format = "%Y-%m-%dT%H:%M:%OS3Z")
     }
     else if(tolower(ext) %in% "csv") {
         # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:
         output <- unname(as.matrix(utils::read.csv(path, encoding = "UTF-8", header = FALSE, na.strings = c(""))))
     }
     else if(tolower(ext) == "nc") {
-        stop("NetCDF4 file not yet implemented.")
+        # Do not unlist here, as it is rather done in readModelData() (using unlist = 0 here):
+        output <- readBootstrapData(
+            path, 
+            ...  # Used in readBootstrapData()
+        )
     }
     else {
         stop("Unknown file extension for StoX output file: ", ext, ". Path: ", path, ".")
@@ -640,6 +688,32 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE) {
     
     return(output)
 }
+
+
+subsetModelData <- function(modelData, subsetList = list()) {
+    # Support for using NA to get all data:
+    areNA <- sapply(subsetList, function(x) length(x) == 1 && is.na(x))
+    subsetList <- subsetList[!areNA] 
+    
+    if(data.table::is.data.table(modelData)) {
+        intersectingNames <- intersect(names(subsetList), names(modelData))
+        if(length(intersectingNames)) {
+            for(name in intersectingNames) {
+                modelData <- subset(modelData, modelData[[name]] %in% subsetList[[name]])
+            }
+        }
+        return(modelData)
+    }
+    else if(is.list(modelData)){
+        modelData <- lapply(modelData, subsetModelData, subsetList = subsetList)
+        
+        return(modelData)
+    }
+    else {
+        stop("The modelData must be a (nested) list of valid StoX output claasses.")
+    }
+}
+
 
 #POSIXctToCharacter <- function(x, digits = 3) {
 #    browser()
@@ -697,7 +771,16 @@ unlistSep <- function(x, sep = "/") {
 #' 
 #' @export
 #' 
-runFunction <- function(what, args, package = "RstoxFramework", removeCall = TRUE, onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE, maxLength.Message = 2000, maxLength.Warning = 2000, maxLength.Error = 2000, nwarnings = 10000, collapseMessages = TRUE, collapseWarnings = TRUE, collapseErrors = TRUE, messageLogFile = NULL, warningLogFile = NULL, errorLogFile = NULL, messageAppend = FALSE, warningAppend = FALSE, errorAppend = FALSE, uniquify = TRUE, header = "> ") {
+runFunction <- function(
+    what, args, 
+    package = "RstoxFramework", removeCall = TRUE, 
+    onlyStoxMessages = TRUE, onlyStoxWarnings = TRUE, onlyStoxErrors = FALSE, 
+    maxLength.Message = 2000, maxLength.Warning = 2000, maxLength.Error = 2000, 
+    nwarnings = 10000, 
+    collapseMessages = TRUE, collapseWarnings = TRUE, collapseErrors = TRUE, 
+    messageLogFile = NULL, warningLogFile = NULL, errorLogFile = NULL, 
+    messageAppend = FALSE, warningAppend = FALSE, errorAppend = FALSE, 
+    uniquify = TRUE, header = "> ") {
     
     # Parse the args if given as a JSON string:
     args <- parseParameter(args)
@@ -989,9 +1072,8 @@ runProject_ReplaceAcousticFiles <- function(projectPath, ReadAcoustic.FileNames,
         warning("Non-existing project ", projectPath, ".")
         return(NULL)
     }
-    if(!isOpenProject(projectPath)) {
-        openProject(projectPath)
-    }
+    # Open the project if not open:
+    temp <- openIfNotAlreadyOpenProject(projectPath)
     
     # Get the process ID of the existing DefineAcousticPSU process:
     processID_existing <- findProcess(

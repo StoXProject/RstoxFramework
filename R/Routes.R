@@ -23,7 +23,10 @@
 #' @param name The name of the property, such as "processName", "functionName", one of the process parameters ("enabled", "showInMap" and "fileOutput"), the name of a funciton input, or the name of a function parameter. 
 #' @param value The value to set to the property (string).
 #' @param stylesheet The html stylesheet to use, defaulted to no stylesheet.
-#' @param include.numeric Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
+#' @param include.integer Logical: If TRUE get possible values for integer variables. Default: TRUE.
+#' @param include.numericInteger Logical: If TRUE get possible values for numeric variables that are all whole numbers. Default: TRUE.
+#' @param include.numeric Logical: If TRUE get possible values for numeric variables. Default: FALSE
+#' @param include.POSIXct Logical: If TRUE get possible values for POSIXct variables. Default: FALSE
 #' @param stopIfEmptyPossibleValues Logical: If TRUE get possible values for numeric ariables as well as categorical variables.
 #' @param format A character string naming the format to get info for.
 #' @param objectName The R object to get help as html for.
@@ -251,8 +254,8 @@ getMapData  <- function(projectPath, modelName, processID) {
     }
     else {
         warning("StoX: No map data available from the process ", processID, " of model ", modelName, " of project ", projectPath)
-        #geojsonio::geojson_json(getRstoxFrameworkDefinitions("emptyStratumPolygon"))
-        getRstoxFrameworkDefinitions("emptyStratumPolygonGeojson")
+        #geojsonio::geojson_json(RstoxBase::getRstoxBaseDefinitions("emptyStratumPolygon"))
+        RstoxBase::getRstoxBaseDefinitions("emptyStratumPolygonGeojson")
     }
 }
 
@@ -265,7 +268,7 @@ getStratumData <- function(projectPath, modelName, processID) {
     # Return an empty StratumPolygon if processData is empty:
     # Change this to an error?????????????????
     if(length(processData) == 0) {
-        return(getRstoxFrameworkDefinitions("emptyStratumPolygon"))
+        return(RstoxBase::getRstoxBaseDefinitions("emptyStratumPolygon"))
     }
     
     # Issue an error of the process data are not of StratumPolygon type:
@@ -401,12 +404,7 @@ getStratumList <- function(projectPath, modelName, processID) {
     
     # Create the objects EDSU_PSU, PSU_Stratum and Stratum
     stratumList <- as.list(RstoxBase::getStratumNames(processData$StratumPolygon))
-    #stratum <- data.table::data.table(
-    #    stratum = names(processData), 
-    #    includeInTotal = 
-    #)
     
-    #list(stratumList)
     return(stratumList)
 }
 
@@ -821,7 +819,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
         # 2. displayName:
         displayName = as.list(c(
             "Process name", 
-            "Function", 
+            "Function name", 
             unname(unlist(processParametersDisplayNames))
         )), 
         # 3. description:
@@ -955,7 +953,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
                 #    isSingleParameter(format), 
                 #    # Format class "single" used for data dependent possigle values:
                 #    mapply(
-                #        getParameterVectorPossibleValues,
+                #        getParameterElementPossibleValues,
                 #        projectPath = projectPath, 
                 #        modelName = modelName, 
                 #        processID = processID, 
@@ -1095,7 +1093,7 @@ cellToJSONStringOne <- function(x) {
         x <- ""
     }
     if(!is.character(x)) {
-        x <- as.character(toJSON_Rstox(x))
+        x <- as.character(RstoxBase::toJSON_Rstox(x))
     }
     return(x)
 }
@@ -1127,7 +1125,7 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
         # Why was this used??????
         ### if(!is.character(x)) {
         ###     browser()
-        ###     x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
+        ###     x <- sapply(x, function(y) as.character(RstoxBase::toJSON_Rstox(y)))
         ### }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):
@@ -1136,7 +1134,7 @@ vectorToJSONStringOne <- function(x, stringifyVector = TRUE) {
     }
     
     if(stringifyVector) {
-        x <- as.character(toJSON_Rstox(x))
+        x <- as.character(RstoxBase::toJSON_Rstox(x))
     }
     return(x)
 }
@@ -1151,7 +1149,7 @@ possibleValuesToJSONStringOne <- function(x, nrow) {
     # Convert to JSON string for each element if not already character:
     else {
         if(!is.character(x)) {
-            x <- sapply(x, function(y) as.character(toJSON_Rstox(y)))
+            x <- sapply(x, function(y) as.character(RstoxBase::toJSON_Rstox(y)))
         }
         if(length(x) == 1) {
             # This trick with a double list is to ensure that data.table actually converts to a list so that jsonlite returns square brackets (do not change this unless you really know what you are doing!!!!!!!!!!):
@@ -1422,9 +1420,6 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
     # Add 00Index:
     db[["00Index.Rd"]] <- tools::parse_Rd(system.file('html', "00Index.html", package = packageName))
     
-    # Write the help to file as html and read back:
-    objectName.Rd <- paste0(objectName, ".Rd")
-    
     # Get the links of the package:
     Links <- tools::findHTMLlinks(pkgDir = find.package(packageName))
     ## Add the index links of the Rstox packages:
@@ -1432,6 +1427,20 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
     #    Links, 
     #    structure(paste0("../../", packageName, "/html/00Index.html"), names = packageName)
     #)
+    
+    # Write the help to file as html and read back:
+    objectName.Rd <- paste0(objectName, ".Rd")
+    # If the objectName.Rd is not present, find the link:
+    if(! objectName.Rd %in% names(db)) {
+        if(objectName %in% names(Links)) {
+            objectName <- basename( tools::file_path_sans_ext(Links[objectName]) )
+            objectName.Rd <- paste0(objectName, ".Rd")
+        }
+        else {
+            warning("")
+        }
+    }
+    
     
     # Return empty string if the function 
     if(! objectName.Rd %in% names(db)) {
@@ -1466,14 +1475,84 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
 
 
 
+
 #' 
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getFilterOptionsAll <- function(projectPath, modelName, processID, include.numeric = TRUE, stopIfEmptyPossibleValues = FALSE) {
+getTableNames <- function(projectPath, modelName, processID, warn = TRUE) {
+    
+    # Get the files:
+    processOutputFilesSansExt <- tools::file_path_sans_ext(unlist(getProcessOutputFiles(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        warn = warn
+    )))
+    folderPath <- getProcessOutputFolder(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = processID, 
+        type = "memory"
+    )
+    processOutputTableNames <- unname(sapply(
+        processOutputFilesSansExt, 
+        getRelativePath,
+        folderPath
+    ))
+    
+    # Return a list of the tableNames, columnNames and possibleValues:
+    return(processOutputTableNames)
+}
 
-    # Run the process without saving and without filter:
-    processOutput <- runProcess(projectPath = projectPath, modelName = modelName, processID = processID, msg = FALSE, returnProcessOutput = TRUE, replaceArgs = list(FilterExpression = list()))
+
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getFilterTableNames <- function(projectPath, modelName, processID, warn = TRUE) {
+    
+    # Get process ID of the single input to the filter process:
+    inputProcessID <- getSingleInputProcessID(projectPath, modelName, processID)
+    
+    # Get the output table names:
+    processOutputTableNames <- getTableNames(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = inputProcessID, 
+        warn = warn
+    )
+    
+    
+        
+    # Return a list if only one element, since runFunction.JSON uses auto.unbox = TRUE:
+    if(length(processOutputTableNames) == 1) {
+        processOutputTableNames <- list(processOutputTableNames)
+    }
+    
+    
+    return(processOutputTableNames)
+}
+
+
+
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableName, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE, stopIfEmptyPossibleValues = FALSE) {
+    
+    # Get the output of the input process, which is only one for all filters:
+    inputProcessID <- getSingleInputProcessID(projectPath, modelName, processID)
+    processOutput <- getProcessOutput(
+        projectPath = projectPath, 
+        modelName = modelName, 
+        processID = inputProcessID, 
+        tableName = tableName
+    )
+    processOutput <- unlistToDataType(processOutput, sep = "/")[[1]]
     
     # Add a warning if the process output is empty:
     if(!length(processOutput)) {
@@ -1484,56 +1563,82 @@ getFilterOptionsAll <- function(projectPath, modelName, processID, include.numer
         #else {
         #    warning(warnText)
         #}
-        return(emptyNamedList())
+        return(list(fields = list()))
     }
     
-    # If the process output is a list of lists, unlist the top level and add names separated by slash:
-    processOutput <- unlistProcessOutput(processOutput)
-    
     # Get the column names:
-    name <- lapply(processOutput, names)
+    name <- names(processOutput)
     
     # Get the data types:
-    type <- lapply(processOutput, function(x) sapply(x, getRelevantClass))
+    type <- sapply(processOutput, getRelevantClass)
+    type_with_numeric_integer <- type
+    areNumeric <- type_with_numeric_integer %in% c("numeric", "double")
+    if(any(areNumeric)) {
+        areNumericOptions <- mapply(detectOptions, processOutput[, ..areNumeric], names(processOutput)[areNumeric])
+        type_with_numeric_integer[areNumeric][areNumericOptions] <- "numeric.options"
+    }
     
     # Get the operators:
-    operators <- lapply(type, function(x) if(length(x)) getRstoxFrameworkDefinitions("filterOperators")[x] else NULL)
+    operators <- getRstoxFrameworkDefinitions("filterOperators")[type]
     
     # Get a list of unique values for each column of each table:
     #options <- lapply(processOutput, getPossibleValuesOneTable, include.numeric = include.numeric)
-    options <- mapply(getPossibleValuesOneTable, processOutput, type, include.numeric = include.numeric, SIMPLIFY = FALSE)
-    options <- lapply(options, function(x) lapply(x, getOptionList))
+    options <- lapply(getPossibleValuesOneTable(processOutput, type = type_with_numeric_integer, include.integer = include.integer, include.numericInteger = include.numericInteger, include.numeric = include.numeric, include.POSIXct = include.POSIXct), getOptionList)
     
     # Return the
-    output <- lapply(
-        seq_along(options),
-        function(ind)
-            structure(
-                list(
-                    mapply(
-                        list,
-                            name = name[[ind]],
-                            type = type[[ind]],
-                            operators = operators[[ind]],
-                            options = options[[ind]],
-                            SIMPLIFY = FALSE
-                        )
-                    ), 
-                names = "fields"
-                )
+    output <- structure(
+        list(
+            mapply(
+                list,
+                name = name,
+                type = type,
+                operators = operators,
+                options = options,
+                SIMPLIFY = FALSE
             )
-    
-    names(output) <- names(options)
-    
-    # Add the fields level:
-    output <- list(
-        tableNames = as.list1(names(output)),
-        allFields = output
+        ), 
+        names = "fields"
     )
     
     # Return a list of the tableNames, columnNames and possibleValues:
     return(output)
 }
+
+detectOptions <- function(x, name, tol = .Machine$double.eps^0.5, minimumFraction = 0.5, allowHalf = TRUE, maxOptions = 1000) {
+    u <- unique(x)
+    canHaveOptions <- mean(abs(u - round(u)) < tol | abs(2 * u - round(2 * u)) < tol, na.rm = TRUE) > minimumFraction
+    if(canHaveOptions && length(u) > maxOptions) {
+        warning("StoX: The field ", name, " has more than ", maxOptions, ". Options not returned. ")
+        canHaveOptions <- FALSE
+    }
+    
+    return(canHaveOptions)
+}
+
+getSingleInputProcessID <- function(projectPath, modelName, processID) {
+    # Get the output of the input process, which is only one for all filters:
+    process <- getProcessArguments(projectPath = projectPath, modelName = modelName, processID = processID)
+    # Get the (single) input process:
+    inputProcessName <- unlist(process$functionInputs)
+    if(length(inputProcessName) != 1) {
+        processName <- getProcessNameFromProcessID(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        stop("The process ", processName, " is not a filter process. Filter options not found.")
+    }
+    else {
+        inputProcessID <- getProcessIDFromProcessName(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processName = inputProcessName[1]
+        )$processID
+    }
+    
+    return(inputProcessID)
+}
+
 
     
 
@@ -1542,7 +1647,7 @@ getOptionList <- function(option, digits = 6) {
 }
 
 
-getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, include.POSIXct = FALSE) {
+getPossibleValuesOneTable <- function(table, type, include.integer = TRUE, include.numericInteger = TRUE, include.numeric = FALSE, include.POSIXct = FALSE, includeKeys = FALSE) {
     
     # Return empty named list if no input:
     if(length(table) == 0) {
@@ -1551,12 +1656,24 @@ getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, incl
     
     # Get the indices of the variables to get possible values from:
     validInd <- seq_len(ncol(table))
+    
+    if(!include.integer) {
+        validInd <- setdiff(validInd, which(type %in% c("integer")))
+    }
+    if(!include.numericInteger) {
+        validInd <- setdiff(validInd, which(type %in% c("numeric.options")))
+    }
     if(!include.numeric) {
-        validInd <- setdiff(validInd, which(type %in% c("numeric", "integer", "double")))
+        validInd <- setdiff(validInd, which(type %in% c("numeric", "double")))
     }
     if(!include.POSIXct) {
         validInd <- setdiff(validInd, which(type %in% c("POSIXct")))
     }
+    if(!includeKeys) {
+        validInd <- setdiff(validInd, which(endsWith(names(table), "Key")))
+    }
+    
+    
     
     #if(include.numeric) {
     #    validInd <- seq_len(ncol(table))
@@ -1575,26 +1692,20 @@ getPossibleValuesOneTable <- function(table, type, include.numeric = FALSE, incl
 }
 
 # Simple function to sort the unique values:
-sortUnique <- function(y) {
+sortUnique <- function(y, use.stringi = TRUE) {
     # 2020-06-18 Added na.last = FALSE to include NAs in the filter options:
     #sort(unique(y), na.last = FALSE)
     
     # Get first the unique values, then check that the length of these are not identical to the length of the vector, and then sort:
     uniquey <- unique(y)
     
-    #if(length(uniquey) < length(y)) {
-    #    sort(uniquey, na.last = FALSE)
-    #}
-    #else {
-    #    NULL
-    #}
-    # Get unique values only if not all are unique
-    ###if(length(uniquey) == length(y) && length(y) > 1) {
-    ###    NULL
-    ###}
-    ###else {
+    # Use stringi instead, which is upp to 4 times faster:
+    if(is.character(y) && use.stringi) {
+        stringi::stri_sort(uniquey, na_last = FALSE)
+    }
+    else {
         sort(uniquey, na.last = FALSE)
-    ###}
+    }
 }
 
 
@@ -1689,7 +1800,7 @@ getParameterTablePossibleValues <- function(projectPath, modelName, processID, f
 }
 
 # Get the possible values of a parameter table:
-getParameterVectorPossibleValues <- function(projectPath, modelName, processID, format, stopIfEmptyPossibleValues = FALSE, length1ToList = FALSE) {
+getParameterElementPossibleValues <- function(projectPath, modelName, processID, format, stopIfEmptyPossibleValues = FALSE, length1ToList = FALSE) {
     possibleValues <- getParameterFormatElement(
         projectPath = projectPath, 
         modelName = modelName, 
@@ -1777,7 +1888,39 @@ getParameterVectorInfo <- function(projectPath, modelName, processID, format, st
             processID = processID, 
             format = format
         ), 
-        parameterVectorPossibleValues = getParameterVectorPossibleValues(
+        parameterVectorPossibleValues = getParameterElementPossibleValues(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format, 
+            stopIfEmptyPossibleValues = stopIfEmptyPossibleValues, 
+            length1ToList = TRUE
+        )
+    )
+}
+
+
+
+#' 
+#' @export
+#' @rdname StoXGUI_interfaces
+#' 
+getParameterSingleInfo <- function(projectPath, modelName, processID, format, stopIfEmptyPossibleValues = FALSE) {
+    list(
+        parameterSingleTitle = getParameterFormatElement(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format, 
+            element = "title"
+        ), 
+        parameterSingleVariableTypes = getParameterVariableTypes(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            format = format
+        ), 
+        parameterSinglePossibleValues = getParameterElementPossibleValues(
             projectPath = projectPath, 
             modelName = modelName, 
             processID = processID, 

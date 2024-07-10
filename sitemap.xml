@@ -1,330 +1,112 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/AcousticPSU.html</loc>
-  </url>
-  <url>
-    <loc>/reference/BioticAssignment.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Bootstrap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/BootstrapData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/BootstrapNetCDF4.html</loc>
-  </url>
-  <url>
-    <loc>/reference/BootstrapNetCDF4Data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/DataTypes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/KnownDifferencesOldVersusNewStoX.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ModelData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PlotReportBootstrap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PlotReportBootstrapData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ProcessData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ProjectUtils.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Projects.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ReportBootstrap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ReportBootstrapData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ReportBootstrapNetCDF4.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ReportBootstrapNetCDF4Data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ResampleBioticAssignmentByPSU.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ResampleBioticAssignmentByStratum.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ResampleMeanLengthDistributionData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ResampleMeanNASCData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ResampleMeanSpeciesCategoryCatchData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/RstoxFramework.html</loc>
-  </url>
-  <url>
-    <loc>/reference/RstoxPackageStatus.html</loc>
-  </url>
-  <url>
-    <loc>/reference/StoXGUI_interfaces.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Stratum.html</loc>
-  </url>
-  <url>
-    <loc>/reference/addProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compareProjectToStoredOutputFiles.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compareProjectToStoredOutputFilesAll.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compareSweptAreaBaseline.html</loc>
-  </url>
-  <url>
-    <loc>/reference/convertKeys2.7To3.html</loc>
-  </url>
-  <url>
-    <loc>/reference/convertStoX2.7To3.html</loc>
-  </url>
-  <url>
-    <loc>/reference/duplicateProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/estimateTimeOfProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/expandDT.html</loc>
-  </url>
-  <url>
-    <loc>/reference/expandProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/expression2list.html</loc>
-  </url>
-  <url>
-    <loc>/reference/extractErrorIDs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/findProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fixedWidthTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/general_arguments.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getActiveProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getAvaiableTemplates.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getAvailableStoxFunctionNames.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getModelData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getOfficialRstoxPackageVersion.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessIDByOffset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessIDFromFunctionName.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessIDFromProcessName.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessIndexFromProcessID.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessNameFromProcessID.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessOutputElements.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessOutputFiles.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessOutputFolder.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessOutputTableNames.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessPlotOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProcessTable.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getProjectPaths.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getResamplableProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getResampleFunctions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getRstoxFrameworkDefinitions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getSubPlotNames_PlotReportBootstrap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/getTemplate.html</loc>
-  </url>
-  <url>
-    <loc>/reference/hasFileOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/initiateRstoxFramework.html</loc>
-  </url>
-  <url>
-    <loc>/reference/json2expression.html</loc>
-  </url>
-  <url>
-    <loc>/reference/list2expression.html</loc>
-  </url>
-  <url>
-    <loc>/reference/modifyModel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/modifyProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/modifyProject.html</loc>
-  </url>
-  <url>
-    <loc>/reference/modifyProjects.html</loc>
-  </url>
-  <url>
-    <loc>/reference/parseParameter.html</loc>
-  </url>
-  <url>
-    <loc>/reference/prependProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/processPropertyFormats.html</loc>
-  </url>
-  <url>
-    <loc>/reference/progressOfProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/purgeOutput.html</loc>
-  </url>
-  <url>
-    <loc>/reference/readModelData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/readProcessOutputFile.html</loc>
-  </url>
-  <url>
-    <loc>/reference/readStoX2.7OutputFile.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rearrangeProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/resetModel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runFunction.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runModel.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runProcess.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runProject.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runProject_ReplaceAcousticFiles.html</loc>
-  </url>
-  <url>
-    <loc>/reference/runProjects.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stopProcesses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/stoxFunctionAttributes.html</loc>
-  </url>
-  <url>
-    <loc>/reference/toJSON_Rstox.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unReDoProject.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unlistToDataType.html</loc>
-  </url>
-  <url>
-    <loc>/reference/unzipProject.html</loc>
-  </url>
-  <url>
-    <loc>/reference/writeActiveProcessID.html</loc>
-  </url>
-  <url>
-    <loc>/reference/writeProjectDescription.html</loc>
-  </url>
-  <url>
-    <loc>/reference/writeProjectDescriptionJSON.html</loc>
-  </url>
-  <url>
-    <loc>/reference/writeStoxJsonSchema.html</loc>
-  </url>
-  <url>
-    <loc>/reference/write_list_as_tables_NetCDFF4.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/AcousticPSU.html</loc></url>
+<url><loc>/reference/BioticAssignment.html</loc></url>
+<url><loc>/reference/BioticPSU.html</loc></url>
+<url><loc>/reference/Bootstrap.html</loc></url>
+<url><loc>/reference/BootstrapData.html</loc></url>
+<url><loc>/reference/DataTypes.html</loc></url>
+<url><loc>/reference/KnownDifferencesOldVersusNewStoX.html</loc></url>
+<url><loc>/reference/ModelData.html</loc></url>
+<url><loc>/reference/PlotReportBootstrap.html</loc></url>
+<url><loc>/reference/PlotReportBootstrapData.html</loc></url>
+<url><loc>/reference/ProcessData.html</loc></url>
+<url><loc>/reference/ProjectUtils.html</loc></url>
+<url><loc>/reference/Projects.html</loc></url>
+<url><loc>/reference/ReportBootstrap.html</loc></url>
+<url><loc>/reference/ReportBootstrapData.html</loc></url>
+<url><loc>/reference/ResampleBioticAssignmentByAcousticPSU.html</loc></url>
+<url><loc>/reference/ResampleBioticAssignmentByStratum.html</loc></url>
+<url><loc>/reference/ResampleMeanLengthDistributionData.html</loc></url>
+<url><loc>/reference/ResampleMeanNASCData.html</loc></url>
+<url><loc>/reference/ResampleMeanSpeciesCategoryCatchData.html</loc></url>
+<url><loc>/reference/RstoxFramework.html</loc></url>
+<url><loc>/reference/RstoxPackageStatus.html</loc></url>
+<url><loc>/reference/StoXGUI_interfaces.html</loc></url>
+<url><loc>/reference/Stratum.html</loc></url>
+<url><loc>/reference/addProcess.html</loc></url>
+<url><loc>/reference/bootstrapRDataToNetCDF4.html</loc></url>
+<url><loc>/reference/compareProjectToStoredOutputFiles.html</loc></url>
+<url><loc>/reference/compareProjectToStoredOutputFilesAll.html</loc></url>
+<url><loc>/reference/compareSweptAreaBaseline.html</loc></url>
+<url><loc>/reference/convertKeys2.7To3.html</loc></url>
+<url><loc>/reference/convertStoX2.7To3.html</loc></url>
+<url><loc>/reference/duplicateProcess.html</loc></url>
+<url><loc>/reference/estimateTimeOfProcesses.html</loc></url>
+<url><loc>/reference/expandDT.html</loc></url>
+<url><loc>/reference/expandProcess.html</loc></url>
+<url><loc>/reference/expression2list.html</loc></url>
+<url><loc>/reference/extractErrorIDs.html</loc></url>
+<url><loc>/reference/findProcess.html</loc></url>
+<url><loc>/reference/fixedWidthTable.html</loc></url>
+<url><loc>/reference/general_arguments.html</loc></url>
+<url><loc>/reference/getActiveProcess.html</loc></url>
+<url><loc>/reference/getAvaiableTemplates.html</loc></url>
+<url><loc>/reference/getAvailableStoxFunctionNames.html</loc></url>
+<url><loc>/reference/getModelData.html</loc></url>
+<url><loc>/reference/getOfficialRstoxPackageVersion.html</loc></url>
+<url><loc>/reference/getOutputVariablesUsedInReport.html</loc></url>
+<url><loc>/reference/getProcess.html</loc></url>
+<url><loc>/reference/getProcessIDByOffset.html</loc></url>
+<url><loc>/reference/getProcessIDFromFunctionName.html</loc></url>
+<url><loc>/reference/getProcessIDFromProcessName.html</loc></url>
+<url><loc>/reference/getProcessIndexFromProcessID.html</loc></url>
+<url><loc>/reference/getProcessNameFromProcessID.html</loc></url>
+<url><loc>/reference/getProcessOutput.html</loc></url>
+<url><loc>/reference/getProcessOutputElements.html</loc></url>
+<url><loc>/reference/getProcessOutputFiles.html</loc></url>
+<url><loc>/reference/getProcessOutputFolder.html</loc></url>
+<url><loc>/reference/getProcessOutputTableNames.html</loc></url>
+<url><loc>/reference/getProcessPlotOutput.html</loc></url>
+<url><loc>/reference/getProcessTable.html</loc></url>
+<url><loc>/reference/getProjectPaths.html</loc></url>
+<url><loc>/reference/getResamplableProcesses.html</loc></url>
+<url><loc>/reference/getResampleFunctions.html</loc></url>
+<url><loc>/reference/getRstoxFrameworkDefinitions.html</loc></url>
+<url><loc>/reference/getSubPlotNames_PlotReportBootstrap.html</loc></url>
+<url><loc>/reference/getTemplate.html</loc></url>
+<url><loc>/reference/hasFileOutput.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/initiateRstoxFramework.html</loc></url>
+<url><loc>/reference/json2expression.html</loc></url>
+<url><loc>/reference/list2expression.html</loc></url>
+<url><loc>/reference/modifyModel.html</loc></url>
+<url><loc>/reference/modifyProcess.html</loc></url>
+<url><loc>/reference/modifyProject.html</loc></url>
+<url><loc>/reference/modifyProjects.html</loc></url>
+<url><loc>/reference/parseParameter.html</loc></url>
+<url><loc>/reference/prependProcess.html</loc></url>
+<url><loc>/reference/processPropertyFormats.html</loc></url>
+<url><loc>/reference/progressOfProcesses.html</loc></url>
+<url><loc>/reference/purgeOutput.html</loc></url>
+<url><loc>/reference/readBootstrapData.html</loc></url>
+<url><loc>/reference/readMemoryFile.html</loc></url>
+<url><loc>/reference/readModelData.html</loc></url>
+<url><loc>/reference/readProcessOutputFile.html</loc></url>
+<url><loc>/reference/readStoX2.7OutputFile.html</loc></url>
+<url><loc>/reference/rearrangeProcesses.html</loc></url>
+<url><loc>/reference/removeProcess.html</loc></url>
+<url><loc>/reference/removeProcesses.html</loc></url>
+<url><loc>/reference/resetModel.html</loc></url>
+<url><loc>/reference/runFunction.html</loc></url>
+<url><loc>/reference/runModel.html</loc></url>
+<url><loc>/reference/runProcess.html</loc></url>
+<url><loc>/reference/runProcesses.html</loc></url>
+<url><loc>/reference/runProject.html</loc></url>
+<url><loc>/reference/runProject_ReplaceAcousticFiles.html</loc></url>
+<url><loc>/reference/runProjects.html</loc></url>
+<url><loc>/reference/stopProcesses.html</loc></url>
+<url><loc>/reference/stoxFunctionAttributes.html</loc></url>
+<url><loc>/reference/unReDoProject.html</loc></url>
+<url><loc>/reference/unlistToDataType.html</loc></url>
+<url><loc>/reference/unzipProject.html</loc></url>
+<url><loc>/reference/writeActiveProcessID.html</loc></url>
+<url><loc>/reference/writeProjectDescription.html</loc></url>
+<url><loc>/reference/writeProjectDescriptionJSON.html</loc></url>
+<url><loc>/reference/writeStoxJsonSchema.html</loc></url>
+<url><loc>/reference/write_list_as_tables_NetCDFF4.html</loc></url>
 </urlset>
+

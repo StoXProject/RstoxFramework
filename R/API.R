@@ -182,6 +182,9 @@ runProject <- function(
     ...
 ) {
     
+    if(isTRUE(save)) {
+        warning("The default save = TRUE will be changed to save = FALSE in RstoxFramework 4.1.0.")
+    }
     
     if(msg) {
         startTime <- proc.time()[3]

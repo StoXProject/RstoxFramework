@@ -6,7 +6,7 @@
 \usage{
 getProcessIDFromProcessName(
   projectPath,
-  modelName,
+  modelName = NULL,
   processName,
   only.processID = FALSE
 )

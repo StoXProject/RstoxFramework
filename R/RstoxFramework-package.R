@@ -24,12 +24,14 @@ utils::globalVariables(c(
 	 "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum", "TableName",
 	 "WeightingFactor", "assignmentPasted", "canShowInMap", "capture.output", "ch",
 	 "currentVersion", "enabled", "freq", "functionInputProcessIDs", "functionInputs",
-	 "functionInputError", "functionName", "functionOutputDataType", "hasBeenRun", "hasProcessData",
-	 "lenght", "modelName", "name", "numStations", "oldCurrentVersion", "offset", "packageName",
-	 "possibleValues", "processDirty", "processID", "processIndex", "processName", "projectPath",
-	 "resampledCountWithUniqueName", "st_linestring", "st_sf", "st_sfc", "start_time", "tableName",
-	 "terminalProcess", "transceiver", "usedInProcessIDs", "usedInProcessIndices",
-	 "usedInProcessNames", "value", "variableName", "verbose", "weightsPasted"))
+	 "functionInputError", "functionInputsRecursive", "functionName", "functionOutputDataType",
+	 "hasBeenRun", "hasProcessData", "lenght", "modelName", "name", "numStations",
+	 "oldCurrentVersion", "offset", "packageName", "possibleValues", "processDirty", "processID",
+	 "processIndex", "processName", "projectPath", "resampledCountWithUniqueName", "st_linestring",
+	 "st_sf", "st_sfc", "start_time", "tableName", "terminalProcess", "transceiver",
+	 "usedInProcessIDs", "usedInProcessIndices", "usedInProcessNames", "usedInRecursiveProcessIDs",
+	 "usedInRecursiveProcessIndices", "usedInRecursiveProcessNames", "value", "variableName",
+	 "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

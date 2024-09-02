@@ -472,6 +472,7 @@ initiateRstoxFramework <- function(){
         "MeanNASCData",
         "MeanLengthDistributionData", 
         "MeanSpeciesCategoryCatchData", 
+        "PreySpeciesCategoryCatchData", 
         "BioticAssignment"
     )
     # ... and the reample functions, 
@@ -479,6 +480,7 @@ initiateRstoxFramework <- function(){
         MeanNASCData = "ResampleMeanNASCData",
         MeanLengthDistributionData = "ResampleMeanLengthDistributionData", 
         MeanSpeciesCategoryCatchData = "ResampleMeanSpeciesCategoryCatchData", 
+        PreySpeciesCategoryCatchData = "ResamplePreySpeciesCategoryCatchData", 
         #BioticAssignment = "ResampleBioticAssignment" 
         BioticAssignment = c("ResampleBioticAssignmentByStratum", "ResampleBioticAssignmentByAcousticPSU")
     )

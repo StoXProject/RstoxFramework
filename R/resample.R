@@ -6,7 +6,7 @@
 #' @param outputData The output of the function from an earlier run.
 #' @param outputMemoryFile The path to the output memory file to copy the \code{outputData} to in the case that \code{UseOutputData} is TRUE.
 #' @param projectPath The path to the project to containing the baseline to bootstrap.
-#' @param BootstrapMethodTable A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}. Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") to get a list of the implemented resampling functions. Note that if a process is selected inn \code{BootstrapMethodTable} that is not used in the model up to the \code{OutputProcesses}, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).
+#' @param BootstrapMethodTable A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}. Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") to get a list of the implemented resampling functions. Note that if a process is selected in \code{BootstrapMethodTable} that is not used in the model up to the \code{OutputProcesses}, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).
 #' @param NumberOfBootstraps Integer: The number of bootstrap replicates.
 #' @param OutputProcesses A vector of the processes to save from each bootstrap replicate.
  #' @param OutputVariables An optional list of variables to keep in the output. A typical set of variables could be ["Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"], which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in \code{OutputVariables}. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects and faster writing/reading of that file. The \code{OutputVariables} are extracted for all processes listed in \code{OutputProcesses}.
@@ -15,7 +15,7 @@
 #' @param BaselineSeedTable A table of ProcessName and Seed, giving the seed to use for the Baseline processes that requires a Seed parameter. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}.
 #' 
 #' @details A copy of the project is made for each core given by \code{NumberOfCores}. In the case that NumberOfCores == 1, this is still done for safety.
-#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method  in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.
+#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate if the \code{ResampleFunction} specified in the \code{BootstrapMethodTable} is "ResampleBioticAssignmentByStratum" (the only option before StoX 4.0.0). This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density. In this case it is adviced to use \code{ResampleFunction} "ResampleBioticAssignmentByAcousticPSU", which will resample the assigned hauls to each individual AcousticPSU. Using this \code{ResampleFunction} "ResampleBioticAssignmentByAcousticPSU" will however require a suffucuent number of Hauls assigned to each AcousticPSU to achieve meaningful bootstrapping. Surely, only one assigned Haul is not sufficient, and will lead to a warning.
 #' 
 #' @return
 #' A \code{\link{BootstrapData}} object, which is a list of the RstoxData \code{\link[RstoxData]{DataTypes}} and RstoxBase \code{\link[RstoxBase]{DataTypes}}.
@@ -146,13 +146,19 @@ Bootstrap <- function(
     allWarnings <- uniqueText(allWarnings, tag = "warnings")
     allErrors <- uniqueText(allErrors, tag = "errors")
     if(length(allMessages)) {
-        lapply(allMessages, message)
+        # In order to avoid the warning "In lapply(c(allWarnings), warning) :longer object length is not a multiple of shorter object length" we do a for loop:
+        #lapply(allMessages, message)
+        for(ind in seq_along(allMessages)) message(allMessages[ind])
     }
     if(length(allWarnings)) {
-        lapply(allWarnings, warning)
+        # In order to avoid the warning "In lapply(c(allWarnings), warning) :longer object length is not a multiple of shorter object length" we do a for loop:
+        #lapply(allWarnings, warning)
+        for(ind in seq_along(allWarnings)) warning(allWarnings[ind])
     }
     if(length(allErrors)) {
-        lapply(allErrors, stop)
+        # In order to avoid the warning "In lapply(c(allWarnings), warning) :longer object length is not a multiple of shorter object length" we do a for loop:
+        #lapply(allErrors, stop)
+        for(ind in seq_along(allErrors)) stop(allErrors[ind])
     }
     
      
@@ -557,7 +563,7 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
     projecName <- basename(projectPath)
     # As of 2021-05-27 (v3.0.23) make a copy even if running on only one core. This for safety:
     #if(NumberOfCores > 1)  {
-    projectPath_copies <- file.path(tempdir(), paste0(projecName, seq_len(NumberOfCores)))
+    projectPath_copies <- file.path(tempdir(), paste(projecName, seq_len(NumberOfCores), sep = "_"))
     message("Copying the project ", projecName, " to the ", length(projectPath_copies), " projects \n\t", paste(projectPath_copies, collapse = "\n\t"))
     temp <- RstoxData::mapplyOnCores(
         copyProject, 
@@ -1576,6 +1582,69 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
 }
 
 
+#' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
+#' 
+#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' 
+#' @inheritParams RstoxBase::ModelData
+#' @inheritParams general_arguments
+#' 
+#' @export
+#' 
+ResamplePreySpeciesCategoryCatchData <- function(PreySpeciesCategoryCatchData, Seed) {
+    
+    # This function will be renamed to ResampleBioticPSUsInStratum
+    
+    # Warn if there are strata with only one PSU, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        PreySpeciesCategoryCatchData$Data, 
+        toResample = "PSU",
+        within  = "Stratum", 
+        functionName = "ResamplePreySpeciesCategoryCatchData", 
+        toResamplePrefix = "Biotic"
+    )
+    onlyOneToResample_Warning(
+        PreySpeciesCategoryCatchData$Data, 
+        toResample = "Individual",
+        within  = "Sample", 
+        functionName = "ResamplePreySpeciesCategoryCatchData", 
+        toResamplePrefix = ""
+    )
+    onlyOneToResample_Warning(
+        PreySpeciesCategoryCatchData$Data, 
+        toResample = "PreySpeciesCategory",
+        within  = "Individual", 
+        functionName = "ResamplePreySpeciesCategoryCatchData", 
+        toResamplePrefix = ""
+    )
+    
+    # Resample PSUs within Strata, modifying the weighting variable of MeanSpeciesCategoryCatchData:
+    PreySpeciesCategoryCatchData <- resampleDataBy(
+        data = PreySpeciesCategoryCatchData, 
+        seed = Seed, 
+        varToScale = "TotalPreyCatchWeight", 
+        varToResample = "PSU", 
+        resampleBy = "Stratum"
+    )
+    PreySpeciesCategoryCatchData <- resampleDataBy(
+        data = PreySpeciesCategoryCatchData, 
+        seed = Seed, 
+        varToScale = "TotalPreyCatchWeight", 
+        varToResample = "Individual", 
+        resampleBy = "Sample"
+    )
+    PreySpeciesCategoryCatchData <- resampleDataBy(
+        data = PreySpeciesCategoryCatchData, 
+        seed = Seed, 
+        varToScale = "TotalPreyCatchWeight", 
+        varToResample = "PreySpeciesCategory", 
+        resampleBy = "Individual"
+    )
+    
+    return(PreySpeciesCategoryCatchData)
+}
+
+
 ### #' Resamples biotic PSUs
 ### #' 
 ### #' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
@@ -1621,7 +1690,8 @@ ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
         BioticAssignment, 
         toResample = "Haul",
         within  = "Stratum",
-        functionName = "ResampleBioticAssignmentByStratum"
+        functionName = "ResampleBioticAssignmentByStratum",
+        toResamplePrefix = "assigned "
     )
     
     # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
@@ -1657,7 +1727,7 @@ ResampleBioticAssignmentByAcousticPSU <- function(BioticAssignment, Seed) {
         toResample = "Haul",
         within  = "PSU", 
         functionName = "ResampleBioticAssignmentByAcousticPSU",
-        toResamplePrefix = "Acoustic"
+        toResamplePrefix = "assigned "
     )
     
     # Resample Hauls within Strata, modifying the weighting variable of BioticAssignment:
@@ -1782,7 +1852,7 @@ ReportBootstrap <- function(
     BootstrapReportFunction <- RstoxData::match_arg_informative(BootstrapReportFunction)
     
     if(!length(BootstrapData)) {
-        stop("The Bootstrap process must been run.")
+        return(NULL)
     }
     
     # Issue a warning if RemoveMissingValues = TRUE:

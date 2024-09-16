@@ -1,3 +1,11 @@
+# RstoxFramework v4.0.1-9001 (2024-09-01)
+* Fixed bug where a ReportBootstrap process could be run even if the Baseline model or the Bootstrap process was reset. Also introduced the columns usedInRecursiveProcessIndices, usedInRecursiveProcessIDs and usedInRecursiveProcessNames in getProcessTable() to support resetting processes using outputs from processes in previous tables.
+* Fixed bug where defaults were not given for Percentages and GroupingVariables in ReportBootstrap().
+* Removed stop in ReportBootstrap when Bootstrap() is not run, and rather showing the default warning.
+* Added resample function ResamplePreySpeciesCategoryCatchData().
+* Added vectorised support in getProcessNameFromProcessID() and getProcessIDFromProcessName()
+
+
 # RstoxFramework v4.0.0 (2024-07-09)
 * Final release for StoX 4.0.0.
 

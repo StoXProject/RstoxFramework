@@ -10,10 +10,6 @@
 getProcessTable(
   projectPath,
   modelName = NULL,
-  startProcess = 1,
-  endProcess = Inf,
-  afterProcessID = NULL,
-  beforeProcessID = NULL,
   argumentFilePaths = NULL,
   only.valid = TRUE,
   return.processIndex = FALSE,
@@ -63,14 +59,6 @@ getProcessAndFunctionNames(
 
 \item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
-\item{startProcess}{The process index, name or ID at which to start the model run.}
-
-\item{endProcess}{The process index, name or ID at which to stop the model run.}
-
-\item{afterProcessID}{The ID of the process after which to get the process table or to place a process.}
-
-\item{beforeProcessID}{The ID of the process before which to get the process table.}
-
 \item{argumentFilePaths}{A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.}
 
 \item{only.valid}{Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).}
@@ -78,6 +66,14 @@ getProcessAndFunctionNames(
 \item{return.processIndex}{Logical: If TRUE include the process indices as a sequence starting from 1 in each model.}
 
 \item{return.processFlow}{Logical: If TRUE include columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated.}
+
+\item{startProcess}{The process index, name or ID at which to start the model run.}
+
+\item{endProcess}{The process index, name or ID at which to stop the model run.}
+
+\item{afterProcessID}{The ID of the process after which to get the process table or to place a process.}
+
+\item{beforeProcessID}{The ID of the process before which to get the process table.}
 
 \item{check.only.enabled}{Logical: If TRUE check input errors only for enabled procecsses.}
 

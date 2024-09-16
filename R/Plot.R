@@ -168,6 +168,10 @@ getSubPlotNames_PlotReportBootstrap <- function(ReportBootstrapData, GroupingVar
 
 PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
     
+    # Abort if no ReportBootstrapData are given:
+    if(!length(plotArguments$ReportBootstrapData)) {
+        return(NULL)
+    }
     if(length(ind)) {
         plotArguments$ReportBootstrapData <- plotArguments$ReportBootstrapData[[ind]]
     }

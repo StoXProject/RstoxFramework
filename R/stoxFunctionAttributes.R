@@ -103,7 +103,14 @@ stoxFunctionAttributes <- list(
             # The specification parameters for Baseline:
             RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Baseline", functionName = "ReportFunction"), 
             # The specification parameters for Boostrap:
-            RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Bootstrap", functionName = "BootstrapReportFunction")
+            RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Bootstrap", functionName = "BootstrapReportFunction"), 
+            list(
+                TargetVariableUnit = list(
+                    ReportFunction = function(functionArguments) {
+                        !startsWith(functionArguments$ReportFunction, "fractionOf")
+                    }
+                )
+            )
         ), 
         functionParameterDefaults = list(
             Percentages = c(5, 50, 95), 

@@ -28,7 +28,7 @@ jobs:
           - {os: macOS-latest,   r: 'release', pkgext: '.tgz'}
           - {os: macOS-latest,   r: '4.3',  pkgext: '.tgz'}
           - {os: macOS-latest,   r: '4.2',  pkgext: '.tgz'} # Temporarily disabling this due some update in gdal
-          - {os: macOS-latest,   r: '4.1',  pkgext: '.tgz'} # Temporarily disabling this due to new sf release not ready for R 4.2
+          # - {os: macOS-latest,   r: '4.1',  pkgext: '.tgz'} # We do not have R 4.1.on the new arm64
           
           # macOS-13 will use the big-sur-x86_64 folder when deploying to the drat repo:
           - {os: macOS-13,   r: 'release', pkgext: '.tgz'}

@@ -1,5 +1,6 @@
 # RstoxFramework v4.0.1-9002 (2024-09-18)
 * Changed to show TargetVariableUnit in ReportBootstrap() only when the ReportFunction is not a fraction (fractionOfOccurrence or fractionOfSum).
+* Changed the check-full.yaml to run both macOS arm64 and x86_64.
 
 
 # RstoxFramework v4.0.1-9001 (2024-09-01)

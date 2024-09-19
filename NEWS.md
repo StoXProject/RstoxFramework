@@ -1,3 +1,8 @@
+# RstoxFramework v4.0.1-9002 (2024-09-18)
+* Changed to show TargetVariableUnit in ReportBootstrap() only when the ReportFunction is not a fraction (fractionOfOccurrence or fractionOfSum).
+* Changed the check-full.yaml to run both macOS arm64 and x86_64.
+
+
 # RstoxFramework v4.0.1-9001 (2024-09-01)
 * Fixed bug where a ReportBootstrap process could be run even if the Baseline model or the Bootstrap process was reset. Also introduced the columns usedInRecursiveProcessIndices, usedInRecursiveProcessIDs and usedInRecursiveProcessNames in getProcessTable() to support resetting processes using outputs from processes in previous tables.
 * Fixed bug where defaults were not given for Percentages and GroupingVariables in ReportBootstrap().

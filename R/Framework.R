@@ -2330,17 +2330,17 @@ getStoxFunctionMetaData <- function(functionName, metaDataName = NULL, showWarni
     }
 }
 
-# Function to return the names of the arguments to show for a function:
-getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePaths = NULL, return.only.names = TRUE) {
+# Function to return the names of the arguments to show for a function. This involves reading both functionInputs and functionParameters:
+getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePaths = NULL, return.only.names = TRUE, ignore.condition = NULL) {
     
     # Get the function name and arguments:
     functionName <- getFunctionName(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
     # Get the function argument hierarchy:
     functionArgumentHierarchy <- getStoxFunctionMetaData(functionName, "functionArgumentHierarchy", showWarnings = FALSE)
     
-    # Get the function inputs and the function parameters:
-    functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
-    functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
+    # Get the function inputs and the function parameters (using only.valid = FALSE is important here to avoid circular dependency, as both getFunctionInputs() and getFunctionParameters() uses getArgumentsToShow() in the case that only.valid = TRUE):
+    functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths, only.valid = FALSE)
+    functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths, only.valid = FALSE)
     
     if(length(functionArgumentHierarchy) && any(rapply(functionArgumentHierarchy, is.function))) {
         
@@ -2355,11 +2355,12 @@ getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePa
     }
     functionArguments <- c(functionInputs, functionParameters)
     
-    
+    # This function is placed in RstoxData, but I forgot why, except that it may be needed in backward compatibility actions or something?:
     RstoxData::applyFunctionArgumentHierarchy(
         functionArgumentHierarchy = functionArgumentHierarchy, 
         functionArguments = functionArguments, 
-        return.only.names = return.only.names
+        return.only.names = return.only.names, 
+        ignore.condition = ignore.condition
     )
 }
 
@@ -2532,7 +2533,7 @@ getFunctionName <- function(projectPath, modelName, processID, argumentFilePaths
     )
 }
 
-getFunctionInputs <- function(projectPath, modelName, processID, only.valid = FALSE, argumentFilePaths = NULL) {
+getFunctionInputs <- function(projectPath, modelName, processID, only.valid = FALSE, argumentFilePaths = NULL, ignore.condition = NULL) {
     functionInputs <- getProjectMemoryData(
         projectPath, 
         modelName = modelName, 
@@ -2542,8 +2543,9 @@ getFunctionInputs <- function(projectPath, modelName, processID, only.valid = FA
         argumentFilePaths = argumentFilePaths
     )
     
+    # This can look like circular dependency, as argumentsToShow() uses getFunctionInputs(), but argumentsToShow() uses getFunctionInputs() with only.valid = FALSE
     if(only.valid) {
-        argumentsToShow <- getArgumentsToShow(projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths)
+        argumentsToShow <- getArgumentsToShow(projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths, ignore.condition = ignore.condition)
         functionInputs <- functionInputs[intersect(names(functionInputs), argumentsToShow)]
     }
     
@@ -3089,21 +3091,21 @@ getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = N
     
     # Add columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated:
     if(return.processFlow) {
-        # Add input processIDs:
-        processTable[, functionInputProcessIDs := lapply(functionInputs, function(x) processID[processName %in% x])]
+        # Add input processIDs (used only by the GUI). Note that functionInputs_UseProcessData is used here, since we want the GUI to show the process workflow including the processes hidden by UseProcessData:
+        processTable[, functionInputProcessIDs := lapply(functionInputs_UseProcessData, function(x) processID[processName %in% x])]
         
         # Used in:
         # Get process indices
-        processTable[, usedInProcessIndices := lapply(processName, function(x) which(sapply(functionInputs, function(y) x %in% y)))]
-        # Convert these to process IDs and names:
+        processTable[, usedInProcessIndices := lapply(processName, function(x) which(sapply(functionInputs_UseProcessData, function(y) x %in% y)))]
+        # Convert these to process IDs (used only by the GUI) and names (not yet used):
         processTable[, usedInProcessIDs := lapply(usedInProcessIndices, function(x) processID[x])]
-        processTable[, usedInProcessNames := lapply(usedInProcessIndices, function(x) processName[x])]
+        #processTable[, usedInProcessNames := lapply(usedInProcessIndices, function(x) processName[x])]
         
         # Used in recursive:
         # Get process indices
         processTable[, usedInRecursiveProcessIndices := lapply(processName, function(x) which(sapply(functionInputsRecursive, function(y) x %in% y)))]
-        # Convert these to process IDs and names:
-        processTable[, usedInRecursiveProcessIDs := lapply(usedInRecursiveProcessIndices, function(x) processID[x])]
+        # Convert these to process IDs (not yet used) and names (used in resetModel):
+        #processTable[, usedInRecursiveProcessIDs := lapply(usedInRecursiveProcessIndices, function(x) processID[x])]
         processTable[, usedInRecursiveProcessNames := lapply(usedInRecursiveProcessIndices, function(x) processName[x])]
         
         # Add a column identifying processes which are not used in any other enabled processes:
@@ -3245,7 +3247,6 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
     
     
     ##### (3) Add function inputs: #####
-    #functionInputs <- lapply(processTable$processID, function(processID) getFunctionInputs(projectPath, modelName, processID, only.valid = only.valid, argumentFilePaths = argumentFilePaths))
     functionInputs <- mapply(
         getFunctionInputs, 
         projectPath = projectPath, 
@@ -3258,6 +3259,21 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
         SIMPLIFY = FALSE
     )
     processTable[, functionInputs := ..functionInputs]
+    
+    # Added functionInputs_UseProcessData as the functionInputs including those that are hidden by UserProcessData, which are used to determine terminal processes:
+    functionInputs_UseProcessData <- mapply(
+        getFunctionInputs, 
+        projectPath = projectPath, 
+        modelName = processTable$modelName, 
+        processID = processTable$processID, 
+        MoreArgs = list(
+            only.valid = only.valid, 
+            argumentFilePaths = argumentFilePaths, 
+            ignore.condition = "UseProcessData"
+        ), 
+        SIMPLIFY = FALSE
+    )
+    processTable[, functionInputs_UseProcessData := ..functionInputs_UseProcessData]
     
     # Get also the recursive function inputs:
     processTable[, functionInputsRecursive := functionInputs]
@@ -3280,7 +3296,8 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
     }
     # For Bootstrap processes use all processes from Baseline:
     allBaselineProcesses <- unlist(processTable[modelName == "baseline", processName])
-    processTable[functionName == "RstoxFramework::Bootstrap", functionInputsRecursive := allBaselineProcesses]
+    atBootstrapProcesses <- processTable[, functionName == "RstoxFramework::Bootstrap"]
+    processTable[atBootstrapProcesses, functionInputsRecursive := rep(list(allBaselineProcesses), sum(atBootstrapProcesses))]
     
     
     return(processTable)
@@ -3779,7 +3796,7 @@ modifyFunctionParameters <- function(projectPath, modelName, processID, newFunct
         processID = processID
     )
     
-    # Modify the funciton parameters:
+    # Modify the function parameters:
     modifiedFunctionParameters <- setListElements(
         list = functionParameters, 
         insertList = newFunctionParameters, 
@@ -5034,7 +5051,7 @@ isProcess <- function(x) {
 #' @param returnProcessOutput Logical: If TRUE return the process output immediately after it is available. Used to get filter options.
 #' @param fileOutput Logical: If TRUE save the output as a text file (or other format specified by the class or attributes of the output). If NULL (defafult) use the corresponding parameter of the process.
 #' @param setUseProcessDataToTRUE Logical: If TRUE set the UseProcessData function parameter to TRUE in the process memory after execution, if the process is a ProcessData process.
-#' @param replaceArgs A list of function parameters and inputs to override.
+#' @param replaceArgs A list of function parameters and inputs to override. E.g., to set UseProcessData to FALSE in a process data process (e.g., if one wants to read in a resource file again) use list(UseProcessData = FALSE).
 #' @param replaceData Either the data to replace the process output by, or a list of two elements \code{FunctionName} and \code{MoreArgs}, giving a function to apply to the output from the process with additional arguments stored in \code{MoreArgs}. The function is applied using \code{\link{do.call}}, with \code{args} being a list with the process output first, followed by the \code{MoreArgs}.
 #' @param try Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.
 #' 
@@ -5124,8 +5141,8 @@ runProcess <- function(
         processOutput <- tryCatch(
             do.call(
                 getFunctionNameFromPackageFunctionName(process$functionName), 
-                functionArguments, 
-                envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
+                functionArguments#, 
+                #envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
             ), 
             error = function(err) {
                 failed <<- TRUE
@@ -5136,8 +5153,8 @@ runProcess <- function(
     else {
         processOutput <- do.call(
             getFunctionNameFromPackageFunctionName(process$functionName), 
-            functionArguments, 
-            envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
+            functionArguments#, 
+            #envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
         )
     }
     
@@ -5180,6 +5197,9 @@ runProcess <- function(
     else if(length(replaceData)) {
         processOutput <- replaceData
     }
+    
+    # Clear memory to avoid memory leak when running parallel bootstrapping. NEVER remove this unless the performance has been thoroughly tested by running bootstrap on multiple large StoX projects sequentially, to give R a chance to pile up memory:
+    #gc()
     
     if(failed){
         return(FALSE)
@@ -5670,7 +5690,7 @@ unlistProcessOutput <- function(processOutput) {
 }
 
 
-#' Get output data from processes of a StoX model
+#' Get output data from processes of an open StoX project
 #' 
 #' @inheritParams general_arguments
 #' @inheritParams readBootstrapData
@@ -6839,7 +6859,7 @@ purgeOutput <- function(projectPath, modelName) {
 #' @param force.restart Logical: If TRUE, start the processes even if the status file indicating that the model is being run exists. This is useuful when something crached in a preivous run, in which case the model is still appearing as running.
 #' @param prugeStopFile Logical: Should the file that signals that the model should be stopped be deleted if present before running (used by the GUI).
 #' @param replaceDataList A list named by the processes to replace output data for. See \code{\link{runProcess}}.
-#' @param replaceArgsList A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.
+#' @param replaceArgsList A list of \code{replaceArgs} (see \code{\link{runProcess}}) holding parameters to replace in the function call, named by the processes to modify.
 #' @param prependProcessList A list of \code{values} used in \code{\link{prependProcess}}, named by the processes to prepend a process to.
 #' @param ... \code{replaceArgsList} can also be given directly.
 #' 
@@ -6963,7 +6983,6 @@ runProcesses <- function(
             fileOutput = fileOutput, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
             purge.processData = purge.processData, 
-            #replaceArgs = replaceArgsList, 
             try = try
         )
     )

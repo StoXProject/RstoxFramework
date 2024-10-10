@@ -580,6 +580,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
     
 }
 
+
 hasOnlyOneTabble <- function(x) {
     is.list(x) && !data.table::is.data.table(x) && length(x) == 1
 }
@@ -678,8 +679,12 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, ...) {
             ...  # Used in readBootstrapData()
         )
     }
+    #else if(tolower(ext) %in% "png") {
+    #    output <- path
+    #}
     else {
-        stop("Unknown file extension for StoX output file: ", ext, ". Path: ", path, ".")
+        warning("Unknown file extension for StoX output file: ", ext, ". Returning the file path: ", path, ".")
+        output <- path
     }
     
     if(emptyStringAsNA  && data.table::is.data.table(output)) {

@@ -1,3 +1,20 @@
+# RstoxFramework v4.0.1-9003 (2024-10-18)
+* Fixed bug in colors of processes to not show bold for ProcessData processes that are used by a later ProcessData process where this use is hidden by UseProcessData.
+* Added the resampling function Resample_PreySpeciesCategoryCatchData_Hierarchical, which does actual resampling by repeating entries that are sampled more than once, as opposed to scaling the data variable.
+* Renamed the resampling functions used in Bootstrap to the following convension: "Resample" + "_" + dataType + "_" + specification, where dataType is the StoX data type such as "MeanNASCData" and "BioticAssignment", and specification is any string in CamelCase describing the resampling function, such as "ByStratum" and "ByAcousticPSU":
+    * "ResampleMeanLengthDistributionData" -> "Resample_MeanLengthDistributionData"
+    * "ResampleMeanSpeciesCategoryCatchData" -> "Resample_MeanSpeciesCategoryCatchData"
+    * "ResamplePreySpeciesCategoryCatchData" -> "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling"
+    * "ResampleBioticAssignmentByStratum" -> "Resample_BioticAssignment_ByStratum"
+    * "ResampleBioticAssignmentByAcousticPSU" -> "Resample_BioticAssignment_ByAcousticPSU"
+    * "ResampleMeanNASCData" -> "Resample_MeanNASCData"
+* Added the resampling function "Resample_PreySpeciesCategoryCatchData_Hierarchical" which should replace "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling" (the latter kept for testing in this pre-release).
+* Fixed bug where the function inputs to a process data process were not considered when UseProcessData is TRUE, with the consequence that the process was marked as terminal (bold in the GUI).
+* Added the progress of writing the nc file in Bootstrap() to the progress file (which is used by estimateTimeOfProcesses()).
+* Added explicit error message when a variable is requested that does not exist in a Bootstrap nc file.
+* Relaxed error to warning for unknown file extension in output files read through readModelData().
+
+
 # RstoxFramework v4.0.1-9002 (2024-09-18)
 * Changed to show TargetVariableUnit in ReportBootstrap() only when the ReportFunction is not a fraction (fractionOfOccurrence or fractionOfSum).
 * Changed the check-full.yaml to run both macOS arm64 and x86_64.

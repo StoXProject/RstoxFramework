@@ -332,3 +332,4 @@ PlotReportBootstrapOne <- function(plotArguments, ind = NULL) {
     
     return(p)
 }
+

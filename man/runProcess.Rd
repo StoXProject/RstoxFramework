@@ -41,7 +41,7 @@ runProcess(
 
 \item{purge.processData}{Logical: If TRUE replace process data entirely.}
 
-\item{replaceArgs}{A list of function parameters and inputs to override.}
+\item{replaceArgs}{A list of function parameters and inputs to override. E.g., to set UseProcessData to FALSE in a process data process (e.g., if one wants to read in a resource file again) use list(UseProcessData = FALSE).}
 
 \item{replaceData}{Either the data to replace the process output by, or a list of two elements \code{FunctionName} and \code{MoreArgs}, giving a function to apply to the output from the process with additional arguments stored in \code{MoreArgs}. The function is applied using \code{\link{do.call}}, with \code{args} being a list with the process output first, followed by the \code{MoreArgs}.}
 

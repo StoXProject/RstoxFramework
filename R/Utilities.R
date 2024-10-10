@@ -1109,11 +1109,10 @@ write_list_as_tables_NetCDFF4 <- function(list, filePath, nc, index, dims, nchar
             # Get maximum number of characters of the variable to write:
             max_length <- getMaxNchar(list[[tableName]][[variableName]])
             
-            
             ncdf4::ncvar_put(
                 ncout, 
                 varid = tableVariableName, 
-                vals = list[[tableName]][[variableName]], 
+                vals = list[[tableName]][[variableName]],
                 start = c(1, startInd), 
                 count = c(max_length, thisNrow), 
                 verbose = verbose

@@ -531,10 +531,9 @@ openProjectAsTemplate <- function(
 
 
 openIfNotAlreadyOpenProject <- function(projectPath) {
-    
     # Open the project if not open:
-    if(!isOpenProject(projectPath)) {
-        openProject(projectPath)
+    if(!isOpenProject(projectPath, strict = TRUE)) {
+        openProject(projectPath, force = TRUE)
     }
     # Otherwise check that the project was opened in the current StoX:
     else {

@@ -1803,12 +1803,10 @@ Resample_MeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-#' @export
-#' 
 Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(PreySpeciesCategoryCatchData, Seed) {
     
     
-    # This function will be renamed to ResampleBioticPSUsInStratum
+    # Export this function when prey is official
     
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(
@@ -1871,11 +1869,9 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(Prey
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-#' @export
-#' 
 Resample_PreySpeciesCategoryCatchData_Hierarchical <- function(PreySpeciesCategoryCatchData, Seed) {
     
-    # This function will be renamed to ResampleBioticPSUsInStratum
+    # Export this function when prey is official
     
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(
@@ -1936,9 +1932,9 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical <- function(PreySpeciesCatego
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-#' @export
-#' 
 Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars <- function(PreySpeciesCategoryCatchData, Seed) {
+    
+    # Export this function when prey is official
     
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(

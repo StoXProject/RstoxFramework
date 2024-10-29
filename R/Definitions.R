@@ -491,7 +491,7 @@ initiateRstoxFramework <- function(){
         "MeanNASCData",
         "MeanLengthDistributionData", 
         "MeanSpeciesCategoryCatchData", 
-        "PreySpeciesCategoryCatchData", 
+        #"PreySpeciesCategoryCatchData", 
         "BioticAssignment"
     )
     # ... and the reample functions, 
@@ -499,11 +499,11 @@ initiateRstoxFramework <- function(){
         MeanNASCData = "Resample_MeanNASCData",
         MeanLengthDistributionData = "Resample_MeanLengthDistributionData", 
         MeanSpeciesCategoryCatchData = "Resample_MeanSpeciesCategoryCatchData", 
-        PreySpeciesCategoryCatchData = c(
-            "Resample_PreySpeciesCategoryCatchData_Hierarchical", 
-            "Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars", 
-            "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling"
-        ), 
+        #PreySpeciesCategoryCatchData = c(
+        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical", 
+        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars", 
+        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling"
+        #), 
         #BioticAssignment = "ResampleBioticAssignment" 
         BioticAssignment = c(
             "Resample_BioticAssignment_ByStratum", 

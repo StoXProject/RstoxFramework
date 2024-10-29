@@ -1883,10 +1883,20 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                     processID = processIDsToReset, 
                     type = "text"
                 )
-                unlink(foldersToDelete, recursive = TRUE, force = TRUE)
+                
+                # Do not delete output text files for processes with UseOutputData set to TRUE:
+                subsetTable <- data.table::data.table(
+                    modelName = modelsOfProcessesToReset, 
+                    processID = processIDsToReset
+                )
+                
+                doesNotHaveUseOutputDataTRUE <- processIndexTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
+                
+                unlink(foldersToDelete[doesNotHaveUseOutputDataTRUE], recursive = TRUE, force = TRUE)
             }
         #}
     }
+    # Delete files even the model has not yet been run:
     else if(purgeOutputFiles) {
         foldersToDelete <- sapply(
             processIndexTable$processID, 
@@ -1897,7 +1907,16 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                 type = "text"
             )
         )
-        unlink(foldersToDelete, recursive = TRUE, force = TRUE)
+        
+        # Do not delete output text files for processes with UseOutputData set to TRUE:
+        subsetTable <- data.table::data.table(
+            modelName = modelName, 
+            processID = processIndexTable$processID
+        )
+        
+        doesNotHaveUseOutputDataTRUE <- processIndexTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
+        
+        unlink(foldersToDelete[doesNotHaveUseOutputDataTRUE], recursive = TRUE, force = TRUE)
     }
     
     # Return a list of the active process and the process table:
@@ -2692,6 +2711,11 @@ checkDataType <- function(dataType, projectPath, modelName, processID) {
 ##### Functions for manipulating the process index table, which defines the order of the processes. These functions are used by the frontend to delete, add, and reorder processes: #####
 readProcessIndexTable <- function(projectPath, modelName = NULL, processes = NULL, startProcess = 1, endProcess = Inf, warn = TRUE, return.processIndex = FALSE) {
     
+    if(!isOpenProject(projectPath)) {
+        openProject(projectPath)
+        on.exit(closeProject(projectPath, save = FALSE))
+    }
+    
     # Get the path to the process index file:
     processIndexTableFile <- getProjectPaths(projectPath, "processIndexTableFile")
     
@@ -2788,7 +2812,7 @@ readProcessIndexTable <- function(projectPath, modelName = NULL, processes = NUL
         processIndexTable[, processIndex := NULL]
     }
     
-    return(processIndexTable)
+    return(processIndexTable[])
 }
 
 matchProcesses <- function(processes, processIndexTable, warn = TRUE) {
@@ -3300,7 +3324,7 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
     processTable[atBootstrapProcesses, functionInputsRecursive := rep(list(allBaselineProcesses), sum(atBootstrapProcesses))]
     
     
-    return(processTable)
+    return(processTable[])
 }
 #' 
 #' @export
@@ -3355,7 +3379,7 @@ getProcessAndFunctionNames <- function(projectPath, modelName = NULL, startProce
     )
     processIndexTable[, functionName := ..functionName]
     
-    return(processIndexTable)
+    return(processIndexTable[])
 }
 
 getProcessIDsFromBeforeAfter <- function(projectPath, afterProcessID = NULL, beforeProcessID = NULL, processIndexTable) {
@@ -5132,7 +5156,11 @@ runProcess <- function(
         # Changed this back again on 2023-12-16. No idea why this was important. Output data SHOULD be deleted when there is a change!
         #resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = TRUE)
         # Changed on 2024-06-25 to use purgeOutputFiles only if fileOutput is TRUE, since always using TRUE deletes bootstrap output data even if UseOutputData is TRUE:
-        resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = fileOutput)
+        # Changed to purge output files in all cases when UseOutputData is not TRUE, and to always delete text files, since it is a breach of expectation if fileOutput is FALSE but there are still files from a previous run:
+        #resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(fileOutput) "text"), purgeOutputFiles = fileOutput)
+        # Or even better, move the condition about UseOutputData into resetModel():
+        #resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", if(!isTRUE(functionArguments$UseOutputData)) "text"), purgeOutputFiles = !isTRUE(functionArguments$UseOutputData))
+        resetModel(projectPath = projectPath, modelName = modelName, processID = processID, shift = -1, delete = c("memory", "text"), purgeOutputFiles = TRUE)
     }
     
     # Run the process:

@@ -501,6 +501,7 @@ initiateRstoxFramework <- function(){
         MeanSpeciesCategoryCatchData = "Resample_MeanSpeciesCategoryCatchData", 
         PreySpeciesCategoryCatchData = c(
             "Resample_PreySpeciesCategoryCatchData_Hierarchical", 
+            "Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars", 
             "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling"
         ), 
         #BioticAssignment = "ResampleBioticAssignment" 

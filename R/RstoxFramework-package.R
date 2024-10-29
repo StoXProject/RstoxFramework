@@ -18,19 +18,20 @@ utils::globalVariables(c(
 	 "..functionInputs", "..functionInputs_UseProcessData", "..functionName",
 	 "..functionParameters", "..haulInfoToKeep", "..idCol", "..newProcessName",
 	 "..presentVariables", "..processDirty", "..propertyDirty", "..signifDigits", "..skipNAAt",
-	 "..stationInfoToKeep", "..subsetByNAOn_New", "..subsetByNAOn_Old", "..validInd", "..x1x2y1y2",
-	 "AcoCat", "BeamKey", "BootstrapID", "BootstrapSampleFactor", "CruiseKey", "DateTime", "Haul",
-	 "Layer", "LogKey", "LogOrigin", "LogOrigin2", "N", "PSU", "PolygonKey", "ProcessName",
-	 "ResampleFunction", "SampleUnit", "Station", "StationWeight", "StoX", "Stratum",
-	 "WeightingFactor", "assignmentPasted", "canShowInMap", "ch", "currentVersion", "enabled",
-	 "freq", "functionInputError", "functionInputProcessIDs", "functionInputsRecursive",
-	 "functionInputs_UseProcessData", "functionName", "functionOutputDataType", "hasBeenRun",
-	 "hasProcessData", "modelName", "name", "numStations", "offset", "oldCurrentVersion",
-	 "packageName", "possibleValues", "processDirty", "processID", "processIndex", "processName",
-	 "resampledCountWithUniqueName", "start_time", "tableName", "temporaryScaleFromResampling",
-	 "terminalProcess", "transceiver", "usedInProcessIDs", "usedInProcessIndices",
-	 "usedInRecursiveProcessIndices", "usedInRecursiveProcessNames", "value", "variableName",
-	 "verbose", "weightsPasted"))
+	 "..stationInfoToKeep", "..subsetByNAOn_New", "..subsetByNAOn_Old",
+	 "..temporaryScaleFromResampling", "..validInd", "..x1x2y1y2", "AcoCat", "BeamKey",
+	 "BootstrapID", "BootstrapSampleFactor", "CruiseKey", "DateTime", "Haul", "Layer", "LogKey",
+	 "LogOrigin", "LogOrigin2", "N", "PSU", "PolygonKey", "ProcessName", "ResampleFunction",
+	 "SampleUnit", "Station", "StationWeight", "StoX", "Stratum", "WeightingFactor",
+	 "assignmentPasted", "canShowInMap", "ch", "currentVersion", "enabled", "freq",
+	 "functionInputError", "functionInputProcessIDs", "functionInputsRecursive",
+	 "functionInputs_UseProcessData", "functionName", "functionOutputDataType",
+	 "functionParameters", "hasBeenRun", "hasProcessData", "modelName", "name", "numStations",
+	 "offset", "oldCurrentVersion", "packageName", "possibleValues", "processDirty", "processID",
+	 "processIndex", "processName", "resampledCountWithUniqueName", "resamplingFactor",
+	 "start_time", "tableName", "temporaryScaleFromResampling", "terminalProcess", "transceiver",
+	 "usedInProcessIDs", "usedInProcessIndices", "usedInRecursiveProcessIndices",
+	 "usedInRecursiveProcessNames", "value", "variableName", "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

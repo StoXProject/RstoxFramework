@@ -234,7 +234,7 @@ getResampleFunctions <- function(projectPath) {
     
     #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
     resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
-    resamplableDataTypes<- intersect(resamplableDataTypes, baselineDataTypes)
+    resamplableDataTypes <- intersect(resamplableDataTypes, baselineDataTypes)
     
     unname(unlist(getRstoxFrameworkDefinitions("resampleFunctions")[resamplableDataTypes]))
 }

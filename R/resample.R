@@ -296,8 +296,6 @@ writeBootstrapOutputFromIndividualProjects <- function(
         
         # Add a dot to the progess file:
         cat(".", file = bootstrapProgressFile, append = TRUE)
-        
-        #print(file.info(filePath)[, "size"])
     }
     
     return(nc)
@@ -810,7 +808,6 @@ readBootstrapDataOne <- function(selectionOneTable, nc, BootstrapID = NA) {
     count <- sum(nrows[BootstrapID])
     
     # Read the variables:
-    #browser()
     list <- lapply(
         requestedVariablesFullName, 
         getVarFromNC, 
@@ -819,10 +816,6 @@ readBootstrapDataOne <- function(selectionOneTable, nc, BootstrapID = NA) {
         start = start, 
         count = count
     )
-    
-    
-    
-    
     
     # ncvar_get() may add a single dimension to the output, so we drop dimensions:
     list <- lapply(list, c)
@@ -1496,13 +1489,12 @@ getResampledCount <- function(subData, seed, varToResample) {
 
 
 # This function resamples varToResample with replacement by altering the input data. Used in ResampleMeanLengthDistributionData(), ResampleBioticAssignment() and ResampleMeanNASCData():
-resampleData_UsingScaling <- function(data, seed, varToScale, varToResample, resampleBy) {
+resampleData_UsingScaling <- function(data, seed, varToResample, resampleBy) {
     
     # Get the unique resampleBy, and sort in C-locale for consistensy across platforms:
     #uniqueResampleBy <- unique(data[[resampleBy]])
     #uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "C")
     
-    #browser()
     # Get the unique resampleBy, and sort in en_US_POSIX for consistency across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
     
@@ -1515,19 +1507,26 @@ resampleData_UsingScaling <- function(data, seed, varToScale, varToResample, res
     data <- merge(data, seedTable, by = resampleBy)
     
     # Resample the data:
-    for(var in varToScale) {
-        data[, eval(var) := resampleOne_UsingScaling(.SD, seed = seed[1], varToScale = var, varToResample = varToResample), by = resampleBy]
+    # Changed this to not scale but simply accumulate the resamplingFactor:
+    #for(var in varToScale) {
+        #data[, eval(var) := resampleOne_UsingScaling(.SD, seed = seed[1], varToScale = var, varToResample = varToResample), by = resampleBy]
+    #}
+    if(!"resamplingFactor" %in% names(data)) {
+        data[, resamplingFactor := 1]
     }
+    data[, resamplingFactor := resamplingFactor * resampleOne_UsingScaling(.SD, seed = seed[1], varToResample = varToResample), by = resampleBy]
     
+    # Delete the resampledCountWithUniqueName, which was created in resampleOne_UsingScaling(), needed here to update the resamplingFactor, but thould then be deleted:
+    data[, resampledCountWithUniqueName := NULL]
     data[, seed := NULL]
     #return(MeanLengthDistributionData)
 }
 
 # Function to resample Hauls of one subset of the data:
-resampleOne_UsingScaling <- function(subData, seed, varToResample, varToScale) {
+resampleOne_UsingScaling <- function(subData, seed, varToResample) {
     
     if(nrow(subData) == 1) {
-        return(subData[[varToScale]])
+        return(1)
     }
     
     # Resample the unique:
@@ -1536,10 +1535,6 @@ resampleOne_UsingScaling <- function(subData, seed, varToResample, varToScale) {
     }
     resampled <- RstoxBase::sampleSorted(unique(subData[[varToResample]]), seed = seed, replace = TRUE)
     # Tabulate the resamples:
-    #resampleTable <- table(resampled)
-    #if(!length(resampleTable)) {
-    #    
-    #}
     resampleTable <- data.table::as.data.table(table(resampled, useNA = "ifany"))
     # Set an unmistakable name to the counts:
     data.table::setnames(resampleTable, c("resampled","N"), c(varToResample, "resampledCountWithUniqueName"))
@@ -1549,22 +1544,83 @@ resampleOne_UsingScaling <- function(subData, seed, varToResample, varToScale) {
     count <- merge(subData, resampleTable, by = varToResample, all.x = TRUE, sort = FALSE)
     
     # Insert the new count into varToScale (with NAs replaced by 0):
-    count[, resampledCountWithUniqueName := ifelse(
-        is.na(count$resampledCountWithUniqueName), 
-        0, 
-        count$resampledCountWithUniqueName
-    )]
+    RstoxBase::replaceNAByReference(count, cols = "resampledCountWithUniqueName")
     
-    #count[, eval(varToScale) := lapply(get(varToScale), "*", resampledCountWithUniqueName)]
-    count[, eval(varToScale) := resampledCountWithUniqueName * get(varToScale)]
+    # as of StoX 4.0.1-9003 this was changed from scaling the varToScale here to rather scaling at the end of the parent function, allowing for resampling in multiple stages (heirarchical resampling):
+    # count[, eval(varToScale) := resampledCountWithUniqueName * get(varToScale)]
     
-    return(count[[varToScale]])
+    return(count$resampledCountWithUniqueName)
 }
 
 
 
+
+resampleData <- function(data, seed, varToResample, resampleBy, makeUniqueVars = FALSE) {
+    
+    
+    if(length(varToResample) > 1 || length(resampleBy) > 1) {
+        if(length(varToResample) == length(resampleBy)) {
+            if(isTRUE(makeUniqueVars)) {
+                
+                
+                # Create replacement variables which will be unquified by appending integers in resampleOneGroup():
+                varToResample_temp <- paste0("UniqueResampleVariable_", varToResample)
+                resampleBy_temp <- paste0("UniqueResampleVariable_", resampleBy)
+                for(ind in seq_along(varToResample_temp)) {
+                    data[, c(varToResample_temp[ind]) := get(varToResample[ind])]
+                    data[, c(resampleBy_temp[ind]) := get(resampleBy[ind])]
+                }
+                
+                # Resample through the varToResample_temp:
+                nsteps <- length(varToResample_temp)
+                for(ind in seq_len(nsteps)) {
+                    data <- resampleDataOne(
+                        data = data, 
+                        seed = seed, 
+                        varToResample = varToResample_temp[ind],
+                        # Append integers to all remaining resampleBy_temp:
+                        nextResampleBy = if(ind < nsteps) resampleBy_temp[seq(ind + 1, eval(nsteps))] else NULL, 
+                        resampleBy = resampleBy_temp[ind]
+                    )
+                }
+                
+                # Delete the replacement variables:
+                data[, c(varToResample_temp) := NULL]
+                data[, c(resampleBy_temp) := NULL]
+            }
+            else {
+                #browser()
+                for(ind in  seq_along(varToResample)) {
+                    data <- resampleDataOne(
+                        data = data, 
+                        seed = seed, 
+                        varToResample = varToResample[ind],
+                        resampleBy = resampleBy[ind]
+                    )
+                }
+                
+                
+            }
+        }
+        else {
+            stop("If varToResample or resampleBy has length > 1, they both need to be of the same length.")
+        }
+    }
+    else {
+        data <- resampleDataOne(
+            data = data, 
+            seed = seed, 
+            varToResample = varToResample, 
+            resampleBy = resampleBy
+        )
+    }
+    
+    return(data)
+}
+
+
 # This function resamples varToResample with replacement by altering the input data. Used in ResampleMeanLengthDistributionData(), ResampleBioticAssignment() and ResampleMeanNASCData():
-resampleData <- function(data, seed, varToResample, resampleBy) {
+resampleDataOne <- function(data, seed, varToResample, resampleBy, nextResampleBy = NULL) {
     
     # Get the unique resampleBy, and sort in en_US_POSIX for consistency across platforms:
     uniqueResampleBy <- stringi::stri_sort(unique(data[[resampleBy]]), locale = "en_US_POSIX")
@@ -1578,14 +1634,19 @@ resampleData <- function(data, seed, varToResample, resampleBy) {
     data <- merge(data, seedTable, by = resampleBy)
     
     # Resample the data:
-    data <- data[, resampleOne(.SD, seed = seed[1], varToResample = varToResample), by = resampleBy]
+    data <- data[, resampleOneGroup(
+        .SD, 
+        seed = seed[1], 
+        varToResample = varToResample, 
+        nextResampleBy = nextResampleBy
+    ), by = resampleBy]
     
     data[, seed := NULL]
     #return(MeanLengthDistributionData)
 }
 
 # Function to resample Hauls of one subset of the data:
-resampleOne <- function(subData, seed, varToResample) {
+resampleOneGroup <- function(subData, seed, varToResample, nextResampleBy = NULL) {
     
     if(nrow(subData) <= 1) {
         return(subData)
@@ -1616,10 +1677,21 @@ resampleOne <- function(subData, seed, varToResample) {
     
     # Merge in the resample factors:
     originalColumnOrder <- names(subData)
+    #if("PSU01" %in% subData$PSU) browser()
     subData <- merge(subData, resampled, by = varToResample)
-    repeatInd <- rep(seq_len(nrow(subData)), subData$temporaryScaleFromResampling)
+    temporaryScaleFromResampling <- subData$temporaryScaleFromResampling
+    repeatInd <- rep(seq_len(nrow(subData)), temporaryScaleFromResampling)
+    
+    
     # ... and repeat the rows according to the factors:
     subData <- subData[repeatInd, ]
+    
+    # Add a suffix to the varToResample of the next step:
+    if(length(nextResampleBy)) {
+        for(this in nextResampleBy) {
+            subData[, eval(this) := paste(get(this), sep = "_", sequence(..temporaryScaleFromResampling))]
+        }
+    }
     
     # Delete the temporary column:
     subData[, temporaryScaleFromResampling := NULL]
@@ -1659,14 +1731,26 @@ Resample_MeanLengthDistributionData <- function(MeanLengthDistributionData, Seed
     MeanLengthDistributionData$Data <- resampleData_UsingScaling(
         data = MeanLengthDistributionData$Data, 
         seed = Seed, 
-        #varToScale = RstoxBase::getRstoxBaseDefinitions("dataTypeDefinition")[["MeanLengthDistributionData"]]$weighting, 
-        varToScale = "WeightedNumber", 
         # If any other values than varToResample = "PSU" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
     
+    # Scale the WeightedNumber:
+    applyResamplingFactor(
+        MeanLengthDistributionData$Data, 
+        varToScale = "WeightedNumber"
+    )
+    
     return(MeanLengthDistributionData)
+}
+
+
+applyResamplingFactor <- function(data, varToScale) {
+    # This function assumes that resampleData_UsingScaling() has been run to produce the resamplingFactor:
+    for(var in varToScale) {
+        data[, eval(var) := get(var) * resamplingFactor]
+    }
 }
 
 
@@ -1697,10 +1781,15 @@ Resample_MeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, 
     MeanSpeciesCategoryCatchData$Data <- resampleData_UsingScaling(
         data = MeanSpeciesCategoryCatchData$Data, 
         seed = Seed, 
-        varToScale = c("TotalCatchWeight", "TotalCatchNumber"), 
         # If any other values than varToResample = "PSU" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "PSU", 
         resampleBy = "Stratum"
+    )
+    
+    # Scale the TotalCatchWeight and TotalCatchNumber:
+    applyResamplingFactor(
+        MeanSpeciesCategoryCatchData$Data, 
+        varToScale = c("TotalCatchWeight", "TotalCatchNumber")
     )
     
     return(MeanSpeciesCategoryCatchData)
@@ -1714,13 +1803,10 @@ Resample_MeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-#' @export
-#' 
 Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(PreySpeciesCategoryCatchData, Seed) {
     
     
-    #browser()
-    # This function will be renamed to ResampleBioticPSUsInStratum
+    # Export this function when prey is official
     
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(
@@ -1749,23 +1835,26 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(Prey
     PreySpeciesCategoryCatchData <- resampleData_UsingScaling(
         data = PreySpeciesCategoryCatchData, 
         seed = Seed, 
-        varToScale = "TotalPreyCatchWeight", 
         varToResample = "PSU", 
         resampleBy = "Stratum"
     )
     PreySpeciesCategoryCatchData <- resampleData_UsingScaling(
         data = PreySpeciesCategoryCatchData, 
         seed = Seed, 
-        varToScale = "TotalPreyCatchWeight", 
         varToResample = "Individual", 
         resampleBy = "Sample"
     )
     PreySpeciesCategoryCatchData <- resampleData_UsingScaling(
         data = PreySpeciesCategoryCatchData, 
         seed = Seed, 
-        varToScale = "TotalPreyCatchWeight", 
         varToResample = "PreySpeciesCategory", 
         resampleBy = "Individual"
+    )
+    
+    # Scale the TotalPreyCatchWeight and TotalPreyCatchNumber:
+    applyResamplingFactor(
+        PreySpeciesCategoryCatchData, 
+        varToScale = c("TotalPreyCatchWeight", "TotalPreyCatchNumber")
     )
     
     return(PreySpeciesCategoryCatchData)
@@ -1780,13 +1869,9 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(Prey
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-#' @export
-#' 
 Resample_PreySpeciesCategoryCatchData_Hierarchical <- function(PreySpeciesCategoryCatchData, Seed) {
     
-    
-    #browser()
-    # This function will be renamed to ResampleBioticPSUsInStratum
+    # Export this function when prey is official
     
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(
@@ -1811,29 +1896,93 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical <- function(PreySpeciesCatego
         toResamplePrefix = ""
     )
     
+    
     # Resample PSUs within Strata, modifying the weighting variable of MeanSpeciesCategoryCatchData:
     PreySpeciesCategoryCatchData <- resampleData(
         data = PreySpeciesCategoryCatchData, 
         seed = Seed, 
-        varToResample = "PSU", 
-        resampleBy = "Stratum"
+        varToResample = c("PSU", "Individual", "PreySpeciesCategory"), 
+        resampleBy = c("Stratum", "Sample", "Individual"), 
+        makeUniqueVars = TRUE
     )
-    PreySpeciesCategoryCatchData <- resampleData(
-        data = PreySpeciesCategoryCatchData, 
-        seed = Seed, 
-        varToResample = "Individual", 
-        resampleBy = "Sample"
-    )
-    PreySpeciesCategoryCatchData <- resampleData(
-        data = PreySpeciesCategoryCatchData, 
-        seed = Seed, 
-        varToResample = "PreySpeciesCategory", 
-        resampleBy = "Individual"
-    )
+    #PreySpeciesCategoryCatchData <- resampleData(
+    #    data = PreySpeciesCategoryCatchData, 
+    #    seed = Seed, 
+    #    varToResample = "Individual", 
+    #    resampleBy = "Sample"
+    #)
+    #PreySpeciesCategoryCatchData <- resampleData(
+    #    data = PreySpeciesCategoryCatchData, 
+    #    seed = Seed, 
+    #    varToResample = "PreySpeciesCategory", 
+    #    resampleBy = "Individual"
+    #)
     
     return(PreySpeciesCategoryCatchData)
 }
 
+
+
+
+
+#' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
+#' 
+#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' 
+#' @inheritParams RstoxBase::ModelData
+#' @inheritParams general_arguments
+#' 
+Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars <- function(PreySpeciesCategoryCatchData, Seed) {
+    
+    # Export this function when prey is official
+    
+    # Warn if there are strata with only one PSU, which may result in loss of variance:
+    onlyOneToResample_Warning(
+        PreySpeciesCategoryCatchData$Data, 
+        toResample = "PSU",
+        within  = "Stratum", 
+        functionName = "ResamplePreySpeciesCategoryCatchData", 
+        toResamplePrefix = "Biotic"
+    )
+    onlyOneToResample_Warning(
+        PreySpeciesCategoryCatchData$Data, 
+        toResample = "Individual",
+        within  = "Sample", 
+        functionName = "ResamplePreySpeciesCategoryCatchData", 
+        toResamplePrefix = ""
+    )
+    onlyOneToResample_Warning(
+        PreySpeciesCategoryCatchData$Data, 
+        toResample = "PreySpeciesCategory",
+        within  = "Individual", 
+        functionName = "ResamplePreySpeciesCategoryCatchData", 
+        toResamplePrefix = ""
+    )
+    
+    
+    # Resample PSUs within Strata, modifying the weighting variable of MeanSpeciesCategoryCatchData:
+    PreySpeciesCategoryCatchData <- resampleData(
+        data = PreySpeciesCategoryCatchData, 
+        seed = Seed, 
+        varToResample = c("PSU", "Individual", "PreySpeciesCategory"), 
+        resampleBy = c("Stratum", "Sample", "Individual"), 
+        makeUniqueVars = FALSE
+    )
+    #PreySpeciesCategoryCatchData <- resampleData(
+    #    data = PreySpeciesCategoryCatchData, 
+    #    seed = Seed, 
+    #    varToResample = "Individual", 
+    #    resampleBy = "Sample"
+    #)
+    #PreySpeciesCategoryCatchData <- resampleData(
+    #    data = PreySpeciesCategoryCatchData, 
+    #    seed = Seed, 
+    #    varToResample = "PreySpeciesCategory", 
+    #    resampleBy = "Individual"
+    #)
+    
+    return(PreySpeciesCategoryCatchData)
+}
 
 
 
@@ -1864,10 +2013,15 @@ Resample_BioticAssignment_ByStratum <- function(BioticAssignment, Seed) {
         #data = BioticAssignment$BioticAssignment, 
         data = BioticAssignment, 
         seed = Seed, 
-        varToScale = "WeightingFactor", 
         # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "Haul", 
         resampleBy = "Stratum"
+    )
+    
+    # Scale the WeightingFactor:
+    applyResamplingFactor(
+        BioticAssignment, 
+        varToScale = "WeightingFactor"
     )
     
     return(BioticAssignment)
@@ -1900,10 +2054,15 @@ Resample_BioticAssignment_ByAcousticPSU <- function(BioticAssignment, Seed) {
         #data = BioticAssignment$BioticAssignment, 
         data = BioticAssignment, 
         seed = Seed, 
-        varToScale = "WeightingFactor", 
         # If any other values than varToResample = "Haul" and resampleBy = "Stratum" are used in the future, warnings for only one and not all varToResample in resampleBy should be added in RstoxBase!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
         varToResample = "Haul", 
         resampleBy = "PSU"
+    )
+    
+    # Scale the WeightingFactor:
+    applyResamplingFactor(
+        BioticAssignment, 
+        varToScale = "WeightingFactor"
     )
     
     return(BioticAssignment)
@@ -1937,10 +2096,14 @@ Resample_MeanNASCData <- function(MeanNASCData, Seed) {
     MeanNASCData$Data <- resampleData_UsingScaling(
         data = MeanNASCData$Data, 
         seed = Seed, 
-        #varToScale = RstoxBase::getRstoxBaseDefinitions("dataTypeDefinition")[["MeanNASC"]]$weighting, 
-        varToScale = "NASC", 
         varToResample = "PSU", 
         resampleBy = "Stratum"
+    )
+    
+    # Scale the NASC:
+    applyResamplingFactor(
+        MeanNASCData$Data, 
+        varToScale = "NASC"
     )
     
     return(MeanNASCData)

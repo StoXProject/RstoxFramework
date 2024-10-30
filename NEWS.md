@@ -1,7 +1,13 @@
-# RstoxFramework v4.0.1-9003 (2024-10-18)
+# RstoxFramework v4.0.1-9004 (2024-10-18)
+* Changed how output files are deleted. Before, output files were deleted for all later processes in a model in addition to the processes of later models using any of these processes. Now, the processes which have an argument UseOutputData = TRUE are not deleted.
+* Refactored resampling functions used in Bootstrap() to save a resamplingFactor in the resampling and then scale the data using the new applyResamplingFactor().
+* Added support for running readProcessIndexTable() on a closed project.
+
+
+# RstoxFramework v4.0.1-9003 (2024-10-10)
 * Fixed bug in colors of processes to not show bold for ProcessData processes that are used by a later ProcessData process where this use is hidden by UseProcessData.
 * Added the resampling function Resample_PreySpeciesCategoryCatchData_Hierarchical, which does actual resampling by repeating entries that are sampled more than once, as opposed to scaling the data variable.
-* Renamed the resampling functions used in Bootstrap to the following convension: "Resample" + "_" + dataType + "_" + specification, where dataType is the StoX data type such as "MeanNASCData" and "BioticAssignment", and specification is any string in CamelCase describing the resampling function, such as "ByStratum" and "ByAcousticPSU":
+* Renamed the resampling functions used in Bootstrap to the following convension: "Resample" + "\_" + dataType + "\_" + specification, where dataType is the StoX data type such as "MeanNASCData" and "BioticAssignment", and specification is any string in CamelCase describing the resampling function, such as "ByStratum" and "ByAcousticPSU":
     * "ResampleMeanLengthDistributionData" -> "Resample_MeanLengthDistributionData"
     * "ResampleMeanSpeciesCategoryCatchData" -> "Resample_MeanSpeciesCategoryCatchData"
     * "ResamplePreySpeciesCategoryCatchData" -> "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling"

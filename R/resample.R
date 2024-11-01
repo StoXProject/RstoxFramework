@@ -1516,8 +1516,7 @@ resampleData_UsingScaling <- function(data, seed, varToResample, resampleBy) {
     }
     data[, resamplingFactor := resamplingFactor * resampleOne_UsingScaling(.SD, seed = seed[1], varToResample = varToResample), by = resampleBy]
     
-    # Delete the resampledCountWithUniqueName, which was created in resampleOne_UsingScaling(), needed here to update the resamplingFactor, but thould then be deleted:
-    data[, resampledCountWithUniqueName := NULL]
+    # Delete the seed:
     data[, seed := NULL]
     #return(MeanLengthDistributionData)
 }

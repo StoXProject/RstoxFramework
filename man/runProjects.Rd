@@ -13,7 +13,7 @@ runProjects(
   drop.datatype = TRUE,
   unlistDepth2 = FALSE,
   run = TRUE,
-  save = TRUE,
+  save = FALSE,
   force.save = FALSE,
   force.restart = FALSE,
   replaceDataList = list(),

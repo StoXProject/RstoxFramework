@@ -2817,6 +2817,10 @@ readProcessIndexTable <- function(projectPath, modelName = NULL, processes = NUL
 matchProcesses <- function(processes, processIndexTable, warn = TRUE) {
     if(is.numeric(processes)) {
         processesNumeric <- processes
+        # Truncate to the number of rows:
+        processesNumeric[processesNumeric < 1] <- 1
+        processesNumeric[processesNumeric > nrow(processIndexTable)] <- nrow(processIndexTable)
+        processesNumeric <- unique(processesNumeric)
     }
     else if(is.character(processes)) {
         # Match for process names first:

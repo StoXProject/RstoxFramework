@@ -1223,12 +1223,13 @@ setOrders <- function(x) {
 #' Read output file from StoX 2.7
 #' 
 #' @param x The path to the StoX 2.7 project file to read.
+#' @param na.strings See data.table::fread.
 #' 
 #' @export
 #' 
-readStoX2.7OutputFile <- function(x) {
+readStoX2.7OutputFile <- function(x, na.strings = "NA") {
     # Read the file:
-    out <- data.table::fread(x, na.strings = "NA")
+    out <- data.table::fread(x, na.strings = na.strings)
     
     # Do type conversions:
     # StratumArea:

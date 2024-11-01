@@ -68,7 +68,7 @@ runModel <- function(
     projectPath, modelName, 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
+    run = TRUE, save = FALSE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -170,7 +170,7 @@ runProject <- function(
     modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype  = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
+    run = TRUE, save = FALSE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -181,10 +181,6 @@ runProject <- function(
     msg = TRUE, 
     ...
 ) {
-    
-    if(isTRUE(save)) {
-        warning("The default save = TRUE will be changed to save = FALSE in RstoxFramework 4.1.0.")
-    }
     
     if(msg) {
         startTime <- proc.time()[3]
@@ -329,7 +325,7 @@ runProjects <- function(
     modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
+    run = TRUE, save = FALSE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 

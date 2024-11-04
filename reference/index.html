@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
       </span>
     </div>
 
@@ -111,23 +111,35 @@
         </td>
         <td><p>Reported Bootstrap data</p></td>
       </tr><tr><td>
-          <p><code><a href="ResampleBioticAssignmentByAcousticPSU.html">ResampleBioticAssignmentByAcousticPSU()</a></code> </p>
+          <p><code><a href="Resample_BioticAssignment_ByAcousticPSU.html">Resample_BioticAssignment_ByAcousticPSU()</a></code> </p>
         </td>
         <td><p>Resamples biotic PSUs</p></td>
       </tr><tr><td>
-          <p><code><a href="ResampleBioticAssignmentByStratum.html">ResampleBioticAssignmentByStratum()</a></code> </p>
+          <p><code><a href="Resample_BioticAssignment_ByStratum.html">Resample_BioticAssignment_ByStratum()</a></code> </p>
         </td>
         <td><p>Resamples biotic PSUs</p></td>
       </tr><tr><td>
-          <p><code><a href="ResampleMeanLengthDistributionData.html">ResampleMeanLengthDistributionData()</a></code> </p>
+          <p><code><a href="Resample_MeanLengthDistributionData.html">Resample_MeanLengthDistributionData()</a></code> </p>
         </td>
         <td><p>Resamples biotic PSUs within Stratum in MeanLengthDistributionData</p></td>
       </tr><tr><td>
-          <p><code><a href="ResampleMeanNASCData.html">ResampleMeanNASCData()</a></code> </p>
+          <p><code><a href="Resample_MeanNASCData.html">Resample_MeanNASCData()</a></code> </p>
         </td>
         <td><p>Resamples acoustic PSUs</p></td>
       </tr><tr><td>
-          <p><code><a href="ResampleMeanSpeciesCategoryCatchData.html">ResampleMeanSpeciesCategoryCatchData()</a></code> </p>
+          <p><code><a href="Resample_MeanSpeciesCategoryCatchData.html">Resample_MeanSpeciesCategoryCatchData()</a></code> </p>
+        </td>
+        <td><p>Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData</p></td>
+      </tr><tr><td>
+          <p><code><a href="Resample_PreySpeciesCategoryCatchData_Hierarchical.html">Resample_PreySpeciesCategoryCatchData_Hierarchical()</a></code> </p>
+        </td>
+        <td><p>Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData</p></td>
+      </tr><tr><td>
+          <p><code><a href="Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars.html">Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars()</a></code> </p>
+        </td>
+        <td><p>Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData</p></td>
+      </tr><tr><td>
+          <p><code><a href="Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling.html">Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling()</a></code> </p>
         </td>
         <td><p>Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData</p></td>
       </tr><tr><td>
@@ -199,6 +211,10 @@
         </td>
         <td><p>Get IDs of bad Hauls or Samples</p></td>
       </tr><tr><td>
+          <p><code><a href="extractPackageNameAsNames.html">extractPackageNameAsNames()</a></code> </p>
+        </td>
+        <td><p>Small function to parse the string defining officical Rstox-package versions (for each RstoxFramwork):</p></td>
+      </tr><tr><td>
           <p><code><a href="findProcess.html">findProcess()</a></code> </p>
         </td>
         <td><p>Find a processes from processName or functionName</p></td>
@@ -223,9 +239,13 @@
         </td>
         <td><p>Function returning the names of the StoX functions available for a model:</p></td>
       </tr><tr><td>
+          <p><code><a href="getBootstrapOutputVariables.html">getBootstrapOutputVariables()</a></code> </p>
+        </td>
+        <td><p>Get variables used in reports, specifically for use in the argument OutputVariables in Bootstrap()</p></td>
+      </tr><tr><td>
           <p><code><a href="getModelData.html">getModelData()</a></code> </p>
         </td>
-        <td><p>Get output data from processes of a StoX model</p></td>
+        <td><p>Get output data from processes of an open StoX project</p></td>
       </tr><tr><td>
           <p><code><a href="getOfficialRstoxPackageVersion.html">getOfficialRstoxPackageVersion()</a></code> </p>
         </td>
@@ -290,6 +310,10 @@
           <p><code><a href="getProjectPaths.html">getProjectPaths()</a></code> </p>
         </td>
         <td><p>This function gets the paths defined by <code>initiateRstoxFramework</code>.</p></td>
+      </tr><tr><td>
+          <p><code><a href="getRelevantClass.html">getRelevantClass()</a></code> </p>
+        </td>
+        <td><p>Function to get the first class of the object x, except if the class "gg" is returned in which case "ggplot" is returned instead if present as one of the classes of the object:</p></td>
       </tr><tr><td>
           <p><code><a href="getResamplableProcesses.html">getResamplableProcesses()</a></code> </p>
         </td>
@@ -375,6 +399,10 @@
         </td>
         <td><p>Read the output files of a project</p></td>
       </tr><tr><td>
+          <p><code><a href="readOfficialRstoxPackageVersionsFile.html">readOfficialRstoxPackageVersionsFile()</a></code> </p>
+        </td>
+        <td><p>Get certified Rstox package versions</p></td>
+      </tr><tr><td>
           <p><code><a href="readProcessOutputFile.html">readProcessOutputFile()</a></code> </p>
         </td>
         <td><p>Function to read a single process output file, possibly by pages and in flattened and pretty view:</p></td>
@@ -435,6 +463,10 @@
         </td>
         <td><p>A list of the attributes of the exported StoX functions:</p></td>
       </tr><tr><td>
+          <p><code><a href="subsetByAllEqual.html">subsetByAllEqual()</a></code> </p>
+        </td>
+        <td><p>Remove columns where all values are equal both in the x and y element of the input</p></td>
+      </tr><tr><td>
           <p><code><a href="unReDoProject.html">unReDoProject()</a></code> </p>
         </td>
         <td><p>Function to undo or redo, i.e., reset the current project description file and change the indices. There will be separate GUI functions for undo and redo:</p></td>
@@ -479,7 +511,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>

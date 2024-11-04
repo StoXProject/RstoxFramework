@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
       </span>
     </div>
 
@@ -47,6 +47,52 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.1.0" id="rstoxframework-v410-2024-11-04">RstoxFramework v4.1.0 (2024-11-04)<a class="anchor" aria-label="anchor" href="#rstoxframework-v410-2024-11-04"></a></h2>
+<ul><li>Final release for StoX 4.1.0.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.0.1-9005" id="rstoxframework-v401-9005-2024-11-01">RstoxFramework v4.0.1-9005 (2024-11-01)<a class="anchor" aria-label="anchor" href="#rstoxframework-v401-9005-2024-11-01"></a></h2>
+<ul><li>Breaking change: Changed default from save = TRUE to save = FALSE in runModel(), runProject() and runProjects().</li>
+<li>Fixed bug in runProject() where startProcess and endProcess outside of the range of processes resulted in a warning. In the new version these are truncated to the range of processes.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.0.1-9004" id="rstoxframework-v401-9004-2024-10-18">RstoxFramework v4.0.1-9004 (2024-10-18)<a class="anchor" aria-label="anchor" href="#rstoxframework-v401-9004-2024-10-18"></a></h2>
+<ul><li>Changed how output files are deleted. Before, output files were deleted for all later processes in a model in addition to the processes of later models using any of these processes. Now, the processes which have an argument UseOutputData = TRUE are not deleted.</li>
+<li>Refactored resampling functions used in Bootstrap() to save a resamplingFactor in the resampling and then scale the data using the new applyResamplingFactor().</li>
+<li>Added support for running readProcessIndexTable() on a closed project.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.0.1-9003" id="rstoxframework-v401-9003-2024-10-10">RstoxFramework v4.0.1-9003 (2024-10-10)<a class="anchor" aria-label="anchor" href="#rstoxframework-v401-9003-2024-10-10"></a></h2>
+<ul><li>Fixed bug in colors of processes to not show bold for ProcessData processes that are used by a later ProcessData process where this use is hidden by UseProcessData.</li>
+<li>Added the resampling function Resample_PreySpeciesCategoryCatchData_Hierarchical, which does actual resampling by repeating entries that are sampled more than once, as opposed to scaling the data variable.</li>
+<li>Renamed the resampling functions used in Bootstrap to the following convension: “Resample” + “_” + dataType + “_” + specification, where dataType is the StoX data type such as “MeanNASCData” and “BioticAssignment”, and specification is any string in CamelCase describing the resampling function, such as “ByStratum” and “ByAcousticPSU”:
+<ul><li>“ResampleMeanLengthDistributionData” -&gt; “Resample_MeanLengthDistributionData”</li>
+<li>“ResampleMeanSpeciesCategoryCatchData” -&gt; “Resample_MeanSpeciesCategoryCatchData”</li>
+<li>“ResamplePreySpeciesCategoryCatchData” -&gt; “Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling”</li>
+<li>“ResampleBioticAssignmentByStratum” -&gt; “Resample_BioticAssignment_ByStratum”</li>
+<li>“ResampleBioticAssignmentByAcousticPSU” -&gt; “Resample_BioticAssignment_ByAcousticPSU”</li>
+<li>“ResampleMeanNASCData” -&gt; “Resample_MeanNASCData”</li>
+</ul></li>
+<li>Added the resampling function “Resample_PreySpeciesCategoryCatchData_Hierarchical” which should replace “Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling” (the latter kept for testing in this pre-release).</li>
+<li>Fixed bug where the function inputs to a process data process were not considered when UseProcessData is TRUE, with the consequence that the process was marked as terminal (bold in the GUI).</li>
+<li>Added the progress of writing the nc file in Bootstrap() to the progress file (which is used by estimateTimeOfProcesses()).</li>
+<li>Added explicit error message when a variable is requested that does not exist in a Bootstrap nc file.</li>
+<li>Relaxed error to warning for unknown file extension in output files read through readModelData().</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.0.1-9002" id="rstoxframework-v401-9002-2024-09-18">RstoxFramework v4.0.1-9002 (2024-09-18)<a class="anchor" aria-label="anchor" href="#rstoxframework-v401-9002-2024-09-18"></a></h2>
+<ul><li>Changed to show TargetVariableUnit in ReportBootstrap() only when the ReportFunction is not a fraction (fractionOfOccurrence or fractionOfSum).</li>
+<li>Changed the check-full.yaml to run both macOS arm64 and x86_64.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.0.1-9001" id="rstoxframework-v401-9001-2024-09-01">RstoxFramework v4.0.1-9001 (2024-09-01)<a class="anchor" aria-label="anchor" href="#rstoxframework-v401-9001-2024-09-01"></a></h2>
+<ul><li>Fixed bug where a ReportBootstrap process could be run even if the Baseline model or the Bootstrap process was reset. Also introduced the columns usedInRecursiveProcessIndices, usedInRecursiveProcessIDs and usedInRecursiveProcessNames in getProcessTable() to support resetting processes using outputs from processes in previous tables.</li>
+<li>Fixed bug where defaults were not given for Percentages and GroupingVariables in ReportBootstrap().</li>
+<li>Removed stop in ReportBootstrap when Bootstrap() is not run, and rather showing the default warning.</li>
+<li>Added resample function ResamplePreySpeciesCategoryCatchData().</li>
+<li>Added vectorised support in getProcessNameFromProcessID() and getProcessIDFromProcessName()</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="4.0.0" id="rstoxframework-v400-2024-07-09">RstoxFramework v4.0.0 (2024-07-09)<a class="anchor" aria-label="anchor" href="#rstoxframework-v400-2024-07-09"></a></h2>
 <ul><li>Final release for StoX 4.0.0.</li>
@@ -510,7 +556,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>

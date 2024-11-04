@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
       </span>
     </div>
 
@@ -56,10 +56,6 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getProcessTable</span><span class="op">(</span></span>
 <span>  <span class="va">projectPath</span>,</span>
 <span>  modelName <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  startProcess <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  endProcess <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  afterProcessID <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  beforeProcessID <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  argumentFilePaths <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  only.valid <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  return.processIndex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -117,22 +113,6 @@
 <dd><p>The name of the model (possible values are "baseline", "analysis" and "report").</p></dd>
 
 
-<dt id="arg-startprocess">startProcess<a class="anchor" aria-label="anchor" href="#arg-startprocess"></a></dt>
-<dd><p>The process index, name or ID at which to start the model run.</p></dd>
-
-
-<dt id="arg-endprocess">endProcess<a class="anchor" aria-label="anchor" href="#arg-endprocess"></a></dt>
-<dd><p>The process index, name or ID at which to stop the model run.</p></dd>
-
-
-<dt id="arg-afterprocessid">afterProcessID<a class="anchor" aria-label="anchor" href="#arg-afterprocessid"></a></dt>
-<dd><p>The ID of the process after which to get the process table or to place a process.</p></dd>
-
-
-<dt id="arg-beforeprocessid">beforeProcessID<a class="anchor" aria-label="anchor" href="#arg-beforeprocessid"></a></dt>
-<dd><p>The ID of the process before which to get the process table.</p></dd>
-
-
 <dt id="arg-argumentfilepaths">argumentFilePaths<a class="anchor" aria-label="anchor" href="#arg-argumentfilepaths"></a></dt>
 <dd><p>A nested list of paths to argument files of a model, as returned from <code>getArgumentFilePaths</code>. This is used to speed up some functions.</p></dd>
 
@@ -147,6 +127,22 @@
 
 <dt id="arg-return-processflow">return.processFlow<a class="anchor" aria-label="anchor" href="#arg-return-processflow"></a></dt>
 <dd><p>Logical: If TRUE include columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated.</p></dd>
+
+
+<dt id="arg-startprocess">startProcess<a class="anchor" aria-label="anchor" href="#arg-startprocess"></a></dt>
+<dd><p>The process index, name or ID at which to start the model run.</p></dd>
+
+
+<dt id="arg-endprocess">endProcess<a class="anchor" aria-label="anchor" href="#arg-endprocess"></a></dt>
+<dd><p>The process index, name or ID at which to stop the model run.</p></dd>
+
+
+<dt id="arg-afterprocessid">afterProcessID<a class="anchor" aria-label="anchor" href="#arg-afterprocessid"></a></dt>
+<dd><p>The ID of the process after which to get the process table or to place a process.</p></dd>
+
+
+<dt id="arg-beforeprocessid">beforeProcessID<a class="anchor" aria-label="anchor" href="#arg-beforeprocessid"></a></dt>
+<dd><p>The ID of the process before which to get the process table.</p></dd>
 
 
 <dt id="arg-check-only-enabled">check.only.enabled<a class="anchor" aria-label="anchor" href="#arg-check-only-enabled"></a></dt>
@@ -170,7 +166,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>

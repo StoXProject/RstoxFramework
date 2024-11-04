@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
       </span>
     </div>
 
@@ -84,7 +84,7 @@
 
 
 <dt id="arg-bootstrapmethodtable">BootstrapMethodTable<a class="anchor" aria-label="anchor" href="#arg-bootstrapmethodtable"></a></dt>
-<dd><p>A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using <code><a href="https://rdrr.io/pkg/RstoxBase/man/getSeedVector.html" class="external-link">getSeedVector</a></code>. Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") to get a list of the implemented resampling functions. Note that if a process is selected inn <code>BootstrapMethodTable</code> that is not used in the model up to the <code>OutputProcesses</code>, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).</p></dd>
+<dd><p>A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using <code><a href="https://rdrr.io/pkg/RstoxBase/man/getSeedVector.html" class="external-link">getSeedVector</a></code>. Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") to get a list of the implemented resampling functions. Note that if a process is selected in <code>BootstrapMethodTable</code> that is not used in the model up to the <code>OutputProcesses</code>, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).</p></dd>
 
 
 <dt id="arg-numberofbootstraps">NumberOfBootstraps<a class="anchor" aria-label="anchor" href="#arg-numberofbootstraps"></a></dt>
@@ -96,7 +96,7 @@
 
 
 <dt id="arg-outputvariables">OutputVariables<a class="anchor" aria-label="anchor" href="#arg-outputvariables"></a></dt>
-<dd><p>An optional list of variables to keep in the output. A typical set of variables could be ["Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"], which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in <code>OutputVariables</code>. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects and faster writing/reading of that file. The <code>OutputVariables</code> are extracted for all processes listed in <code>OutputProcesses</code>.</p></dd>
+<dd><p>An optional list of variables to keep in the output. A typical set of variables could be ["Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"], which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in <code>OutputVariables</code>. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects and faster writing/reading of that file. The <code>OutputVariables</code> are extracted for all processes listed in <code>OutputProcesses</code>. See <code><a href="getBootstrapOutputVariables.html">getBootstrapOutputVariables</a></code> for finding the variables used in ReportBootstrap processes of a project.</p></dd>
 
 
 <dt id="arg-useoutputdata">UseOutputData<a class="anchor" aria-label="anchor" href="#arg-useoutputdata"></a></dt>
@@ -118,7 +118,7 @@
     <div id="details">
     <h2>Details</h2>
     <p>A copy of the project is made for each core given by <code>NumberOfCores</code>. In the case that NumberOfCores == 1, this is still done for safety.
-Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method  in <code><a href="https://rdrr.io/pkg/RstoxBase/man/DefineBioticAssignment.html" class="external-link">DefineBioticAssignment</a></code>), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density.</p>
+Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method in <code><a href="https://rdrr.io/pkg/RstoxBase/man/DefineBioticAssignment.html" class="external-link">DefineBioticAssignment</a></code>), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate if the <code>ResampleFunction</code> specified in the <code>BootstrapMethodTable</code> is "ResampleBioticAssignmentByStratum" (the only option before StoX 4.0.0). This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density. In this case it is adviced to use <code>ResampleFunction</code> "ResampleBioticAssignmentByAcousticPSU", which will resample the assigned hauls to each individual AcousticPSU. Using this <code>ResampleFunction</code> "ResampleBioticAssignmentByAcousticPSU" will however require a suffucuent number of Hauls assigned to each AcousticPSU to achieve meaningful bootstrapping. Surely, only one assigned Haul is not sufficient, and will lead to a warning.</p>
     </div>
 
   </div>
@@ -133,7 +133,7 @@ Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>

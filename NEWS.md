@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.0 (2024-11-04)
+* Final release for StoX 4.1.0.
+
+
 # RstoxFramework v4.0.1-9005 (2024-11-01)
 * Breaking change: Changed default from save = TRUE to save = FALSE in runModel(), runProject() and runProjects().
 * Fixed bug in runProject() where startProcess and endProcess outside of the range of processes resulted in a warning. In the new version these are truncated to the range of processes. 

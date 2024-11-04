@@ -28,10 +28,10 @@ utils::globalVariables(c(
 	 "functionInputs_UseProcessData", "functionName", "functionOutputDataType",
 	 "functionParameters", "hasBeenRun", "hasProcessData", "modelName", "name", "numStations",
 	 "offset", "oldCurrentVersion", "packageName", "possibleValues", "processDirty", "processID",
-	 "processIndex", "processName", "resampledCountWithUniqueName", "resamplingFactor",
-	 "start_time", "tableName", "temporaryScaleFromResampling", "terminalProcess", "transceiver",
-	 "usedInProcessIDs", "usedInProcessIndices", "usedInRecursiveProcessIndices",
-	 "usedInRecursiveProcessNames", "value", "variableName", "verbose", "weightsPasted"))
+	 "processIndex", "processName", "resamplingFactor", "start_time", "tableName",
+	 "terminalProcess", "transceiver", "usedInProcessIDs", "usedInProcessIndices",
+	 "usedInRecursiveProcessIndices", "usedInRecursiveProcessNames", "value", "variableName",
+	 "verbose", "weightsPasted"))
 
 .onLoad <- function(libname, pkgname) {
 	# Initiate the RstoxFramework environment:

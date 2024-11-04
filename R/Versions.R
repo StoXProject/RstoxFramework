@@ -11,9 +11,8 @@
 #' 
 #' This function reads the OfficialRstoxFrameworkVersions.txt file for the given StoX GUI version.
 #'
+#' @inheritParams readOfficialRstoxPackageVersionsFile
 #' @param StoXVersion The version of the StoX GUI defining the combination of official Rstox package versions.
-#' @param officialRstoxPackageVersionsFile The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").
-#' @param optionalDependencies Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Suggests field of the DESCRIPTION file.
 #' @param toJSON Logical: If TRUE output a JSON string.
 #' @param list.out Logical: If TRUE wrap the output of \code{getOfficialRstoxPackageVersion} in a list with packageName and version.
 #' 
@@ -84,6 +83,18 @@ getOfficialRstoxPackageVersion <- function(
 }
 
 
+
+
+#' Get certified Rstox package versions 
+#' 
+#' This function reads the OfficialRstoxFrameworkVersions.txt file for the given StoX GUI version.
+#'
+#' @param officialRstoxPackageVersionsFile The path to the file holding the link between StoX GUI version and Rstox package versions. If missing, the file on the RstoxFramework master on GitHub is used ("https://raw.githubusercontent.com/StoXProject/RstoxFramework/master/inst/versions/OfficialRstoxFrameworkVersions.txt").
+#' @param optionalDependencies Logical: If TRUE include also the column OptionalDependencies from the OfficialRstoxFrameworkVersions.txt file, which holds Rstox packages used in the Suggests field of the DESCRIPTION file.
+#' @param toTable Logical: If TRUE output a table.
+#' 
+#' @export
+#'
 readOfficialRstoxPackageVersionsFile <- function(officialRstoxPackageVersionsFile, optionalDependencies = FALSE, toTable = FALSE) {
     # Get the file name:
     if(missing(officialRstoxPackageVersionsFile) || !length(officialRstoxPackageVersionsFile)) {
@@ -144,15 +155,21 @@ readOfficialRstoxPackageVersionsFile <- function(officialRstoxPackageVersionsFil
 #    x <- sapply(x, "[", 1)
 #    return(x)
 #}
-# Small function to parse the string defining officical Rstox-package versions (for each RstoxFramwork):
-extractPackageNameAsNames <- function(x) {
-    if(!length(x) || !sum(nchar(x))) {
-        return(x)
+
+#' Small function to parse the string defining officical Rstox-package versions (for each RstoxFramwork):
+#' 
+#' @param packageVersionString Character: A vector of strings of the form PACKAGENAME_PACKAGEVERSION (e.g. "RstoxFramework_3.6.1") to be converted into a list of versions named by the package names.
+#' 
+#' @export
+#' 
+extractPackageNameAsNames <- function(packageVersionString) {
+    if(!length(packageVersionString) || !sum(nchar(packageVersionString))) {
+        return(packageVersionString)
     }
-    x <- strsplit(x, "[_]")
-    x <- structure(lapply(x, "[", 2), names = sapply(x, "[", 1))
+    packageVersionList <- strsplit(packageVersionString, "[_]")
+    packageVersionList <- structure(lapply(packageVersionList, "[", 2), names = sapply(packageVersionList, "[", 1))
     
-    return(x)
+    return(packageVersionList)
 }
 
 getPackageNameAndVersionString <- function(packageName, version, sep = "_") {

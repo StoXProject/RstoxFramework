@@ -210,7 +210,7 @@ initiateRstoxFramework <- function(){
     #    return(variableNames)
     #}
     
-    getEmptyOutputVariables <- function(projectDescription, modelName, processIndex) {
+    getOutputVariablesForUseInBootstrap <- function(projectDescription, modelName, processIndex) {
         
         parameters <- c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable")
         variableNames <- unique(unlist(lapply(lapply(projectDescription$report, "[[", "functionParameters"), "[", parameters)))
@@ -285,7 +285,7 @@ initiateRstoxFramework <- function(){
                 functionName = "Bootstrap", 
                 modelName = "analysis", 
                 parameterName = "OutputVariables",
-                parameterValue = getEmptyOutputVariables
+                parameterValue = getOutputVariablesForUseInBootstrap
             ), 
             list(
                 changeVersion = "3.6.3-9007", 
@@ -341,16 +341,40 @@ initiateRstoxFramework <- function(){
                         oldName = "ResampleBioticAssignment", 
                         newName = "ResampleBioticAssignmentByStratum"
                     )
-                    ## Find any use of the ResampleBioticAssignment resampling function:
-                    #hasResampleBioticAssignment <- sapply(projectDescriptionOne$functionParameters$BootstrapMethodTable, function(x) x$ResampleFunction == "ResampleBioticAssignment")
-                    #if(any(hasResampleBioticAssignment)) {
-                    #    atResampleBioticAssignment <- which(hasResampleBioticAssignment)
-                    #    for(ind in atResampleBioticAssignment) {
-                    #        projectDescriptionOne$functionParameters$BootstrapMethodTable[[ind]]$ResampleFunction <- "ResampleBioticAssignmentByStratum"
-                    #    }
-                    #}
+                }
+            ), 
+            list(
+                changeVersion = "4.0.1-9003", 
+                functionName = "Bootstrap", 
+                modelName = "analysis", 
+                parameterName = "BootstrapMethodTable",
+                # Multiple values must be given in a list!!! Also if only :
+                value = function(value) {
+                    TRUE # Translate regardless of the value.
+                }, 
+                newValue = function(projectDescription, modelName, processIndex) {
                     
-                    #return(projectDescriptionOne$functionParameters$BootstrapMethodTable)
+                    renameResampleFunctionInBootstrapMethodTable(
+                        projectDescription[[modelName]][[processIndex]], 
+                        oldName = c(
+                            "ResampleMeanLengthDistributionData", 
+                            "ResampleMeanSpeciesCategoryCatchData", 
+                            "ResamplePreySpeciesCategoryCatchData", 
+                            "ResampleBioticAssignmentByStratum", 
+                            "ResampleBioticAssignmentByAcousticPSU", 
+                            "ResampleMeanNASCData"
+                            
+                        ), 
+                        newName = c(
+                            "Resample_MeanLengthDistributionData", 
+                            "Resample_MeanSpeciesCategoryCatchData", 
+                            "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling", 
+                            "Resample_BioticAssignment_ByStratum", 
+                            "Resample_BioticAssignment_ByAcousticPSU", 
+                            "Resample_MeanNASCData"
+                            
+                        )
+                    )
                 }
             )
         )
@@ -359,11 +383,6 @@ initiateRstoxFramework <- function(){
     
     # Get the backward compatibility:
     backwardCompatibility <- lapply(officialStoxLibraryPackages, getBackwardCompatibility)
-    #rm(
-    #    renameResampleFunctionInBootstrapMethodTableOne, 
-    #    renameResampleFunctionInBootstrapMethodTable, 
-    #    getEmptyOutputVariables
-    #)
     names(backwardCompatibility) <- officialStoxLibraryPackages
     # Add the backwardCompatibility_RstoxFramework:
     backwardCompatibility$RstoxFramework <- backwardCompatibility_RstoxFramework
@@ -472,15 +491,24 @@ initiateRstoxFramework <- function(){
         "MeanNASCData",
         "MeanLengthDistributionData", 
         "MeanSpeciesCategoryCatchData", 
+        #"PreySpeciesCategoryCatchData", 
         "BioticAssignment"
     )
     # ... and the reample functions, 
     resampleFunctions <- list(
-        MeanNASCData = "ResampleMeanNASCData",
-        MeanLengthDistributionData = "ResampleMeanLengthDistributionData", 
-        MeanSpeciesCategoryCatchData = "ResampleMeanSpeciesCategoryCatchData", 
+        MeanNASCData = "Resample_MeanNASCData",
+        MeanLengthDistributionData = "Resample_MeanLengthDistributionData", 
+        MeanSpeciesCategoryCatchData = "Resample_MeanSpeciesCategoryCatchData", 
+        #PreySpeciesCategoryCatchData = c(
+        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical", 
+        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars", 
+        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling"
+        #), 
         #BioticAssignment = "ResampleBioticAssignment" 
-        BioticAssignment = c("ResampleBioticAssignmentByStratum", "ResampleBioticAssignmentByAcousticPSU")
+        BioticAssignment = c(
+            "Resample_BioticAssignment_ByStratum", 
+            "Resample_BioticAssignment_ByAcousticPSU"
+        )
     )
     
     
@@ -939,20 +967,36 @@ initiateRstoxFramework <- function(){
 }
 
 
+
 ##################################################
 ##################################################
-#' Re-define definitions stored in the RstoxFramework environment
+#' Get variables used in reports, specifically for use in the argument OutputVariables in Bootstrap()
 #' 
-#' This function is useful e.g. to test a new package as an official package:
+#' @inheritParams general_arguments
+#' @param parameters Character: A vector of strings naming the parameters to get from the ReportBootstrap functions.
 #' 
-#' @return
-#' A list of definitions.
+#' @export
 #' 
-#' @noRd
-#' @seealso Use \code{\link{getRstoxFrameworkDefinitions}} to get the definitions.
-#' 
-reinitiateRstoxFramework <- function(){
+getBootstrapOutputVariables <- function(projectPath, parameters = c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable")) {
     
+    # Read the projectDescription:
+    projectDescription <- readProjectDescription(
+        projectPath, 
+        verbose = FALSE, 
+        projectDescriptionFile = NULL, 
+        applyBackwardCompatibility = TRUE, 
+        formatProcesses = TRUE, 
+        validateJSON = TRUE
+    )$projectDescription
+    
+    # Get ReportBootstrap processes:
+    atReportFunctionNames <- sapply(projectDescription$report, "[[", "functionName") == "ReportBootstrap"
+    # Extract the variables:
+    variableNames <- unique(unlist(lapply(lapply(projectDescription$report[atReportFunctionNames], "[[", "functionParameters"), "[", parameters)))
+    
+    message("The following OutputVariables are needed (as can be pasted into the parameter field of StoX): ", paste0("\"", variableNames, "\"", collapse = ", "))
+    
+    return(variableNames)  
 }
 
 

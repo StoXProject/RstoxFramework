@@ -1,3 +1,48 @@
+# RstoxFramework v4.1.0 (2024-11-04)
+* Final release for StoX 4.1.0.
+
+
+# RstoxFramework v4.0.1-9005 (2024-11-01)
+* Breaking change: Changed default from save = TRUE to save = FALSE in runModel(), runProject() and runProjects().
+* Fixed bug in runProject() where startProcess and endProcess outside of the range of processes resulted in a warning. In the new version these are truncated to the range of processes. 
+
+
+# RstoxFramework v4.0.1-9004 (2024-10-18)
+* Changed how output files are deleted. Before, output files were deleted for all later processes in a model in addition to the processes of later models using any of these processes. Now, the processes which have an argument UseOutputData = TRUE are not deleted.
+* Refactored resampling functions used in Bootstrap() to save a resamplingFactor in the resampling and then scale the data using the new applyResamplingFactor().
+* Added support for running readProcessIndexTable() on a closed project.
+
+
+# RstoxFramework v4.0.1-9003 (2024-10-10)
+* Fixed bug in colors of processes to not show bold for ProcessData processes that are used by a later ProcessData process where this use is hidden by UseProcessData.
+* Added the resampling function Resample_PreySpeciesCategoryCatchData_Hierarchical, which does actual resampling by repeating entries that are sampled more than once, as opposed to scaling the data variable.
+* Renamed the resampling functions used in Bootstrap to the following convension: "Resample" + "\_" + dataType + "\_" + specification, where dataType is the StoX data type such as "MeanNASCData" and "BioticAssignment", and specification is any string in CamelCase describing the resampling function, such as "ByStratum" and "ByAcousticPSU":
+    * "ResampleMeanLengthDistributionData" -> "Resample_MeanLengthDistributionData"
+    * "ResampleMeanSpeciesCategoryCatchData" -> "Resample_MeanSpeciesCategoryCatchData"
+    * "ResamplePreySpeciesCategoryCatchData" -> "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling"
+    * "ResampleBioticAssignmentByStratum" -> "Resample_BioticAssignment_ByStratum"
+    * "ResampleBioticAssignmentByAcousticPSU" -> "Resample_BioticAssignment_ByAcousticPSU"
+    * "ResampleMeanNASCData" -> "Resample_MeanNASCData"
+* Added the resampling function "Resample_PreySpeciesCategoryCatchData_Hierarchical" which should replace "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling" (the latter kept for testing in this pre-release).
+* Fixed bug where the function inputs to a process data process were not considered when UseProcessData is TRUE, with the consequence that the process was marked as terminal (bold in the GUI).
+* Added the progress of writing the nc file in Bootstrap() to the progress file (which is used by estimateTimeOfProcesses()).
+* Added explicit error message when a variable is requested that does not exist in a Bootstrap nc file.
+* Relaxed error to warning for unknown file extension in output files read through readModelData().
+
+
+# RstoxFramework v4.0.1-9002 (2024-09-18)
+* Changed to show TargetVariableUnit in ReportBootstrap() only when the ReportFunction is not a fraction (fractionOfOccurrence or fractionOfSum).
+* Changed the check-full.yaml to run both macOS arm64 and x86_64.
+
+
+# RstoxFramework v4.0.1-9001 (2024-09-01)
+* Fixed bug where a ReportBootstrap process could be run even if the Baseline model or the Bootstrap process was reset. Also introduced the columns usedInRecursiveProcessIndices, usedInRecursiveProcessIDs and usedInRecursiveProcessNames in getProcessTable() to support resetting processes using outputs from processes in previous tables.
+* Fixed bug where defaults were not given for Percentages and GroupingVariables in ReportBootstrap().
+* Removed stop in ReportBootstrap when Bootstrap() is not run, and rather showing the default warning.
+* Added resample function ResamplePreySpeciesCategoryCatchData().
+* Added vectorised support in getProcessNameFromProcessID() and getProcessIDFromProcessName()
+
+
 # RstoxFramework v4.0.0 (2024-07-09)
 * Final release for StoX 4.0.0.
 

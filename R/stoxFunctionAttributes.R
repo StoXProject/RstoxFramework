@@ -104,10 +104,17 @@ stoxFunctionAttributes <- list(
             RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Baseline", functionName = "ReportFunction"), 
             # The specification parameters for Boostrap:
             RstoxBase::getFunctionArgumentHierarchyForSpcificationParameters(use = "Bootstrap", functionName = "BootstrapReportFunction"), 
-            functionParameterDefaults = list(
-                Percentages = c(5, 50, 95), 
-                GroupingVariables = c("Survey", "SpeciesCategory")
+            list(
+                TargetVariableUnit = list(
+                    ReportFunction = function(functionArguments) {
+                        !startsWith(functionArguments$ReportFunction, "fractionOf")
+                    }
+                )
             )
+        ), 
+        functionParameterDefaults = list(
+            Percentages = c(5, 50, 95), 
+            GroupingVariables = c("Survey", "SpeciesCategory")
         )
     ), 
     
@@ -227,7 +234,7 @@ getResampleFunctions <- function(projectPath) {
     
     #paste0("Resample", getRstoxFrameworkDefinitions("resamplableDataTypes"))
     resamplableDataTypes <- getRstoxFrameworkDefinitions("resamplableDataTypes")
-    resamplableDataTypes<- intersect(resamplableDataTypes, baselineDataTypes)
+    resamplableDataTypes <- intersect(resamplableDataTypes, baselineDataTypes)
     
     unname(unlist(getRstoxFrameworkDefinitions("resampleFunctions")[resamplableDataTypes]))
 }

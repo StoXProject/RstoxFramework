@@ -13,7 +13,7 @@ runModel(
   drop.datatype = TRUE,
   unlistDepth2 = FALSE,
   run = TRUE,
-  save = TRUE,
+  save = FALSE,
   force.save = FALSE,
   force.restart = FALSE,
   replaceDataList = list(),
@@ -58,7 +58,7 @@ runModel(
 
 \item{replaceDataList}{A list named by the processes to replace output data for. See \code{\link{runProcess}}.}
 
-\item{replaceArgsList}{A list of \code{replaceArgs} holding parameters to replace in the function call, named by the processes to modify.}
+\item{replaceArgsList}{A list of \code{replaceArgs} (see \code{\link{runProcess}}) holding parameters to replace in the function call, named by the processes to modify.}
 
 \item{prependProcessList}{A list of \code{values} used in \code{\link{prependProcess}}, named by the processes to prepend a process to.}
 

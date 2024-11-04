@@ -68,7 +68,7 @@ runModel <- function(
     projectPath, modelName, 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
+    run = TRUE, save = FALSE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -170,7 +170,7 @@ runProject <- function(
     modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype  = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
+    run = TRUE, save = FALSE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -181,7 +181,6 @@ runProject <- function(
     msg = TRUE, 
     ...
 ) {
-    
     
     if(msg) {
         startTime <- proc.time()[3]
@@ -326,7 +325,7 @@ runProjects <- function(
     modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), 
     processes = NULL, startProcess = 1, endProcess = Inf, 
     drop.datatype = TRUE, unlistDepth2 = FALSE, 
-    run = TRUE, save = TRUE, force.save = FALSE, force.restart = FALSE, 
+    run = TRUE, save = FALSE, force.save = FALSE, force.restart = FALSE, 
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
@@ -577,6 +576,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
     
 }
 
+
 hasOnlyOneTabble <- function(x) {
     is.list(x) && !data.table::is.data.table(x) && length(x) == 1
 }
@@ -675,8 +675,12 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, ...) {
             ...  # Used in readBootstrapData()
         )
     }
+    #else if(tolower(ext) %in% "png") {
+    #    output <- path
+    #}
     else {
-        stop("Unknown file extension for StoX output file: ", ext, ". Path: ", path, ".")
+        warning("Unknown file extension for StoX output file: ", ext, ". Returning the file path: ", path, ".")
+        output <- path
     }
     
     if(emptyStringAsNA  && data.table::is.data.table(output)) {
@@ -1165,5 +1169,10 @@ runProject_ReplaceAcousticFiles <- function(projectPath, ReadAcoustic.FileNames,
     
     return(output)
 }
+
+
+
+
+
 
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/Framework.R
 \name{getModelData}
 \alias{getModelData}
-\title{Get output data from processes of a StoX model}
+\title{Get output data from processes of an open StoX project}
 \usage{
 getModelData(
   projectPath,
@@ -45,5 +45,5 @@ getModelData(
 \item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
 }
 \description{
-Get output data from processes of a StoX model
+Get output data from processes of an open StoX project
 }

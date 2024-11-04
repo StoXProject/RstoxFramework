@@ -4,10 +4,12 @@
 \alias{readStoX2.7OutputFile}
 \title{Read output file from StoX 2.7}
 \usage{
-readStoX2.7OutputFile(x)
+readStoX2.7OutputFile(x, na.strings = "NA")
 }
 \arguments{
 \item{x}{The path to the StoX 2.7 project file to read.}
+
+\item{na.strings}{See data.table::fread.}
 }
 \description{
 Read output file from StoX 2.7

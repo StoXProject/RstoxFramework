@@ -107,7 +107,13 @@ stoxFunctionAttributes <- list(
             list(
                 TargetVariableUnit = list(
                     ReportFunction = function(functionArguments) {
-                        !startsWith(functionArguments$ReportFunction, "fractionOf")
+                        if(length(functionArguments$ReportFunction)) {
+                            !startsWith(functionArguments$ReportFunction, "fractionOf")
+                        }
+                        else {
+                            FALSE
+                        }
+                        
                     }
                 )
             )

@@ -1,5 +1,6 @@
 # RstoxFramework v4.1.0 (2024-11-04)
 * Final release for StoX 4.1.0.
+* Fixed bug in the function parameter hierarchy of ReportBootstrap, where empty ReportFunction caused an error.
 
 
 # RstoxFramework v4.0.1-9005 (2024-11-01)

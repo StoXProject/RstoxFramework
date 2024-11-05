@@ -70,18 +70,18 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 #' @export
 #'
 compareProjectToStoredOutputFiles <- function(
-        projectPath, projectPath_original = projectPath, 
-        emptyStringAsNA = FALSE, intersect.names = TRUE, 
-        ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, 
-        skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
-        ignoreEqual = FALSE, classOf = c("first", "second"), 
-        try = TRUE, data.out = FALSE, 
-        #mergeWhenDifferentNumberOfRows = FALSE, 
-        sort = TRUE, 
-        compareReports = FALSE, checkOutputFiles = TRUE, 
-        returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, 
-        tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
-        ...
+    projectPath, projectPath_original = projectPath, 
+    emptyStringAsNA = FALSE, intersect.names = TRUE, 
+    ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, 
+    skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
+    ignoreEqual = FALSE, classOf = c("first", "second"), 
+    try = TRUE, data.out = FALSE, 
+    #mergeWhenDifferentNumberOfRows = FALSE, 
+    sort = TRUE, 
+    compareReports = FALSE, checkOutputFiles = TRUE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, 
+    tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
+    ...
 ) {
     
     # Unzip if zipped:

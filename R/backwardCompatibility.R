@@ -279,7 +279,11 @@ renameParameterInOneProcess <- function(functionParameters, action, verbose = FA
         #    message("StoX: Backward compatibility: Remnaming parameter ", action$parameterName, " to ", action$newParameterName, " in function ", action$functionName)
         #}
         
-        # Remname the parameter:
+        # Rename the parameter, overriding the existing with a warning:
+        if(action$newParameterName %in% names(functionParameters)) {
+            warning("StoX: The parameter ", action$newParameterName, " already exists (for some reason) and will be overwritten.")
+            functionParameters[[action$newParameterName]] <- NULL
+        }
         names(functionParameters)[names(functionParameters) %in% action$parameterName] <- action$newParameterName
     }
     return(functionParameters)

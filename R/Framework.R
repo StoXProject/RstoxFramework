@@ -697,7 +697,6 @@ saveAsProject <- function(
 #' 
 copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, save = NULL, msg = TRUE) {
     
-    
     # Check whether the project to be used as template exists:
     if(!dir.exists(projectPath) || !isProject(projectPath)) {
         stop("The path ", projectPath, " does not point to a StoX project.")
@@ -713,9 +712,10 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         }
     }
     
-    if(close) {
+    if(close && isOpenProject(projectPath)) {
         closeProject(projectPath, save = save, msg = msg)
     }
+    
     
     #suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
     createProjectSkeleton(newProjectPath, ow = ow)
@@ -830,6 +830,11 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     # Make sure the project session is complete:
     if(isOpenProject(newProjectPath)) {
         createProjectSessionFolderStructure(newProjectPath)
+    }
+    
+    # Close the new project if the old is closed, or has been closed earlier in the function:
+    if(!isOpenProject(projectPath)) {
+        closeProject(newProjectPath, save = save, msg = msg)
     }
     
     
@@ -1076,7 +1081,10 @@ readProjectDescription <- function(
                 projectDescriptionFile = tempProjectDescriptionFile, 
                 optionalDependencies = TRUE
             )
+            
             valid <- validateProjectDescriptionFile(tempProjectDescriptionFile)
+            # Delete the temporary project description file:
+            unlink(tempProjectDescriptionFile)
         #}
         
         if(!isTRUE(valid)) {
@@ -4471,7 +4479,8 @@ formatFunctionParameters <-  function(functionParameters, functionName, projectP
             
             # Warning if there are parameters not specified in the function definition:
             if(length(invalid)) {
-                warning("StoX: The following functionParameters are not specified in the definition of function ", functionName, ": ", paste(invalid, collapse = ", "))
+                warning("StoX: The following functionParameters are not specified in the definition of function ", functionName, ", and were removed: ", paste(invalid, collapse = ", "))
+                functionParameters <- functionParameters[present]
             }
             # Change class to the defined class:
             else if(length(present)) {
@@ -6416,7 +6425,12 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
                 file.ext = outputFileType
             )
             
+            
             file.copy(processOutput[[1]], filePath)
+            
+            # NO THIS IS NOT SMART. WE CANNOT DELETE THE MEMORY FILE:
+            # delete the temporary bootstrap files:
+            #unlink(processOutput[[1]])
             
             message(
                 "StoX: The bootstrap file can be read into R using the following command:", "\n", 

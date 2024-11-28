@@ -26,9 +26,9 @@ utils::globalVariables(c(
 	 "assignmentPasted", "canShowInMap", "ch", "currentVersion", "enabled", "freq",
 	 "functionInputError", "functionInputProcessIDs", "functionInputsRecursive",
 	 "functionInputs_UseProcessData", "functionName", "functionOutputDataType",
-	 "functionParameters", "hasBeenRun", "hasProcessData", "modelName", "name", "numStations",
-	 "offset", "oldCurrentVersion", "packageName", "possibleValues", "processDirty", "processID",
-	 "processIndex", "processName", "resamplingFactor", "start_time", "tableName",
+	 "functionParameters", "hasBeenRun", "hasProcessData", "listOf", "modelName", "name",
+	 "numStations", "offset", "oldCurrentVersion", "packageName", "possibleValues", "processDirty",
+	 "processID", "processIndex", "processName", "resamplingFactor", "start_time", "tableName",
 	 "terminalProcess", "transceiver", "usedInProcessIDs", "usedInProcessIndices",
 	 "usedInRecursiveProcessIndices", "usedInRecursiveProcessNames", "value", "variableName",
 	 "verbose", "weightsPasted"))

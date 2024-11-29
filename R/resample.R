@@ -540,14 +540,12 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
     #SeedTable <- data.table::as.data.table(lapply(BootstrapMethodTable$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
     #names(SeedTable) <- BootstrapMethodTable$ProcessName
     #SeedList <- split(SeedTable, seq_len(nrow(SeedTable)))
-    NumberOfBootstraps <- NumberOfBootstraps
-    SeedList <- drawSeedList(
-        table = BootstrapMethodTable, 
-        NumberOfBootstraps = NumberOfBootstraps, 
-        listOf = "table"
-    )
+    
     # Create the replaceDataList input to runProcesses, which defines the seed for each bootstrap run:
-    replaceDataList <- createReplaceData(SeedList = SeedList, BootstrapMethodTable = BootstrapMethodTable)
+    replaceDataList <- createReplaceData(
+        BootstrapMethodTable = BootstrapMethodTable, 
+        NumberOfBootstraps = NumberOfBootstraps
+    )
     
     # Scan through the baseline processes to be run and look for processes with the parameter Seed:
     hasSeed <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x))
@@ -562,10 +560,9 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
         }
     }
     # Construct a list of lists, where each list contains a list of Seed named by the processes using Seed in the Baseline:
-    BaselineSeedList <- drawSeedList(
+    BaselineSeedList <- drawNamedSeedList(
         table = BaselineSeedTable, 
-        NumberOfBootstraps = NumberOfBootstraps, 
-        listOf = "list"
+        NumberOfBootstraps = NumberOfBootstraps
     )
     
     # Get the number of cores to open:
@@ -1054,23 +1051,37 @@ getDataTypeFromBootstrap <- function(nc, processName) {
 
 
 # Funcion to draw seeds for each process given in the table and each bootstrap run, and reshape the seeds into a list of either data.table with rows 
-drawSeedList <- function(table, NumberOfBootstraps, listOf = c("table", "list")) {
+drawNamedSeedList <- function(table, NumberOfBootstraps) {
     if(!length(table)) {
         SeedList <- vector("list", NumberOfBootstraps)
-        if(listOf == "list") {
-            SeedList <- lapply(SeedList, as.data.table)
-        }
+        SeedList <- lapply(SeedList, as.data.table)
     }
     else {
         SeedTable <- data.table::as.data.table(lapply(table$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
         names(SeedTable) <- table$ProcessName
         SeedList <- split(SeedTable, seq_len(nrow(SeedTable)))
-        if(listOf == "list") {
-            SeedList <- lapply(SeedList, function(x) structure(as.list(x), names = names(x)))
-        }
+        
+        # ERROR: This does not work, as the result is not a list with an element named Seed:
+        SeedList <- lapply(SeedList, function(x) structure(as.list(x), names = names(x)))
+        # The following will work:
+        #warning("StoX: NEW BASELINESEED METHOD")
+        #SeedList <- lapply(SeedList, function(x) lapply(x, function(y) list(Seed = y)))
     }
     
     return(SeedList)
+}
+
+drawSeedTable <- function(table, NumberOfBootstraps) {
+    if(!length(table)) {
+        SeedTable <- vector("list", NumberOfBootstraps)
+    }
+    else {
+        SeedTable <- data.table::as.data.table(lapply(table$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
+        names(SeedTable) <- table$ProcessName
+        SeedTable <- split(SeedTable, seq_len(nrow(SeedTable)))
+    }
+    
+    return(SeedTable)
 }
 
 
@@ -1102,8 +1113,15 @@ addFunctionNameToReplaceData <- function(replaceData, BootstrapMethodTable) {
     return(out)
 }
 
-createReplaceData <- function(SeedList, BootstrapMethodTable) {
-    replaceDataList <- lapply(SeedList, createReplaceDataSansFunctionName)
+createReplaceData <- function(BootstrapMethodTable, NumberOfBootstraps) {
+    
+    # Create a table of seed values:
+    SeedTable <- drawSeedTable(
+        table = BootstrapMethodTable, 
+        NumberOfBootstraps = NumberOfBootstraps
+    )
+    
+    replaceDataList <- lapply(SeedTable, createReplaceDataSansFunctionName)
     replaceDataList <- lapply(replaceDataList, addFunctionNameToReplaceData, BootstrapMethodTable = BootstrapMethodTable)
     return(replaceDataList)
 }
@@ -1676,7 +1694,6 @@ resampleOneGroup <- function(subData, seed, varToResample, nextResampleBy = NULL
     
     # Merge in the resample factors:
     originalColumnOrder <- names(subData)
-    #if("PSU01" %in% subData$PSU) browser()
     subData <- merge(subData, resampled, by = varToResample)
     temporaryScaleFromResampling <- subData$temporaryScaleFromResampling
     repeatInd <- rep(seq_len(nrow(subData)), temporaryScaleFromResampling)
@@ -1802,7 +1819,7 @@ Resample_MeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(PreySpeciesCategoryCatchData, Seed) {
+Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling <- function(PreySpeciesCategoryCatchData, Seed) {
     
     
     # Export this function when prey is official
@@ -2188,9 +2205,14 @@ ReportBootstrap <- function(
     }
     
     #  Open the file:
-    nc <- ncdf4::nc_open(unlist(BootstrapData))
-    on.exit(ncdf4::nc_close(nc))
-    
+    if(length(unlist(BootstrapData))) {
+        nc <- ncdf4::nc_open(unlist(BootstrapData))
+        on.exit(ncdf4::nc_close(nc))
+    }
+    else {
+        warning("StoX: Bootstrap output NetCDF4 file missing.")
+        return(NULL)
+    }
     
     # Read the baseline process names:
     processNameAndTableName <- getProcessNameAndTableName(BaselineProcess, nc, na.rm = TRUE)

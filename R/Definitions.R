@@ -368,7 +368,7 @@ initiateRstoxFramework <- function(){
                         newName = c(
                             "Resample_MeanLengthDistributionData", 
                             "Resample_MeanSpeciesCategoryCatchData", 
-                            "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling", 
+                            "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling", 
                             "Resample_BioticAssignment_ByStratum", 
                             "Resample_BioticAssignment_ByAcousticPSU", 
                             "Resample_MeanNASCData"
@@ -501,8 +501,8 @@ initiateRstoxFramework <- function(){
         MeanSpeciesCategoryCatchData = "Resample_MeanSpeciesCategoryCatchData", 
         #PreySpeciesCategoryCatchData = c(
         #    "Resample_PreySpeciesCategoryCatchData_Hierarchical", 
-        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars", 
-        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling"
+        #    "Resample_PreySpeciesCategoryCatchData_HierarchicalNotUsingMakeUniqueVars", 
+        #    "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling"
         #), 
         #BioticAssignment = "ResampleBioticAssignment" 
         BioticAssignment = c(
@@ -726,6 +726,10 @@ initiateRstoxFramework <- function(){
     names(stoxFolderStructure) <- stoxFolderStructureNames
     stoxFolderStructureList <- as.list(stoxFolderStructure)
     
+    # Define the input folders:
+    stoxFolderStructureList$inputFolders <- file.path(stoxFolders["input"], stoxDataSourceFolders)
+    
+    # Define the output folders:
     stoxFolderStructureList$outputFolders <- stoxFolderStructure[stoxModelFolders]
     
     

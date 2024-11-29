@@ -1309,14 +1309,17 @@ setRstoxPrecision <- function(x) {
             
             # Write the data to a file to utilize the function sf::st_set_precision:
             outdata <- sf::st_set_precision(x, precision = precision)
-            tmp  <- paste0(tempfile(), "nc.shp")
+            tmpDir <- file.path(tempdir(), "shapefile")
+            dir.create(tmpDir)
+            tmpFile <- file.path(tmpDir, "nc.shp")
+            
             # Keep the stratum names and crs: 
             stratumNames <- outdata$StratumName
             crs <- sf::st_crs(outdata)
             
             # Write the multipolygons to a temporary file (suppress the name abbreviation warning "Field names abbreviated for ESRI Shapefile driver"):
-            suppressWarnings(sf::st_write(outdata, tmp, quiet = TRUE))
-            x <- sf::st_read(tmp, quiet = TRUE)
+            suppressWarnings(sf::st_write(outdata, tmpFile, quiet = TRUE))
+            x <- sf::st_read(tmpFile, quiet = TRUE)
             
             # Add the stratum names and crs again: 
             x <- x[, NULL]
@@ -1330,8 +1333,8 @@ setRstoxPrecision <- function(x) {
             newOrder <- c(setdiff(names(x), "geometry"), "geometry")
             x <- x[, newOrder]
             
-            
-            file.remove(tmp)
+            # delete the shape files:
+            unlink(tmpDir, recursive = TRUE)
         }
         # None of the other validOutputDataClasses need setting precision to.
         

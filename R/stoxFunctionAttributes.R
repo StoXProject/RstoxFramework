@@ -13,9 +13,17 @@ getGroupingVariables_PlotReportBootstrap <- function(ReportBootstrapData) {
 }
 
 getPossibleVariables <- function(BootstrapData, BaselineProcess) {
+    
     #  Open the file:
-    nc <- ncdf4::nc_open(unlist(BootstrapData))
-    on.exit(ncdf4::nc_close(nc))
+    if(length(unlist(BootstrapData))) {
+        nc <- ncdf4::nc_open(unlist(BootstrapData))
+        on.exit(ncdf4::nc_close(nc))
+    }
+    else {
+        warning("StoX: Bootstrap output NetCDF4 file missing.")
+        return(NULL)
+    }
+    
     # Read the baseline process names:
     processNameAndTableName <- getProcessNameAndTableName(BaselineProcess, nc, na.rm = FALSE)
     #processNameSlashTableName <- paste(processNameAndTableName, collapse = "/")
@@ -35,9 +43,15 @@ getPossibleVariables <- function(BootstrapData, BaselineProcess) {
     
 getPossibleVariables.nc <- function(BootstrapData, BaselineProcess, exceptions, nc.classes = c("double", "int", "character")) {
     
-    # Open the ncc file:
-    nc <- ncdf4::nc_open(unlist(BootstrapData))
-    on.exit(ncdf4::nc_close(nc))
+    #  Open the file:
+    if(length(unlist(BootstrapData))) {
+        nc <- ncdf4::nc_open(unlist(BootstrapData))
+        on.exit(ncdf4::nc_close(nc))
+    }
+    else {
+        warning("StoX: Bootstrap output NetCDF4 file missing.")
+        return(NULL)
+    }
     
     # Get the process, table and variable names, with classes:
     processNameTableNameVariableName <- getProcessNameTableNameVariableName(nc, add.class = TRUE)
@@ -351,8 +365,16 @@ processPropertyFormats <- list(
         class = "single", 
         title = "Select Unit for the TargetVariable", 
         possibleValues = function(BootstrapData, BaselineProcess, TargetVariable) {
-            nc <- ncdf4::nc_open(unlist(BootstrapData))
-            on.exit(ncdf4::nc_close(nc))
+            #  Open the file:
+            if(length(unlist(BootstrapData))) {
+                nc <- ncdf4::nc_open(unlist(BootstrapData))
+                on.exit(ncdf4::nc_close(nc))
+            }
+            else {
+                warning("StoX: Bootstrap output NetCDF4 file missing.")
+                return(NULL)
+            }
+            
             dataType <- getDataTypeFromBootstrap(nc, BaselineProcess)
             quantity <- RstoxBase::getBaseUnit(dataType = dataType, variableName = TargetVariable, element = "quantity")
             if(is.na(quantity)) {
@@ -412,8 +434,15 @@ processPropertyFormats <- list(
         title = "Select one baseline process to report from.", 
         possibleValues = function(BootstrapData) {
             #  Open the file:
-            nc <- ncdf4::nc_open(unlist(BootstrapData))
-            on.exit(ncdf4::nc_close(nc))
+            if(length(unlist(BootstrapData))) {
+                nc <- ncdf4::nc_open(unlist(BootstrapData))
+                on.exit(ncdf4::nc_close(nc))
+            }
+            else {
+                warning("StoX: Bootstrap output NetCDF4 file missing.")
+                return(NULL)
+            }
+            
             # Read the baseline process names:
             processNamesAndTableNames <- getProcessNamesAndTableNames(nc)
             processNames <- unique(processNamesAndTableNames$processName)

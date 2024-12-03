@@ -1,3 +1,13 @@
+# RstoxFramework v4.1.1-9002 (2024-12-03)
+* Reverted the name change of Resample* functions back to using CamelCase and not underscore separated CamelCase (underscore between the word "Resample", the data type, and the specification):
+    * "Resample_MeanLengthDistributionData" -> "ResampleMeanLengthDistributionData"
+    * "Resample_MeanSpeciesCategoryCatchData" -> "ResampleMeanSpeciesCategoryCatchData"
+    * "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling" -> "ResamplePreySpeciesCategoryCatchData"
+    * "Resample_BioticAssignment_ByStratum" -> "ResampleBioticAssignmentByStratum"
+    * "Resample_BioticAssignment_ByAcousticPSU" -> "ResampleBioticAssignmentByAcousticPSU"
+    * "Resample_MeanNASCData" -> "ResampleMeanNASCData"
+
+
 # RstoxFramework v4.1.1-9001 (2024-11-15)
 * Changed unwanted error "Passed a filename that is NOT a string of characters!" when creating a process using ReportBootstrap and clicking on the drop down list for e.g. BaselineProcess, to a warning "Bootstrap output NetCDF4 file missing." and with empty drop down as result.
 * Added removal of temporary files: 1. Shapefiles written by setRstoxPrecision() were not completely deleted (shx, dbf and prj were not deleted). 2. The NetCDF4 file written temporarily during bootstrapping and copied to the bootstrap process output was not deleted. 3. The temporary project description file used in validation in readProjectDescription() was not deleted.

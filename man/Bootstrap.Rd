@@ -24,7 +24,7 @@ Bootstrap(
 
 \item{projectPath}{The path to the project to containing the baseline to bootstrap.}
 
-\item{BootstrapMethodTable}{A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}. Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") to get a list of the implemented resampling functions. Note that if a process is selected in \code{BootstrapMethodTable} that is not used in the model up to the \code{OutputProcesses}, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).}
+\item{BootstrapMethodTable}{A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}. See Details for a list of resampling functions and the limitations and benefits of each function.}
 
 \item{NumberOfBootstraps}{Integer: The number of bootstrap replicates.}
 
@@ -45,6 +45,32 @@ A \code{\link{BootstrapData}} object, which is a list of the RstoxData \code{\li
 Run a subset of the baseline model a number of times while resampling data.
 }
 \details{
-A copy of the project is made for each core given by \code{NumberOfCores}. In the case that NumberOfCores == 1, this is still done for safety.
-Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate if the \code{ResampleFunction} specified in the \code{BootstrapMethodTable} is "ResampleBioticAssignmentByStratum" (the only option before StoX 4.0.0). This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density. In this case it is adviced to use \code{ResampleFunction} "ResampleBioticAssignmentByAcousticPSU", which will resample the assigned hauls to each individual AcousticPSU. Using this \code{ResampleFunction} "ResampleBioticAssignmentByAcousticPSU" will however require a suffucuent number of Hauls assigned to each AcousticPSU to achieve meaningful bootstrapping. Surely, only one assigned Haul is not sufficient, and will lead to a warning.
+\strong{Resampling of BioticAssignment}
+
+For acoustic-trawl survey estimates there are two possible resampling functions for the biotic assignment; \code{\link{ResampleBioticAssignmentByStratum}} and \code{\link{ResampleBioticAssignmentByAcousticPSU}}. Both of these have their limitations and effect on the mean and variance, and the choice of resampling function depends on the survey design and how the Hauls are assigned to the AcousticPSUs. The effect on the mean and variance will also depend on the characteristics of the biotic data.
+
+If the AcousticPSUs of a Stratum have different assigned Hauls, there is a probability that none of the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap replicate, in the case that ResampleFunction is \code{\link{ResampleBioticAssignmentByStratum}} in the \code{BootstrapMethodTable} (the only option before StoX 4.0.0). Different assigned Hauls can be the result of using \code{DefinitionMethod} "Radius" or "EllipsoidalDistance", or manually assigning different Hauls to each AcousticPSU in \code{\link[RstoxBase]{DefineBioticAssignment}}. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. The only option in order to avoid missing values in the reports is to use RemoveMissingValues = TRUE, which introduces under-estimation of the mean compared to what the estimate would be if none of the AcousticPSUs came out with missing acoustic density. The degree of under-estimation depends on how many of the bootstrap replicates have the problem of AcousticPSUs with missing assignment length distribution.
+
+If the problem of under-estimation due to different assigned hauls per AcousticPSU is present in a StoX project, one alternative is to use the ResampleFunction \code{\link{ResampleBioticAssignmentByAcousticPSU}} instead. With this method, the assigned hauls are resampled for \emph{each individual} AcousticPSU. A potential consequence of this resampling function is however that the variance can be considerably under-estimated compared to using the ResampleFunction \code{\link{ResampleBioticAssignmentByStratum}}. The reason for this is that extreme outcomes of the resampling are equal for all AcousticPSUs of a stratum in the case that ResampleFunction is \code{\link{ResampleBioticAssignmentByStratum}}, while extreme outcomes are likely to be counteracted by other outcomes for the rest of the  AcousticPSUs in the case that ResampleFunction is \code{\link{ResampleBioticAssignmentByAcousticPSU}}. Using ResampleFunction \code{\link{ResampleBioticAssignmentByAcousticPSU}} will require a sufficient number of Hauls assigned to each AcousticPSU to achieve meaningful bootstrapping. Surely, only one assigned Haul is not sufficient for any contribution to the variance, and will lead to a warning.
+
+
+A different option when experiencing missing values in reports due to different assigned Hauls is to split a stratum into smaller strata, each for which the \code{DefinitionMethod} "Stratus" can be used in \code{\link[RstoxBase]{DefineBioticAssignment}}. 
+
+\strong{Resampling of MeanNASCData}
+
+The ResampleFunction \code{\link{ResampleMeanNASCData}} resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
+
+\strong{Resampling of ResampleMeanLengthDistributionData}
+
+The ResampleFunction \code{\link{ResampleMeanLengthDistributionData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
+
+\strong{Resampling of ResampleMeanSpeciesCategoryCatchData}
+
+The ResampleFunction \code{\link{ResampleMeanSpeciesCategoryCatchData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
+
+\strong{General}
+
+Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") in R to get a list of the implemented resampling functions. Note that if a process is selected in \code{BootstrapMethodTable} that is not used in the model up to the \code{OutputProcesses}, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).
+
+A copy of the project is made for each core given by \code{NumberOfCores}.
 }

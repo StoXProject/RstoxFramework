@@ -1,4 +1,5 @@
 # RstoxFramework v4.1.1-9002 (2024-12-03)
+* Updated the documentation of ResampleFunction in the BootstrapMethodTable of Bootstrap(). Specifically the pros and cons of ResampleFunction "ResampleBioticAssignmentByStratum" and "ResampleBioticAssignmentByAcousticPSU" are described. There are dangers to using the "ResampleBioticAssignmentByAcousticPSU" in that the variance may be lower than expected due to Hauls being resampled multiple times for the same Stratum, which smoothes out the extreme values. 
 * Reverted the name change of Resample* functions back to using CamelCase and not underscore separated CamelCase (underscore between the word "Resample", the data type, and the specification):
     * "Resample_MeanLengthDistributionData" -> "ResampleMeanLengthDistributionData"
     * "Resample_MeanSpeciesCategoryCatchData" -> "ResampleMeanSpeciesCategoryCatchData"
@@ -6,6 +7,7 @@
     * "Resample_BioticAssignment_ByStratum" -> "ResampleBioticAssignmentByStratum"
     * "Resample_BioticAssignment_ByAcousticPSU" -> "ResampleBioticAssignmentByAcousticPSU"
     * "Resample_MeanNASCData" -> "ResampleMeanNASCData"
+* Added message when replaceDataList or replaceArgsList is used.
 
 
 # RstoxFramework v4.1.1-9001 (2024-11-15)

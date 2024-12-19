@@ -4919,7 +4919,7 @@ expandProcess <- function(projectPath, modelName, processName, values = NULL, re
         )
     }
     
-    # Add an AddToStoxBiotic process which inputs the firstStoxBioticProcess 
+    # Add the process:
     suppressWarnings(
         addProcess(
             projectPath = projectPath, 
@@ -5211,6 +5211,16 @@ runProcess <- function(
     }
     if(is.list(replaceData) && !data.table::is.data.table(replaceData) && is.character(replaceData$FunctionName)) {
         
+        # Add a message when replacing data using a function:
+        message(
+            "StoX: Replacing data in ", modelName, " process ", 
+            getProcessIndexFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), 
+            ": ", 
+            getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), 
+            " using the function ", replaceData$FunctionName, ".",
+            appendLF = TRUE
+        )
+        
         #if(!exists(replaceData$FunctionName)) {
         #    stop("If replaceData is given as a list with a function name first, this must be an existing function (was ", replaceData$FunctionName, ").")
         #}
@@ -5240,6 +5250,17 @@ runProcess <- function(
         )
     }
     else if(length(replaceData)) {
+        # Add a message when replacing data:
+        message(
+            "StoX: Replacing data in ", modelName, " process ", 
+            getProcessIndexFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), 
+            ": ", 
+            getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), 
+            " using the replaceData option.", 
+            appendLF = TRUE
+        )
+        
+        # Do the actual replacement:
         processOutput <- replaceData
     }
     
@@ -5403,6 +5424,17 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
         warning("The replaceArgs/replaceArgsList contains the following parameters that do not exist in the process: ", paste(namesOfReplaceArgsNotToInsert, sep = ", "))
     }
     if(length(namesOfReplaceArgsToInsert)) {
+        # Add a message when replacing data:
+        message(
+            "StoX: Replacing the following arguments in ", modelName, " process ", 
+            getProcessIndexFromProcessID(projectPath = projectPath, modelName = modelName, processID = processID), 
+            ": ", 
+            getProcessName(projectPath = projectPath, modelName = modelName, processID = processID), 
+            ": ", 
+            paste(namesOfReplaceArgsToInsert, collapse = ", "), ".",
+            appendLF = TRUE
+        )
+        
         functionArguments[namesOfReplaceArgsToInsert] <- replaceArgs[namesOfReplaceArgsToInsert]
     }
     

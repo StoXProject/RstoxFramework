@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.1</span>
       </span>
     </div>
 
@@ -47,6 +47,24 @@
       <small>Source: <a href="https://github.com/StoXProject/RstoxFramework/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.1.1-9002" id="rstoxframework-v411-9002-2024-12-03">RstoxFramework v4.1.1-9002 (2024-12-03)<a class="anchor" aria-label="anchor" href="#rstoxframework-v411-9002-2024-12-03"></a></h2>
+<ul><li>Updated the documentation of ResampleFunction in the BootstrapMethodTable of Bootstrap(). Specifically the pros and cons of ResampleFunction “ResampleBioticAssignmentByStratum” and “ResampleBioticAssignmentByAcousticPSU” are described. There are dangers to using the “ResampleBioticAssignmentByAcousticPSU” in that the variance may be lower than expected due to Hauls being resampled multiple times for the same Stratum, which smoothes out the extreme values.</li>
+<li>Reverted the name change of Resample* functions back to using CamelCase and not underscore separated CamelCase (underscore between the word “Resample”, the data type, and the specification):
+<ul><li>“Resample_MeanLengthDistributionData” -&gt; “ResampleMeanLengthDistributionData”</li>
+<li>“Resample_MeanSpeciesCategoryCatchData” -&gt; “ResampleMeanSpeciesCategoryCatchData”</li>
+<li>“Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling” -&gt; “ResamplePreySpeciesCategoryCatchData”</li>
+<li>“Resample_BioticAssignment_ByStratum” -&gt; “ResampleBioticAssignmentByStratum”</li>
+<li>“Resample_BioticAssignment_ByAcousticPSU” -&gt; “ResampleBioticAssignmentByAcousticPSU”</li>
+<li>“Resample_MeanNASCData” -&gt; “ResampleMeanNASCData”</li>
+</ul></li>
+<li>Added message when replaceDataList or replaceArgsList is used.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="4.1.1-9001" id="rstoxframework-v411-9001-2024-11-15">RstoxFramework v4.1.1-9001 (2024-11-15)<a class="anchor" aria-label="anchor" href="#rstoxframework-v411-9001-2024-11-15"></a></h2>
+<ul><li>Changed unwanted error “Passed a filename that is NOT a string of characters!” when creating a process using ReportBootstrap and clicking on the drop down list for e.g. BaselineProcess, to a warning “Bootstrap output NetCDF4 file missing.” and with empty drop down as result.</li>
+<li>Added removal of temporary files: 1. Shapefiles written by setRstoxPrecision() were not completely deleted (shx, dbf and prj were not deleted). 2. The NetCDF4 file written temporarily during bootstrapping and copied to the bootstrap process output was not deleted. 3. The temporary project description file used in validation in readProjectDescription() was not deleted.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="4.1.0" id="rstoxframework-v410-2024-11-04">RstoxFramework v4.1.0 (2024-11-04)<a class="anchor" aria-label="anchor" href="#rstoxframework-v410-2024-11-04"></a></h2>
 <ul><li>Final release for StoX 4.1.0.</li>

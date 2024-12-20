@@ -368,10 +368,44 @@ initiateRstoxFramework <- function(){
                         newName = c(
                             "Resample_MeanLengthDistributionData", 
                             "Resample_MeanSpeciesCategoryCatchData", 
-                            "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling", 
+                            "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling", 
                             "Resample_BioticAssignment_ByStratum", 
                             "Resample_BioticAssignment_ByAcousticPSU", 
                             "Resample_MeanNASCData"
+                            
+                        )
+                    )
+                }
+            ), 
+            list(
+                changeVersion = "4.1.1-9002", 
+                functionName = "Bootstrap", 
+                modelName = "analysis", 
+                parameterName = "BootstrapMethodTable",
+                # Multiple values must be given in a list!!! Also if only :
+                value = function(value) {
+                    TRUE # Translate regardless of the value.
+                }, 
+                newValue = function(projectDescription, modelName, processIndex) {
+                    
+                    renameResampleFunctionInBootstrapMethodTable(
+                        projectDescription[[modelName]][[processIndex]], 
+                        oldName = c(
+                            "Resample_MeanLengthDistributionData", 
+                            "Resample_MeanSpeciesCategoryCatchData", 
+                            "Resample_PreySpeciesCategoryCatchData_HierarchicalUsingScaling", 
+                            "Resample_BioticAssignment_ByStratum", 
+                            "Resample_BioticAssignment_ByAcousticPSU", 
+                            "Resample_MeanNASCData"
+                            
+                        ), 
+                        newName = c(
+                            "ResampleMeanLengthDistributionData", 
+                            "ResampleMeanSpeciesCategoryCatchData", 
+                            "ResamplePreySpeciesCategoryCatchData", 
+                            "ResampleBioticAssignmentByStratum", 
+                            "ResampleBioticAssignmentByAcousticPSU", 
+                            "ResampleMeanNASCData"
                             
                         )
                     )
@@ -496,18 +530,18 @@ initiateRstoxFramework <- function(){
     )
     # ... and the reample functions, 
     resampleFunctions <- list(
-        MeanNASCData = "Resample_MeanNASCData",
-        MeanLengthDistributionData = "Resample_MeanLengthDistributionData", 
-        MeanSpeciesCategoryCatchData = "Resample_MeanSpeciesCategoryCatchData", 
+        MeanNASCData = "ResampleMeanNASCData",
+        MeanLengthDistributionData = "ResampleMeanLengthDistributionData", 
+        MeanSpeciesCategoryCatchData = "ResampleMeanSpeciesCategoryCatchData", 
         #PreySpeciesCategoryCatchData = c(
-        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical", 
-        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars", 
-        #    "Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling"
+        #    "ResamplePreySpeciesCategoryCatchDataHierarchical", 
+        #    "ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingMakeUniqueVars", 
+        #    "ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling"
         #), 
         #BioticAssignment = "ResampleBioticAssignment" 
         BioticAssignment = c(
-            "Resample_BioticAssignment_ByStratum", 
-            "Resample_BioticAssignment_ByAcousticPSU"
+            "ResampleBioticAssignmentByStratum", 
+            "ResampleBioticAssignmentByAcousticPSU"
         )
     )
     
@@ -726,6 +760,10 @@ initiateRstoxFramework <- function(){
     names(stoxFolderStructure) <- stoxFolderStructureNames
     stoxFolderStructureList <- as.list(stoxFolderStructure)
     
+    # Define the input folders:
+    stoxFolderStructureList$inputFolders <- file.path(stoxFolders["input"], stoxDataSourceFolders)
+    
+    # Define the output folders:
     stoxFolderStructureList$outputFolders <- stoxFolderStructure[stoxModelFolders]
     
     

@@ -6,7 +6,7 @@
 #' @param outputData The output of the function from an earlier run.
 #' @param outputMemoryFile The path to the output memory file to copy the \code{outputData} to in the case that \code{UseOutputData} is TRUE.
 #' @param projectPath The path to the project to containing the baseline to bootstrap.
-#' @param BootstrapMethodTable A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}. Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") to get a list of the implemented resampling functions. Note that if a process is selected in \code{BootstrapMethodTable} that is not used in the model up to the \code{OutputProcesses}, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).
+#' @param BootstrapMethodTable A table of the columns ProcessName, ResampleFunction and Seed, where each row defines the resample function to apply to the output of the given process, and the seed to use in the resampling. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}. See Details for a list of resampling functions and the limitations and benefits of each function.
 #' @param NumberOfBootstraps Integer: The number of bootstrap replicates.
 #' @param OutputProcesses A vector of the processes to save from each bootstrap replicate.
 #' @param OutputVariables An optional list of variables to keep in the output. A typical set of variables could be ["Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"], which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in \code{OutputVariables}. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects and faster writing/reading of that file. The \code{OutputVariables} are extracted for all processes listed in \code{OutputProcesses}. See \code{\link{getBootstrapOutputVariables}} for finding the variables used in ReportBootstrap processes of a project.
@@ -14,8 +14,37 @@
 #' @param NumberOfCores The number of cores to use for parallel processing. A copy of the project is created in tempdir() for each core, also when using only one core. Note that this will require disc space equivalent to the \code{NumberOfCores} time the size of the project folder (excluding the output/analysis/Bootstrap folder, which will be deleted before copies are made).
 #' @param BaselineSeedTable A table of ProcessName and Seed, giving the seed to use for the Baseline processes that requires a Seed parameter. The seed is used to draw one seed per bootstrap run using \code{\link[RstoxBase]{getSeedVector}}.
 #' 
-#' @details A copy of the project is made for each core given by \code{NumberOfCores}. In the case that NumberOfCores == 1, this is still done for safety.
-#' Note that for acoustic-trawl survey estimates, if the AcousticPSUs of a Stratum have different assigned Hauls (not using the Stratum assignment method in \code{\link[RstoxBase]{DefineBioticAssignment}}), there is a probability that none the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap  replicate if the \code{ResampleFunction} specified in the \code{BootstrapMethodTable} is "ResampleBioticAssignmentByStratum" (the only option before StoX 4.0.0). This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. This forces the use of RemoveMissingValues = TRUE, which implies some degree of under-estimation from what the estimate would be if none of the AcousticPSUs came out with missing acoustic density. In this case it is adviced to use \code{ResampleFunction} "ResampleBioticAssignmentByAcousticPSU", which will resample the assigned hauls to each individual AcousticPSU. Using this \code{ResampleFunction} "ResampleBioticAssignmentByAcousticPSU" will however require a suffucuent number of Hauls assigned to each AcousticPSU to achieve meaningful bootstrapping. Surely, only one assigned Haul is not sufficient, and will lead to a warning.
+#' @details 
+#' \strong{Resampling of BioticAssignment}
+#' 
+#' For acoustic-trawl survey estimates there are two possible resampling functions for the biotic assignment; \code{\link{ResampleBioticAssignmentByStratum}} and \code{\link{ResampleBioticAssignmentByAcousticPSU}}. Both of these have their limitations and effect on the mean and variance, and the choice of resampling function should be based on the survey design and how the Hauls are assigned to the AcousticPSUs. The effect on the mean and variance will also depend on the characteristics of the biotic data:
+#' 
+#' When ResampleFunction is \code{\link{ResampleBioticAssignmentByStratum}} in the \code{BootstrapMethodTable} (the only option before StoX 4.0.0), if the AcousticPSUs of a Stratum have different assigned Hauls, there is a probability that none of the assigned Hauls of an AcousticPSU are re-sampled in a bootstrap replicate. Different assigned Hauls can be the result of using \code{DefinitionMethod} "Radius" or "EllipsoidalDistance", or manually assigning different Hauls to each AcousticPSU in \code{\link[RstoxBase]{DefineBioticAssignment}}. This will lead to missing acoustic density for that PSU for the target species, which will propagate throughout to the reports. The only option in order to avoid missing values in the reports in this case is to use RemoveMissingValues = TRUE, which introduces under-estimation of the mean compared to what the estimate would be if none of the AcousticPSUs came out with missing acoustic density. The degree of under-estimation depends on how many of the bootstrap replicates have the problem of AcousticPSUs with missing assignment length distribution.
+#' 
+#' If the problem of under-estimation due to different assigned hauls per AcousticPSU is present in a StoX project, one alternative is to use the ResampleFunction \code{\link{ResampleBioticAssignmentByAcousticPSU}} instead. With this method, the assigned hauls are resampled for \emph{each individual} AcousticPSU. A potential consequence of this resampling function is however that the variance can be under-estimated compared to using the ResampleFunction \code{\link{ResampleBioticAssignmentByStratum}}. The reason for this is that while extreme outcomes of the resampling are equal for all AcousticPSUs of a stratum in the case that ResampleFunction is \code{\link{ResampleBioticAssignmentByStratum}}, extreme outcomes are likely to be counteracted by other outcomes from the rest of the  AcousticPSUs in the case that ResampleFunction is \code{\link{ResampleBioticAssignmentByAcousticPSU}}. The under-estimation can be dependent on the number of AcousticPSUs for each Stratum. 
+#' 
+#' I addition, using ResampleFunction \code{\link{ResampleBioticAssignmentByAcousticPSU}} will require a sufficient number of Hauls assigned to each AcousticPSU to achieve meaningful bootstrapping. Surely, only one assigned Haul is not sufficient for any contribution to the variance, and will lead to a warning.
+#' 
+#' 
+#' A different option when experiencing missing values in reports due to different assigned Hauls is to split a Stratum into smaller strata, each for which the \code{DefinitionMethod} "Stratum" can be used in \code{\link[RstoxBase]{DefineBioticAssignment}}. 
+#' 
+#' \strong{Resampling of MeanNASCData}
+#' 
+#' The ResampleFunction \code{\link{ResampleMeanNASCData}} resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
+#' 
+#' \strong{Resampling of ResampleMeanLengthDistributionData}
+#' 
+#' The ResampleFunction \code{\link{ResampleMeanLengthDistributionData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
+#' 
+#' \strong{Resampling of ResampleMeanSpeciesCategoryCatchData}
+#' 
+#' The ResampleFunction \code{\link{ResampleMeanSpeciesCategoryCatchData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
+#' 
+#' \strong{General}
+#' 
+#' Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") in R to get a list of the implemented resampling functions. Note that if a process is selected in \code{BootstrapMethodTable} that is not used in the model up to the \code{OutputProcesses}, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).
+#' 
+#' A copy of the project is made for each core given by \code{NumberOfCores}.
 #' 
 #' @return
 #' A \code{\link{BootstrapData}} object, which is a list of the RstoxData \code{\link[RstoxData]{DataTypes}} and RstoxBase \code{\link[RstoxBase]{DataTypes}}.
@@ -540,14 +569,12 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
     #SeedTable <- data.table::as.data.table(lapply(BootstrapMethodTable$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
     #names(SeedTable) <- BootstrapMethodTable$ProcessName
     #SeedList <- split(SeedTable, seq_len(nrow(SeedTable)))
-    NumberOfBootstraps <- NumberOfBootstraps
-    SeedList <- drawSeedList(
-        table = BootstrapMethodTable, 
-        NumberOfBootstraps = NumberOfBootstraps, 
-        listOf = "table"
-    )
+    
     # Create the replaceDataList input to runProcesses, which defines the seed for each bootstrap run:
-    replaceDataList <- createReplaceData(SeedList = SeedList, BootstrapMethodTable = BootstrapMethodTable)
+    replaceDataList <- createReplaceData(
+        BootstrapMethodTable = BootstrapMethodTable, 
+        NumberOfBootstraps = NumberOfBootstraps
+    )
     
     # Scan through the baseline processes to be run and look for processes with the parameter Seed:
     hasSeed <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x))
@@ -562,10 +589,9 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
         }
     }
     # Construct a list of lists, where each list contains a list of Seed named by the processes using Seed in the Baseline:
-    BaselineSeedList <- drawSeedList(
+    BaselineSeedList <- drawNamedSeedList(
         table = BaselineSeedTable, 
-        NumberOfBootstraps = NumberOfBootstraps, 
-        listOf = "list"
+        NumberOfBootstraps = NumberOfBootstraps
     )
     
     # Get the number of cores to open:
@@ -1054,23 +1080,37 @@ getDataTypeFromBootstrap <- function(nc, processName) {
 
 
 # Funcion to draw seeds for each process given in the table and each bootstrap run, and reshape the seeds into a list of either data.table with rows 
-drawSeedList <- function(table, NumberOfBootstraps, listOf = c("table", "list")) {
+drawNamedSeedList <- function(table, NumberOfBootstraps) {
     if(!length(table)) {
         SeedList <- vector("list", NumberOfBootstraps)
-        if(listOf == "list") {
-            SeedList <- lapply(SeedList, as.data.table)
-        }
+        SeedList <- lapply(SeedList, as.data.table)
     }
     else {
         SeedTable <- data.table::as.data.table(lapply(table$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
         names(SeedTable) <- table$ProcessName
         SeedList <- split(SeedTable, seq_len(nrow(SeedTable)))
-        if(listOf == "list") {
-            SeedList <- lapply(SeedList, function(x) structure(as.list(x), names = names(x)))
-        }
+        
+        # ERROR: This does not work, as the result is not a list with an element named Seed:
+        SeedList <- lapply(SeedList, function(x) structure(as.list(x), names = names(x)))
+        # The following will work:
+        #warning("StoX: NEW BASELINESEED METHOD")
+        #SeedList <- lapply(SeedList, function(x) lapply(x, function(y) list(Seed = y)))
     }
     
     return(SeedList)
+}
+
+drawSeedTable <- function(table, NumberOfBootstraps) {
+    if(!length(table)) {
+        SeedTable <- vector("list", NumberOfBootstraps)
+    }
+    else {
+        SeedTable <- data.table::as.data.table(lapply(table$Seed, RstoxBase::getSeedVector, size = NumberOfBootstraps))
+        names(SeedTable) <- table$ProcessName
+        SeedTable <- split(SeedTable, seq_len(nrow(SeedTable)))
+    }
+    
+    return(SeedTable)
 }
 
 
@@ -1102,8 +1142,15 @@ addFunctionNameToReplaceData <- function(replaceData, BootstrapMethodTable) {
     return(out)
 }
 
-createReplaceData <- function(SeedList, BootstrapMethodTable) {
-    replaceDataList <- lapply(SeedList, createReplaceDataSansFunctionName)
+createReplaceData <- function(BootstrapMethodTable, NumberOfBootstraps) {
+    
+    # Create a table of seed values:
+    SeedTable <- drawSeedTable(
+        table = BootstrapMethodTable, 
+        NumberOfBootstraps = NumberOfBootstraps
+    )
+    
+    replaceDataList <- lapply(SeedTable, createReplaceDataSansFunctionName)
     replaceDataList <- lapply(replaceDataList, addFunctionNameToReplaceData, BootstrapMethodTable = BootstrapMethodTable)
     return(replaceDataList)
 }
@@ -1676,7 +1723,6 @@ resampleOneGroup <- function(subData, seed, varToResample, nextResampleBy = NULL
     
     # Merge in the resample factors:
     originalColumnOrder <- names(subData)
-    #if("PSU01" %in% subData$PSU) browser()
     subData <- merge(subData, resampled, by = varToResample)
     temporaryScaleFromResampling <- subData$temporaryScaleFromResampling
     repeatInd <- rep(seq_len(nrow(subData)), temporaryScaleFromResampling)
@@ -1706,14 +1752,14 @@ resampleOneGroup <- function(subData, seed, varToResample, nextResampleBy = NULL
 
 #' Resamples biotic PSUs within Stratum in MeanLengthDistributionData
 #' 
-#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanLengthDistributionWeight.
+#' This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
 #' @export
 #' 
-Resample_MeanLengthDistributionData <- function(MeanLengthDistributionData, Seed) {
+ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed) {
     
     # 2024-04: This function will be renamed to ResampleBioticPSUsInStratum
     
@@ -1756,14 +1802,14 @@ applyResamplingFactor <- function(data, varToScale) {
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
 #' @export
 #' 
-Resample_MeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, Seed) {
+ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, Seed) {
     
     # This function will be renamed to ResampleBioticPSUsInStratum
     
@@ -1797,13 +1843,17 @@ Resample_MeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, 
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalPreyCatchWeight and TotalPreyCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling. 
+#' 
+#' Note that this resampling function resamples also the individuals of samples that belong to BioticPSUs that are scaled by 0, and similarly resamples also PreySpeciesCategory in Individuals that belong to Individuals that are scaled by 0. Consequently, this is in essence a reversed hierarchical resampling of PreySpeciesCategory within Individual, then Individuals within Sample, then BioticPSUs within Stratum. 
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(PreySpeciesCategoryCatchData, Seed) {
+ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling <- function(PreySpeciesCategoryCatchData, Seed) {
     
+    
+    warning("It should be decided which of the ResamplingFunctions ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling, ResamplePreySpeciesCategoryCatchDataHierarchical or ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingmakeUniqueVars should be included in StoX")
     
     # Export this function when prey is official
     
@@ -1863,12 +1913,14 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical_UsingScaling <- function(Prey
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-Resample_PreySpeciesCategoryCatchData_Hierarchical <- function(PreySpeciesCategoryCatchData, Seed) {
+ResamplePreySpeciesCategoryCatchDataHierarchical <- function(PreySpeciesCategoryCatchData, Seed) {
+    
+    warning("It should be decided which of the ResamplingFunctions ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling, ResamplePreySpeciesCategoryCatchDataHierarchical or ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingmakeUniqueVars should be included in StoX")
     
     # Export this function when prey is official
     
@@ -1926,14 +1978,18 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical <- function(PreySpeciesCatego
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples biotic PSUs with replacement within each Stratum, changing the MeanSpeciesCategoryCatchData
+#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
+#' 
+#' Note that this function resamples only unique Individual in the resampling of Individual within Sample, ignoring that these individuals may have been duplicated in the resampling of BioticPSU within Stratum. The effect is that Individuals are resampled equally for all equal Samples, whereas the function \code{\link{ResamplePreySpeciesCategoryCatchDataHierarchical}} resamples differently for each Sample. The latter may suppress extreme outcomes, which should be considered when choosing the final resampling function to use for Prey.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
-Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars <- function(PreySpeciesCategoryCatchData, Seed) {
+ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingmakeUniqueVars <- function(PreySpeciesCategoryCatchData, Seed) {
     
     # Export this function when prey is official
+    
+    warning("It should be decided which of the ResamplingFunctions ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling, ResamplePreySpeciesCategoryCatchDataHierarchical or ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingmakeUniqueVars should be included in StoX")
     
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(
@@ -1994,7 +2050,7 @@ Resample_PreySpeciesCategoryCatchData_Hierarchical_NotUsing_makeUniqueVars <- fu
 #' 
 #' @export
 #' 
-Resample_BioticAssignment_ByStratum <- function(BioticAssignment, Seed) {
+ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
     
     # This function will be renamed to ResampleAssignedHaulsInStratum
     
@@ -2035,7 +2091,7 @@ Resample_BioticAssignment_ByStratum <- function(BioticAssignment, Seed) {
 #' 
 #' @export
 #' 
-Resample_BioticAssignment_ByAcousticPSU <- function(BioticAssignment, Seed) {
+ResampleBioticAssignmentByAcousticPSU <- function(BioticAssignment, Seed) {
     
     # This function will be renamed to ResampleAssignedHaulsInStratum
     
@@ -2071,14 +2127,14 @@ Resample_BioticAssignment_ByAcousticPSU <- function(BioticAssignment, Seed) {
 
 #' Resamples acoustic PSUs
 #' 
-#' This function resamples acoustic PSUs with replacement within each Stratum, changing the MeanNASC
+#' This function resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
 #' 
 #' @export
 #' 
-Resample_MeanNASCData <- function(MeanNASCData, Seed) {
+ResampleMeanNASCData <- function(MeanNASCData, Seed) {
     
     # This function will be renamed to ResampleAcousticPSUsInStratum
     
@@ -2188,9 +2244,14 @@ ReportBootstrap <- function(
     }
     
     #  Open the file:
-    nc <- ncdf4::nc_open(unlist(BootstrapData))
-    on.exit(ncdf4::nc_close(nc))
-    
+    if(length(unlist(BootstrapData))) {
+        nc <- ncdf4::nc_open(unlist(BootstrapData))
+        on.exit(ncdf4::nc_close(nc))
+    }
+    else {
+        warning("StoX: Bootstrap output NetCDF4 file missing.")
+        return(NULL)
+    }
     
     # Read the baseline process names:
     processNameAndTableName <- getProcessNameAndTableName(BaselineProcess, nc, na.rm = TRUE)

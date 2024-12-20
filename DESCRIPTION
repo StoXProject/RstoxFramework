@@ -1,6 +1,6 @@
 Package: RstoxFramework
 Version: 4.1.1
-Date: 2024-12-19
+Date: 2024-12-20
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
@@ -59,6 +59,7 @@ Imports:
     stringi (>= 1.4.0)
 Suggests: 
     remotes (>= 2.0.0),
+    RstoxFDA (>= 1.4.0),
     tinytest (>= 1.2.0)
 Additional_repositories: 
     https://stoxproject.github.io/repo

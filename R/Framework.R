@@ -2840,7 +2840,7 @@ matchProcesses <- function(processes, processIndexTable, warn = TRUE) {
         if(any(is.na(processesNumeric))) {
             # stop("StoX: The following processes were not recognized as process names or process IDs: ", paste(processes[is.na(processesNumeric)], collapse = ", "), ".")
             if(warn) {
-                stop("StoX: The following processes were not recognized as process names or process IDs: ", paste(processes[is.na(processesNumeric)], collapse = ", "), ".")
+                stop("StoX: The following process names are not present: ", paste(processes[is.na(processesNumeric)], collapse = ", "), ".")
             }
             processesNumeric <- processesNumeric[!is.na(processesNumeric)]
         }
@@ -3042,6 +3042,43 @@ modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processNam
             }
         }
     }
+    
+    # Modify also specifically the OutputProcesses and BaselineSeedTable of any Bootstrap processes:
+    atBootstrapProcesses <- which(processTable$functionName == "RstoxFramework::Bootstrap")
+    for(index in atBootstrapProcesses) {
+        
+        thisModelName <- processTable$modelName[[index]]
+        thisProcessID <- processTable$processID[[index]]
+        thisFunctionParameters <- processTable$functionParameters[[index]]
+        
+        # If the old process name is present in the BootstrapMethodTable, change to the new process name:
+        if(processName %in% thisFunctionParameters$BootstrapMethodTable$ProcessName) {
+            thisFunctionParameters$BootstrapMethodTable[ProcessName == processName, ProcessName := newProcessName]
+        }
+        
+        # If the old process name is present in the BaselineSeedTable, change to the new process name:
+        if(processName %in% thisFunctionParameters$BaselineSeedTable$ProcessName) {
+            thisFunctionParameters$BaselineSeedTable[ProcessName == processName, ProcessName := newProcessName]
+        }
+        
+        # If the old process name is present in the OutputProcesses, change to the new process name:
+        if(processName %in% thisFunctionParameters$OutputProcesses) {
+            thisFunctionParameters$OutputProcesses[thisFunctionParameters$OutputProcesses == processName] <- newProcessName
+        }
+        
+        
+        # Record the changes:
+        modifyFunctionParameters(
+            projectPath = projectPath, 
+            modelName = thisModelName, 
+            processID = thisProcessID, 
+            newFunctionParameters = thisFunctionParameters, 
+            archive = TRUE
+        )
+    }
+    
+    
+    invisible(TRUE)
 }
 
 
@@ -3318,6 +3355,8 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
                 # For a Bootstrap process all baseline processes up until the latest OutputProcesses are to be considered as recursive function inputs:
                 OutputProcesses <- processTable$functionParameters[[processIndex]]$OutputProcesses
                 if(length(OutputProcesses)) {
+                # This checks that there are any OutputProcesses, and if any of those exist as processes assigns those processes as function inputs:
+                #if(length(OutputProcesses) && any(processTable$processName %in% OutputProcesses)) {
                     thisFunctionInput <- processTable[seq_len(max(which(processName %in% OutputProcesses))), processName]
                 }
                 else {
@@ -3792,7 +3831,7 @@ modifyProcessName <- function(projectPath, modelName, processID, newProcessName,
             )
         #}
         
-        # Modify the process name also in the proces index table:
+        # Modify the process name also in the process index table:
         modifyProcessNameInProcessIndexTable(projectPath, modelName, processName, newProcessName)
         
         # Change the process name in all relevant function inputs of consecutive processes:

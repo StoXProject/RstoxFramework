@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.2-9001 (2025-01-10)
+* Fixed a bug in the communication to the StoX GUI which caused the GUI to freeze when a process listed in the OutputProcesses of a Bootstrap process was renamed.
+
+
 # RstoxFramework v4.1.1-9002 (2024-12-03)
 * Updated the documentation of ResampleFunction in the BootstrapMethodTable of Bootstrap(). Specifically the pros and cons of ResampleFunction "ResampleBioticAssignmentByStratum" and "ResampleBioticAssignmentByAcousticPSU" are described. There are dangers to using the "ResampleBioticAssignmentByAcousticPSU" in that the variance may be lower than expected due to Hauls being resampled multiple times for the same Stratum, which smoothes out the extreme values. 
 * Reverted the name change of Resample* functions back to using CamelCase and not underscore separated CamelCase (underscore between the word "Resample", the data type, and the specification):

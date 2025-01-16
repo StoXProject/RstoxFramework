@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.2-9002 (2025-01-16)
+* New pre-release with RstoxData also as pre-release.
+
+
 # RstoxFramework v4.1.2-9001 (2025-01-10)
 * Fixed a bug in the communication to the StoX GUI which caused the GUI to freeze when a process listed in the OutputProcesses of a Bootstrap process was renamed.
 

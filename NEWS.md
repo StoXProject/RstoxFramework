@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.2-9003 (2025-01-17)
+* Fixed bug where processes listed in the OutputProcesses of a Bootstrap process was deleted.
+
+
 # RstoxFramework v4.1.2-9002 (2025-01-16)
 * New pre-release with RstoxData also as pre-release.
 

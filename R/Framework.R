@@ -3354,9 +3354,8 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
             if(processTable[processIndex, functionName == "RstoxFramework::Bootstrap"]) {
                 # For a Bootstrap process all baseline processes up until the latest OutputProcesses are to be considered as recursive function inputs:
                 OutputProcesses <- processTable$functionParameters[[processIndex]]$OutputProcesses
-                if(length(OutputProcesses)) {
                 # This checks that there are any OutputProcesses, and if any of those exist as processes assigns those processes as function inputs:
-                #if(length(OutputProcesses) && any(processTable$processName %in% OutputProcesses)) {
+                if(length(OutputProcesses) && any(processTable$processName %in% OutputProcesses)) {
                     thisFunctionInput <- processTable[seq_len(max(which(processName %in% OutputProcesses))), processName]
                 }
                 else {

@@ -27,10 +27,10 @@ Authors@R: c(
     role = "aut"), 
   person(given = "Atle", 
     family = "Totland", 
-    role = "aut"), , 
+    role = "aut"), 
   person(given = "Ibrahim", 
     family = "Umar", 
-    role = "aut")
+    role = "aut"),
   person(given = "Mikko Juhani", 
     family = "Vihtakari", 
     role = "aut"), 

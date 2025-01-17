@@ -1,17 +1,23 @@
 Package: RstoxFramework
-Version: 4.1.2-9002
-Date: 2025-01-16
+Version: 4.1.2-9003
+Date: 2025-01-17
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
     family = "Holmin", 
     role = c("cre", "aut"), 
     email = "arnejh@hi.no"), 
-  person(given = "Ibrahim", 
-    family = "Umar", 
+  person(given = "Anthony", 
+    family = "Hennessey", 
     role = "aut"), 
   person(given = "Edvin", 
     family = "Fuglebakk", 
+    role = "aut"), 
+  person(given = "Espen", 
+    family = "Johnsen", 
+    role = "aut"), 
+  person(given = "Sindre", 
+    family = "Vatnehol", 
     role = "aut"), 
   person(given = "Aasmund", 
     family = "Skaalevik", 
@@ -19,18 +25,12 @@ Authors@R: c(
   person(given = "Esmael Musema", 
     family = "Hassen", 
     role = "aut"), 
-  person(given = "Sindre", 
-    family = "Vatnehol", 
-    role = "aut"), 
-  person(given = "Espen", 
-    family = "Johnsen", 
-    role = "aut"), 
   person(given = "Atle", 
     family = "Totland", 
-    role = "aut"), 
-  person(given = "Anthony", 
-    family = "Hennessey", 
-    role = "aut"), 
+    role = "aut"), , 
+  person(given = "Ibrahim", 
+    family = "Umar", 
+    role = "aut")
   person(given = "Mikko Juhani", 
     family = "Vihtakari", 
     role = "aut"), 

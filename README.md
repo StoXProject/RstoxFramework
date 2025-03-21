@@ -14,7 +14,7 @@ The package replaces the old Java library in StoX versions prior to StoX 3.0.0.
 
 1. Install the latest release:
     ```r
-    install.packages("RstoxFramework", repos = c("https://stoxproject.github.io/repo", "https://cloud.r-project.org"))
+    install.packages("RstoxFramework", repos = c("https://stoxproject.github.io/repo", getOption("repos")))
     ```
 
 2. Install the latest version from GitHub:

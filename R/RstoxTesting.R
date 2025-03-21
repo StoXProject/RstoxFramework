@@ -96,7 +96,9 @@ compareProjectToStoredOutputFiles <- function(
     projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
     temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
     
-    
+    if(debug) {
+        browser()
+    }
     # Open the project:
     openProject(projectPath_copy)
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
@@ -151,9 +153,9 @@ compareProjectToStoredOutputFiles <- function(
     data_equal <- list()
     diffData <- list()
     
-    if(debug) {
-        browser()
-    }
+    #if(debug) {
+    #    browser()
+    #}
     
     
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().

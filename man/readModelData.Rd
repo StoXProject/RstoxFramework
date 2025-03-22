@@ -23,7 +23,7 @@ readModelData(
 
 \item{verifyFiles}{Logical: If TRUE verify that the files are from processes that exist in the project.}
 
-\item{unlist}{Either 1 to unlist the models, 2 to unlist the models and the process. TRUE is interpreted as 2.}
+\item{unlist}{Whether to unlist elements of length 1. If \code{unlist} is FALSE or 0, the output will be a list of models named by the model names (one or more of "baseline", "analysis" and "report"), which in turn are lists of processes named by the process names, which in turn are lists of process output elements, e.g. a list of data.tables such as "Data" and "Resolution" for processes using the MeanNASC function. If \code{unlist} = 1 the models will be unlisted so that the output is a list of processes. If \code{unlist} = 2 and a single process is requested, the process will be unlisted so that the output is a list of process output elements. If \code{unlist} = 3 and a single process with a single process output element is requested that element is returned. The default (TRUE) is interpreted as 3.}
 
 \item{emptyStringAsNA}{Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.}
 

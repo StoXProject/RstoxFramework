@@ -5221,11 +5221,22 @@ runProcess <- function(
     # Run the process:
     packageName <- getPackageNameFromPackageFunctionName(process$functionName)
     if(try) {
+        
+        # Test that the function exists in the right package. If the function name is not an exported function from the package name, an error is thrown:
+        testWhetherFunctionIsInPackage(process$functionName)
+        
+        # Run the StoX function in a tryCatch:
         processOutput <- tryCatch(
-            do.call(
+            # Changed this on 2025-03-19 to not only use the function name but both package and function name using the double colon operator, since where was an example project with the wrong package name for a function (RstoxFramework::LengthDependentLengthDistributionCompensation in the project "Example_StoX_v4.1.0_swept-area_cod"). Now that process will fail with the folloing error:
+            # Error: 'LengthDependentLengthDistributionCompensation' is not an exported object from 'namespace:RstoxFramework'
+            #do.call(
+            #    getFunctionNameFromPackageFunctionName(process$functionName), 
+            #    functionArguments#, 
+            #    #envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
+            #)
+            processOutput <- do.call(
                 getFunctionNameFromPackageFunctionName(process$functionName), 
-                functionArguments#, 
-                #envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
+                functionArguments
             ), 
             error = function(err) {
                 failed <<- TRUE
@@ -5234,10 +5245,13 @@ runProcess <- function(
         )
     }
     else {
+        # Test that the function exists in the right package. If the function name is not an exported function from the package name, an error is thrown:
+        testWhetherFunctionIsInPackage(process$functionName)
+        
+        # Run the StoX function:
         processOutput <- do.call(
             getFunctionNameFromPackageFunctionName(process$functionName), 
-            functionArguments#, 
-            #envir = if(packageName == "RstoxFramework") environment() else as.environment(paste("package", packageName, sep = ":"))
+            functionArguments
         )
     }
     
@@ -5371,6 +5385,20 @@ runProcess <- function(
         TRUE
     }
 }
+
+
+# Function to test that the function exists in the right package. If the function name is not an exported function from the package name, an error is thrown (such as 'LengthDependentLengthDistributionCompensation' is not an exported object from 'namespace:RstoxFramework', which is the case for the example project Example_StoX_v4.1.0_swept-area_cod):
+testWhetherFunctionIsInPackage <- function(packageFunctionName) {
+    output <- do.call(
+        what = `::`, 
+        args = list(
+            getPackageNameFromPackageFunctionName(packageFunctionName), 
+            getFunctionNameFromPackageFunctionName(packageFunctionName)
+        )
+    )
+    invisible(output)
+}
+
 
 
 setUseProcessData <- function(projectPath, modelName, processID, UseProcessData = TRUE) {

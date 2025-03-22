@@ -1,17 +1,26 @@
 Package: RstoxFramework
-Version: 4.1.2
-Date: 2025-01-21
+Version: 4.1.3-9001
+Date: 2025-03-21
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
     family = "Holmin", 
     role = c("cre", "aut"), 
     email = "arnejh@hi.no"), 
-  person(given = "Ibrahim", 
-    family = "Umar", 
+  person(given = "Anthony", 
+    family = "Hennessey", 
+    role = "aut"), 
+  person(given = "Espen", 
+    family = "Johnsen", 
+    role = "aut"), 
+  person(given = "Sindre", 
+    family = "Vatnehol", 
     role = "aut"), 
   person(given = "Edvin", 
     family = "Fuglebakk", 
+    role = "aut"), 
+  person(given = "Ibrahim", 
+    family = "Umar", 
     role = "aut"), 
   person(given = "Aasmund", 
     family = "Skaalevik", 
@@ -19,17 +28,8 @@ Authors@R: c(
   person(given = "Esmael Musema", 
     family = "Hassen", 
     role = "aut"), 
-  person(given = "Sindre", 
-    family = "Vatnehol", 
-    role = "aut"), 
-  person(given = "Espen", 
-    family = "Johnsen", 
-    role = "aut"), 
   person(given = "Atle", 
     family = "Totland", 
-    role = "aut"), 
-  person(given = "Anthony", 
-    family = "Hennessey", 
     role = "aut"), 
   person(given = "Mikko Juhani", 
     family = "Vihtakari", 
@@ -52,14 +52,14 @@ Imports:
     methods (>= 3.6.0),
     ncdf4 (>= 1.18),
     RstoxBase (>= 2.1.2),
-    RstoxData (>= 2.1.2),
+    RstoxData (>= 2.1.4-9001),
     scales (>= 1.1.0),
     semver (>= 0.2.0),
     sf (>= 0.9.0),
     stringi (>= 1.4.0)
 Suggests: 
     remotes (>= 2.0.0),
-    RstoxFDA (>= 1.3.0),
+    RstoxFDA (>= 1.2.0),
     tinytest (>= 1.2.0)
 Additional_repositories: 
     https://stoxproject.github.io/repo

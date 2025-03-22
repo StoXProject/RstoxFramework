@@ -28,14 +28,14 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Ibrahim Umar
+  \item Anthony Hennessey
+  \item Espen Johnsen
+  \item Sindre Vatnehol
   \item Edvin Fuglebakk
+  \item Ibrahim Umar
   \item Aasmund Skaalevik
   \item Esmael Musema Hassen
-  \item Sindre Vatnehol
-  \item Espen Johnsen
   \item Atle Totland
-  \item Anthony Hennessey
   \item Mikko Juhani Vihtakari
 }
 

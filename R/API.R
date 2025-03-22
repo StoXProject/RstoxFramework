@@ -488,7 +488,7 @@ createNestedListElement <- function(x, namesVector) {
 #' @inheritParams general_arguments
 #' @inheritParams runProject
 #' @param verifyFiles Logical: If TRUE verify that the files are from processes that exist in the project.
-#' @param unlist Either 1 to unlist the models, 2 to unlist the models and the process. TRUE is interpreted as 2.
+#' @param unlist Whether to unlist elements of length 1. If \code{unlist} is FALSE or 0, the output will be a list of models named by the model names (one or more of "baseline", "analysis" and "report"), which in turn are lists of processes named by the process names, which in turn are lists of process output elements, e.g. a list of data.tables such as "Data" and "Resolution" for processes using the MeanNASC function. If \code{unlist} = 1 the models will be unlisted so that the output is a list of processes. If \code{unlist} = 2 and a single process is requested, the process will be unlisted so that the output is a list of process output elements. If \code{unlist} = 3 and a single process with a single process output element is requested that element is returned. The default (TRUE) is interpreted as 3.
 #' @param emptyStringAsNA Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.
 #' @param ... Arguments passed to \code{\link{readBootstrapData}}, e.g. \code{selection}, which must be set to NA to read the entire file.
 #' 
@@ -552,21 +552,20 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
 
         # Drop the list over models:
         if(isTRUE(unlist)) {
-            unlist <- 2
+            unlist <- 3
+        }
+        if(unlist > 2) {
+            output <- lapply(output, function(x) lapply(x, function(y) if(hasOnlyOneTabble(y)) y[[1]] else y))
         }
         if(unlist > 1) {
-            #output <- lapply(output, function(x) if(hasOnlyOneTabble(x)) unlist(unname(x), recursive = FALSE) else x)
-            # Changed to equal the output from runProject():
-            output <- lapply(output, function(x) lapply(x, function(y) if(hasOnlyOneTabble(y)) y[[1]] else y))
-            # Still the processes with 2 levels are output in a flat list with names separated by underscore, as there is no secure way to determine from those file names that there actually are 2 levels:
+            output <- lapply(output, function(x) if(hasOnlyOneTabble(x)) x[[1]] else x)
         }
         if(unlist > 0) {
-            output <- unlist(unname(output), recursive = FALSE)
+            allProcessNames <- unlist(lapply(output, names))
+            output <- unlist(output, recursive = FALSE)
+            names(output) <- allProcessNames
         }
-        # Did not work:
-        #if(unlist) {
-        #    output <- unlistToDataType(output)
-        #}
+
         
         return(output)
     }

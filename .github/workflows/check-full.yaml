@@ -150,13 +150,10 @@ jobs:
       - name: Install CRANdependencies
         run: |
           install.packages(c("rcmdcheck", "git2r", "sessioninfo", "knitr", "remotes", "drat"))
-          
-          # Temporarily install Rcpp from GitHub until the CRAN version is fixed:
-          remotes::install_github("RcppCore/Rcpp")
         shell: Rscript {0}
         
       
-      ## 2d. Rstox packages and dependencies (the complicated if condition is needed since the reference to branch name is not consistent across event names):
+      ## 2d. Rstox packages and dependencies (the complicated if condition is needed since the reference to branch name is not consistent across event names). There is the issue that R sorts packge versions alphabetically, while StoX uses semantic versioning. Consequently a pre-release such as 1.2.3-9001 will be considered as newer than the official release 1.2.3 by R. We have solved this by separating the pre-releases and official releases into different repos "unstableRepo" and "testingRepo" for pre-releases and "repo" of official releases). This potentially breaks with remotes::install_deps() as it silently appends the Additional_repositories from the DESCRIPTION file to the repos, but since this would only be a problem if a pre-release is ranked as newer than the official release it will not be a problem when installing dependencies from the "repo" since the Additional_repositories points to that same repo:
       - name: Install R package dependencies from the unstableRepo
         if: (github.event_name == 'push' && github.ref_name == 'develop') || (github.event_name == 'pull_request' && github.base_ref == 'develop')
         run: |

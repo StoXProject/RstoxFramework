@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.3-9002 (2025-03-24)
+* Added backwards compatibility action to change RstoxFramework::LengthDependentLengthDistributionCompensation() to the correct RstoxBase::LengthDependentLengthDistributionCompensation().
+
+
 # RstoxFramework v4.1.3-9001 (2025-03-21)
 * Corrected the test projects coastalCod_20.zip, cod_19.zip, haddock_19.zip and versus_2.7/coastalCod_21.zip from using RstoxFramework::LengthDependentLengthDistributionCompensation() to the correct RstoxBase::LengthDependentLengthDistributionCompensation(), as runProcess() now gives an error if the function is not in the specified namespace.
 * Changed the parameter 'unlist' in readModelData() to support a value 3 that can be used to unlist down to the actual table for one table outputs.

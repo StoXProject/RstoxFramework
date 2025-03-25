@@ -149,7 +149,7 @@ jobs:
       ## 2c. R packages needed for this yaml script (not related to the Rstox package itself):
       - name: Install CRANdependencies
         run: |
-          install.packages(c("rcmdcheck", "git2r", "sessioninfo", "knitr", "remotes", "drat"))
+          install.packages(c("rcmdcheck", "git2r", "sessioninfo", "knitr", "drat"))
         shell: Rscript {0}
         
       
@@ -174,7 +174,6 @@ jobs:
             "sf",
             "stringi",
             # Suggests: 
-            "remotes",
             "RstoxFDA",
             "tinytest"
           )
@@ -205,7 +204,6 @@ jobs:
             "sf",
             "stringi",
             # Suggests: 
-            "remotes",
             "RstoxFDA",
             "tinytest"
           )
@@ -236,7 +234,6 @@ jobs:
             "sf",
             "stringi",
             # Suggests: 
-            "remotes",
             "RstoxFDA",
             "tinytest"
           )

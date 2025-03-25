@@ -226,6 +226,14 @@ initiateRstoxFramework <- function(){
     
     #### Backward compabitibility actions. These need not to be exported as is the case for any other Rstox-packages, since RstoxFramework is the package that collects the backwardCompatibility objects:
     backwardCompatibility_RstoxFramework <- list(
+        renameFunction = list(
+            list(
+                changeVersion = "4.1.3", 
+                functionName = "LengthDependentLengthDistributionCompensation", 
+                modelName = "baseline", 
+                newFunctionName = "RstoxBase::LengthDependentLengthDistributionCompensation"
+            )
+        ), 
         renameAttribute = list(
             list(
                 changeVersion = "1.2.39", 

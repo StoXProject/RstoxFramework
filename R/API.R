@@ -204,6 +204,10 @@ runProject <- function(
         )
     }
     
+    if(!length(modelNames)) {
+        modelNames = getRstoxFrameworkDefinitions("stoxModelNames")
+    }
+    
     # Return model data from all models by default (is this risky?):
     if(isTRUE(returnModelData)) {
         returnModelData <- rep(TRUE, length(modelNames))
@@ -490,6 +494,7 @@ createNestedListElement <- function(x, namesVector) {
 #' @param verifyFiles Logical: If TRUE verify that the files are from processes that exist in the project.
 #' @param unlist Whether to unlist elements of length 1. If \code{unlist} is FALSE or 0, the output will be a list of models named by the model names (one or more of "baseline", "analysis" and "report"), which in turn are lists of processes named by the process names, which in turn are lists of process output elements, e.g. a list of data.tables such as "Data" and "Resolution" for processes using the MeanNASC function. If \code{unlist} = 1 the models will be unlisted so that the output is a list of processes. If \code{unlist} = 2 and a single process is requested, the process will be unlisted so that the output is a list of process output elements. If \code{unlist} = 3 and a single process with a single process output element is requested that element is returned. The default (TRUE) is interpreted as 3.
 #' @param emptyStringAsNA Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.
+#' @param readCsvAsLines Logical: If TRUE read csv files as lines with \code{\link[base]{readLines}}.
 #' @param ... Arguments passed to \code{\link{readBootstrapData}}, e.g. \code{selection}, which must be set to NA to read the entire file.
 #' 
 #' @return
@@ -497,7 +502,16 @@ createNestedListElement <- function(x, namesVector) {
 #' 
 #' @export
 #'  
-readModelData <- function(projectPath, modelName = NULL, processName = NULL, verifyFiles = FALSE, unlist = FALSE, emptyStringAsNA = FALSE, ...) {
+readModelData <- function(
+    projectPath, 
+    modelName = NULL, 
+    processName = NULL, 
+    verifyFiles = FALSE, 
+    unlist = FALSE, 
+    emptyStringAsNA = FALSE, 
+    readCsvAsLines = FALSE, 
+    ...
+) {
     
     # List the files of the project:
     if(isProject(projectPath)) {
@@ -514,9 +528,10 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         }
         
         # Subset by the modelName:
-        if(length(modelName)) {
-            outputFiles <- matchName(outputFiles, modelName)
+        if(!length(modelName)) {
+            modelName = getRstoxFrameworkDefinitions("stoxModelNames")
         }
+        outputFiles <- matchName(outputFiles, modelName)
         # Subset by the processName:
         if(length(processName)) {
             outputFiles <- lapply(outputFiles, matchName, processName)
@@ -546,7 +561,7 @@ readModelData <- function(projectPath, modelName = NULL, processName = NULL, ver
         # Read the files using the appropriate function:
         #output <- lapply(outputFiles, function(x) lapply(x, readStoxOutputFile))
         output <- rapply(
-            outputFiles, readStoxOutputFiles, emptyStringAsNA = emptyStringAsNA, how = "replace", 
+            outputFiles, readStoxOutputFiles, emptyStringAsNA = emptyStringAsNA, readCsvAsLines = readCsvAsLines, how = "replace", 
             ...  # Used in readBootstrapData()
         )
 
@@ -580,14 +595,30 @@ hasOnlyOneTabble <- function(x) {
     is.list(x) && !data.table::is.data.table(x) && length(x) == 1
 }
 
-readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE, ...) {
+readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE, readCsvAsLines = FALSE, ...) {
     output <- structure(
         lapply(
-            paths, readStoxOutputFile, emptyStringAsNA = emptyStringAsNA, 
+            paths, readStoxOutputFile, emptyStringAsNA = emptyStringAsNA, readCsvAsLines = readCsvAsLines, 
             ...  # Used in readBootstrapData()
         ), 
         names = basename(tools::file_path_sans_ext(paths))
     )
+    
+    # If the output is a list with names containing underscore, and that the names until the last underscore appear at least 3 times, we assume that the data are lists of data:
+    allHasUnderscore <- all(grepl("_", names(output)))
+    if(allHasUnderscore) {
+        # Get the part of the names before and after the last underscore:
+        before <- sub('_[^_]*$', '', names(output))
+        #after <- sub('.*_', '', names(output))
+        
+        if(all(table(before) >= 3)) {
+            output <- split(output, before)
+            names(output) <- unique(before)
+            for(name in names(output)) {
+                names(output[[name]]) <- sub('.*_', '', names(output[[name]]))
+            }
+        }
+    }
     
     # Unlist the top level of an RData file, as an RData file is a joint file of several outputs, and we do not want the extra BootstrapData level on top of this list:
     areRDataFiles <- tolower(tools::file_ext(paths)) == "rdata"
@@ -599,7 +630,7 @@ readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE, ...) {
 }
 
 
-readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, ...) {
+readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, readCsvAsLines = FALSE, ...) {
     # This function only reads one file:
     if(length(path) != 1) {
         stop("Exactly one file required")
@@ -664,8 +695,13 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, ...) {
         formatPOSIXAsISO8601(output, cols = keys, add = 1e-4, format = "%Y-%m-%dT%H:%M:%OS3Z")
     }
     else if(tolower(ext) %in% "csv") {
-        # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:
-        output <- unname(as.matrix(utils::read.csv(path, encoding = "UTF-8", header = FALSE, na.strings = c(""))))
+        if(readCsvAsLines) {
+            output <- readLines(path)
+        }
+        else {
+            # Use "" as NA string, but do not inclcude "NA" as NA string, as "" is used when writing the data:
+            output <- unname(as.matrix(utils::read.csv(path, encoding = "UTF-8", header = FALSE, na.strings = c(""))))
+        }
     }
     else if(tolower(ext) == "nc") {
         # Do not unlist here, as it is rather done in readModelData() (using unlist = 0 here):
@@ -1028,6 +1064,12 @@ freadKeepQuotedCharacterAsCharacter <- function(...) {
         x[, (characterCols) := lapply(.SD, stripLeadingAndTrailingQuote), .SDcols = characterCols]
     }
     
+    # Remove escaped space:
+    if(any(areCharacter)) {
+        characterCols <- names(areCharacter)[areCharacter]
+        x[, (characterCols) := lapply(.SD, unescapeSpaceChars), .SDcols = characterCols]
+    }
+    
     return(x)
 }
 
@@ -1038,7 +1080,14 @@ stripLeadingAndTrailingQuote <- function(x) {
     return(x)
 }
 
-
+unescapeSpaceChars <- function(x) {
+    x <- gsub('\\\\n', '\\\n', x)
+    x <- gsub('\\\\t', '\\\t', x)
+    x <- gsub('\\\\r', '\\\r', x)
+    x <- gsub('\\\\a', '\\\a', x)
+    #x <-stringi::stri_unescape_unicode(x)
+    return(x)
+}
 
 
 

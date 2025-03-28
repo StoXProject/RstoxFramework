@@ -28,7 +28,7 @@ compareProjectToStoredOutputFilesAll(
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
-\item{ignore.variable}{Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).}
+\item{ignore.variable}{A vector of names of variables/columns to ignore in the comparison.}
 
 \item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.}
 

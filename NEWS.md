@@ -1,3 +1,8 @@
+# RstoxFramework v4.1.3-9003 (2025-03-28)
+* Updated documentation of data types by adding a table of output file formats.
+* Added DATRAS test project.
+
+
 # RstoxFramework v4.1.3-9002 (2025-03-24)
 * Added backwards compatibility action to change RstoxFramework::LengthDependentLengthDistributionCompensation() to the correct RstoxBase::LengthDependentLengthDistributionCompensation().
 

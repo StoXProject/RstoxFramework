@@ -49,9 +49,9 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 #' @inheritParams readMemoryFile
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @param intersect.names Logical: If TRUE, compare only same named columns.
-#' @param ignore.variable Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).
+#' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
 #' @param ignore.process A vector of names of processes to ignore in the comparison.
-#' @param ignore.process.variable A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth"))
+#' @param ignore.process.variable A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth")).
 #' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.
 #' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.
 #' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
@@ -71,6 +71,7 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 #'
 compareProjectToStoredOutputFiles <- function(
     projectPath, projectPath_original = projectPath, 
+    modelNames = NULL, 
     emptyStringAsNA = FALSE, intersect.names = TRUE, 
     ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, 
     skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
@@ -79,7 +80,7 @@ compareProjectToStoredOutputFiles <- function(
     #mergeWhenDifferentNumberOfRows = FALSE, 
     sort = TRUE, 
     compareReports = FALSE, checkOutputFiles = TRUE, 
-    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, readCsvAsLines = FALSE, 
     tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
     ...
 ) {
@@ -103,14 +104,28 @@ compareProjectToStoredOutputFiles <- function(
     openProject(projectPath_copy)
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
     #dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = TRUE, close = TRUE, save = save, try = try, msg = FALSE, ...)
-    dat <- runProject(projectPath_copy, unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, close = TRUE, save = save, try = try, returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, ...)
+    dat <- runProject(
+        projectPath_copy, 
+        modelNames = modelNames, 
+        unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, 
+        close = TRUE, save = save, try = try, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, 
+        unlistSingleTable = unlistSingleTable, 
+        ...
+    )
     
     
     # Read the original data:
     #dat_orig <- readModelData(projectPath_original, unlist.models = TRUE)
     dat_orig <- readModelData(
-        projectPath_original, unlist = 1, emptyStringAsNA = emptyStringAsNA, verifyFiles = TRUE, 
-        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
+        projectPath_original, 
+        modelName = modelNames, 
+        unlist = 1, 
+        emptyStringAsNA = emptyStringAsNA, 
+        verifyFiles = TRUE, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, 
+        unlistSingleTable = unlistSingleTable, 
+        readCsvAsLines = readCsvAsLines
     )
     
     # Reorder the original data to the order of the new data:
@@ -208,6 +223,58 @@ compareProjectToStoredOutputFiles <- function(
                 # This caused trouble when converting character to POSIXct:
                 #data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfSecond(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
+            # If the subname points to a list of tables, move into the list:
+            else if(is.list(dat_orig[[name]][[subname]]) && data.table::is.data.table(dat_orig[[name]][[subname]][[1]])) {
+                for(subsubname in names(dat_orig[[name]][[subname]])) {
+                    if(data.table::is.data.table(dat_orig[[name]][[subname]][[subsubname]])) {
+                        if(intersect.names) {
+                            intersectingNames <- intersect(names(dat_orig[[name]][[subname]][[subsubname]]), names(dat[[name]][[subname]][[subsubname]]))
+                            result <- compareDataTablesUsingClassOf(
+                                dat_orig[[name]][[subname]][[subsubname]][, intersectingNames, with = FALSE], 
+                                dat[[name]][[subname]][[subsubname]][, intersectingNames, with = FALSE], 
+                                # Support ignoring specific variables of specific processes:
+                                ignore.variable = c(ignore.variable, ignore.process.variable[[name]]), 
+                                skipNAFraction = skipNAFraction, 
+                                skipNAAt = if(is.list(skipNAAt)) skipNAAt[[name]] else skipNAAt, 
+                                NAReplacement = NAReplacement, 
+                                ignoreEqual = ignoreEqual,
+                                classOf = classOf, 
+                                #mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
+                                sort = sort, 
+                                tolerance = tolerance, 
+                                testAllTRUE = testAllTRUE
+                            )
+                            
+                            data_equal[[name]][[subname]][[subsubname]] <- result$warn
+                            diffData[[name]][[subname]][[subsubname]] <- result$diffData
+                        }
+                        else {
+                            result <- compareDataTablesUsingClassOf(
+                                dat_orig[[name]][[subname]][[subsubname]], 
+                                dat[[name]][[subname]][[subsubname]], 
+                                # Support ignoring specific variables of specific processes:
+                                ignore.variable = c(ignore.variable, ignore.process.variable[[name]]), 
+                                skipNAFraction = skipNAFraction, 
+                                skipNAAt = if(is.list(skipNAAt)) skipNAAt[[name]] else skipNAAt, 
+                                NAReplacement = NAReplacement, 
+                                ignoreEqual = ignoreEqual, 
+                                classOf = classOf, 
+                                #mergeWhenDifferentNumberOfRows = mergeWhenDifferentNumberOfRows, 
+                                sort = sort, 
+                                tolerance = tolerance, 
+                                testAllTRUE = testAllTRUE
+                            )
+                            
+                            data_equal[[name]][[subname]][[subsubname]] <- result$warn
+                            diffData[[name]][[subname]][[subsubname]] <- result$diffData
+                        }
+                        
+                        # This caused trouble when converting character to POSIXct:
+                        #data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfSecond(dat_orig[[name]][[subname]], dat[[name]][[subname]])
+                    }
+                }
+            }
+            
             else if("sf" %in% class(dat_orig[[name]][[subname]])){
                 data_equal[[name]][[subname]] <- all.equal(
                     sf::st_coordinates(dat_orig[[name]][[subname]]), 
@@ -428,8 +495,8 @@ compareDataTablesUsingClassOf <- function(
     }
     
     # Detect keys and use these in all_equal_mergeIfDifferentNumberOfRows:
-    keys_x <- locateUniqueKeys(x, requireNextPositive = TRUE)
-    keys_y <- locateUniqueKeys(y, requireNextPositive = TRUE)
+    keys_x <- locateUniqueKeys(x, requireNextPositive = FALSE)
+    keys_y <- locateUniqueKeys(y, requireNextPositive = FALSE)
     
     # Apply the NA replacement:
     if(length(NAReplacement) && (!isFALSE(skipNAFraction) || length(skipNAAt))) {
@@ -567,6 +634,7 @@ subsetByAllEqual <- function(xy, keys) {
 }
 
 
+# Function used in compareDataTablesUsingClassOf() to find unique keys of a table by iterating through the columns starting from the first and checking whether there are duplicates. This assumes that the keys are located in the first columns:
 locateUniqueKeys <- function(x, requireNextPositive = FALSE) {
     if(any(duplicated(x))) {
         warning("Cannot locate keys if there are duplicated rows of the entire table.")

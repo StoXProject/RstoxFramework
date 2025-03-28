@@ -6,3 +6,18 @@
 \description{
 StoX data types are the data types used to transfer data and information between processes in a StoX estimation model. The data types are divided into two types, the \code{\link{ModelData}} and \code{\link{ProcessData}}.
 }
+\details{
+The StoX output data can be written to file using the "Write output to file" process parameter in the StoX GUI which corresponds to the logical parameter fileOutput in the project description, which is set to TRUE by default. The output files are written differently based on the class of the output data from the process, with the following file types/file extensions: 
+
+\tabular{llll}{
+\bold{Output data class} \tab \bold{StoX data types} \tab \bold{Output file type} \tab \bold{Output file extension} \cr
+NetCDF4 \tab Bootstrap \tab NetCDF4 \tab nc \cr
+Spatial (multi)polygon. R class: sf \tab StratumPolygon \tab GeoJSON \tab geojson \cr
+Table (R class: data.table) \tab ReadBiotic, StoxBiotic, NASC, etc \tab Tab separated, NA as "NA" \tab txt \cr
+Plot. R class: ggplot \tab PlotReportBootstrap, etc \tab Default: PNG (user choice) \tab Default: png (user choice) \cr
+Character matrix \tab WriteICESAcoustic, WriteICESBiotic, etc \tab Comma separated, NA as "" \tab csv \cr
+Vector \tab WriteICESDatras, WriteICESDatsusc, etc \tab Comma separated \tab csv \cr
+}
+
+Output data cannot be composed of multiple output data classes.
+}

@@ -68,11 +68,15 @@
 
 \item{ICESDatrasData}{\code{\link[RstoxData]{ICESDatrasData}} (defined in RstoxData).}
 
+\item{ICESDatsuscData}{\code{\link[RstoxData]{ICESDatsuscData}} (defined in RstoxData).}
+
 \item{WriteICESBioticData}{\code{\link[RstoxData]{WriteICESBioticData}} (defined in RstoxData).}
 
 \item{WriteICESAcousticData}{\code{\link[RstoxData]{WriteICESAcousticData}} (defined in RstoxData).}
 
 \item{WriteICESDatrasData}{\code{\link[RstoxData]{WriteICESDatrasData}} (defined in RstoxData).}
+
+\item{WriteICESDatsuscData}{\code{\link[RstoxData]{WriteICESDatsuscData}} (defined in RstoxData).}
 }
 \description{
 The model data of a StoX model are the data generated during the model run based on input data and user settings and resources given in the project description (project.json file). Model data are transient and only exists from a process has been run until the project is closed.

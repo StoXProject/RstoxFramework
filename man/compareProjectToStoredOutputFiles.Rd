@@ -7,6 +7,7 @@
 compareProjectToStoredOutputFiles(
   projectPath,
   projectPath_original = projectPath,
+  modelNames = NULL,
   emptyStringAsNA = FALSE,
   intersect.names = TRUE,
   ignore.variable = NULL,
@@ -26,6 +27,7 @@ compareProjectToStoredOutputFiles(
   selection = list(),
   BootstrapID = NA,
   unlistSingleTable = TRUE,
+  readCsvAsLines = FALSE,
   tolerance = sqrt(.Machine$double.eps),
   debug = FALSE,
   save = FALSE,
@@ -39,15 +41,17 @@ compareProjectToStoredOutputFiles(
 
 \item{projectPath_original}{The project holding the existing output files, defaulted to \code{projectPath}.}
 
+\item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
+
 \item{emptyStringAsNA}{Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.}
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
-\item{ignore.variable}{Either a vector of names of variables/columns to ignore in the comparison, or a list of such variables per process (named by the process names).}
+\item{ignore.variable}{A vector of names of variables/columns to ignore in the comparison.}
 
 \item{ignore.process}{A vector of names of processes to ignore in the comparison.}
 
-\item{ignore.process.variable}{A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth"))}
+\item{ignore.process.variable}{A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth")).}
 
 \item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.}
 
@@ -76,6 +80,8 @@ compareProjectToStoredOutputFiles(
 \item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
 
 \item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
+
+\item{readCsvAsLines}{Logical: If TRUE read csv files as lines with \code{\link[base]{readLines}}.}
 
 \item{tolerance}{The tolerance to use in all.equal.}
 

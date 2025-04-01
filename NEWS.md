@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.3 (2025-04-01)
+* Final release for StoX 4.1.3.
+
+
 # RstoxFramework v4.1.3-9003 (2025-03-28)
 * Updated documentation of data types by adding a table of output file formats.
 * Added DATRAS test project.

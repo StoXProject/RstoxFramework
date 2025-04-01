@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.3</span>
       </span>
     </div>
 
@@ -53,6 +53,11 @@
     </div>
 
 
+    <div id="details">
+    <h2>Details</h2>
+    <p>The StoX output data can be written to file using the "Write output to file" process parameter in the StoX GUI which corresponds to the logical parameter fileOutput in the project description, which is set to TRUE by default. The output files are written differently based on the class of the output data from the process, with the following file types/file extensions:</p>
+<table class="table table"><tr><td><b>Output data class</b></td><td><b>StoX data types</b></td><td><b>Output file type</b></td><td><b>Output file extension</b></td></tr><tr><td>NetCDF4</td><td>Bootstrap</td><td>NetCDF4</td><td>nc</td></tr><tr><td>Spatial (multi)polygon. R class: sf</td><td>StratumPolygon</td><td>GeoJSON</td><td>geojson</td></tr><tr><td>Table (R class: data.table)</td><td>ReadBiotic, StoxBiotic, NASC, etc</td><td>Tab separated, NA as "NA"</td><td>txt</td></tr><tr><td>Plot. R class: ggplot</td><td>PlotReportBootstrap, etc</td><td>Default: PNG (user choice)</td><td>Default: png (user choice)</td></tr><tr><td>Character matrix</td><td>WriteICESAcoustic, WriteICESBiotic, etc</td><td>Comma separated, NA as ""</td><td>csv</td></tr><tr><td>Vector</td><td>WriteICESDatras, WriteICESDatsusc, etc</td><td>Comma separated</td><td>csv</td></tr></table><p>Output data cannot be composed of multiple output data classes.</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -62,7 +67,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Arne Johannes Holmin, Ibrahim Umar, Edvin Fuglebakk, Aasmund Skaalevik, Esmael Musema Hassen, Sindre Vatnehol, Espen Johnsen, Atle Totland, Anthony Hennessey, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
+  <p></p><p>Developed by Arne Johannes Holmin, Anthony Hennessey, Espen Johnsen, Sindre Vatnehol, Edvin Fuglebakk, Ibrahim Umar, Aasmund Skaalevik, Esmael Musema Hassen, Atle Totland, Mikko Juhani Vihtakari, Norwegian Institute of Marine Research.</p>
 </div>
 
 <div class="pkgdown">

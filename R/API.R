@@ -570,15 +570,20 @@ readModelData <- function(
             unlist <- 3
         }
         if(unlist > 2) {
-            output <- lapply(output, function(x) lapply(x, function(y) if(hasOnlyOneTabble(y)) y[[1]] else y))
+            output <- lapply(output, function(x) lapply(x, function(y) if(hasOnlyOneTable(y)) y[[1]] else y))
         }
         if(unlist > 1) {
-            output <- lapply(output, function(x) if(hasOnlyOneTabble(x)) x[[1]] else x)
+            output <- lapply(output, function(x) if(hasOnlyOneTable(x)) x[[1]] else x)
         }
         if(unlist > 0) {
-            allProcessNames <- unlist(lapply(output, names))
-            output <- unlist(output, recursive = FALSE)
-            names(output) <- allProcessNames
+            if(hasOnlyOneTable(output)) {
+                output <- output[[1]]
+            }
+            else {
+                allProcessNames <- unlist(lapply(output, names))
+                output <- unlist(output, recursive = FALSE)
+                names(output) <- allProcessNames
+            }
         }
 
         
@@ -591,7 +596,7 @@ readModelData <- function(
 }
 
 
-hasOnlyOneTabble <- function(x) {
+hasOnlyOneTable <- function(x) {
     is.list(x) && !data.table::is.data.table(x) && length(x) == 1
 }
 

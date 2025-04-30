@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.4-9001</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.1.4</span>
       </span>
     </div>
 
@@ -125,11 +125,11 @@
 
 <p>A different option when experiencing missing values in reports due to different assigned Hauls is to split a Stratum into smaller strata, each for which the <code>DefinitionMethod</code> "Stratum" can be used in <code><a href="https://rdrr.io/pkg/RstoxBase/man/DefineBioticAssignment.html" class="external-link">DefineBioticAssignment</a></code>.</p>
 <p><strong>Resampling of MeanNASCData</strong></p>
-<p>The ResampleFunction <code><a href="ResampleMeanNASCData.html">ResampleMeanNASCData</a></code> resamples, with replacement, the AcousticPSUs within Stratum in the <code>MeanNASCData</code>, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.</p>
+<p>The ResampleFunction <code><a href="ResampleMeanNASCData.html">ResampleMeanNASCData</a></code> resamples, with replacement, the AcousticPSUs within Stratum in the <code><a href="https://rdrr.io/pkg/RstoxBase/man/MeanNASCData.html" class="external-link">MeanNASCData</a></code>, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.</p>
 <p><strong>Resampling of ResampleMeanLengthDistributionData</strong></p>
-<p>The ResampleFunction <code><a href="ResampleMeanLengthDistributionData.html">ResampleMeanLengthDistributionData</a></code> resamples, with replacement, the BioticPSUs within Stratum in the <code>MeanLengthDistributionData</code>, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.</p>
+<p>The ResampleFunction <code><a href="ResampleMeanLengthDistributionData.html">ResampleMeanLengthDistributionData</a></code> resamples, with replacement, the BioticPSUs within Stratum in the <code><a href="https://rdrr.io/pkg/RstoxBase/man/MeanLengthDistributionData.html" class="external-link">MeanLengthDistributionData</a></code>, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.</p>
 <p><strong>Resampling of ResampleMeanSpeciesCategoryCatchData</strong></p>
-<p>The ResampleFunction <code><a href="ResampleMeanSpeciesCategoryCatchData.html">ResampleMeanSpeciesCategoryCatchData</a></code> resamples, with replacement, the BioticPSUs within Stratum in the <code>MeanSpeciesCategoryCatchData</code>, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.</p>
+<p>The ResampleFunction <code><a href="ResampleMeanSpeciesCategoryCatchData.html">ResampleMeanSpeciesCategoryCatchData</a></code> resamples, with replacement, the BioticPSUs within Stratum in the <code><a href="https://rdrr.io/pkg/RstoxBase/man/MeanSpeciesCategoryCatchData.html" class="external-link">MeanSpeciesCategoryCatchData</a></code>, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.</p>
 <p><strong>General</strong></p>
 <p>Run RstoxFramework::getRstoxFrameworkDefinitions("resampleFunctions") in R to get a list of the implemented resampling functions. Note that if a process is selected in <code>BootstrapMethodTable</code> that is not used in the model up to the <code>OutputProcesses</code>, the bootstrapping of that process will not be effective on the end result (e.g. select the correct process that returns BioticAssignment data type).</p>
 <p>A copy of the project is made for each core given by <code>NumberOfCores</code>.</p>

@@ -12,5 +12,5 @@ ResampleMeanLengthDistributionData(MeanLengthDistributionData, Seed)
 \item{Seed}{The seed, given as a single integer.}
 }
 \description{
-This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
+This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
 }

@@ -15,7 +15,7 @@ ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingmakeUniqueVars(
 \item{Seed}{The seed, given as a single integer.}
 }
 \description{
-This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
+This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
 }
 \details{
 Note that this function resamples only unique Individual in the resampling of Individual within Sample, ignoring that these individuals may have been duplicated in the resampling of BioticPSU within Stratum. The effect is that Individuals are resampled equally for all equal Samples, whereas the function \code{\link{ResamplePreySpeciesCategoryCatchDataHierarchical}} resamples differently for each Sample. The latter may suppress extreme outcomes, which should be considered when choosing the final resampling function to use for Prey.

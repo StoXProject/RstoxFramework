@@ -30,15 +30,15 @@
 #' 
 #' \strong{Resampling of MeanNASCData}
 #' 
-#' The ResampleFunction \code{\link{ResampleMeanNASCData}} resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
+#' The ResampleFunction \code{\link{ResampleMeanNASCData}} resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link[RstoxBase]{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
 #' 
 #' \strong{Resampling of ResampleMeanLengthDistributionData}
 #' 
-#' The ResampleFunction \code{\link{ResampleMeanLengthDistributionData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
+#' The ResampleFunction \code{\link{ResampleMeanLengthDistributionData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
 #' 
 #' \strong{Resampling of ResampleMeanSpeciesCategoryCatchData}
 #' 
-#' The ResampleFunction \code{\link{ResampleMeanSpeciesCategoryCatchData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
+#' The ResampleFunction \code{\link{ResampleMeanSpeciesCategoryCatchData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
 #' 
 #' \strong{General}
 #' 
@@ -1752,7 +1752,7 @@ resampleOneGroup <- function(subData, seed, varToResample, nextResampleBy = NULL
 
 #' Resamples biotic PSUs within Stratum in MeanLengthDistributionData
 #' 
-#' This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
+#' This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
@@ -1802,7 +1802,7 @@ applyResamplingFactor <- function(data, varToScale) {
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
+#' This function resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
@@ -1843,7 +1843,7 @@ ResampleMeanSpeciesCategoryCatchData <- function(MeanSpeciesCategoryCatchData, S
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalPreyCatchWeight and TotalPreyCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling. 
+#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalPreyCatchWeight and TotalPreyCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling. 
 #' 
 #' Note that this resampling function resamples also the individuals of samples that belong to BioticPSUs that are scaled by 0, and similarly resamples also PreySpeciesCategory in Individuals that belong to Individuals that are scaled by 0. Consequently, this is in essence a reversed hierarchical resampling of PreySpeciesCategory within Individual, then Individuals within Sample, then BioticPSUs within Stratum. 
 #' 
@@ -1913,7 +1913,7 @@ ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling <- function(PreySpe
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
+#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments
@@ -1978,7 +1978,7 @@ ResamplePreySpeciesCategoryCatchDataHierarchical <- function(PreySpeciesCategory
 
 #' Resamples biotic PSUs within Stratum in MeanSpeciesCategoryCatchData
 #' 
-#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
+#' This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
 #' 
 #' Note that this function resamples only unique Individual in the resampling of Individual within Sample, ignoring that these individuals may have been duplicated in the resampling of BioticPSU within Stratum. The effect is that Individuals are resampled equally for all equal Samples, whereas the function \code{\link{ResamplePreySpeciesCategoryCatchDataHierarchical}} resamples differently for each Sample. The latter may suppress extreme outcomes, which should be considered when choosing the final resampling function to use for Prey.
 #' 
@@ -2127,7 +2127,7 @@ ResampleBioticAssignmentByAcousticPSU <- function(BioticAssignment, Seed) {
 
 #' Resamples acoustic PSUs
 #' 
-#' This function resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
+#' This function resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link[RstoxBase]{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
 #' 
 #' @inheritParams RstoxBase::ModelData
 #' @inheritParams general_arguments

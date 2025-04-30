@@ -15,7 +15,7 @@ ResamplePreySpeciesCategoryCatchDataHierarchicalUsingScaling(
 \item{Seed}{The seed, given as a single integer.}
 }
 \description{
-This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalPreyCatchWeight and TotalPreyCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
+This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalPreyCatchWeight and TotalPreyCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
 }
 \details{
 Note that this resampling function resamples also the individuals of samples that belong to BioticPSUs that are scaled by 0, and similarly resamples also PreySpeciesCategory in Individuals that belong to Individuals that are scaled by 0. Consequently, this is in essence a reversed hierarchical resampling of PreySpeciesCategory within Individual, then Individuals within Sample, then BioticPSUs within Stratum.

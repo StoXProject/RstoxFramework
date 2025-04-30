@@ -60,15 +60,15 @@ A different option when experiencing missing values in reports due to different 
 
 \strong{Resampling of MeanNASCData}
 
-The ResampleFunction \code{\link{ResampleMeanNASCData}} resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
+The ResampleFunction \code{\link{ResampleMeanNASCData}} resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link[RstoxBase]{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
 
 \strong{Resampling of ResampleMeanLengthDistributionData}
 
-The ResampleFunction \code{\link{ResampleMeanLengthDistributionData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
+The ResampleFunction \code{\link{ResampleMeanLengthDistributionData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanLengthDistributionData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column WeightedNumber is scaled by the number of occurrences of each BioticPSUs from the resampling.
 
 \strong{Resampling of ResampleMeanSpeciesCategoryCatchData}
 
-The ResampleFunction \code{\link{ResampleMeanSpeciesCategoryCatchData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
+The ResampleFunction \code{\link{ResampleMeanSpeciesCategoryCatchData}} resamples, with replacement, the BioticPSUs within Stratum in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The columns TotalCatchWeight and TotalCatchNumber are scaled by the number of occurrences of each BioticPSUs from the resampling.
 
 \strong{General}
 

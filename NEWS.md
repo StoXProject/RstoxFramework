@@ -1,3 +1,7 @@
+# RstoxFramework v4.1.4 (2025-04-30)
+* Final release for StoX 4.1.4.
+
+
 # RstoxFramework v4.1.4-9001 (2025-04-28)
 * Version supporting R 4.5 binaries.
 

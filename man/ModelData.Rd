@@ -82,5 +82,5 @@
 The model data of a StoX model are the data generated during the model run based on input data and user settings and resources given in the project description (project.json file). Model data are transient and only exists from a process has been run until the project is closed.
 }
 \seealso{
-\code{\link{ProcessData}} for process data types and \code{\link{DataTypes}} for all data types produced by \code{\link{RstoxFramework}}. See \code{\link[RstoxData]{ModelData}} and \code{\link[RstoxBase]{ModelData}} for model data by
+\code{\link{ProcessData}} for process data types and \code{\link{DataTypes}} for all data types produced by \code{\link{RstoxFramework}}. See also \code{\link[RstoxData]{ModelData}} in RstoxData and \code{\link[RstoxBase]{ModelData}} in RstoxBase.
 }

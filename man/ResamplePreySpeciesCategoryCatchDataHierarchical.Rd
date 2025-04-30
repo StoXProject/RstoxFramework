@@ -15,5 +15,5 @@ ResamplePreySpeciesCategoryCatchDataHierarchical(
 \item{Seed}{The seed, given as a single integer.}
 }
 \description{
-This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
+This function resamples, with replacement, the BioticPSUs within Stratum, then the Individuals within Sample, and then the PreySpeciesCategory within Individual in the \code{\link[RstoxBase]{MeanSpeciesCategoryCatchData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The function performs actual resampling, as opposed to scaling a data variable as is done for most other resampling functions in StoX.
 }

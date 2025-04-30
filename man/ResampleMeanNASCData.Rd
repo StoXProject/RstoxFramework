@@ -12,5 +12,5 @@ ResampleMeanNASCData(MeanNASCData, Seed)
 \item{Seed}{The seed, given as a single integer.}
 }
 \description{
-This function resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
+This function resamples, with replacement, the AcousticPSUs within Stratum in the \code{\link[RstoxBase]{MeanNASCData}}, where Stratum is the stratum associated to the PSU, and not necessarily the actual stratum polygon. The column NASC is scaled by the number of occurrences of each AcousticPSUs from the resampling.
 }

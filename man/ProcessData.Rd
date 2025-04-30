@@ -28,5 +28,5 @@
 There are currently no process data in RstoxFramework, but in the dependent packages RstoxData and RstoxBase.
 }
 \seealso{
-\code{\link{ModelData}} for model data types and \code{\link{DataTypes}} for all data types produced by \code{\link{RstoxFramework}}.
+\code{\link{ModelData}} for model data types and \code{\link{DataTypes}} for all data types produced by \code{\link[RstoxFramework]{RstoxFramework}}.
 }

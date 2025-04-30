@@ -7,5 +7,5 @@
 The PlotReportBootstrapData model data is a ggplot object or a list of ggplot objects generated from \code{\link{BootstrapData}}. The plots show e.g. error bars with lower, mid and upper value of Abundance per IndividualAge.
 }
 \seealso{
-This data type is produced by \code{\link{PlotReportBootstrap}}. See \code{\link{DataTypes}} for a list of all StoX data types produced by \code{\link{RstoxData}}, \code{\link{RstoxBase}} and \code{\link{RstoxFramework}}.
+This data type is produced by \code{\link{PlotReportBootstrap}}. See \code{\link{DataTypes}} for a list of all StoX data types produced by \code{\link[RstoxData]{RstoxData}}, \code{\link[RstoxBase]{RstoxBase}} and \code{\link[RstoxFramework]{RstoxFramework}}.
 }

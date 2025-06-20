@@ -1,0 +1,92 @@
+{
+    "project": {
+        "TimeSaved": "2025-06-06T10:10:36.930Z",
+        "RVersion": "R version 4.5.0 (2025-04-11)",
+        "RstoxPackageVersion": [
+            "RstoxFramework_4.2.0-9001",
+            "RstoxBase_2.2.0-9001",
+            "RstoxData_2.2.0-9001"
+        ],
+        "CertifiedRstoxPackageVersion": [
+            "RstoxFramework_4.2.0-9001",
+            "RstoxBase_2.1.3",
+            "RstoxData_2.1.5"
+        ],
+        "AllCertifiedRstoxPackageVersion": false,
+        "OfficialRstoxFrameworkVersion": false,
+        "DependentPackageVersion": [
+            "geojsonsf_2.0.3"
+        ],
+        "Application": "StoX 4.1.4",
+        "models": {
+            "baseline": [
+                {
+                    "processName": "DefineSurveyPlan",
+                    "functionName": "RstoxBase::DefineSurveyPlan",
+                    "functionInputs": {
+                        "StratumPolygon": "DefineStratumPolygon"
+                    },
+                    "functionParameters": {
+                        "UseProcessData": true,
+                        "DefinitionMethod": "ZigZagRectangularEnclosure",
+                        "FileName": [
+
+                        ],
+                        "StratumNames": [
+
+                        ],
+                        "Bearing": "Along",
+                        "BearingAngle": [
+
+                        ],
+                        "Retour": false,
+                        "SurveyTime": 50,
+                        "SurveyDistance": [
+
+                        ],
+                        "SurveySpeed": 9,
+                        "EqualEffort": true,
+                        "OrderAllToursFirst": false,
+                        "Seed": 1,
+                        "Margin": 0.1
+                    },
+                    "processParameters": {
+                        "enabled": true,
+                        "showInMap": false,
+                        "fileOutput": true
+                    },
+                    "processData": {
+                        "SurveyPlan": [
+{
+    "Stratum": "Engelsk_Klondyke_2020",
+    "Transect": "Transect_01",
+    "LatitudeStart": 57.816407487657,
+    "LongitudeEnd": 3.912999191201,
+    "LatitudeEnd": 57.740583109667,
+    "Segment": "Segment_1",
+    "Speed": 9
+},
+                            {
+                                "Stratum": "Engelsk_Klondyke_2020",
+                                "Transect": "Transect_01",
+                                "LongitudeStart": 3.924830325664,
+                                "LatitudeStart": 57.624543815307,
+                                "LongitudeEnd": 3.894626441572,
+                                "LatitudeEnd": 57.622205246199,
+                                "Segment": "Segment_2",
+                                "Speed": 9
+                            }
+                        ]
+                    }
+                }
+            ],
+            "analysis": [
+
+            ],
+            "report": [
+
+            ]
+        }
+    }
+}
+

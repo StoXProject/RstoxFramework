@@ -1289,8 +1289,12 @@ getDefaultOutputFileType <- function(processOutput) {
         
         # List of outputs:
         else if("sf" %in% classes) {
-            # Set file extension:
-            ext <- "geojson"
+            if(sf::st_geometry_type(processOutput[[1]])[1] == "POINT") {
+                ext <- "gpx"
+            }
+            else {
+                ext <- "geojson"
+            }
         }
         else if("data.table" %in% classes) {
             # Set file extension:

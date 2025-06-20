@@ -1,3 +1,7 @@
+# RstoxFramework v4.2.0-9001 (2025-04-30)
+* Added support for writing gpx files from RstoxBase::WriteSurveyPlan().
+
+
 # RstoxFramework v4.1.4 (2025-04-30)
 * Final release for StoX 4.1.4.
 

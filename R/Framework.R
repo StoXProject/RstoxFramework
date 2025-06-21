@@ -5444,6 +5444,7 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     # Add the processData if a processData function. This must be added after dropping one level if a list of one list:
     if(isProcessDataFunction(process$functionName)) {
         functionArguments$processData <- process$processData
+        # Not sure why this is needed:
         if(is.listOfOneList(functionArguments$processData)) {
             functionArguments$processData <- functionArguments$processData[[1]]
         }
@@ -5513,7 +5514,7 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
     )
     
     
-    # Keep only arguments to show, but for a processData process only if UseProcessData is set to FALSE:
+    # Keep only arguments to show, but for a processData process only if UseProcessData is set to FALSE, since this overrides all other arguments:
     if(! "UseProcessData" %in% namesOfReplaceArgsToInsert || isTRUE(replaceArgs$UseProcessData)) {
         functionArguments <- extractArgumentsToShow(arguments = functionArguments, projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = NULL) # Using NULL here, as argumentFilePaths has not been read. Should it?
     }
@@ -6575,18 +6576,22 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
 reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
     
     if("sf" %in% class(processOutputOne)) {
-        
-        # Write the file:
-        #jsonObject <- geojsonio::geojson_json(processOutputOne)
-        jsonObject <- jsonlite::prettify(geojsonsf::sf_geojson(processOutputOne, simplify = FALSE))
-        
-        # It seems this is no longer relevant as we moved from geojsonio to geojsonsf:
-        # Hack to rermove all IDs from the geojson:
-        #jsonObject <- removeIDsFromGeojson(jsonObject)
-        
-        # Changed on 2020-12-19 to simply using write, as it writes as actual geojson:
-        #jsonlite::write_json(jsonObject, path = filePath)
-        write(jsonObject, file = filePath)
+        if(sf::st_geometry_type(processOutputOne)[1] == "POINT") {
+            writeGPX(processOutputOne, filePath)
+        }
+        else {
+            # Write the file:
+            #jsonObject <- geojsonio::geojson_json(processOutputOne)
+            jsonObject <- jsonlite::prettify(geojsonsf::sf_geojson(processOutputOne, simplify = FALSE))
+            
+            # It seems this is no longer relevant as we moved from geojsonio to geojsonsf:
+            # Hack to rermove all IDs from the geojson:
+            #jsonObject <- removeIDsFromGeojson(jsonObject)
+            
+            # Changed on 2020-12-19 to simply using write, as it writes as actual geojson:
+            #jsonlite::write_json(jsonObject, path = filePath)
+            write(jsonObject, file = filePath)
+        }
     }
     # To be implemented
     #else if("StoX_shapefile" %in% class(processOutputOne)) {
@@ -6646,6 +6651,16 @@ reportFunctionOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
     }
 }
 
+
+
+writeGPX <- function(x, filePath) {
+    sf::st_write(
+        x,
+        dsn = filePath,
+        layer = "track_points",
+        driver = "GPX"
+    )
+}
 
 
 ggsaveApplyDefaults <- function(x, filePath, overrideAttributes = list()) {

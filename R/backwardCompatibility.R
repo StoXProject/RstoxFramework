@@ -445,9 +445,9 @@ reshapeParameter <- function(projectDescription, modelName, processIndex, action
         }
         
         # Print message:
-        if(verbose) {
-            message("StoX: Backward compatibility: Reshaping parameter '", action$parameterName, "' in process ", projectDescription[[modelName]][[processIndex]]$processName, "'", "'")
-        }
+        #if(verbose) {
+        #    message("StoX: Backward compatibility: Reshaping parameter '", action$parameterName, "' in process ", projectDescription[[modelName]][[processIndex]]$processName, "'", "'")
+        #}
         
         # Reshape the parameter:
         projectDescription[[modelName]][[processIndex]]$functionParameters[[toReshape]] <- action$newValue

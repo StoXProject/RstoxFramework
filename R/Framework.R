@@ -42,24 +42,31 @@ getStoxFunctionAttributes <- function(packageName, requestedFunctionAttributeNam
     }
     
     # Add the argument descriptions:
-    argumentDescriptionFile <- system.file("extdata", "functionArguments.rds", package = packageName)
-    if(file.exists(argumentDescriptionFile)) {
-        
-        # Read the argument descriptions:
-        argumentDescriptions <- readRDS(argumentDescriptionFile)
-        # Keep only the argument descriptions for functions given in the stoxFunctionAttributes:
-        argumentDescriptions <- argumentDescriptions[names(argumentDescriptions) %in% names(stoxFunctionAttributes)]
-        
-        for(functionName in names(argumentDescriptions)) {
-            stoxFunctionAttributes [[functionName]] [["functionArgumentDescription"]] <- argumentDescriptions [[functionName]]
-        }
+    objectDocumentation <- readFunctionArguments.rds(packageName)
+    # Add the argument descriptions for functions given in the stoxFunctionAttributes:
+    for(functionName in names(stoxFunctionAttributes)) {
+        stoxFunctionAttributes [[functionName]] [["functionArgumentDescription"]] <- objectDocumentation [[functionName]] [["argumentDescriptions"]]
     }
-    else {
-        warning("StoX: The file ", argumentDescriptionFile, " does not exist.")
-    }
+    
     
     stoxFunctionAttributes
 }
+
+
+readFunctionArguments.rds <- function(packageName) {
+    objectDocumentationFile <- system.file("extdata", "functionArguments.rds", package = packageName)
+    if(file.exists(objectDocumentationFile)) {
+        # Read the argument descriptions:
+        objectDocumentation <- readRDS(objectDocumentationFile)
+    }
+    else {
+        warning("StoX: The file ", objectDocumentationFile, " does not exist.")
+        objectDocumentation <- NULL
+    }
+    return(objectDocumentation)
+}
+
+
 
 # Function to add the missing attributes of all functions.
 addMissingAttributes <- function(stoxFunctionAttributes, requestedFunctionAttributeNames) {
@@ -1773,7 +1780,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' 
 #' @export
 #'
-resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE) {
+resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE, argumentFilePaths = NULL) {
     
     # Get the process ID to reset the model to:
     #processIndexTable <- readProcessIndexTable(projectPath, modelName)
@@ -1820,7 +1827,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                 )
                 if(returnProcessTable) {
                     output <- c(
-                        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName)), 
+                        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName, argumentFilePaths = argumentFilePaths)), 
                         output
                     )
                 }
@@ -2289,10 +2296,6 @@ unwrapProjectMemoryFile <- function(projectMemoryFile, projectPath) {
 ##### StoX function library: #####
 ##################################
 
-#getStoxFunctionAttributes <- function(packageName) {
-#    package <- paste0("package", packageName)
-#    get("stoxFunctionAttributes", pos = package)
-#}
 
 #' Function returning the names of the StoX functions available for a model:
 #' 
@@ -2368,17 +2371,17 @@ getArgumentsToShow <- function(projectPath, modelName, processID, argumentFilePa
     functionInputs <- getFunctionInputs(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths, only.valid = FALSE)
     functionParameters <- getFunctionParameters(projectPath = projectPath, modelName = modelName, processID = processID, argumentFilePaths = argumentFilePaths, only.valid = FALSE)
     
-    if(length(functionArgumentHierarchy) && any(rapply(functionArgumentHierarchy, is.function))) {
-        
-        # Get the actual function input data, as it is needed when functionArgumentHierarchy is a function:
-        functionInputs <- getFunctionInputData(
-            functionInputProcessNames = functionInputs, 
-            projectPath = projectPath, 
-            # Do not stop if the input is not specified, as we may not yet have defined the parameters:
-            strict = FALSE
-        )
-        
-    }
+    #if(length(functionArgumentHierarchy) && any(rapply(functionArgumentHierarchy, is.function))) {
+    #    
+    #    # Get the actual function input data, as it is needed when functionArgumentHierarchy is a function:
+    #    functionInputs <- getFunctionInputData(
+    #        functionInputProcessNames = functionInputs, 
+    #        projectPath = projectPath, 
+    #        # Do not stop if the input is not specified, as we may not yet have defined the parameters:
+    #        strict = FALSE
+    #    )
+    #    
+    #}
     functionArguments <- c(functionInputs, functionParameters)
     
     # This function is placed in RstoxData, but I forgot why, except that it may be needed in backward compatibility actions or something?:
@@ -6675,13 +6678,13 @@ ggsaveApplyDefaults <- function(x, filePath, overrideAttributes = list()) {
     arguments <- list(
         plot = x, 
         device = if("Format"      %in% names(att)) att$Format      
-            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format, 
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Format, 
         width  = if("Width"       %in% names(att)) att$Width
-            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Width,
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Width,
         height = if("Height"      %in% names(att)) att$Height
-            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Height, 
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Height, 
         dpi    = if("DotsPerInch" %in% names(att)) att$DotsPerInch
-            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$DotsPerInch, 
+            else RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$DotsPerInch, 
         units = "cm"
     )
     

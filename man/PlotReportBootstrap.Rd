@@ -14,7 +14,7 @@ PlotReportBootstrap(
   CVVariable = character(),
   GroupingVariables = character(),
   SubPlots = character(),
-  UseDefaultTextSettings = TRUE,
+  UseDefaultLabelSettings = TRUE,
   Title = character(),
   AxisTitleSize = numeric(),
   AxisTickSize = numeric(),
@@ -46,27 +46,27 @@ PlotReportBootstrap(
 
 \item{SubPlots}{A vector of the names of the plots to produce. To get a list of possible plot names use getSubPlotNames_PlotReportBootstrap(ReportBootstrapData, GroupingVariables). The subplot names cannot contain slashes, which are replaced by underscore.}
 
-\item{UseDefaultTextSettings}{Logical: If TRUE (default) use the default text settings of the plotting function. Setting this to FALSE will show all text options of the plotting function in the StoX GUI.}
+\item{UseDefaultLabelSettings}{Logical: If TRUE (default) use the default text settings of the plot, specifically Title, AxisTitleSize, AxisTickSize, LegendTitleSize and LegendTextSize. Setting this to FALSE will show all text options of the plotting function in the StoX GUI.}
 
-\item{Title}{The title of the plot, defaulted to no title.}
+\item{Title}{Character: The title of the plot, defaulted to no title.}
 
-\item{AxisTitleSize}{The size of the axis titles, defaulted to 20.}
+\item{AxisTitleSize}{Numeric: The size of the axis titles, defaulted to 20.}
 
-\item{AxisTickSize}{The size of the axis tick marks, defaulted to 20.}
+\item{AxisTickSize}{Numeric: The size of the axis tick marks, defaulted to 20.}
 
-\item{LegendTitleSize}{The size of the legend title, defaulted to 20.}
+\item{LegendTitleSize}{Numeric: The size of the legend title, defaulted to 20.}
 
-\item{LegendTextSize}{The size of the legend text, defaulted to 20.}
+\item{LegendTextSize}{Numeric: The size of the legend text, defaulted to 20.}
 
-\item{UseDefaultFileSettings}{Logical: If TRUE (default) use the default file settings of the plotting function. Setting this to FALSE will show all file options of the plotting function in the StoX GUI.}
+\item{UseDefaultFileSettings}{Logical: If TRUE (default) use the default file settings of the output file of the plot, specifically Format, Width, Height and DotsPerInch. Setting this to FALSE will show all file options of the plotting function in the StoX GUI.}
 
-\item{Format}{The format of the output file from plotting functions, defaulted to "png". Other options are defined by \code{\link[ggplot2]{ggsave}}, including "tiff", "jpeg"  and "pdf".}
+\item{Format}{Character: The format of the output file from plotting functions, defaulted to "png". Other options are defined by \code{\link[ggplot2]{ggsave}}, including "tiff", "jpeg"  and "pdf".}
 
-\item{Width}{The width of the plot in centimeters, defaulted to 17, as per the \href{https://academic.oup.com/icesjms/pages/General_Instructions}{ICES Journal og Marine Science author recommendations}.}
+\item{Width}{Numeric: The width of the plot in centimeters, defaulted to 17, as per the instructions to authors for submission to the ICES Journal og Marine Science.}
 
-\item{Height}{The height of the plot in centimeters, defaulted to 17.}
+\item{Height}{Numeric: The height of the plot in centimeters, defaulted to 17.}
 
-\item{DotsPerInch}{The number of dots per inch (DPI), defaulted to 1200.}
+\item{DotsPerInch}{Numeric: The number of dots per inch (DPI), defaulted to 1200.}
 }
 \value{
 A \code{\link{PlotReportBootstrapData}} object.

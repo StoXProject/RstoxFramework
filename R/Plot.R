@@ -4,6 +4,7 @@
 #' 
 #' @inheritParams ModelData
 #' @inheritParams RstoxBase::general_plot_arguments
+#' @inheritParams RstoxBase::general_file_plot_arguments
 #' @inheritParams RstoxBase::general_map_plot_arguments
 #' @param PlotType The type of plot to produce. Currently only "ErrorBarPlot" is implemented.
 #' @param PlottingVariable The variable to plot the points for. Normally this is the variable giving the mean.
@@ -36,7 +37,7 @@ PlotReportBootstrap <- function(
     SubPlots = character(), 
     
     # Options for the labels and other text:
-    UseDefaultTextSettings = TRUE, 
+    UseDefaultLabelSettings = TRUE, 
     Title = character(), 
     AxisTitleSize = numeric(), 
     AxisTickSize = numeric(), 

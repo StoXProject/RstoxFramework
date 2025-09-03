@@ -153,6 +153,11 @@ initiateRstoxFramework <- function(){
     processDataFunctions <- availableFunctions[sapply(stoxLibrary, "[[", "functionType") == "processData"]
     
     
+    # Get the documentation of every exported object from all Rstox packages as html:
+    objectHelp <- getObjectHelp(officialStoxLibraryPackagesAll)
+    
+    
+    
     
     # Define the supported backward compatibility actions. The order of the actions is defined here!!!:
     backwardCompatibilityActionNames <- c(
@@ -329,6 +334,13 @@ initiateRstoxFramework <- function(){
                 modelName = "report", 
                 parameterName = "AggregationFunction",
                 newParameterName = "ReportFunction"
+            ),
+            list(
+                changeVersion = "4.2.0-9002", 
+                functionName = "PlotReportBootstrap", 
+                modelName = "report", 
+                parameterName = "UseDefaultTextSettings",
+                newParameterName = "UseDefaultLabelSettings"
             )
         ), 
         
@@ -632,7 +644,8 @@ initiateRstoxFramework <- function(){
         #"StoX_shapefile"
         "ggplot", 
         #"BootstrapData", 
-        "StoXNetCDF4File"
+        "StoXNetCDF4File", 
+        "Ruter"
     )
     
     outputTypes <- list(
@@ -643,14 +656,16 @@ initiateRstoxFramework <- function(){
         integer = "table", 
         logical = "table", 
         sf = "geojson", 
-        ggplot = "plot"
+        ggplot = "plot",
+        Ruter = "table"
     )
     
     vectorClasses <- c(
         "character", 
         "numeric", 
         "integer", 
-        "logical"
+        "logical", 
+        "Ruter"
     )
     
     
@@ -1057,7 +1072,7 @@ orderBackwardCompatibilityOne <- function(x) {
 }
 
 
-# This function gets the stoxFunctionAttributes of the specified packages.
+# This function gets the stoxFunctionAttributes and function attributes of the specified packages:
 getStoxLibrary <- function(packageNames, requestedFunctionAttributeNames) {
     
     # Validate the pakcages:
@@ -1099,6 +1114,22 @@ getStoxLibrary <- function(packageNames, requestedFunctionAttributeNames) {
     # Keep only the non-duplicated functions: 
     stoxFunctionAttributes <- stoxFunctionAttributes[!areDuplicatedFunctionNames]
     return(stoxFunctionAttributes)
+}
+
+
+# This function gets the help as HTML for every exported object of the specified packages:
+getObjectHelp <- function(packageNames) {
+    
+    # Get a list of the 'stoxFunctionAttributes' from each package:
+    objectDocumentation <- lapply(packageNames, readFunctionArguments.rds)
+    
+    # Collapse to one list:
+    objectDocumentation <- unlist(objectDocumentation, recursive = FALSE)
+    
+    # Get only the help:
+    htmlHelp <- lapply(objectDocumentation, "[[", "htmlHelp")
+    
+    return(htmlHelp)
 }
 
 
@@ -1276,10 +1307,13 @@ getBackwardCompatibility <- function(packageName) {
 
 
 getDefaultOutputFileType <- function(processOutput) {
+    
     if(length(processOutput)) {
         # Support for class specified in the output of function:
         classes <- unique(c(class(processOutput), class(processOutput[[1]])))
+        classes2 <- class(processOutput[[1]][[1]])
         
+        #### Detect classes in the root or first list element:
         if("StoXNetCDF4File" %in% classes) {
             ext <- "nc"
         }
@@ -1300,35 +1334,46 @@ getDefaultOutputFileType <- function(processOutput) {
             # Set file extension:
             ext <- "txt"
         }
+        else if("Ruter" %in% classes) {
+            # Set file extension:
+            ext <- "txt"
+            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+        }
         else if("matrix" %in% classes || any(getRstoxFrameworkDefinitions("vectorClasses") %in% classes)) {
             # Set file extension:
             ext <- "csv"
         }
         else if("ggplot" %in% classes) {
             # Set file extension:
-            ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+            ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Format # "png" 
             # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
         }
+        #### Detect also classes in the recursive list element:
         # List of lists of outputs:
-        else if("sf" %in% class(processOutput[[1]][[1]])) {
+        else if("sf" %in% classes2) {
             # Set file extension:
             ext <- "geojson"
         }
-        else if("data.table" %in% class(processOutput[[1]][[1]])) {
+        else if("data.table" %in% classes2) {
             # Set file extension:
             ext <- "txt"
         }
-        else if("matrix" %in% class(processOutput[[1]][[1]]) || any(getRstoxFrameworkDefinitions("vectorClasses") %in% class(processOutput[[1]][[1]]))) {
+        else if("Ruter" %in% classes2) {
+            # Set file extension:
+            ext <- "txt"
+            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+        }
+        else if("matrix" %in% classes2 || any(getRstoxFrameworkDefinitions("vectorClasses") %in% classes2)) {
             # Set file extension:
             ext <- "csv"
         }
-        else if("ggplot" %in% class(processOutput[[1]][[1]])) {
+        else if("ggplot" %in% classes2) {
             # Set file extension:
-            ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions$Format # "png" 
+            ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Format # "png" 
             # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
         }
         else {
-            stop("Unknown process output: [[1]]: ", classes, ", [[1]][[1]]: ", class(processOutput[[1]][[1]]))
+            stop("Unknown process output: [[1]]: ", classes, ", [[1]][[1]]: ", classes2)
         }
     }
     

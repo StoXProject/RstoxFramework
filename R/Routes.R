@@ -22,7 +22,6 @@
 #' @param groupName The name of the property group, one of "processArguments", "functionInputs" and "functionParameters".
 #' @param name The name of the property, such as "processName", "functionName", one of the process parameters ("enabled", "showInMap" and "fileOutput"), the name of a funciton input, or the name of a function parameter. 
 #' @param value The value to set to the property (string).
-#' @param stylesheet The html stylesheet to use, defaulted to no stylesheet.
 #' @param include.integer Logical: If TRUE get possible values for integer variables. Default: TRUE.
 #' @param include.numericInteger Logical: If TRUE get possible values for numeric variables that are all whole numbers. Default: TRUE.
 #' @param include.numeric Logical: If TRUE get possible values for numeric variables. Default: FALSE
@@ -761,7 +760,7 @@ isSingleParameter <- function(format) {
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getProcessPropertySheet <- function(projectPath, modelName, processID) {
+getProcessPropertySheet <- function(projectPath, modelName, processID, argumentFilePaths = NULL) {
     
     # The project properties contains the following elements:
     # 1. name
@@ -887,7 +886,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID) {
             # scanForModelError is enough...
             #processTable <- getProcessTable(projectPath = projectPath, modelName = modelName, beforeProcessID = processID)
             #processTable <- scanForModelError(projectPath = projectPath, modelName = modelName, beforeProcessID = processID)
-            processTable <- scanForModelError(projectPath = projectPath, modelName = NULL, beforeProcessID = processID)
+            processTable <- scanForModelError(projectPath = projectPath, modelName = NULL, beforeProcessID = processID, argumentFilePaths = argumentFilePaths)
             
             #thisProcessIndex <- which(processTable$processID == processID)
             #processTable <- processTable[seq_len(thisProcessIndex), ]
@@ -1278,6 +1277,9 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         )
     }
     
+    # Get the argumentFilePaths for use both in resetModel() and later in getProcessTable():
+    argumentFilePaths <- getArgumentFilePaths(projectPath)
+    
     if(changed) {
         # Reset the active process ID to the process before the modified process:
         resetModel(
@@ -1292,7 +1294,8 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
             processDirty = TRUE, 
             shift = 0, 
             delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
-            deleteCurrent = TRUE
+            deleteCurrent = TRUE, 
+            argumentFilePaths = argumentFilePaths
         )
     }
     
@@ -1300,12 +1303,13 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
     output <- getProcessPropertySheet(
         projectPath = projectPath, 
         modelName = modelName, 
-        processID = processID
+        processID = processID, 
+        argumentFilePaths = argumentFilePaths
     )
     
     # Add the process table, so that the GUI can update the list of processes, and all its symbols:
     output <- c(
-        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName)), 
+        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName, argumentFilePaths = argumentFilePaths)), 
         output
     )
     
@@ -1361,7 +1365,7 @@ getPathToSingleFunctionPDF <- function(functionName) {
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getFunctionHelpAsHtml <- function(projectPath, modelName, processID, stylesheet = "") {
+getFunctionHelpAsHtml <- function(projectPath, modelName, processID) {
     
     # Extract the packageName::functionName:
     packageName_functionName <- getFunctionName(
@@ -1378,7 +1382,7 @@ getFunctionHelpAsHtml <- function(projectPath, modelName, processID, stylesheet 
     packageName <- getPackageNameFromPackageFunctionName(packageName_functionName)
     functionName <- getFunctionNameFromPackageFunctionName(packageName_functionName)
     # Get the help:
-    html <- getObjectHelpAsHtml(packageName = packageName, objectName = functionName, stylesheet = stylesheet)
+    html <- getObjectHelpAsHtml(packageName = packageName, objectName = functionName)
     return(html)
 }
 
@@ -1387,8 +1391,9 @@ getFunctionHelpAsHtml <- function(projectPath, modelName, processID, stylesheet 
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
+getObjectHelpAsHtml <- function(packageName, objectName) {
     
+    # Special care to ge the 00Index, which is done here since it is a small task and not possible to include along with the expported objects from the Rstox packages, which are required to be uniquely named (there would be multiple 00Index from the Rstox packages):
     if(objectName == "00Index") {
         # Parse the  Index:
         html <- tools::parse_Rd(system.file("html", "00Index.html", package = packageName))
@@ -1413,63 +1418,11 @@ getObjectHelpAsHtml <- function(packageName, objectName, stylesheet = "") {
         
         return(html)
     }
-    
-    
-    # Read the documentation database:
-    db <- tools::Rd_db(packageName)
-    # Add 00Index:
-    db[["00Index.Rd"]] <- tools::parse_Rd(system.file('html', "00Index.html", package = packageName))
-    
-    # Get the links of the package:
-    Links <- tools::findHTMLlinks(pkgDir = find.package(packageName))
-    ## Add the index links of the Rstox packages:
-    #Links <- c(
-    #    Links, 
-    #    structure(paste0("../../", packageName, "/html/00Index.html"), names = packageName)
-    #)
-    
-    # Write the help to file as html and read back:
-    objectName.Rd <- paste0(objectName, ".Rd")
-    # If the objectName.Rd is not present, find the link:
-    if(! objectName.Rd %in% names(db)) {
-        if(objectName %in% names(Links)) {
-            objectName <- basename( tools::file_path_sans_ext(Links[objectName]) )
-            objectName.Rd <- paste0(objectName, ".Rd")
-        }
-        else {
-            warning("")
-        }
+    else {
+        html <- getRstoxFrameworkDefinitions("objectHelp")[[objectName]]
     }
     
-    
-    # Return empty string if the function 
-    if(! objectName.Rd %in% names(db)) {
-        return("")
-    }
-    
-    # Write to a temporary file
-    outfile <- tempfile(fileext = ".html")
-    tools::Rd2HTML(
-        db[[objectName.Rd]], 
-        out = outfile, 
-        package = packageName, 
-        Links = Links, 
-        stylesheet = stylesheet
-    )
-    html <- paste(readLines(outfile), collapse="\n")
-    
-    # This hack was needed as of R 4.1 or something, where the links all of a sudden were with "help" instead of "html":
-    html  <-  gsub("/help/",  "/html/", html)
-    
-    # Add the index links of the Rstox packages:
-    html  <-  gsub(
-        "href=\"00Index.html\">Index",  
-        paste0("href=\"../../", packageName, "/html/00Index.html\">Index"), 
-        html
-    )
-    
-    unlink(outfile, force = TRUE)
-    
+    # Return the objectDocumentation:
     return(html)
 }
 
@@ -1604,8 +1557,10 @@ getFilterOptionsOneTable <- function(projectPath, modelName, processID, tableNam
     return(output)
 }
 
+# This function checks that more than 'minimumFraction' of the unique values can considered as integers, and returns TRUE if the number of unique values do not exceed  'maxOptions':
 detectOptions <- function(x, name, tol = .Machine$double.eps^0.5, minimumFraction = 0.5, allowHalf = TRUE, maxOptions = 1000) {
     u <- unique(x)
+    # Support whole and half values, e.g. length measurements:
     canHaveOptions <- mean(abs(u - round(u)) < tol | abs(2 * u - round(2 * u)) < tol, na.rm = TRUE) > minimumFraction
     if(canHaveOptions && length(u) > maxOptions) {
         warning("StoX: The field ", name, " has more than ", maxOptions, ". Options not returned. ")

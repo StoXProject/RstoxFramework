@@ -110,6 +110,7 @@ stoxFunctionAttributes <- list(
         ), 
         functionArgumentHierarchy = c(
             list(
+                # Hide the AggregationFunction as this is deprecated: 
                 AggregationFunction = list(
                     ReportFunction = "CompletelyUnlikelyFunctionNameDesignedJustToNotShowTheAggregationFunctionInTheGUI"
                 )
@@ -157,19 +158,19 @@ stoxFunctionAttributes <- list(
             ), 
             # Options for the labels and other text:
             Title = list(
-                UseDefaultTextSettings = FALSE
+                UseDefaultLabelSettings = FALSE
             ), 
             AxisTitleSize = list(
-                UseDefaultTextSettings = FALSE
+                UseDefaultLabelSettings = FALSE
             ), 
             AxisTickSize = list(
-                UseDefaultTextSettings = FALSE
+                UseDefaultLabelSettings = FALSE
             ), 
             LegendTitleSize = list(
-                UseDefaultTextSettings = FALSE
+                UseDefaultLabelSettings = FALSE
             ), 
             LegendTextSize = list(
-                UseDefaultTextSettings = FALSE
+                UseDefaultLabelSettings = FALSE
             ), 
             # Options for the output file:
             Format = list(
@@ -187,9 +188,9 @@ stoxFunctionAttributes <- list(
         ), 
         functionParameterDefaults = c(
             # Default general options:
-            RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotGeneralOptions, 
+            RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_plot_arguments, 
             # Default file options:
-            RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$defaultPlotFileOptions
+            RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments
         )
     )
 )

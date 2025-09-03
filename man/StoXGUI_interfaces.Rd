@@ -36,7 +36,12 @@ getStationColours(
   col = c("steelblue2", "darkblue", "mediumvioletred")
 )
 
-getProcessPropertySheet(projectPath, modelName, processID)
+getProcessPropertySheet(
+  projectPath,
+  modelName,
+  processID,
+  argumentFilePaths = NULL
+)
 
 setProcessPropertyValue(
   groupName,
@@ -47,9 +52,9 @@ setProcessPropertyValue(
   processID
 )
 
-getFunctionHelpAsHtml(projectPath, modelName, processID, stylesheet = "")
+getFunctionHelpAsHtml(projectPath, modelName, processID)
 
-getObjectHelpAsHtml(packageName, objectName, stylesheet = "")
+getObjectHelpAsHtml(packageName, objectName)
 
 getTableNames(projectPath, modelName, processID, warn = TRUE)
 
@@ -104,13 +109,13 @@ getParameterSingleInfo(
 
 \item{col}{A vector of colour steps.}
 
+\item{argumentFilePaths}{A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.}
+
 \item{groupName}{The name of the property group, one of "processArguments", "functionInputs" and "functionParameters".}
 
 \item{name}{The name of the property, such as "processName", "functionName", one of the process parameters ("enabled", "showInMap" and "fileOutput"), the name of a funciton input, or the name of a function parameter.}
 
 \item{value}{The value to set to the property (string).}
-
-\item{stylesheet}{The html stylesheet to use, defaulted to no stylesheet.}
 
 \item{packageName}{The package holding the object to get help as html for.}
 

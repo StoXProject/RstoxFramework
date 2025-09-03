@@ -13,7 +13,8 @@ resetModel(
   returnProcessTable = FALSE,
   delete = c("memory", "text"),
   deleteCurrent = FALSE,
-  purgeOutputFiles = FALSE
+  purgeOutputFiles = FALSE,
+  argumentFilePaths = NULL
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ resetModel(
 \item{deleteCurrent}{Logical: If TRUE delete process output also of the process given by processID.}
 
 \item{purgeOutputFiles}{Logical: If the model has not been run, should the output text files be deleted first. This was used at an earlier stage, when there was not complete control of how process output was deleted, and data were frequently not deleted even though the process was deleted.}
+
+\item{argumentFilePaths}{A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.}
 }
 \description{
 Reset a StoX model.

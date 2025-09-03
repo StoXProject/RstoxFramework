@@ -19,8 +19,9 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
-      - name: Install macOS system dependencies
-        if: runner.os == 'macOS'
+      - name: Install MacOS system dependencies
+        # We are on macOS as per the "runs-on":
+        #if: runner.os == 'macOS'
         run: |
           # gfortran may not exist in a period after a new R minor release:
           gfortranFile='/usr/local/bin/gfortran'
@@ -76,5 +77,7 @@ jobs:
         run: R CMD INSTALL .
 
       - name: Deploy package
-        run: pkgdown::deploy_to_branch(new_process = FALSE)
-        shell: Rscript {0}
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'

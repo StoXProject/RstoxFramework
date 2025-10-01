@@ -72,7 +72,7 @@ runModel <- function(
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
-    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, 
+    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, unlistSingleBootstrapData = TRUE, 
     try = TRUE, 
     close = FALSE, 
     msg = TRUE, 
@@ -129,7 +129,7 @@ runModel <- function(
                     drop.datatype = drop.datatype, 
                     warn = FALSE, 
                     unlistDepth2 = unlistDepth2, 
-                    returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable
+                    returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, unlistSingleBootstrapData = unlistSingleBootstrapData
                 )
             }
         }
@@ -174,7 +174,7 @@ runProject <- function(
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
-    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, 
+    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, unlistSingleBootstrapData = TRUE, 
     try = TRUE, 
     close = FALSE, 
     unlist.models = TRUE, 
@@ -272,7 +272,7 @@ runProject <- function(
             processes = processes, 
             setUseProcessDataToTRUE = setUseProcessDataToTRUE, 
             purge.processData = purge.processData, 
-            returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable,
+            returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, unlistSingleBootstrapData = unlistSingleBootstrapData, 
             try = try, 
             close = FALSE, 
             msg = msg, 
@@ -333,7 +333,7 @@ runProjects <- function(
     replaceDataList = list(), replaceArgsList = list(), prependProcessList = list(), 
     fileOutput = NULL, 
     setUseProcessDataToTRUE = TRUE, purge.processData = FALSE, 
-    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, 
+    returnModelData = TRUE, returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, unlistSingleBootstrapData = TRUE, 
     try = TRUE, 
     unlist.models = FALSE, 
     close = FALSE, 
@@ -352,7 +352,7 @@ runProjects <- function(
         fileOutput = fileOutput, 
         setUseProcessDataToTRUE = setUseProcessDataToTRUE, purge.processData = purge.processData, 
         returnModelData = returnModelData, 
-        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, 
+        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, unlistSingleTable = unlistSingleTable, unlistSingleBootstrapData = unlistSingleBootstrapData, 
         try = try, 
         unlist.models = unlist.models, 
         close = close, 
@@ -625,12 +625,6 @@ readStoxOutputFiles <- function(paths, emptyStringAsNA = FALSE, readCsvAsLines =
         }
     }
     
-    # Unlist the top level of an RData file, as an RData file is a joint file of several outputs, and we do not want the extra BootstrapData level on top of this list:
-    areRDataFiles <- tolower(tools::file_ext(paths)) == "rdata"
-    # isTRUE is TRUE only for one TRUE:
-    if(isTRUE(areRDataFiles)) {
-        output <- output[[1]]
-    }
     return(output)
 }
 
@@ -724,7 +718,9 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, readCsvAsLines = F
     }
     
     if(emptyStringAsNA  && data.table::is.data.table(output)) {
-        characterColumns <- names(output)[sapply(output, getRelevantClass) == "character"]
+        ###characterColumns <- names(output)[sapply(output, getRelevantClass) == "character"]
+        characterColumns <- names(output)[sapply(output, inherits, "character")]
+        
         if(length(characterColumns)) {
             output[, (characterColumns) := lapply(.SD, function(x) replace(x, nchar(x) == 0, NA_character_)), .SDcols = characterColumns]
         }
@@ -758,13 +754,6 @@ subsetModelData <- function(modelData, subsetList = list()) {
     }
 }
 
-
-#POSIXctToCharacter <- function(x, digits = 3) {
-#    browser()
-#    formatString <- paste0("%Y-%m-%dT%H:%M:%OS", digits, "Z")
-#    print(formatString)
-#    format(x, format = formatString)
-#}
 
 readOutputRDataFile <- function(outputDataPath) {
     if(file.exists(outputDataPath)) {

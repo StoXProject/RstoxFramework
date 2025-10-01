@@ -275,7 +275,7 @@ compareProjectToStoredOutputFiles <- function(
                 }
             }
             
-            else if("sf" %in% class(dat_orig[[name]][[subname]])){
+            else if(inherits(dat_orig[[name]][[subname]], "sf")){
                 data_equal[[name]][[subname]] <- all.equal(
                     sf::st_coordinates(dat_orig[[name]][[subname]]), 
                     sf::st_coordinates(dat[[name]][[subname]])

@@ -514,42 +514,7 @@ verifyPaths <- function(x) {
 }
 
 
-# getMemoryFileFormat <- function(x) {
-#     if(length(x) == 0) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Empty")
-#     }
-#     else if(data.table::is.data.table(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Table")
-#     }
-#     else if(is.matrix(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Matrix")
-#     }
-#     else if("SpatialPolygonsDataFrame" %in% class(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
-#     }
-#     else if("SpatialPointsDataFrame" %in% class(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Spatial")
-#     }
-#     else if(is.character(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Character")
-#     }
-#     else if(is.numeric(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Numeric")
-#     }
-#     else if(is.integer(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Integer")
-#     }
-#     else if(is.logical(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_Logical")
-#     }
-#     else if(is.list(x)) {
-#         memoryFileFormat <- getRstoxFrameworkDefinitions("memoryFileFormat_List")
-#     }
-#     else {
-#         stop("StoX: Wrong memory file class ", class(x)[1])
-#     }
-#     return(memoryFileFormat)
-# }
+
 
 
 writeMemoryFile <- function(x, filePathSansExt, ext = NULL) {
@@ -1197,7 +1162,8 @@ formatPOSIXAsISO8601 <- function(table, cols = NULL, add = 0, format = "%Y-%m-%d
         cols <- names(table)
     }
     
-    areDateTime <- names(table)[sapply(table, getRelevantClass) %in% "POSIXct"]
+    ###areDateTime <- names(table)[sapply(table, getRelevantClass) %in% "POSIXct"]
+    areDateTime <- names(table)[sapply(table, inherits, "POSIXct")]
     
     toConvertToCharacter <- intersect(areDateTime, cols)
     
@@ -1284,10 +1250,10 @@ setRstoxPrecision <- function(x) {
     currentAttributes <- attributes(x)
     
     # Do not set precision to ggplot objects:
-    if("ggplot" %in% class(x)){
+    if(inherits(x, "ggplot")){
         return(x)
     }
-    else if(is.list(x) && ! any(c("sf", "data.frame") %in% class(x))){
+    else if(is.list(x) && ! inherits(x, c("sf", "data.frame"))){
         output <- lapply(x, setRstoxPrecision)
         class(output) <- currentClass
         output <- setNonStandardAttributes(output, currentAttributes)
@@ -1303,7 +1269,7 @@ setRstoxPrecision <- function(x) {
         else if(is.numeric(x) && !is.integer(x) && !all(is.na(x))) {
             x  <- roundSignif(x, digits = digits, signifDigits = signifDigits)
         }
-        else if(getRelevantClass(x) == "sf") {
+        else if(inherits(x, "sf")) {
             # Do nothing with waypoints, as the precision is set to 6 digins by DefineSurveyPlan, which is the only datatype that is written to file from sf spation points:
             if(sf::st_geometry_type(x)[1] == "POINT") {
                 x <- x

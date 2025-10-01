@@ -74,11 +74,11 @@ Bootstrap <- function(
             
             if(length(outputData)) {
                 if(!file.exists(outputData)) {
-                    oldRataFile <- file.path(dirname(outputData), "BootstrapData.RData")
-                    if(file.exists(oldRataFile)) {
+                    oldRDataFile <- file.path(dirname(outputData), "BootstrapData.RData")
+                    if(file.exists(oldRDataFile)) {
                         # We decided not to convert existing RData file and rather assume that the use re-runs the bootstrapping in StoX 4.0.0.
                         # Convert the old bootstrap RData file to a new NetCDF4 file:
-                        #timeUsed <- system.time(bootstrapRDataToNetCDF4(oldRataFile, processName = processName, ow = T))
+                        #timeUsed <- system.time(bootstrapRDataToNetCDF4(oldRDataFile, processName = processName, ow = T))
                         #  ... with a message:
                         #warning(
                         #    "An old bootstrap RData file was found and coverted to a NetCDF4 file fitted for StoX >= 4.0.0. This operation is usually time cosuming, and lasted for ", timeUsed[[3]], " seconds.")
@@ -400,129 +400,6 @@ getBootstrapOneTable <- function(BootstrapDataOneTable, ind, outputVariables) {
 #    !any("_Data" %in% names(BootstrapData))
 #}
 
-
-
-
-
-#' Convert a bootstrap RData file to NetCDF4. THIS FUNCTION IS NOT FINISHED, AND SHOULD NOT BE!!!
-#' 
-#' @param bootstrapRDataFile The path to file holding the BoostrapData from a StoX <= 3.6.2 project run.
-#' @param bootstrapNetCDF4File The path to the new netCDF4 file.
-#' @param outputVariables An optional list of variables to keep in the output. A typical set of variables could be ["Survey", "Stratum", "SpeciesCategory", "IndividualTotalLength", "IndividualAge", "Abundance", "Biomass"], which should cover the most frequently used variables in reports. Any variable that is used in a report must be present in \code{outputVariables}. Empty list (the default) implies to keep all variables. This parameter is included to facilitate smaller disc space for the bootstrap objects and faster writing/reading of that file.
-#' @param ow Logical: If TRUE, overwrite the \code{bootstrapNetCDF4File}.
-#' 
-bootstrapRDataToNetCDF4 <- function(
-    bootstrapRDataFile, 
-    bootstrapNetCDF4File = file.path(dirname(bootstrapRDataFile), "BootstrapData.nc"), 
-    outputVariables = NULL, 
-    ow = FALSE
-) {
-    
-    startTime <- proc.time()[3]
-    # Load the RData:
-    message("StoX: Reading RData file ", bootstrapRDataFile)
-    BootstrapData <- loadRData(bootstrapRDataFile)
-    timeSpent <- proc.time()[3] - startTime
-    message("StoX: Time used: ", round(timeSpent, digits = 3), " s")
-    
-    # Try to intepret the table name:
-    namesSplit <- strsplit(names(BootstrapData), "_")
-    processName <- sapply(namesSplit, "[", 1)
-    tableName <- lapply(namesSplit, "[", 2)
-    atMissingTableName <- which(is.na(tableName))
-    for(ind in atMissingTableName) {
-        tableName[[ind]] <- interpretTableNameFromVariables(BootstrapData[[ind]])
-    }
-        
-    
-        
-    BootstrapData <- split(BootstrapData, processName)
-    tableNameSplit <- split(tableName, processName)
-    
-    for(ind in seq_along(BootstrapData)) {
-        names(BootstrapData[[ind]]) <- tableNameSplit[[ind]]
-    }
-    
-    # Get dims and nchars:
-    dimsNchars <- getDimsAndNcharsFromOldBootstrapData(BootstrapData)
-    
-    midTime <- proc.time()[3]
-    message("StoX: Writing nc file ", bootstrapNetCDF4File)
-    nc <- writeBootstrapOutputFromOldBootstrapData(
-        oldBootstrapData = BootstrapData, 
-        outputVariables = outputVariables, 
-        filePath = bootstrapNetCDF4File, 
-        dims = dimsNchars$dims, 
-        nchars = dimsNchars$nchars, 
-        ow = ow
-    )
-    timeSpent <- proc.time()[3] - midTime
-    message("StoX: Time used: ", round(timeSpent, digits = 3), " s")
-    
-    # Close the nc object that was created in writeBootstrapOutputFromOldBootstrapData():
-    ncdf4::nc_close(nc)
-    
-    timeSpent <- proc.time()[3] - midTime
-    message("StoX: Total time used: ", round(timeSpent, digits = 3), " s")
-    
-    return(bootstrapNetCDF4File)
-}
-
-interpretTableNameFromVariables <- function(x) {
-    individualsVariableNames <- c("Stratum", "Layer", "Individual")
-    superIndividualsVariableNames <- c(individualsVariableNames, "Abundance")
-    if(all(superIndividualsVariableNames %in% names(x))) {
-        return("SuperIndividualsData")
-    }
-    else if(all(individualsVariableNames %in% names(x))) {
-        return("IndividualsData")
-    }
-    else {
-        stop("Unknown bootstrap output table.")
-    }
-}
-
-# Function to load RData to a variable (https://stackoverflow.com/questions/5577221/can-i-load-a-saved-r-object-into-a-new-object-name):
-loadRData <- function(fileName){
-    #loads an RData file, and returns it
-    load(fileName)
-    get(ls()[ls() != "fileName"])
-}
-
-writeBootstrapOutputFromOldBootstrapData <- function(oldBootstrapData, outputVariables, filePath, dims, nchars, ow = FALSE) {
-    
-    #dataTypeAttribute <- attr(oldBootstrapData, "dataType")
-    #processNameAttribute <- attr(oldBootstrapData, "processName")
-    dataTypes <- unlist(lapply(oldBootstrapData, attr, "dataType"))
-    processNames <- names(oldBootstrapData)
-    
-    #if(!singleTableOutputInBootstrapData(oldBootstrapData)) {
-    #    stop("StoX: This conversion only works on BootstrapData with single table outputs (like SuperIndividualsData but not AbundanceData which has tables Data and Resolution).")
-    #}
-    
-    # Assume that there are no multi-table outputs:
-    numberOfBootstraps <- oldBootstrapData[[1]][[1]][, max(BootstrapID)]
-    
-    # Get this only once to save time:
-    validOutputDataClasses = getRstoxFrameworkDefinitions("validOutputDataClasses")
-    
-    nc <- NULL
-    # Write one bootstrap at the time:
-    for(ind in seq_len(numberOfBootstraps)) {
-        
-        
-        # Subset the data:
-        processOutput <- lapply(oldBootstrapData, getBootstrapOneTable, ind = ind, outputVariables = outputVariables)
-        
-        # Set the dataType and processName attributes:
-        attr(processOutput, "dataType") <- dataTypes
-        attr(processOutput, "processName") <- processNames
-        
-        nc <- write_list_as_tables_NetCDFF4(processOutput, filePath, nc = nc, index = ind, dims = dims, nchars = nchars, append = ind > 1, ow = ow, missval = -9, compression = NA, verbose = FALSE, validOutputDataClasses = validOutputDataClasses)
-    }
-    
-    return(nc)
-}
 
 
 
@@ -1286,7 +1163,7 @@ selectRobust <- function(x, var) {
 
 
 getMaxNchar <- function(x) {
-    if("POSIXct" %in% class(x)) {
+    if(inherits(x, "POSIXct")) {
         24 # format = "%Y-%m-%dT%H:%M:%OS3Z")
     }
     else if(is.character(x)){

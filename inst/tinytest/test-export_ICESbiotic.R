@@ -5,9 +5,14 @@ projectPaths <- system.file("test",  "export_ICESbiotic.zip", package = "RstoxFr
 
 test <- compareProjectToStoredOutputFiles(projectPaths, data.out = TRUE)
 
+message("Number of rows of original: ", NROW(test$dat_orig$ICESBiotic$Catch))
+message(paste(sort(unique(test$dat_orig$ICESBiotic$Catch$CatchSpeciesCode)), collapse = "\n"))
+message("Number of rows of new: ", NROW(test$dat$ICESBiotic$Catch))
+message(paste(sort(unique(test$dat$ICESBiotic$Catch$CatchSpeciesCode)), collapse = "\n"))
+
 
 if(NROW(test$dat$ICESBiotic$Catch) > NROW(test$dat_orig$ICESBiotic$Catch)) {
-    warning("There might have been additions to http://vocab.ices.dk/?ref=365 causing more species to be inclcuded in the Catch table. This is accepted for this accepted for this test of export_ICESbiotic.zip.")
+    warning("There might have been additions to http://vocab.ices.dk/?ref=365 causing more species to be inclcuded in the Catch table. This is accepted for this test of export_ICESbiotic.zip.")
     
     # Defiene here the new species added and remove those rows:
     sp <- c(

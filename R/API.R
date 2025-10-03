@@ -513,6 +513,9 @@ readModelData <- function(
     ...
 ) {
     
+    
+    #browser()
+    
     # List the files of the project:
     if(isProject(projectPath)) {
         outputFolders <- getProjectPaths(projectPath)$outputFolders
@@ -703,11 +706,30 @@ readStoxOutputFile <- function(path, emptyStringAsNA = FALSE, readCsvAsLines = F
         }
     }
     else if(tolower(ext) == "nc") {
-        # Do not unlist here, as it is rather done in readModelData() (using unlist = 0 here):
-        output <- readBootstrapData(
-            path, 
-            ...  # Used in readBootstrapData()
-        )
+        ### # Do not unlist here, as it is rather done in readModelData() (using unlist = 0 here):
+        ### output <- readBootstrapData(
+        ###     path, 
+        ###     ...  # Used in readBootstrapData()
+        ### )
+        lll <- list(...)
+        if(isTRUE(lll$returnBootstrapData)) {
+            # Do not unlist here, as it is rather done in readModelData() (using unlist = 0 here):
+            #output <- readBootstrapData(
+            #    path, 
+            #    ...  # Used in readBootstrapData()
+            #)
+            
+            output <- do.call(readBootstrapData, c(list(path), lll[names(lll) != "returnBootstrapData"]))
+            
+            # Add class BootstrapData to the output, as the datatype is currently not written to a textfile "outputClass.txt" like the Baseline and Report processes:
+            class(output) <- "BootstrapData"
+        }
+        
+        else {
+            output <- createStoXNetCDF4FileDataType(path)
+        }
+        
+        
     }
     #else if(tolower(ext) %in% "png") {
     #    output <- path

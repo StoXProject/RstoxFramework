@@ -47,6 +47,7 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 #' @inheritParams general_arguments
 #' @inheritParams readBootstrapData
 #' @inheritParams readMemoryFile
+#' @inheritParams getProcessOutput
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @param intersect.names Logical: If TRUE, compare only same named columns.
 #' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
@@ -80,7 +81,7 @@ compareProjectToStoredOutputFiles <- function(
     #mergeWhenDifferentNumberOfRows = FALSE, 
     sort = TRUE, 
     compareReports = FALSE, checkOutputFiles = TRUE, 
-    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, readCsvAsLines = FALSE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE, readCsvAsLines = FALSE, 
     tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
     ...
 ) {
@@ -110,7 +111,7 @@ compareProjectToStoredOutputFiles <- function(
         unlist.models = TRUE, drop.datatype = FALSE, unlistDepth2 = FALSE, 
         close = TRUE, save = save, try = try, 
         returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, 
-        unlistSingleTable = unlistSingleTable, 
+        unlistSingleTable = unlistSingleTable, unlistSingleBootstrapData = unlistSingleBootstrapData, 
         ...
     )
     
@@ -123,10 +124,13 @@ compareProjectToStoredOutputFiles <- function(
         unlist = 1, 
         emptyStringAsNA = emptyStringAsNA, 
         verifyFiles = TRUE, 
-        returnBootstrapData = returnBootstrapData, selection = selection, BootstrapID = BootstrapID, 
+        returnBootstrapData = returnBootstrapData, 
+        selection = selection, BootstrapID = BootstrapID, 
         unlistSingleTable = unlistSingleTable, 
         readCsvAsLines = readCsvAsLines
     )
+    
+    
     
     # Reorder the original data to the order of the new data:
     newOrder <- c(intersect(names(dat), names(dat_orig)), setdiff(names(dat_orig), names(dat)))
@@ -177,6 +181,7 @@ compareProjectToStoredOutputFiles <- function(
     for(name in processesToCheck) {
         data_equal[[name]] <- list()
         for(subname in names(dat_orig[[name]])) {
+            # Is the sub element a table?:
             if(data.table::is.data.table(dat_orig[[name]][[subname]])) {
                 if(intersect.names) {
                     intersectingNames <- intersect(names(dat_orig[[name]][[subname]]), names(dat[[name]][[subname]]))
@@ -224,7 +229,14 @@ compareProjectToStoredOutputFiles <- function(
                 #data_equal[[name]][[subname]] <- compareDataTablesUsingClassOfSecond(dat_orig[[name]][[subname]], dat[[name]][[subname]])
             }
             # If the subname points to a list of tables, move into the list:
-            else if(is.list(dat_orig[[name]][[subname]]) && data.table::is.data.table(dat_orig[[name]][[subname]][[1]])) {
+            else if(
+                # Is the sub element a list...
+                is.list(dat_orig[[name]][[subname]]) && 
+                # ... of length > 0
+                length(dat_orig[[name]][[subname]]) && 
+                # ... and the first element is a data.table:
+                data.table::is.data.table(dat_orig[[name]][[subname]][[1]])
+                ) {
                 for(subsubname in names(dat_orig[[name]][[subname]])) {
                     if(data.table::is.data.table(dat_orig[[name]][[subname]][[subsubname]])) {
                         if(intersect.names) {

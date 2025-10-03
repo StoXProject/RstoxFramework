@@ -5639,14 +5639,6 @@ getProcessOutput <- function(
     returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = FALSE, unlistSingleBootstrapData = TRUE
 ) {
     
-    
-    
-    
-    
-    
-    
-    
-    
     # If the 'tableName' contains "/", extract the 'subFolder' and 'tableName':
     if(any(grepl("/", tableName))) {
         subFolder_tableName <- strsplit(tableName, "/")

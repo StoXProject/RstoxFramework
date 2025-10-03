@@ -2,7 +2,7 @@
 % Please edit documentation in R/Framework.R
 \name{writeStoxOutput}
 \alias{writeStoxOutput}
-\title{Assignment of biotic hauls to acoustic PSUs by layer}
+\title{Write the output of a function}
 \usage{
 writeStoxOutput(x, folderPath, filePath, ow = FALSE, escape = TRUE)
 }
@@ -18,5 +18,5 @@ writeStoxOutput(x, folderPath, filePath, ow = FALSE, escape = TRUE)
 \item{escape}{Logical: Should strings be escaped in text output. Defaulted to TRUE.}
 }
 \description{
-This function defines the \code{\link{BioticAssignment}} process data, linking biotic Hauls with acoustic PSUs by Layer.
+Write the output of a function
 }

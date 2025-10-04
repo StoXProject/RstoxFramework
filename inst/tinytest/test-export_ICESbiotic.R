@@ -4,6 +4,11 @@ projectPaths <- system.file("test",  "export_ICESbiotic.zip", package = "RstoxFr
 
 test <- compareProjectToStoredOutputFiles(projectPaths, data.out = TRUE)
 
+xmlRaw <- xml2::read_xml("https://acoustic.ices.dk/Services/Schema/XML/SpecWoRMS.xml")
+validCodes <- xml2::xml_text(xml2::xml_find_all(xmlRaw, "//Code//Key"))
+
+stop("Number of species in vocab: ", length(validCodes))
+
 stop(
     "Number of rows of original: ", 
     NROW(test$dat_orig$ICESBiotic$Catch), 

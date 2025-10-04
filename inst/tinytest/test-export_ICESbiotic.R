@@ -1,14 +1,19 @@
 # Run the test project:
 projectPaths <- system.file("test",  "export_ICESbiotic.zip", package = "RstoxFramework")
 
-# TEMPORARILY DISABLED DUE TO ICES BEING HACKED. UN-COMMENT THIS WHEN THE ICES PROBLEM IS FIXED:
 
 test <- compareProjectToStoredOutputFiles(projectPaths, data.out = TRUE)
 
-message("Number of rows of original: ", NROW(test$dat_orig$ICESBiotic$Catch))
-message(paste(sort(unique(test$dat_orig$ICESBiotic$Catch$CatchSpeciesCode)), collapse = "\n"))
-message("Number of rows of new: ", NROW(test$dat$ICESBiotic$Catch))
-message(paste(sort(unique(test$dat$ICESBiotic$Catch$CatchSpeciesCode)), collapse = "\n"))
+stop(
+    "Number of rows of original: ", 
+    NROW(test$dat_orig$ICESBiotic$Catch), 
+    " ___ \n",
+    paste(sort(unique(test$dat_orig$ICESBiotic$Catch$CatchSpeciesCode)), collapse = "\n"),
+    " ___ \n",
+    "Number of rows of new: ", NROW(test$dat$ICESBiotic$Catch),
+    " ___ \n",
+    paste(sort(unique(test$dat$ICESBiotic$Catch$CatchSpeciesCode)), collapse = "\n")
+)
 
 
 if(NROW(test$dat$ICESBiotic$Catch) > NROW(test$dat_orig$ICESBiotic$Catch)) {

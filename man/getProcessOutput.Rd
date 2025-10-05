@@ -29,7 +29,8 @@ getProcessOutput(
   returnBootstrapData = FALSE,
   selection = list(),
   BootstrapID = NA,
-  unlistSingleTable = FALSE
+  unlistSingleTable = FALSE,
+  unlistSingleBootstrapData = TRUE
 )
 
 getProcessTableOutput(
@@ -102,6 +103,8 @@ getProcessGeoJsonOutput(
 \item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
 
 \item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
+
+\item{unlistSingleBootstrapData}{Logical: If TRUE unlist the the top level of the process output if this is a list with a single element of class "BootstrapData" (and named "BootstrapData"). This is the default for historic reasons to match the output of StoX < 4.0.0.}
 
 \item{geoJsonName}{The name of the GeoJSON object to extract from the process.}
 }

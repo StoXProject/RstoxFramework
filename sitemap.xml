@@ -31,7 +31,6 @@
 <url><loc>/reference/StoXGUI_interfaces.html</loc></url>
 <url><loc>/reference/Stratum.html</loc></url>
 <url><loc>/reference/addProcess.html</loc></url>
-<url><loc>/reference/bootstrapRDataToNetCDF4.html</loc></url>
 <url><loc>/reference/compareProjectToStoredOutputFiles.html</loc></url>
 <url><loc>/reference/compareProjectToStoredOutputFilesAll.html</loc></url>
 <url><loc>/reference/compareSweptAreaBaseline.html</loc></url>
@@ -115,6 +114,7 @@
 <url><loc>/reference/writeProjectDescription.html</loc></url>
 <url><loc>/reference/writeProjectDescriptionJSON.html</loc></url>
 <url><loc>/reference/writeStoxJsonSchema.html</loc></url>
+<url><loc>/reference/writeStoxOutput.html</loc></url>
 <url><loc>/reference/write_list_as_tables_NetCDFF4.html</loc></url>
 </urlset>
 

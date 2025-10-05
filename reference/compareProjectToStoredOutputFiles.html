@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9002</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9003</span>
       </span>
     </div>
 
@@ -76,6 +76,7 @@
 <span>  selection <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  BootstrapID <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  unlistSingleTable <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  unlistSingleBootstrapData <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  readCsvAsLines <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  tolerance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">)</span>,</span>
 <span>  debug <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -176,6 +177,10 @@
 
 <dt id="arg-unlistsingletable">unlistSingleTable<a class="anchor" aria-label="anchor" href="#arg-unlistsingletable"></a></dt>
 <dd><p>Logical: For use when only single table process outputs are among the requested processes in <code>OutputProcesses</code> of <code><a href="Bootstrap.html">Bootstrap</a></code>. If FALSE (default) return a list named by the <code>selection</code> with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the <code>selection</code> holding the output data, replicating the output of <code><a href="Bootstrap.html">Bootstrap</a></code> in StoX &lt;= 3.6.2.</p></dd>
+
+
+<dt id="arg-unlistsinglebootstrapdata">unlistSingleBootstrapData<a class="anchor" aria-label="anchor" href="#arg-unlistsinglebootstrapdata"></a></dt>
+<dd><p>Logical: If TRUE unlist the the top level of the process output if this is a list with a single element of class "BootstrapData" (and named "BootstrapData"). This is the default for historic reasons to match the output of StoX &lt; 4.0.0.</p></dd>
 
 
 <dt id="arg-readcsvaslines">readCsvAsLines<a class="anchor" aria-label="anchor" href="#arg-readcsvaslines"></a></dt>

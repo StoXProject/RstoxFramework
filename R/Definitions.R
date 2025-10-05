@@ -98,12 +98,6 @@ initiateRstoxFramework <- function(){
         "nc"
     )
     
-    default.output.file.type <- list(
-        baseline = "text", 
-        analysis = "RData", 
-        report = "text"
-    )
-    
     processProperties <- c(
         "processName", 
         "functionName", 
@@ -524,8 +518,10 @@ initiateRstoxFramework <- function(){
         atSingleTableProcessData <- setdiff(seq_along(processDataSchemas), atMultiTableProcessData)
         # Find column types of the process data tables:
         columnTypes <- lapply(processDataSchemas[atSingleTableProcessData], function(x) sapply(x$items[[1]]$properties, function(x) utils::head(x$type, if(onlyFirst) 1 else Inf)))
+        # Translate from JSON schema to R primitive types ("string" to "character", "number" to "double", "boolean" to "logical"):
         columnTypes <- rapply(columnTypes, function(x) replace(x, x == "string", "character"), how = "replace")
         columnTypes <- rapply(columnTypes, function(x) replace(x, x == "number", "double"), how = "replace")
+        columnTypes <- rapply(columnTypes, function(x) replace(x, x == "boolean", "logical"), how = "replace")
         return(columnTypes)
     }
     processDataColumnTypes <- getProcessDataColumnTypes(processDataSchemas)
@@ -643,7 +639,7 @@ initiateRstoxFramework <- function(){
         #"StoX_multipolygon_WKT", 
         #"StoX_shapefile"
         "ggplot", 
-        #"BootstrapData", 
+        "BootstrapData", 
         "StoXNetCDF4File", 
         "Ruter"
     )
@@ -1311,15 +1307,18 @@ getDefaultOutputFileType <- function(processOutput) {
     if(length(processOutput)) {
         # Support for class specified in the output of function:
         classes <- unique(c(class(processOutput), class(processOutput[[1]])))
-        classes2 <- class(processOutput[[1]][[1]])
+        if(is.list(processOutput[[1]]) && length(processOutput[[1]])) {
+            classes2 <- class(processOutput[[1]][[1]])
+        }
+        else {
+            classes2 <- NULL
+        }
+        
         
         #### Detect classes in the root or first list element:
         if("StoXNetCDF4File" %in% classes) {
             ext <- "nc"
         }
-        #else if("BootstrapData" %in% classes) {
-        #    ext <- "RData"
-        #}
         
         # List of outputs:
         else if("sf" %in% classes) {
@@ -1337,7 +1336,7 @@ getDefaultOutputFileType <- function(processOutput) {
         else if("Ruter" %in% classes) {
             # Set file extension:
             ext <- "txt"
-            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+            # This is the default, and is changed to the value specified by the user in the process later in writeStoxOutputOne().
         }
         else if("matrix" %in% classes || any(getRstoxFrameworkDefinitions("vectorClasses") %in% classes)) {
             # Set file extension:
@@ -1346,13 +1345,19 @@ getDefaultOutputFileType <- function(processOutput) {
         else if("ggplot" %in% classes) {
             # Set file extension:
             ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Format # "png" 
-            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+            # This is the default, and is changed to the value specified by the user in the process later in writeStoxOutputOne().
         }
         #### Detect also classes in the recursive list element:
         # List of lists of outputs:
         else if("sf" %in% classes2) {
-            # Set file extension:
-            ext <- "geojson"
+            ### # Set file extension:
+            ### ext <- "geojson"
+            if(sf::st_geometry_type(processOutput[[1]][[1]])[1] == "POINT") {
+                ext <- "gpx"
+            }
+            else {
+                ext <- "geojson"
+            }
         }
         else if("data.table" %in% classes2) {
             # Set file extension:
@@ -1361,7 +1366,7 @@ getDefaultOutputFileType <- function(processOutput) {
         else if("Ruter" %in% classes2) {
             # Set file extension:
             ext <- "txt"
-            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+            # This is the default, and is changed to the value specified by the user in the process later in writeStoxOutputOne().
         }
         else if("matrix" %in% classes2 || any(getRstoxFrameworkDefinitions("vectorClasses") %in% classes2)) {
             # Set file extension:
@@ -1370,7 +1375,7 @@ getDefaultOutputFileType <- function(processOutput) {
         else if("ggplot" %in% classes2) {
             # Set file extension:
             ext <- RstoxBase::getRstoxBaseDefinitions("defaultPlotOptions")$default_general_file_plot_arguments$Format # "png" 
-            # This is the default, and is changed to the value specified by the user in the process later in reportFunctionOutputOne().
+            # This is the default, and is changed to the value specified by the user in the process later in writeStoxOutputOne().
         }
         else {
             stop("Unknown process output: [[1]]: ", classes, ", [[1]][[1]]: ", classes2)

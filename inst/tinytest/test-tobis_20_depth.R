@@ -4,7 +4,7 @@ expect_true(
     compareProjectToStoredOutputFiles(
         projectPath, 
         tolerance = 3e-12, # The Biomass_sum_cv seems to diff by up to 2.605614e-12, so we increase the tolerance a bit
-        returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, 
+        returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE, 
         skipNAFraction = 0.5
     )
 )

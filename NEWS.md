@@ -6,6 +6,7 @@
 * Fixed bug where the type of output of plotting functions was not correctly recognised (change in getDefaultOutputFileType()).
 * Some refactoring of getFunctionArguments() and getProcessOutputTextFilePath().
 * Added support for specifying which columns to write in writeGPX (using the "layers" argument).
+* Changed to not copy input data when bootstrapping, potentially reducing the size of the copies to appoximately 10% so that the temp directory is not filled up as fast.
 
 
 # RstoxFramework v4.2.0-9002 (2025-09-01)
@@ -13,7 +14,7 @@
 * Renamed UseDefaultTextSettings to UseDefaultLabelSettings in PlotReportBootstrap().
 
 
-# RstoxFramework v4.2.0-9001 (2025-04-30)
+# RstoxFramework v4.2.0-9001 (2025-06-20)
 * Added support for writing gpx files from RstoxBase::WriteSurveyPlan().
 
 

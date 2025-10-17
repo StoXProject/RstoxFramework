@@ -487,6 +487,7 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
         MoreArgs = list(
             ow = TRUE, 
             empty.memory = c("analysis", "report"), 
+            empty.input = TRUE, 
             empty.output = TRUE
         ), 
         NumberOfCores = NumberOfCores

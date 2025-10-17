@@ -289,7 +289,7 @@ jobs:
         if: ( (runner.os == 'Windows') || (runner.os == 'macOS') || (runner.os == 'Linux' && matrix.config.r == 'release') ) && github.event_name == 'push' && github.ref_name == 'master'
         env:
           BUILD_NUMBER: ${{ github.sha  }}
-          DRAT_DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAT_DEPLOY_TOKEN: ${{ secrets.DRAT_DEPLOY_TOKEN }}
         run: . repo_deploy.sh
         shell: bash
 
@@ -299,7 +299,7 @@ jobs:
         if: ( (runner.os == 'Windows') || (runner.os == 'macOS') || (runner.os == 'Linux' && matrix.config.r == 'release') ) && github.event_name == 'push' && github.ref_name == 'testing'
         env:
           BUILD_NUMBER: ${{ github.sha  }}
-          DRAT_DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAT_DEPLOY_TOKEN: ${{ secrets.DRAT_DEPLOY_TOKEN }}
         run: . testingRepo_deploy.sh
         shell: bash
 
@@ -309,7 +309,7 @@ jobs:
         if: ( (runner.os == 'Windows') || (runner.os == 'macOS') || (runner.os == 'Linux' && matrix.config.r == 'release') ) && github.event_name == 'push' && github.ref_name == 'develop'
         env:
           BUILD_NUMBER: ${{ github.sha  }}
-          DRAT_DEPLOY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRAT_DEPLOY_TOKEN: ${{ secrets.DRAT_DEPLOY_TOKEN }}
         run: . unstableRepo_deploy.sh
         shell: bash
 

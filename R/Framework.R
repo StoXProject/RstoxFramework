@@ -1773,6 +1773,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' 
 #' @inheritParams general_arguments
 #' @inheritParams unReDoProject
+#' @inheritParams StoXGUI_interfaces
 #' @param processDirty Logical: Indicates whether the model has been modified when resetting. Tf the process to reset to is after the active process, 
 #' @param delete A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.
 #' @param deleteCurrent Logical: If TRUE delete process output also of the process given by processID.
@@ -1780,11 +1781,14 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #' 
 #' @export
 #'
-resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE, argumentFilePaths = NULL) {
+resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE, argumentFilePaths = NULL, processTable = NULL) {
+    
     
     # Get the process ID to reset the model to:
-    #processIndexTable <- readProcessIndexTable(projectPath, modelName)
-    processIndexTable <- getProcessTable(projectPath, modelName = NULL)
+    #processTable <- readProcessIndexTable(projectPath, modelName)
+    if(!length(processTable)) {
+        processTable <- getProcessTable(projectPath, modelName = NULL)
+    }
     
     
     # Get the processIndex, that is the index of the process to reset to:
@@ -1792,7 +1796,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         processIndex <- 0
     }
     else {
-        processIndex <- which(processIndexTable$processID == processID) + shift
+        processIndex <- which(processTable$processID == processID) + shift
         # Error if the process does not exist
         if(length(processIndex) == 0) {
             stop("StoX: processID not regocnized")
@@ -1808,7 +1812,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         
         ##### (1) Set active process: #####
         # Get the current active process index:
-        currentActiveProcessIndex <- which(processIndexTable$processID == currentActiveProcessID)
+        currentActiveProcessIndex <- which(processTable$processID == currentActiveProcessID)
         
         # If the processIndex is 0 or processID not given, reset to the start of the model (activeProcessID = NA):
         if(processIndex == 0 || length(processID) == 0) {
@@ -1817,7 +1821,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         else {
             # Reset only if the input process ID is before that of the active:
             if(processIndex <= currentActiveProcessIndex) {
-                    newActiveProcessID <- processIndexTable$processID[processIndex]
+                    newActiveProcessID <- processTable$processID[processIndex]
                 }
             else {
                 #newActiveProcessID <- currentActiveProcessID
@@ -1851,21 +1855,21 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
             # Get all processes from the process to reset to and onwards:
             thisProcessIndex <- processIndex
             thisModelName <- modelName
-            atAffectedProcesses <- processIndexTable[, seq_along(processID) > thisProcessIndex & modelName == thisModelName]
+            atAffectedProcesses <- processTable[, seq_along(processID) > thisProcessIndex & modelName == thisModelName]
                 
             # Get all processes to delete output and memory data files from, as all functionInputsRecursive in the rest of the current model (use double subset() here to avoid warning "longer object length is not a multiple of shorter object length"):
             processNamesToReset <- c(
                 unique(
                     unlist(
-                        processIndexTable[atAffectedProcesses, usedInRecursiveProcessNames]
+                        processTable[atAffectedProcesses, usedInRecursiveProcessNames]
                     )
                 ), 
-                processIndexTable[atAffectedProcesses, processName]
+                processTable[atAffectedProcesses, processName]
             )
-            atProcessesToReset <- match(processNamesToReset, processIndexTable$processName)
+            atProcessesToReset <- match(processNamesToReset, processTable$processName)
             
-            processIDsToReset <- processIndexTable[atProcessesToReset, processID]
-            modelsOfProcessesToReset <- processIndexTable[atProcessesToReset, modelName]
+            processIDsToReset <- processTable[atProcessesToReset, processID]
+            modelsOfProcessesToReset <- processTable[atProcessesToReset, modelName]
              
             if("memory" %in% delete) {
                 foldersToDelete <- getProcessOutputFolder(
@@ -1904,7 +1908,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                     processID = processIDsToReset
                 )
                 
-                doesNotHaveUseOutputDataTRUE <- processIndexTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
+                doesNotHaveUseOutputDataTRUE <- processTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
                 
                 unlink(foldersToDelete[doesNotHaveUseOutputDataTRUE], recursive = TRUE, force = TRUE)
             }
@@ -1913,7 +1917,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
     # Delete files even the model has not yet been run:
     else if(purgeOutputFiles) {
         foldersToDelete <- sapply(
-            processIndexTable$processID, 
+            processTable$processID, 
             function(thisProcessID) getProcessOutputFolder(
                 projectPath = projectPath, 
                 modelName = modelName, 
@@ -1925,12 +1929,13 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
         # Do not delete output text files for processes with UseOutputData set to TRUE:
         subsetTable <- data.table::data.table(
             modelName = modelName, 
-            processID = processIndexTable$processID
+            processID = processTable$processID
         )
         
-        doesNotHaveUseOutputDataTRUE <- processIndexTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
+        doesNotHaveUseOutputDataTRUE <- processTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
         
         unlink(foldersToDelete[doesNotHaveUseOutputDataTRUE], recursive = TRUE, force = TRUE)
+        
     }
     
     # Return a list of the active process and the process table:
@@ -1943,7 +1948,7 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
             output
         )
     }
-   
+    
     #output <- list(
     #    if(returnProcessTable) processTable = getProcessTable(projectPath = projectPath, modelName = modelName), 
     #    activeProcess = getActiveProcess(projectPath = projectPath, modelName = modelName)
@@ -3107,10 +3112,13 @@ modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processNam
 #' @param return.processIndex Logical: If TRUE include the process indices as a sequence starting from 1 in each model.
 #' @param return.processFlow Logical: If TRUE include columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated.
 #' @param check.only.enabled Logical: If TRUE check input errors only for enabled procecsses.
+#' @param processTable The process table as returned from \code{\link{getProcessTable}}. Used in the function \code{updateProcessTable}.
 #' 
 #' @export
 #' 
 getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = NULL, only.valid = TRUE, return.processIndex = FALSE, return.processFlow = TRUE) {
+    
+    
     # The old function definition, before 4.0.1. We skipped startProcess, endProcess, afterProcessID and beforeProcessID as it has not been in use, and that getProcessTable needs to consider the entire project to identify processes using the a process, and even recursively:
     #getProcessTable <- function(projectPath, modelName = NULL, startProcess = 1, endProcess = Inf, afterProcessID = NULL, beforeProcessID = NULL, argumentFilePaths = NULL, only.valid = TRUE, return.processIndex = FALSE, return.processFlow = TRUE) {
         
@@ -3132,9 +3140,30 @@ getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = N
         only.valid = only.valid, 
         return.processIndex = return.processIndex
     )
+    
+    updateProcessTable(
+        processTable = processTable, 
+        projectPath = projectPath, 
+        modelName = modelName, 
+        only.valid = only.valid, 
+        return.processIndex = return.processIndex, 
+        return.processFlow = return.processFlow
+    ) 
+}
+#' 
+#' @export
+#' @rdname getProcessTable
+#' 
+updateProcessTable <- function(processTable, projectPath, modelName = NULL, only.valid = TRUE, return.processIndex = FALSE, return.processFlow = TRUE) {
+    
     # Return an empty data.table if the processTable is empty:
-    if(nrow(processTable) == 0) {
+    if(NROW(processTable) == 0) {
         return(data.table::data.table())
+    }
+    
+    # modelName == NULL indicates all models:
+    if(!length(modelName)) {
+        modelName = getRstoxFrameworkDefinitions("stoxModelNames")
     }
     
     # Check whether the data type can be shown in the map:
@@ -3143,9 +3172,11 @@ getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = N
     # Check whether the process returns process data:
     processTable[, hasProcessData := lapply(functionName, isProcessDataFunction)]
     
+    # If a single model is specified (either "baseline", "analysis" or "report"), set the hasBeenRun to TRUE for all processes up until the active process, or the previous of the active process if the active process is dirty:
     activeProcess <- getActiveProcess(projectPath = projectPath, modelName = modelName, drop = FALSE)
     processTable[, hasBeenRun := FALSE]
-    for(thisModelName in modelName) {
+    if(length(modelName) == 1) {
+        thisModelName <- modelName
         if(!is.na(activeProcess[modelName == thisModelName, processID])) {
             activeProcessIndex <- getProcessIndexFromProcessID(
                 projectPath = projectPath, 
@@ -3164,7 +3195,7 @@ getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = N
             processTable[seq_len(numHasBeenRun) + firstProcessIndexOfModel - 1, hasBeenRun := TRUE]
         }
     }
-
+    
     
     # Add columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated:
     if(return.processFlow) {
@@ -3192,7 +3223,7 @@ getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = N
     # Subset by modelName:
     if(length(modelName)) {
         thisModelName <- modelName
-        processTable <- subset(processTable, modelName == thisModelName)
+        processTable <- subset(processTable, modelName %in% thisModelName)
     }
     
     return(processTable[])
@@ -3222,7 +3253,7 @@ scanForModelError <- function(projectPath, modelName = NULL, startProcess = 1, e
         return.processIndex = return.processIndex
     )
     # Return an empty data.table if the processTable is empty:
-    if(nrow(processTable) == 0) {
+    if(NROW(processTable) == 0) {
         return(data.table::data.table())
     }
     
@@ -3354,7 +3385,7 @@ getProcessesSansProcessData <- function(projectPath, modelName = NULL, startProc
     
     # Get also the recursive function inputs:
     processTable[, functionInputsRecursive := functionInputs]
-    if(nrow(processTable) > 1) {
+    if(NROW(processTable) > 1) {
         for(processIndex in seq_len(nrow(processTable))) {
             if(processTable[processIndex, functionName == "RstoxFramework::Bootstrap"]) {
                 # For a Bootstrap process all baseline processes up until the latest OutputProcesses are to be considered as recursive function inputs:
@@ -3870,7 +3901,7 @@ modifyFunctionParameters <- function(projectPath, modelName, processID, newFunct
         modelName = modelName, 
         processID = processID
     )
-
+    
     # Modify any file or directory paths to relative paths if possible:
     newFunctionParameters <- convertToRelativePaths(
         functionParameters = newFunctionParameters, 
@@ -5585,7 +5616,7 @@ getFunctionInputData <- function(functionInputProcessNames, projectPath, strict 
         functionInputData <- structure(vector("list", length(functionInputProcessNames)), names = names(functionInputProcessNames))
             
         if(strict && nrow(functionInputsProcessIDs) != length(functionInputProcessNames)) {
-            stop("Some function inputs are not specified: ", paste(setdiff(functionInputProcessNames, names(functionInputsProcessIDs)), collapse = ", "))
+            stop("Some function inputs are not specified: ", paste(setdiff(functionInputProcessNames, functionInputsProcessIDs$processName), collapse = ", "))
             
         }
         
@@ -5882,7 +5913,7 @@ getModelData <- function(
         warn = warn
     )
     
-    if(nrow(processTable)) {
+    if(NROW(processTable)) {
         # Get the process outputs:
         processOutput <- mapply(
             getProcessOutput, 
@@ -6633,7 +6664,13 @@ writeStoxOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
     
     if(inherits(processOutputOne, "sf")) {
         if(sf::st_geometry_type(processOutputOne)[1] == "POINT") {
-            writeGPX(processOutputOne, filePath)
+            if("track_seg_point_id" %in% names(processOutputOne)) {
+                writeGPX_track_points(processOutputOne, filePath)
+            }
+            else {
+                writeGPX_waypoints(processOutputOne, filePath)
+            }
+            
         }
         else {
             # Write the file:
@@ -6709,10 +6746,10 @@ writeStoxOutputOne <- function(processOutputOne, filePath, escape = TRUE) {
 
 
 
-writeGPX <- function(
+writeGPX_track_points <- function(
     x, 
     filePath, 
-    layers = c("geometry", "track_name", "track_fid", "track_seg_id", "track_seg_point_id")
+    layers = c("geometry", "track_name", "track_fid", "track_seg_id", "track_seg_point_id", "Stratum")
 ) {
     # Keep only the specified layers:
     x <- subset(x, select = layers)
@@ -6721,7 +6758,26 @@ writeGPX <- function(
         x,
         dsn = filePath,
         layer = "track_points",
-        driver = "GPX"
+        driver = "GPX", 
+        dataset_options = "GPX_USE_EXTENSIONS=YES"
+    )
+}
+
+
+writeGPX_waypoints <- function(
+    x, 
+    filePath, 
+    layers = c("geometry", "Stratum")
+) {
+    # Keep only the specified layers:
+    x <- subset(x, select = layers)
+    
+    sf::st_write(
+        x,
+        dsn = filePath,
+        layer = "waypoint",
+        driver = "GPX", 
+        dataset_options = "GPX_USE_EXTENSIONS=YES"
     )
 }
 

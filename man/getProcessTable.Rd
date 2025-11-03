@@ -2,6 +2,7 @@
 % Please edit documentation in R/Framework.R
 \name{getProcessTable}
 \alias{getProcessTable}
+\alias{updateProcessTable}
 \alias{scanForModelError}
 \alias{getProcessesSansProcessData}
 \alias{getProcessAndFunctionNames}
@@ -11,6 +12,15 @@ getProcessTable(
   projectPath,
   modelName = NULL,
   argumentFilePaths = NULL,
+  only.valid = TRUE,
+  return.processIndex = FALSE,
+  return.processFlow = TRUE
+)
+
+updateProcessTable(
+  processTable,
+  projectPath,
+  modelName = NULL,
   only.valid = TRUE,
   return.processIndex = FALSE,
   return.processFlow = TRUE
@@ -66,6 +76,8 @@ getProcessAndFunctionNames(
 \item{return.processIndex}{Logical: If TRUE include the process indices as a sequence starting from 1 in each model.}
 
 \item{return.processFlow}{Logical: If TRUE include columns giving the processIDs and processNames of processes used as input to each process (processNames of these are already in) and of the processes that use the output from each process. Also, terminal processes are indicated.}
+
+\item{processTable}{The process table as returned from \code{\link{getProcessTable}}. Used in the function \code{updateProcessTable}.}
 
 \item{startProcess}{The process index, name or ID at which to start the model run.}
 

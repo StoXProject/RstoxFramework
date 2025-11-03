@@ -30,6 +30,7 @@
 #' @param format A character string naming the format to get info for.
 #' @param objectName The R object to get help as html for.
 #' @param packageName The package holding the object to get help as html for.
+#' @param processTable The process table obtained using e.g. getProcessTable(), used in getProcessPropertySheet().
 #' 
 #' @name StoXGUI_interfaces
 #'
@@ -440,7 +441,7 @@ getStationData <- function(projectPath, modelName, processID) {
     
     # Create a spatial points data frame and convert to geojson:
     #stationPoints <- sp::SpatialPointsDataFrame(coordinates, properties, match.ID = TRUE)
-    stationPoints <- dataTable2sf_POINT(CruiseStation, coords = c("Longitude", "Latitude"), idCol = "Station")
+    stationPoints <- RstoxBase::dataTable2sf_POINT(CruiseStation, coords = c("Longitude", "Latitude"), idCol = "Station")
     #stationPoints <- geojsonio::geojson_json(stationPoints)
     #stationPoints <- geojsonsf::sf_geojson(sf::st_as_sf(stationPoints))
     stationPoints <- geojsonsf::sf_geojson(stationPoints)
@@ -494,7 +495,7 @@ getEDSUData <- function(projectPath, modelName, processID) {
     
     # Create a spatial points data frame and convert to geojson:
     #EDSUPoints <- sp::SpatialPointsDataFrame(clickPoints, properties, match.ID = FALSE)
-    EDSUPoints <- dataTable2sf_POINT(CruiseLog, coords = c("Longitude", "Latitude"), idCol = "EDSU")
+    EDSUPoints <- RstoxBase::dataTable2sf_POINT(CruiseLog, coords = c("Longitude", "Latitude"), idCol = "EDSU")
     #EDSUPoints <- geojsonio::geojson_json(EDSUPoints)
     #EDSUPoints <- geojsonsf::sf_geojson(sf::st_as_sf(EDSUPoints))
     EDSUPoints <- geojsonsf::sf_geojson(EDSUPoints, simplify = FALSE)
@@ -513,8 +514,8 @@ getEDSUData <- function(projectPath, modelName, processID) {
     #EDSULines <- geojsonsf::sf_geojson(sf::st_as_sf(EDSULines))
     
     # geojsonsf::sf_geojson could not handle an extra column in the linestrings:
-    #EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "endLongitude", "startLatitude", "endLatitude"), idCol = "interpolated")
-    EDSULines <- dataTable2sf_LINESTRING(CruiseLog, x1x2y1y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"))
+    #EDSULines <- RstoxBase::dataTable2sf_LINESTRING(CruiseLog, x1y1x2y2 = c("startLongitude", "endLongitude", "startLatitude", "endLatitude"), idCol = "interpolated")
+    EDSULines <- RstoxBase::dataTable2sf_LINESTRING(CruiseLog, x1y1x2y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"))
     EDSULines <- geojsonsf::sf_geojson(EDSULines, simplify = FALSE)
     
     ## List the points and lines and return:
@@ -760,7 +761,7 @@ isSingleParameter <- function(format) {
 #' @export
 #' @rdname StoXGUI_interfaces
 #' 
-getProcessPropertySheet <- function(projectPath, modelName, processID, argumentFilePaths = NULL) {
+getProcessPropertySheet <- function(projectPath, modelName, processID, argumentFilePaths = NULL, processTable = NULL) {
     
     # The project properties contains the following elements:
     # 1. name
@@ -886,7 +887,10 @@ getProcessPropertySheet <- function(projectPath, modelName, processID, argumentF
             # scanForModelError is enough...
             #processTable <- getProcessTable(projectPath = projectPath, modelName = modelName, beforeProcessID = processID)
             #processTable <- scanForModelError(projectPath = projectPath, modelName = modelName, beforeProcessID = processID)
-            processTable <- scanForModelError(projectPath = projectPath, modelName = NULL, beforeProcessID = processID, argumentFilePaths = argumentFilePaths)
+            
+            if(!length(processTable)) {
+                processTable <- scanForModelError(projectPath = projectPath, modelName = NULL, beforeProcessID = processID, argumentFilePaths = argumentFilePaths)
+            }
             
             #thisProcessIndex <- which(processTable$processID == processID)
             #processTable <- processTable[seq_len(thisProcessIndex), ]
@@ -1024,6 +1028,7 @@ getProcessPropertySheet <- function(projectPath, modelName, processID, argumentF
         propertySheet = propertySheet, 
         activeProcess = getActiveProcess(projectPath = projectPath, modelName = modelName)
     )
+    
     output
 }
 
@@ -1280,9 +1285,11 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
     # Get the argumentFilePaths for use both in resetModel() and later in getProcessTable():
     argumentFilePaths <- getArgumentFilePaths(projectPath)
     
+    processTable <- getProcessTable(projectPath = projectPath, modelName = NULL, argumentFilePaths = argumentFilePaths)
+    
     if(changed) {
         # Reset the active process ID to the process before the modified process:
-        resetModel(
+        processTable <- resetModel(
             projectPath = projectPath, 
             modelName = modelName, 
             processID = processID, 
@@ -1295,8 +1302,9 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
             shift = 0, 
             delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
             deleteCurrent = TRUE, 
-            argumentFilePaths = argumentFilePaths
-        )
+            processTable = processTable, 
+            returnProcessTable = TRUE
+        )$processTable
     }
     
     # Return the modified process properties:
@@ -1304,12 +1312,16 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         projectPath = projectPath, 
         modelName = modelName, 
         processID = processID, 
-        argumentFilePaths = argumentFilePaths
+        processTable = processTable
     )
     
     # Add the process table, so that the GUI can update the list of processes, and all its symbols:
     output <- c(
-        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName, argumentFilePaths = argumentFilePaths)), 
+        list(processTable = updateProcessTable(
+            processTable = processTable, 
+            projectPath = projectPath, 
+            modelName = modelName
+        )), 
         output
     )
     
@@ -1318,6 +1330,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
         list(updateHelp = updateHelp), 
         output
     )
+    
     # Add also the saved status:
     output$saved <- isSaved(projectPath)
     

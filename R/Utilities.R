@@ -1275,37 +1275,41 @@ setRstoxPrecision <- function(x) {
                 x <- x
             }
             else {
-                # The precision of geographical coordinates will only be set to the specified digits, with no consideration of significant digits. Using digits = 12 implies a precision of approximately 100 nanometers, which should be enough:
-                precision <- 10^digits
+                ### # The precision of geographical coordinates will only be set to the specified digits, with no consideration of significant digits. Using digits = 12 implies a precision of approximately 100 nanometers, which should be enough:
+                ### precision <- 10^digits
+                ### 
+                ### # Write the data to a file to utilize the function sf::st_set_precision:
+                ### outdata <- sf::st_set_precision(x, precision = precision)
+                ### tmpDir <- file.path(tempdir(), "shapefile")
+                ### dir.create(tmpDir)
+                ### tmpFile <- file.path(tmpDir, "nc.shp")
+                ### 
+                ### # Keep the stratum names and crs: 
+                ### stratumNames <- outdata$StratumName
+                ### crs <- sf::st_crs(outdata)
+                ### 
+                ### # Write the multipolygons to a temporary file (suppress the name abbreviation warning "Field names abbreviated for ESRI Shapefile driver"):
+                ### suppressWarnings(sf::st_write(outdata, tmpFile, quiet = TRUE))
+                ### x <- sf::st_read(tmpFile, quiet = TRUE)
+                ### 
+                ### # Add the stratum names and crs again: 
+                ### x <- x[, NULL]
+                ### x$StratumName <- stratumNames
+                ### # Suppress "replacing crs does not reproject data; use st_transform for that":
+                ### suppressWarnings(sf::st_crs(x) <- crs)
+                ### # sf::st_read may read as POLYGON. We want MULTIPOLYGON always:
+                ### x <- sf::st_cast(x, "MULTIPOLYGON")
+                ### 
+                ### # Place geometry last, as this seems to be the default in sf, e.g. in st_cast:
+                ### newOrder <- c(setdiff(names(x), "geometry"), "geometry")
+                ### x <- x[, newOrder]
+                ### 
+                ### # delete the shape files:
+                ### unlink(tmpDir, recursive = TRUE)
                 
-                # Write the data to a file to utilize the function sf::st_set_precision:
-                outdata <- sf::st_set_precision(x, precision = precision)
-                tmpDir <- file.path(tempdir(), "shapefile")
-                dir.create(tmpDir)
-                tmpFile <- file.path(tmpDir, "nc.shp")
                 
-                # Keep the stratum names and crs: 
-                stratumNames <- outdata$StratumName
-                crs <- sf::st_crs(outdata)
                 
-                # Write the multipolygons to a temporary file (suppress the name abbreviation warning "Field names abbreviated for ESRI Shapefile driver"):
-                suppressWarnings(sf::st_write(outdata, tmpFile, quiet = TRUE))
-                x <- sf::st_read(tmpFile, quiet = TRUE)
-                
-                # Add the stratum names and crs again: 
-                x <- x[, NULL]
-                x$StratumName <- stratumNames
-                # Suppress "replacing crs does not reproject data; use st_transform for that":
-                suppressWarnings(sf::st_crs(x) <- crs)
-                # sf::st_read may read as POLYGON. We want MULTIPOLYGON always:
-                x <- sf::st_cast(x, "MULTIPOLYGON")
-                
-                # Place geometry last, as this seems to be the default in sf, e.g. in st_cast:
-                newOrder <- c(setdiff(names(x), "geometry"), "geometry")
-                x <- x[, newOrder]
-                
-                # delete the shape files:
-                unlink(tmpDir, recursive = TRUE)
+                x <- RstoxBase::setPrecisionToSF(x, digits = digits)
             }
         }
         # None of the other validOutputDataClasses need setting precision to.
@@ -1351,42 +1355,9 @@ getPrecisionDigits <- function(x, digits = 12, signifDigits = NULL) {
 
 
 
-dataTable2sf_POINT <- function(x, coords = c("Longitude", "Latitude"), idCol = NULL, crs = NULL) {
-    
-    # Keep only the idCol and the coords:
-    pos <- subset(x, select = c(idCol, coords))
-    
-    # Convert to POINT sf object:
-    points <- sf::st_as_sf(pos, coords = coords)
-    # Set projection:
-    sf::st_crs(points) <- if(length(crs)) crs else RstoxBase::getRstoxBaseDefinitions("proj4string_longlat")
-    
-    return(points)
-}
 
-dataTable2sf_LINESTRING <- function(x, x1x2y1y2 = c("startLongitude", "startLatitude", "endLongitude", "endLatitude"), idCol = NULL, crs = NULL) {
-    
-    # Create a geometry column:
-    linestrings  <- data.frame(geometry = sf::st_sfc(sapply(seq_len(nrow(x)), function(i) create_segment(x[i, ..x1x2y1y2]), simplify = FALSE)))
-    
-    # Add info:
-    if(length(idCol) && idCol %in% names(x)) {
-        linestrings[[idCol]] <- x[, ..idCol]
-    } 
-    
-    # Convert to proper sf data frame:
-    linestrings <-  sf::st_sf(linestrings)
-    
-    # Set projection:
-    sf::st_crs(linestrings) <- if(length(crs)) crs else RstoxBase::getRstoxBaseDefinitions("proj4string_longlat")
 
-    return(linestrings)                   
-}
 
-# Simple function to create a segment:
-create_segment <- function(r) {
-    sf::st_linestring(t(matrix(unlist(r), 2, 2)))
-}
 
 
 

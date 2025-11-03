@@ -1,3 +1,14 @@
+# RstoxFramework v4.2.0-9004 (2025-10-27)
+* Changed setProcessPropertyValue() to call getProcessTable() once, and use this in ResetModel(), getProcessPropertySheet() and the new updateProcessTable().
+* Added the new exported function updateProcessTable().
+* Updated test-tobis_20_depth.R to the latest Transecdesign().
+* Updated test-export_ICESbiotic.R to the latest ICESBiotic().
+* Added the backward compatibility action applySplitProcess.
+* Moved the functions dataTable2sf_POINT() and dataTable2sf_LINESTRING() to RstoxBase.
+* Moved setting precision of sf objects to RstoxBase::setPrecisionToSF().
+* Added writeGPX_waypoints() for writing waypoints to file for the function RstoxBase::StationsAlongTransectDesign().
+
+
 # RstoxFramework v4.2.0-9003 (2025-09-08)
 * Added the exported function writeStoxOutput() which can be used to write output from a StoX function run in R and get the same files as a StoX project would.
 * Added the option unlistSingleBootstrapData to runProjects(), runProject() and rumModel().
@@ -6,7 +17,7 @@
 * Fixed bug where the type of output of plotting functions was not correctly recognised (change in getDefaultOutputFileType()).
 * Some refactoring of getFunctionArguments() and getProcessOutputTextFilePath().
 * Added support for specifying which columns to write in writeGPX (using the "layers" argument).
-* Changed to not copy input data when bootstrapping, potentially reducing the size of the copies to appoximately 10% so that the temp directory is not filled up as fast.
+* Changed to not copy input data when bootstrapping, potentially reducing the size of the copies to approximately 10% so that the temp directory is not filled up as fast.
 
 
 # RstoxFramework v4.2.0-9002 (2025-09-01)

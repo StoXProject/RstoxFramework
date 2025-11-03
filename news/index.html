@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9003</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9004</span>
       </span>
     </div>
 
@@ -48,6 +48,17 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="4.2.0-9004" id="rstoxframework-v420-9004-2025-10-27">RstoxFramework v4.2.0-9004 (2025-10-27)<a class="anchor" aria-label="anchor" href="#rstoxframework-v420-9004-2025-10-27"></a></h2>
+<ul><li>Changed setProcessPropertyValue() to call getProcessTable() once, and use this in ResetModel(), getProcessPropertySheet() and the new updateProcessTable().</li>
+<li>Added the new exported function updateProcessTable().</li>
+<li>Updated test-tobis_20_depth.R to the latest Transecdesign().</li>
+<li>Updated test-export_ICESbiotic.R to the latest ICESBiotic().</li>
+<li>Added the backward compatibility action applySplitProcess.</li>
+<li>Moved the functions dataTable2sf_POINT() and dataTable2sf_LINESTRING() to RstoxBase.</li>
+<li>Moved setting precision of sf objects to RstoxBase::setPrecisionToSF().</li>
+<li>Added writeGPX_waypoints() for writing waypoints to file for the function RstoxBase::StationsAlongTransectDesign().</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="4.2.0-9003" id="rstoxframework-v420-9003-2025-09-08">RstoxFramework v4.2.0-9003 (2025-09-08)<a class="anchor" aria-label="anchor" href="#rstoxframework-v420-9003-2025-09-08"></a></h2>
 <ul><li>Added the exported function writeStoxOutput() which can be used to write output from a StoX function run in R and get the same files as a StoX project would.</li>
 <li>Added the option unlistSingleBootstrapData to runProjects(), runProject() and rumModel().</li>
@@ -56,7 +67,7 @@
 <li>Fixed bug where the type of output of plotting functions was not correctly recognised (change in getDefaultOutputFileType()).</li>
 <li>Some refactoring of getFunctionArguments() and getProcessOutputTextFilePath().</li>
 <li>Added support for specifying which columns to write in writeGPX (using the “layers” argument).</li>
-<li>Changed to not copy input data when bootstrapping, potentially reducing the size of the copies to appoximately 10% so that the temp directory is not filled up as fast.</li>
+<li>Changed to not copy input data when bootstrapping, potentially reducing the size of the copies to approximately 10% so that the temp directory is not filled up as fast.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="4.2.0-9002" id="rstoxframework-v420-9002-2025-09-01">RstoxFramework v4.2.0-9002 (2025-09-01)<a class="anchor" aria-label="anchor" href="#rstoxframework-v420-9002-2025-09-01"></a></h2>

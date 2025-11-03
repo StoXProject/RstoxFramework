@@ -25,7 +25,7 @@ getParameterTableInfo and getParameterVectorInfo get information of a parameter 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9003</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9004</span>
       </span>
     </div>
 
@@ -81,7 +81,8 @@ getParameterTableInfo and getParameterVectorInfo get information of a parameter 
 <span>  <span class="va">projectPath</span>,</span>
 <span>  <span class="va">modelName</span>,</span>
 <span>  <span class="va">processID</span>,</span>
-<span>  argumentFilePaths <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  argumentFilePaths <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  processTable <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">setProcessPropertyValue</span><span class="op">(</span></span>
@@ -168,6 +169,10 @@ getParameterTableInfo and getParameterVectorInfo get information of a parameter 
 
 <dt id="arg-argumentfilepaths">argumentFilePaths<a class="anchor" aria-label="anchor" href="#arg-argumentfilepaths"></a></dt>
 <dd><p>A nested list of paths to argument files of a model, as returned from <code>getArgumentFilePaths</code>. This is used to speed up some functions.</p></dd>
+
+
+<dt id="arg-processtable">processTable<a class="anchor" aria-label="anchor" href="#arg-processtable"></a></dt>
+<dd><p>The process table obtained using e.g. getProcessTable(), used in getProcessPropertySheet().</p></dd>
 
 
 <dt id="arg-groupname">groupName<a class="anchor" aria-label="anchor" href="#arg-groupname"></a></dt>

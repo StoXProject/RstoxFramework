@@ -40,7 +40,8 @@ getProcessPropertySheet(
   projectPath,
   modelName,
   processID,
-  argumentFilePaths = NULL
+  argumentFilePaths = NULL,
+  processTable = NULL
 )
 
 setProcessPropertyValue(
@@ -110,6 +111,8 @@ getParameterSingleInfo(
 \item{col}{A vector of colour steps.}
 
 \item{argumentFilePaths}{A nested list of paths to argument files of a model, as returned from \code{getArgumentFilePaths}. This is used to speed up some functions.}
+
+\item{processTable}{The process table obtained using e.g. getProcessTable(), used in getProcessPropertySheet().}
 
 \item{groupName}{The name of the property group, one of "processArguments", "functionInputs" and "functionParameters".}
 

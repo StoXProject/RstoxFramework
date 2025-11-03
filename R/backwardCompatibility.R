@@ -629,27 +629,102 @@ reshapeProcessData <- function(projectDescription, modelName, processIndex, acti
     return(projectDescription)
 }
 
-#applySplitFunction <- function(action, projectDescription, packageName, verbose = FALSE) {
+
+
+#### 12. splitProcess: ####
+applySplitProcess <- function(action, projectDescription, packageName, verbose = FALSE) {
+    
+    # Get the indices at functions to apply the action to:
+    atFunctionName <- getIndicesAtFunctionName(
+        projectDescription = projectDescription, 
+        action = action, 
+        packageName = packageName
+    )
+    
+    
+    for(ind in atFunctionName) {
+        
+        # Do the splitting:
+        splited <- action$newProcesses(
+            projectDescription = projectDescription, 
+            modelName = action$modelName, 
+            processIndex = ind
+        )
+        
+        # Get the name of the old process:
+        oldProcessName <- projectDescription[[action$modelName]][[ind]]$processName
+        # Get the name of the last (second) of the processes after splitting, which will be used as function input in other processes:
+        newProcessName <- names(splited)[2]
+        
+        if(verbose) {
+            message("StoX: Backward compatibility: Splitting process ", oldProcessName, " to the processes ", oldProcessName, " and ", newProcessName, ".")
+        }
+        
+        # Update the name of the process that has been split in all function inputs later in the project. We need to do this BFORE inserting the splitted process, so that we do not mess with those new processes:
+        projectDescription <- updateFunctionInputsInProjectDescription(
+            processName = oldProcessName, 
+            newProcessName = newProcessName, 
+            projectDescription = projectDescription
+        )
+        
+        # Insert the new processes:
+        projectDescription[[action$modelName]] <- c(
+            # The processes up to the process to split:
+            projectDescription[[action$modelName]][seq_len(ind - 1)], 
+            # The split process:
+            splited,
+            # The processes after to the process to split:
+            projectDescription[[action$modelName]][seq(ind + 1, length(projectDescription[[action$modelName]]))]
+        )
+    }
+    
+    return(projectDescription)
+}
+
+
+#splitProcess <- function(projectDescription, modelName, processIndex, action) {
 #    
-#    # Get the indices at functions to apply the action to:
-#    atFunctionName <- getIndicesAtFunctionName(
+#    output <- action$newProcesses(
 #        projectDescription = projectDescription, 
-#        action = action, 
-#        packageName = packageName
+#        modelName = modelName, 
+#        processIndex = processIndex
 #    )
 #    
-#    for(ind in atFunctionName) {
-#        
-#        # Rename any relevant function parameter: 
-#        projectDescription[[action$modelName]][[ind]]$processData <- splitFunctionInOneProcess(
-#            projectDescription[[action$modelName]][[ind]]$processData, 
-#            action, 
-#            verbose = verbose
-#        )
-#    }
-#    
-#    return(projectDescription)
+#    return(output)
 #}
+
+
+# Function to change all function inputs from processName to newProcessName:
+updateFunctionInputsInProjectDescription <- function(
+    processName,
+    newProcessName,
+    projectDescription
+) {
+    
+    # Loop through the models and processes and replace the processName by the newProcessName:
+    for(model in names(projectDescription)) {
+        for(processInd in seq_along(projectDescription[[model]])) {
+            for(functionInputInd in seq_along(projectDescription[[model]][[processInd]]$functionInputs)) {
+                thisDataType <- names(projectDescription[[model]][[processInd]]$functionInputs)[functionInputInd]
+                thisFunctionInput <- projectDescription[[model]][[processInd]]$functionInputs[[functionInputInd]]
+                if(identical(thisFunctionInput, processName)) {
+                    projectDescription[[model]][[processInd]]$functionInputs[[thisDataType]] <- newProcessName
+                }
+            }
+        }
+    }
+    
+    return(projectDescription)
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -672,33 +747,6 @@ getIndicesAtFunctionName <- function(projectDescription, action, packageName) {
 
 
 #### The actual backward compatibility actions are performed using the following functions:
-
-
-
-
-
-
-
-
-
-
-
-
-#splitFunctionInOneProcess <- function(list, action, verbose = FALSE) {
-#    # Find the objects to remove:
-#    toRemove <- names(list) == action$parameterName
-#    # Remove if any to remove:
-#    if(any(toRemove)) {
-#        if(verbose) {
-#            message("StoX: Backward compatibility: Removing parameter ", action$parameterName, " in function ", #action$functionName)
-#        }
-#        
-#        # Remove the parameter:
-#        list <- list[!toRemove]
-#    }
-#    return(list)
-#}
-
 
 checkActionKeys <- function(action) {
     required_function <- c(

@@ -165,7 +165,8 @@ initiateRstoxFramework <- function(){
         "reshapeParameter", # 8
         "renameProcessData", # 9
         "renameColumInProcessDataTable", # 10
-        "reshapeProcessData" # 11
+        "reshapeProcessData", # 11
+        "splitProcess" # 12
     )
     
     renameResampleFunctionInBootstrapMethodTableOne <- function(projectDescriptionOne, oldName, newName) {

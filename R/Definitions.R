@@ -673,7 +673,7 @@ initiateRstoxFramework <- function(){
     # Define the regular expression listing lower and upper characters, integers, underscore and dot:
     validProcessNameSet <- "[[:alnum:]_.]"
     # The prefix for new unnamed processes:
-    process_Prefix <- "Process_"
+    process_Prefix <- "Process"
     # The number of digits in the integer part of the project IDs:
     numDigitsOfProcessIntegerID <- 3
     
@@ -1048,7 +1048,7 @@ getBootstrapOutputVariables <- function(projectPath, parameters = c("GroupingVar
     )$projectDescription
     
     # Get ReportBootstrap processes:
-    atReportFunctionNames <- sapply(projectDescription$report, "[[", "functionName") == "ReportBootstrap"
+    atReportFunctionNames <- sapply(projectDescription$report, "[[", "functionName") == "RstoxFramework::ReportBootstrap"
     # Extract the variables:
     variableNames <- unique(unlist(lapply(lapply(projectDescription$report[atReportFunctionNames], "[[", "functionParameters"), "[", parameters)))
     

@@ -12,7 +12,7 @@
 #' @param processID The ID of the process.
 #' @param processName The name of the process.
 #' @param processNames A vector of names of the processes.
-#' @param processes The name of the processes.
+#' @param processes The name of the processes to return data from.
 #' @param functionName The name of the function used by the process. 
 #' @param tableName The name of the output table to get from the process.
 #' @param startProcess The process index, name or ID at which to start the model run.

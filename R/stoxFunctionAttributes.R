@@ -311,11 +311,12 @@ processPropertyFormats <- list(
             # Get the processes to run:
             processesSansProcessData <- getProcessesSansProcessData(projectPath, modelName = "baseline", startProcess = BootstrapMethodTable$ProcessName, endProcess = OutputProcesses, return.processIndex = TRUE, only.valid = TRUE)
             # Scan through the baseline processes to be run and look for processes with the parameter Seed:
-            hasSeed <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x))
+            #hasSeed <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x))
+            hasSeedAndEnabled <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x)) & processesSansProcessData$enabled
             
             # Must be an unnamed list:
             possibleValues = list(
-                processesSansProcessData$processName[hasSeed], 
+                processesSansProcessData$processName[hasSeedAndEnabled], 
                 NULL
             )
         }

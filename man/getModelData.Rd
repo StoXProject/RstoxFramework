@@ -25,7 +25,7 @@ getModelData(
 
 \item{modelName}{The name of the model (possible values are "baseline", "analysis" and "report").}
 
-\item{processes}{The name of the processes.}
+\item{processes}{The name of the processes to return data from.}
 
 \item{startProcess}{The process index, name or ID at which to start the model run.}
 

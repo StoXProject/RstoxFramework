@@ -1,3 +1,8 @@
+# RstoxFramework v4.2.0-9005 (2025-11-16)
+* Restricted error when BaselineSeedTable does not include all required processes to not include non-Enabled processes.
+* Added the argument newValuesListByProject to modifyProjects().
+* Added the internal function getDefaultProcessName() what can be used by the GUI to generate a default name of processes.
+
 # RstoxFramework v4.2.0-9004 (2025-10-27)
 * Changed setProcessPropertyValue() to call getProcessTable() once, and use this in ResetModel(), getProcessPropertySheet() and the new updateProcessTable().
 * Added the new exported function updateProcessTable().
@@ -14,7 +19,7 @@
 * Added the option unlistSingleBootstrapData to runProjects(), runProject() and rumModel().
 * Refactored to use inherits() actively when checking class.
 * Added support for logical columns in process data tables (represented as boolean in the JSON schema).
-* Fixed bug where the type of output of plotting functions was not correctly recognised (change in getDefaultOutputFileType()).
+* Fixed bug where the type of output of plotting functions was not correctly recognised (change in getDefaultOutputFileType()). This bug caused all plots to not work in StoX 4.1.4!
 * Some refactoring of getFunctionArguments() and getProcessOutputTextFilePath().
 * Added support for specifying which columns to write in writeGPX (using the "layers" argument).
 * Changed to not copy input data when bootstrapping, potentially reducing the size of the copies to approximately 10% so that the temp directory is not filled up as fast.

@@ -453,16 +453,17 @@ prepareBootstrap <- function(projectPath, BootstrapMethodTable, OutputProcesses,
         NumberOfBootstraps = NumberOfBootstraps
     )
     
+    
     # Scan through the baseline processes to be run and look for processes with the parameter Seed:
-    hasSeed <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x))
+    hasSeedAndEnabled <- sapply(processesSansProcessData$functionParameters, function(x) "Seed" %in% names(x)) & processesSansProcessData$enabled
     # Error if the BaselineSeedTable does not contain exactly the processes using Seed in the Baseline processes to be run:
-    if(any(hasSeed)) {
+    if(any(hasSeedAndEnabled)) {
         presentInBaselineButNotInBaselineSeedTable <- setdiff(
-            processesSansProcessData$processName[hasSeed], 
+            processesSansProcessData$processName[hasSeedAndEnabled], 
             BaselineSeedTable$ProcessName
         )
         if(length(presentInBaselineButNotInBaselineSeedTable)) {
-            stop("The BaselineSeedTable must contain Seed for the processes ", paste(processesSansProcessData$processName[hasSeed], collapse = ", "), ".")
+            stop("The BaselineSeedTable must contain Seed for the processes ", paste(processesSansProcessData$processName[hasSeedAndEnabled], collapse = ", "), ".")
         }
     }
     # Construct a list of lists, where each list contains a list of Seed named by the processes using Seed in the Baseline:
@@ -693,7 +694,7 @@ readBootstrapDataOne <- function(selectionOneTable, nc, BootstrapID = NA) {
     
     # Check that BootstrapID is an unbroken sequence:
     if(length(BootstrapID) == 1 && is.na(BootstrapID)) {
-        BootstrapID <- seq_len( length(nrows))
+        BootstrapID <- seq_len( length(nrows) )
     }
     if(any(diff(BootstrapID) != 1)) {
         warning("BootstrapID must be an unbroken sequence. Converted to the sequence from min(BootstrapID) to max(BootstrapID) (", min(BootstrapID), " - ", max((BootstrapID)), ").")
@@ -766,7 +767,7 @@ getVarFromNC <- function(var, nc, ndims, start, count) {
             count = if(ndims[[var]] == 2) c(-1, count) else count
         ), 
         error = function(e) {
-            NULL
+            warning(e)
         }
     )
 }
@@ -2116,10 +2117,6 @@ ReportBootstrap <- function(
         return(NULL)
     }
     
-    # Issue a warning if RemoveMissingValues = TRUE:
-    if(isTRUE(RemoveMissingValues)) {
-        warning(RstoxBase::getRstoxBaseDefinitions("RemoveMissingValuesWarning")(TargetVariable))
-    }
     
     #  Open the file:
     if(length(unlist(BootstrapData))) {
@@ -2159,7 +2156,7 @@ ReportBootstrap <- function(
     
     
     
-    # Run the initial aggregation on each bootstrap replicated, reading from the file at each step instead of reading all steps and then aggregating:
+    # Run the initial aggregation on each bootstrap replicate, reading from the file at each step instead of reading all steps and then aggregating:
     output <- lapply(bootstrapIDs, initialAggregateBootstrapDataOne, 
         nc = nc, 
         selection = selection, 
@@ -2295,6 +2292,14 @@ initialAggregateBootstrapDataOne <- function(
     
     # Get the table of current bootstrapID:
     relevantBootstrapDataOne <- readBootstrapData(nc = nc, selection = selection, BootstrapID = bootstrapID, unlistSingleTable = TRUE, close = FALSE)[[1]]
+    
+    # Issue a warning if RemoveMissingValues = TRUE:
+    RstoxBase::getRstoxBaseDefinitions("RemoveMissingValuesWarning")(
+        RemoveMissingValues = RemoveMissingValues, 
+        data = relevantBootstrapDataOne, 
+        TargetVariable = TargetVariable, 
+        GroupingVariables = GroupingVariables
+    )
     
     # Set the unit of the target variable:
     relevantBootstrapDataOne[[TargetVariable]] <- RstoxBase::setUnitRstoxBase(

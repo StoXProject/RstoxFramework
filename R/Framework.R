@@ -1783,7 +1783,6 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #'
 resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE, argumentFilePaths = NULL, processTable = NULL) {
     
-    
     # Get the process ID to reset the model to:
     #processTable <- readProcessIndexTable(projectPath, modelName)
     if(!length(processTable)) {
@@ -1944,7 +1943,8 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
     )
     if(returnProcessTable) {
         output <- c(
-            list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName)), 
+            #list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName)), 
+            list(processTable = getProcessTable(projectPath = projectPath, modelName = NULL)), 
             output
         )
     }
@@ -4385,22 +4385,40 @@ modifyProject <- function(projectPath, modelNames = getRstoxFrameworkDefinitions
 #' @inheritParams addProcess
 #' @inheritParams modifyProcess
 #' @inheritParams modifyModel
+#' @param newValuesListByProject A list of \code{newValuesList}, one for each project. If the same value should be used on all projects, use \code{newValuesList} instead.
 #' 
 #' @export
 #' 
-modifyProjects <- function(projectPaths, modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), newValuesList, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE, update.functionInputs = TRUE) {
+modifyProjects <- function(projectPaths, modelNames = getRstoxFrameworkDefinitions("stoxModelNames"), newValuesList, newValuesListByProject, add.defaults = FALSE, purge.processData = FALSE, strict = TRUE, update.functionInputs = TRUE) {
     
     # Modify:
-    lapply(projectPaths, function(projectPath) modifyProject(
-        projectPath = projectPath, 
-        modelNames = , modelNames, 
-        newValuesList = newValuesList, 
-        add.defaults = add.defaults, 
-        purge.processData = purge.processData, 
-        strict = strict, 
-        update.functionInputs = update.functionInputs
+    if(!missing(newValuesListByProject)) {
+        mapply(
+            function(projectPath, newValuesList) modifyProject(
+                projectPath = projectPath, 
+                modelNames = , modelNames, 
+                newValuesList = newValuesList, 
+                add.defaults = add.defaults, 
+                purge.processData = purge.processData, 
+                strict = strict, 
+                update.functionInputs = update.functionInputs
+            ), 
+            projectPath = projectPaths, 
+            newValuesList = newValuesListByProject
         )
-    )
+    }
+    else {
+        lapply(projectPaths, function(projectPath) modifyProject(
+            projectPath = projectPath, 
+            modelNames = , modelNames, 
+            newValuesList = newValuesList, 
+            add.defaults = add.defaults, 
+            purge.processData = purge.processData, 
+            strict = strict, 
+            update.functionInputs = update.functionInputs
+            )
+        )
+    }
 }
 
 
@@ -4709,13 +4727,67 @@ is.convertableToVector <- function(x, minLength = 1) {
 }
 
 
+getDefaultProcessName <- function(processID, projectPath) {
+    processTable <- getProcessesSansProcessData(projectPath)
+    thisProcessID <- processID
+    thisProcess <- subset(processTable, processID == thisProcessID)
+    
+    functionName <- getFunctionNameFromPackageFunctionName(thisProcess$functionName)
+    groupingVariablesSansSurveyAndSpeciesCategory <- setdiff(thisProcess$functionParameters[[1]]$GroupingVariables, c("Survey", "SpeciesCategory"))
+    
+    
+    if(startsWith(functionName, "Report")) {
+        processName <- paste(
+            functionName, 
+            thisProcess$functionParameters[[1]]$ReportFunction, 
+            thisProcess$functionParameters[[1]]$TargetVariable, 
+            sep = "_"
+        )
+        
+        if(length(groupingVariablesSansSurveyAndSpeciesCategory)) {
+            processName <- paste(
+                processName, 
+                "By", 
+                paste(groupingVariablesSansSurveyAndSpeciesCategory, collapse = "_"), 
+                sep = "_"
+            )
+        }
+    }
+    else if(startsWith(functionName, "Filter")) {
+        processName <- paste(
+            functionName, 
+            sub("[^[:alnum:]].*", "", thisProcess$functionParameters[[1]]$FilterExpression), 
+            sep = "_"
+        )
+    }
+    else if(startsWith(functionName, "ImputeSuperIndividuals")) {
+        processName <- paste(
+            functionName, 
+            thisProcess$functionParameters[[1]]$ImputeAtMissing, 
+            sep = "_"
+        )
+    }
+    else if(startsWith(functionName, "PlotReportBootstrap")) {
+        processName <- paste0("Plot", thisProcess$functionInputs[[1]]$ReportBootstrapData)
+    }
+    else {
+        processName <- functionName
+    }
+    
+    # Add "_1" if the processName is already used:
+    processName <- getNewDefaultName(processTable$processName, processName, start = NULL)
+    
+    return(processName)
+}
+
+
 
 getNewDefaultProcessName <- function(projectPath) {
     
     # Get all process names of the specified model:
     #processIndexTable <- readProcessIndexTable(projectPath, modelName)
     
-    # Changed on 2021-01-19 to check against all processes of all models, as all process named should be unnique across models due to the possibility of gettinng output from processes in other models: 
+    # Changed on 2021-01-19 to check against all processes of all models, as all process named should be unique across models due to the possibility of getting output from processes in other models: 
     processIndexTable <- readProcessIndexTable(projectPath, modelName = NULL)
     processNames <- processIndexTable$processName
     
@@ -6751,6 +6823,7 @@ writeGPX_track_points <- function(
     filePath, 
     layers = c("geometry", "track_name", "track_fid", "track_seg_id", "track_seg_point_id", "Stratum")
 ) {
+    
     # Keep only the specified layers:
     x <- subset(x, select = layers)
     
@@ -6767,8 +6840,9 @@ writeGPX_track_points <- function(
 writeGPX_waypoints <- function(
     x, 
     filePath, 
-    layers = c("geometry", "Stratum")
+    layers = c("geometry", "Stratum", "name")
 ) {
+    
     # Keep only the specified layers:
     x <- subset(x, select = layers)
     

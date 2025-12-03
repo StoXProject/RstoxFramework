@@ -8,6 +8,7 @@ modifyProjects(
   projectPaths,
   modelNames = getRstoxFrameworkDefinitions("stoxModelNames"),
   newValuesList,
+  newValuesListByProject,
   add.defaults = FALSE,
   purge.processData = FALSE,
   strict = TRUE,
@@ -20,6 +21,8 @@ modifyProjects(
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
 \item{newValuesList}{A list of \code{newValues} named by the processes to modify. See also \code{\link{modifyProcess}}.}
+
+\item{newValuesListByProject}{A list of \code{newValuesList}, one for each project. If the same value should be used on all projects, use \code{newValuesList} instead.}
 
 \item{add.defaults}{Logical: If TRUE defaults of a function are added when setting the function of the process.}
 

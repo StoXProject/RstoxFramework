@@ -39,7 +39,7 @@ runProjects(
 
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
-\item{processes}{The name of the processes.}
+\item{processes}{The name of the processes to return data from.}
 
 \item{startProcess}{The process index, name or ID at which to start the model run. A list can be given named by the models if one needs to specify start process for each model. Models given inn \code{modelNames} but not in the list will be run from the start of the model.}
 

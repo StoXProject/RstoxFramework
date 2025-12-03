@@ -513,9 +513,6 @@ readModelData <- function(
     ...
 ) {
     
-    
-    #browser()
-    
     # List the files of the project:
     if(isProject(projectPath)) {
         outputFolders <- getProjectPaths(projectPath)$outputFolders
@@ -523,21 +520,16 @@ readModelData <- function(
         outputFiles <- lapply(outputFolders, listOutputfiles)
         
         
-        matchName <- function(x, name = NULL) {
-            if(length(name)) {
-                presentName <- intersect(names(x), name)
-                x[presentName]
-            }
-        }
         
         # Subset by the modelName:
         if(!length(modelName)) {
             modelName = getRstoxFrameworkDefinitions("stoxModelNames")
         }
-        outputFiles <- matchName(outputFiles, modelName)
+        outputFiles <- subsetByName(outputFiles, modelName)
+        
         # Subset by the processName:
         if(length(processName)) {
-            outputFiles <- lapply(outputFiles, matchName, processName)
+            outputFiles <- lapply(outputFiles, subsetByName, processName)
         }
         
         
@@ -596,6 +588,16 @@ readModelData <- function(
         stop("The projectPath ", projectPath, " is not a StoX project.")
     }
     
+}
+
+# Function to subset a list by names:
+subsetByName <- function(x, name = NULL) {
+    if(length(name)) {
+        presentName <- intersect(names(x), name)
+        x <- x[presentName]
+    }
+    
+    return(x)
 }
 
 

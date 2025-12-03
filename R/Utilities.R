@@ -204,33 +204,61 @@ getTrailingInteger <- function(x, integer = TRUE) {
 }
 
 # Function to generate a new name in the sequence of names starting with the prefix:
-getNewDefaultName <- function(names, prefix) {
+getNewDefaultName <- function(names, prefix, start = 1) {
     
-    if(length(names)) {
-        # Find the names starting with the prefix:
-        startsWithProcess_Prefix <- which(startsWith(names, prefix))
-        # Get the trailing integers of the names starting with the prefix:
-        trailingIntegerString <- getTrailingInteger(names[startsWithProcess_Prefix], integer = FALSE)
-        trailingInteger <- getTrailingInteger(names[startsWithProcess_Prefix])
-        # Verify that the number of characters equals the sum of the prefix and the number of characters of the numeric string:
-        hasCorrectNumberOfCharacters <- nchar(names[startsWithProcess_Prefix]) == nchar(prefix) + nchar(trailingIntegerString)
+    # 1. Detect whether the prefix exists as a full name or as a incremental name (prefix with an integer suppix separated by underscore):
+    prefix_is_full_name <- any(prefix %in% names)
+    
+    
+    # Find the name that start with the prefix:
+    startsWithProcess_Prefix <- which(startsWith(names, prefix))
+    
+    if(!prefix_is_full_name && length(startsWithProcess_Prefix) == 0) {
+        if(length(start)) {
+            newName <- paste(prefix, start, sep = "_")
+        }
+        else {
+            newName <- prefix
+        }
+        
+        return(newName)
     }
+    
+    # ... and get the trailing integer:
+    trailingIntegerString <- getTrailingInteger(names[startsWithProcess_Prefix], integer = FALSE)
+    
+    # Verify that the number of characters equals the sum of the prefix and the number of characters of the numeric string. The +1 is for the underscore:
+    hasCorrectNumberOfCharacters <- nchar(names[startsWithProcess_Prefix]) == nchar(prefix) + 1 + nchar(trailingIntegerString)
+    
+    # If the identified name that starts with the prefix also has a trailing integer separated by a single character (assuming this is an underscore), increment the integer:
+    if(any(hasCorrectNumberOfCharacters)) {
+        # Increment the integer:
+        trailingInteger <- max(as.integer(trailingIntegerString), 1) + 1
+        
+        newName <- paste(prefix, trailingInteger, sep = "_")
+        
+        return(newName)
+    }
+    else if(prefix_is_full_name) {
+        newName <- paste(prefix, 2, sep = "_")
+        
+        return(newName)
+    }
+    # If not found in the vector of names, return the prefix, possibly with a trailing start integer:
     else {
-        hasCorrectNumberOfCharacters <- NULL
+        if(length(start)) {
+            newName <- paste(prefix, start, sep = "_")
+        }
+        else {
+            newName <- prefix
+        }
+        
+        return(newName)
     }
+        
+        
+
     
-    if(length(hasCorrectNumberOfCharacters) == 0) {
-        newInteger <- 1
-    }
-    else {
-        # Get new integer as one more than the maximum integer:
-        newInteger <- max(trailingInteger[hasCorrectNumberOfCharacters]) + 1
-    }
-    
-    # Add 1 to the latest integer:
-    newName <- paste0(prefix, newInteger)
-    
-    return(newName)
 }
 
 #' Function to convert from json to R expression:

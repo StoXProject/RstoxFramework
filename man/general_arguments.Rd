@@ -20,7 +20,7 @@
 
 \item{processNames}{A vector of names of the processes.}
 
-\item{processes}{The name of the processes.}
+\item{processes}{The name of the processes to return data from.}
 
 \item{functionName}{The name of the function used by the process.}
 

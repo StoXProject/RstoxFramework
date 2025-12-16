@@ -1,3 +1,7 @@
+# RstoxFramework v4.2.0-9006 (2025-12-15)
+* Fixed bug where the current process and beyond were shown in the drop down list for function inputs.
+* Updated the test project coastalCod_20 to contain translation of length.
+
 # RstoxFramework v4.2.0-9005 (2025-11-16)
 * Restricted error when BaselineSeedTable does not include all required processes to not include non-Enabled processes.
 * Added the argument newValuesListByProject to modifyProjects().

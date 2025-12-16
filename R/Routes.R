@@ -914,7 +914,12 @@ getProcessPropertySheet <- function(projectPath, modelName, processID, argumentF
                 #possibleValues = lapply(functionInputNames, getProcessNamesByDataType, processTable = processTable),
                 # Set each element (using as.list()) as list to ensure that we keep the square brackets "[]" in the JSON string even with auto_unbox = TRUE.
                 #possibleValues = lapply(lapply(functionInputNames, getProcessNamesByDataType, processTable = processTable), as.list),
-                possibleValues = lapply(functionInputNames, getProcessNamesByDataType, processTable = processTable),
+                possibleValues = lapply(
+                    functionInputNames, 
+                    getProcessNamesByDataType, 
+                    processTable = processTable, 
+                    before = processName
+                ),
                 # 7. value:
                 value = functionInputs
             )
@@ -1034,10 +1039,14 @@ getProcessPropertySheet <- function(projectPath, modelName, processID, argumentF
 
 
 # Function that gets the process names of the processes returning the specified data type
-getProcessNamesByDataType <- function(dataType, processTable) {
+getProcessNamesByDataType <- function(dataType, processTable, before = NULL) {
     hasRequestedDataType <- processTable$functionOutputDataType == dataType
     if(any(hasRequestedDataType)) {
         output <- processTable$processName[hasRequestedDataType]
+        atBefore <- which(output == before)
+        if(length(atBefore)) {
+            output <- output[seq_len(atBefore - 1)]
+        }
     }
     else {
         output <- NULL

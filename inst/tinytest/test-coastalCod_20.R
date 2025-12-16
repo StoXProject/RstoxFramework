@@ -8,5 +8,6 @@ test <- compareProjectToStoredOutputFiles(
         returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE, data.out = TRUE
     )
 
-print(test)
+message(test)
+warning(test)
 expect_true(sum(lengths(test$test)) == 0)

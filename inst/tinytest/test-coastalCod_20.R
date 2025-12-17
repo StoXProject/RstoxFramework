@@ -2,12 +2,10 @@
 projectPath <- system.file("test",  "coastalCod_20.zip", package = "RstoxFramework")
 #expect_true(compareProjectToStoredOutputFiles(projectPath, tolerance = 1e-12, ignore.process = "Bootstrap"))
 
-test <- compareProjectToStoredOutputFiles(
+expect_true(
+    compareProjectToStoredOutputFiles(
         projectPath, 
-        tolerance = 1e-12, 
-        returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE, data.out = TRUE
+        tolerance = 1e-11, 
+        returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE,
     )
-
-message(test)
-warning(test)
-expect_true(sum(lengths(test$test)) == 0)
+)

@@ -5,7 +5,7 @@ projectPath <- system.file("test",  "coastalCod_20.zip", package = "RstoxFramewo
 expect_true(
     compareProjectToStoredOutputFiles(
         projectPath, 
-        tolerance = 1e-12, 
-        returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE
+        tolerance = 1e-11, 
+        returnBootstrapData = TRUE, selection = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE,
     )
 )

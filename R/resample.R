@@ -65,6 +65,10 @@ Bootstrap <- function(
     BaselineSeedTable = data.table::data.table()
 ) {
     
+    if(!length(OutputVariables)) {
+        message("StoX: Using OutputVariables to specify only the variables that are needed in reports can reduce CPU time and load significantly. The function getBootstrapOutputVariables can be used to get a list of the variables used in the reports.")
+    }
+    
     # Use previously generated output data if specified:
     if(UseOutputData) {
         warning("StoX: Using UseOutputData = TRUE in the function Bootstrap implies reading the BootstrapData from a previous run (stored in the output folder)). Any changes made to the Baseline model or to the parameters of the Bootstrap itself will not be accounted for unless UseOutputData = FALSE. The option UseOutputData = TRUE is intended only for saving time when one needs to generate a report from an existing Bootstrap run.")

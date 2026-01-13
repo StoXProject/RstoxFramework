@@ -1,3 +1,10 @@
+# RstoxFramework v4.2.0-9007 (2025-01-12)
+* Fixed bug in Bootstrap() when UseOutputData was TRUE, in which case the stored output file was not found.
+* Added message recommending to use the OutputVariables if not given in Bootstrap().
+* Fixed bug where a process was shown as terminal (bold face) even if it was used in a later model.
+* Added documentation of the output of getProcessTable.
+
+
 # RstoxFramework v4.2.0-9006 (2025-12-15)
 * Fixed bug where the current process and beyond were shown in the drop down list for function inputs.
 * Updated the test project coastalCod_20 to contain translation of length.

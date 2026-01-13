@@ -2585,6 +2585,7 @@ getFunctionInputs <- function(projectPath, modelName, processID, only.valid = FA
         functionInputs <- functionInputs[intersect(names(functionInputs), argumentsToShow)]
     }
     
+    
     return(functionInputs)
 }
 
@@ -3114,6 +3115,33 @@ modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processNam
 #' @param check.only.enabled Logical: If TRUE check input errors only for enabled procecsses.
 #' @param processTable The process table as returned from \code{\link{getProcessTable}}. Used in the function \code{updateProcessTable}.
 #' 
+#' @value A table of the following columns:
+#' \describe{
+#'   \item{\code{processID}}{The process ID of the process in the form P001, P002, etc. The process ID exists unchanged throughout the life of the process.}
+#'   \item{\code{processName}}{The current name of the process.}
+#'   \item{\code{modelName}}{The name of the model, one of baseline, analysis and report.}
+#'   \item{\code{projectPath}}{The path to the project folder.}
+#'   \item{\code{functionName}}{The function name.}
+#'   \item{\code{enabled}}{Logical: Whether the process enabled?}
+#'   \item{\code{showInMap}}{Logical: Will the process be shown in the map of the StoX GUI.}
+#'   \item{\code{fileOutput}}{Logical: Will the process produce output files.}
+#'   \item{\code{functionParameters}}{A list of function parameters that are shown in the GUI.}
+#'   \item{\code{functionInputs}}{A list of function inputs that are shown in the GUI.}
+#'   \item{\code{functionInputs_UseProcessData}}{A list of function inputs that are shown in the GUI, including those that are hidded by UseProcessData = TRUE.}
+#'   \item{\code{functionInputsRecursive}}{A list of function inputs recursively, including function inputs to processes listed as function inputs in \code{functionInputs.}
+#'   \item{\code{functionOutputDataType}}{The StoX data type of the function output.}
+#'   \item{\code{functionInputError}}{Logical: Does the process contain errors in function inputs? E.g., is there a function input that does not exist?}
+#'   \item{\code{canShowInMap}}{Logical: Can the process output be shown in the map?}
+#'   \item{\code{hasProcessData}}{Logical: Does the process return process data?}
+#'   \item{\code{hasBeenRun}}{Logical: Has the process been run?}
+#'   \item{\code{functionInputProcessIDs}}{A list of processIDs of the function inputs. This in only used by the GUI.}
+#'   \item{\code{usedInProcessIndices}}{A list of indices of the processes in which the current process is used as function input.This in only used by the GUI.}
+#'   \item{\code{usedInProcessIDs}}{A list of IDs of the processes in which the current process is used as function input.This in only used by the GUI.}
+#'   \item{\code{usedInRecursiveProcessIndices}}{A list of indices of the processes in which the current process is used as function input, recursively, so that a processes using a process that is using the current process are included.}
+#'   \item{\code{usedInRecursiveProcessNames}}{A list of IDs of the processes in which the current process is used as function input, recursively, so that a processes using a process that is using the current process are included.}
+#'   \item{\code{terminalProcess}}{Logical: Is the process a terminal process, i.e. is it not used in any later processes (also in later models)?}
+#' }
+#' 
 #' @export
 #' 
 getProcessTable <- function(projectPath, modelName = NULL, argumentFilePaths = NULL, only.valid = TRUE, return.processIndex = FALSE, return.processFlow = TRUE) {
@@ -3217,7 +3245,7 @@ updateProcessTable <- function(processTable, projectPath, modelName = NULL, only
         processTable[, usedInRecursiveProcessNames := lapply(usedInRecursiveProcessIndices, function(x) processName[x])]
         
         # Add a column identifying processes which are not used in any other enabled processes:
-        processTable[, terminalProcess := lapply(usedInProcessIndices, function(ind) !any(enabled[ind])) ]
+        processTable[, terminalProcess := lapply(usedInRecursiveProcessIndices, function(ind) !any(enabled[ind])) ]
     }
     
     # Subset by modelName:
@@ -5576,9 +5604,9 @@ getFunctionArguments <- function(projectPath, modelName, processID, arguments = 
             subFolder = NULL
         )
         functionArguments["outputData"] <- getProcessOutputTextFilePath(
-            #projectPath = projectPath, 
-            #modelName = modelName, 
-            #processID = process$processID, 
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = process$processID, 
             processOutput = NULL, 
             folderPath = outputFolderPath, 
             file.ext = "nc"
@@ -6554,11 +6582,11 @@ getProcessIDFromFunctionName <- function(projectPath, modelName = NULL, function
 
 
 
-
+# The arguments projectPath, modelName and processID are only used to get the file path to the bootstrap files for the UseOutputData option:
 getProcessOutputTextFilePath <- function(
-    #projectPath, 
-    #modelName, 
-    #processID, 
+    projectPath, 
+    modelName, 
+    processID, 
     folderPath, 
     file.ext, 
     processOutput = NULL
@@ -6578,13 +6606,17 @@ getProcessOutputTextFilePath <- function(
         dir.create(folderPath, recursive = TRUE)
     }
     
-    ### # Define the process output file path:
-    ### if(file.ext == "nc") {
-    ###     # Define a single file output named by the process name:
-    ###     dataType <- getDataType(projectPath = projectPath, modelName = modelName, processID = processID)
-    ###     fileNameSansExt <- dataType
-    ### }
-    ### else {
+    # Define the process output file path:
+    if(file.ext == "nc") {
+        # Define a single file output named by the process name:
+        dataType <- getDataType(
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
+        )
+        fileNameSansExt <- dataType
+    }
+    else {
         # Added on 2020-06-16. Add the data type in the file name only if multiple outputs, but not for RData files (default for analysis processes):
         # Changed on 2021-03-10 to only use the names of the output, not prefixed by the process name:
         if(length(processOutput)) {
@@ -6592,12 +6624,9 @@ getProcessOutputTextFilePath <- function(
             fileNameSansExt <- names(processOutput)
         }
         else {
-            # Get the process name
-            #processName <- getProcessNameFromProcessID(projectPath, modelName, processID)
-            #fileNameSansExt <- processName
             fileNameSansExt <- "EmptyOutput"
         }
-    ### }
+    }
     
     # Add file extension:
     filePathSansExt <- file.path(folderPath, fileNameSansExt)
@@ -6615,6 +6644,7 @@ getProcessOutputTextFilePath <- function(
 ##################################################
 #' Write the output of a function
 #' 
+#' @inheritParams general_arguments
 #' @param x The output from a StoX function.
 #' @param folderPath Character: The path to the folder to write the files to
 #' @param filePath Character: Optional. If given this overrides the default file paths. Must be of the same length as \code{x} is \code{x} is a list of tables etc.
@@ -6623,7 +6653,16 @@ getProcessOutputTextFilePath <- function(
 #' 
 #' @export
 #'
-writeStoxOutput <- function(x, folderPath, filePath, ow = FALSE, escape = TRUE) {
+writeStoxOutput <- function(
+    x, 
+    folderPath, 
+    filePath, 
+    ow = FALSE, 
+    escape = TRUE, 
+    projectPath = projectPath, 
+    modelName = modelName, 
+    processID = processID
+) {
     
     # If a valid output class, wrap the function output to a list named with "output" as default, as we do not know the function that was used to produce the data (as we do in runProcess()):
     if(isValidOutputDataClass(x)) {
@@ -6636,7 +6675,7 @@ writeStoxOutput <- function(x, folderPath, filePath, ow = FALSE, escape = TRUE) 
     # Stop if the optional 'filePath' does not have the same length as the data:
     if(!missing(filePath)) {
         if(length(filePath) != length(x)) {
-            stop("If the data is a list of tables ect, there will be one file per list element, and the filePath must be of the same length as the data.")
+            stop("If the data is a list of tables, there will be one file per list element, and the filePath must be of the same length as the data.")
         }
     }
     else {
@@ -6646,9 +6685,12 @@ writeStoxOutput <- function(x, folderPath, filePath, ow = FALSE, escape = TRUE) 
         
         # Set the default file name:
         filePath <- getProcessOutputTextFilePath(
-            x, 
-            folderPath = folderPath,
-            file.ext = outputFileType
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID, 
+            folderPath = folderPath, 
+            file.ext = outputFileType, 
+            processOutput = x
         )
     }
     
@@ -6656,9 +6698,6 @@ writeStoxOutput <- function(x, folderPath, filePath, ow = FALSE, escape = TRUE) 
     if(any(file.exists(filePath)) & !ow) {
         stop("File(s) ", paste(filePath, collapse = ", "), " exist. Provide a different filePath or use ow = TRUE to overwrite.")
     }
-    
-    
-    
     
     
     # Store the process output:
@@ -6715,7 +6754,10 @@ writeProcessOutputTextFile <- function(processOutput, projectPath, modelName, pr
             processOutput, 
             folderPath = outputFolderPath, 
             ow = TRUE, 
-            escape = escape
+            escape = escape,
+            projectPath = projectPath, 
+            modelName = modelName, 
+            processID = processID
         )
     }
     else {

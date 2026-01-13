@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9006</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0-9007</span>
       </span>
     </div>
 
@@ -53,7 +53,16 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">writeStoxOutput</span><span class="op">(</span><span class="va">x</span>, <span class="va">folderPath</span>, <span class="va">filePath</span>, ow <span class="op">=</span> <span class="cn">FALSE</span>, escape <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">writeStoxOutput</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">folderPath</span>,</span>
+<span>  <span class="va">filePath</span>,</span>
+<span>  ow <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  escape <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  projectPath <span class="op">=</span> <span class="va">projectPath</span>,</span>
+<span>  modelName <span class="op">=</span> <span class="va">modelName</span>,</span>
+<span>  processID <span class="op">=</span> <span class="va">processID</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -78,6 +87,18 @@
 
 <dt id="arg-escape">escape<a class="anchor" aria-label="anchor" href="#arg-escape"></a></dt>
 <dd><p>Logical: Should strings be escaped in text output. Defaulted to TRUE.</p></dd>
+
+
+<dt id="arg-projectpath">projectPath<a class="anchor" aria-label="anchor" href="#arg-projectpath"></a></dt>
+<dd><p>The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.</p></dd>
+
+
+<dt id="arg-modelname">modelName<a class="anchor" aria-label="anchor" href="#arg-modelname"></a></dt>
+<dd><p>The name of the model (possible values are "baseline", "analysis" and "report").</p></dd>
+
+
+<dt id="arg-processid">processID<a class="anchor" aria-label="anchor" href="#arg-processid"></a></dt>
+<dd><p>The ID of the process.</p></dd>
 
 </dl></div>
 

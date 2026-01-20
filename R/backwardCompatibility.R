@@ -645,16 +645,21 @@ applySplitProcess <- function(action, projectDescription, packageName, verbose =
     for(ind in atFunctionName) {
         
         # Do the splitting:
-        splited <- action$newProcesses(
+        splitted <- action$newProcesses(
             projectDescription = projectDescription, 
             modelName = action$modelName, 
             processIndex = ind
         )
         
+        # If the splitting process returns an empty object, this indicates that the splitting has been skipped, as there is no processes to be split (e.g. already split)
+        if(!length(splitted)) {
+            return(projectDescription)
+        }
+        
         # Get the name of the old process:
         oldProcessName <- projectDescription[[action$modelName]][[ind]]$processName
         # Get the name of the last (second) of the processes after splitting, which will be used as function input in other processes:
-        newProcessName <- names(splited)[2]
+        newProcessName <- names(splitted)[2]
         
         if(verbose) {
             message("StoX: Backward compatibility: Splitting process ", oldProcessName, " to the processes ", oldProcessName, " and ", newProcessName, ".")
@@ -672,7 +677,7 @@ applySplitProcess <- function(action, projectDescription, packageName, verbose =
             # The processes up to the process to split:
             projectDescription[[action$modelName]][seq_len(ind - 1)], 
             # The split process:
-            splited,
+            splitted,
             # The processes after to the process to split:
             projectDescription[[action$modelName]][seq(ind + 1, length(projectDescription[[action$modelName]]))]
         )

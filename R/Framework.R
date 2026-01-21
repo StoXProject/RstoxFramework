@@ -1907,7 +1907,8 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                     processID = processIDsToReset
                 )
                 
-                doesNotHaveUseOutputDataTRUE <- processTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) && isTRUE(x$UseOutputData))), on = c("modelName", "processID")]
+                # Exclude processes that has a UseOutputData argument, as these need the output file in order to work when UseOutputData = TRUE:
+                doesNotHaveUseOutputDataTRUE <- processTable[subsetTable, sapply(functionParameters, function(x) !(any("UseOutputData" %in% names(x)) )), on = c("modelName", "processID")]
                 
                 unlink(foldersToDelete[doesNotHaveUseOutputDataTRUE], recursive = TRUE, force = TRUE)
             }

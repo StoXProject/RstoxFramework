@@ -21,7 +21,7 @@ expandProcess(
 
 \item{values}{A list of values to assign to the process, such as list(processName = "ReadBiotic", functionName = "RstoxBase::ReadBiotic").}
 
-\item{returnProcessTable}{Logical: If TRUE return the process table (much used in functions used by the GUI).}
+\item{returnProcessTable}{Logical: If TRUE return the process table of the specified model (much used in functions used by the GUI). If NULL returns the process table of all models.}
 }
 \description{
 Insert a StoX process after a specific process

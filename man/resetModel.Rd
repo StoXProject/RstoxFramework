@@ -29,7 +29,7 @@ resetModel(
 
 \item{shift}{The position relative to the current memory status to un/redo to.}
 
-\item{returnProcessTable}{Logical: If TRUE return the process table (much used in functions used by the GUI).}
+\item{returnProcessTable}{Logical: If TRUE return the process table of the specified model (much used in functions used by the GUI). If NULL returns the process table of all models.}
 
 \item{delete}{A character vector naming which elements to delete, where possible values are "memory", for deleting the output files that are stored as memory files, and "text" to delete the output text files.}
 

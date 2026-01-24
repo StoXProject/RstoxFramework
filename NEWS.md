@@ -1,4 +1,6 @@
 # RstoxFramework v4.2.0-9007 (2025-01-12)
+* Fixed bug with function input drop-down lists, which were not showing any content when functionInputs were from a different StoX model.
+* Fixed bug where links to external (non Rstox) packages did not work in the GUI.
 * Fixed bug in Bootstrap() when UseOutputData was TRUE, in which case the stored output file was not found.
 * Added message recommending to use the OutputVariables if not given in Bootstrap().
 * Fixed bug where a process was shown as terminal (bold face) even if it was used in a later model.

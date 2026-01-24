@@ -24,7 +24,7 @@ prependProcess(
 
 \item{values}{A list of zero or more of the following process arguments: functionParameters, processData, processParameters. The arguments functionInputs, functionName and processName are set as equal to the process given by \code{processName}.}
 
-\item{returnProcessTable}{Logical: If TRUE return the process table (much used in functions used by the GUI).}
+\item{returnProcessTable}{Logical: If TRUE return the process table of the specified model (much used in functions used by the GUI). If NULL returns the process table of all models.}
 }
 \description{
 This method is only available for functions that has the same data type as input and output.

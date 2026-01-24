@@ -1783,6 +1783,7 @@ writeActiveProcessIDFromTable <- function(projectPath, activeProcessIDTable) {
 #'
 resetModel <- function(projectPath, modelName, processID = NULL, processDirty = FALSE, shift = 0, returnProcessTable = FALSE, delete = c("memory", "text"), deleteCurrent = FALSE, purgeOutputFiles = FALSE, argumentFilePaths = NULL, processTable = NULL) {
     
+    
     # Get the process ID to reset the model to:
     #processTable <- readProcessIndexTable(projectPath, modelName)
     if(!length(processTable)) {
@@ -1828,12 +1829,24 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
                 output <- list(
                     activeProcess = getActiveProcess(projectPath = projectPath, modelName = modelName)
                 )
-                if(returnProcessTable) {
-                    output <- c(
-                        list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName, argumentFilePaths = argumentFilePaths)), 
-                        output
-                    )
+                
+                
+                # Return all models if returnProcessTable = TRUE or the specified modelsif returnProcessTable is empty:
+                if(!length(returnProcessTable)) {
+                    processTable <- getProcessTable(projectPath = projectPath, modelName = NULL, argumentFilePaths = argumentFilePaths)
                 }
+                else if(isTRUE(returnProcessTable)) {
+                    processTable <- getProcessTable(projectPath = projectPath, modelName = modelName, argumentFilePaths = argumentFilePaths)
+                }
+                else if(!isFALSE(returnProcessTable)) {
+                    stop("returnProcessTable must be a logical or NULL.")
+                }
+                
+                output <- c(
+                    list(processTable = processTable), 
+                    output
+                )
+                
                 
                 return(output)
             }
@@ -1942,13 +1955,22 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
     output <- list(
         activeProcess = getActiveProcess(projectPath = projectPath, modelName = modelName)
     )
-    if(returnProcessTable) {
-        output <- c(
-            #list(processTable = getProcessTable(projectPath = projectPath, modelName = modelName)), 
-            list(processTable = getProcessTable(projectPath = projectPath, modelName = NULL)), 
-            output
-        )
+    
+    # Return all models if returnProcessTable = TRUE or the specified modelsif returnProcessTable is empty:
+    if(!length(returnProcessTable)) {
+        processTable <- getProcessTable(projectPath = projectPath, modelName = NULL)
     }
+    else if(isTRUE(returnProcessTable)) {
+        processTable <- getProcessTable(projectPath = projectPath, modelName = modelName)
+    }
+    else if(!isFALSE(returnProcessTable)) {
+        stop("returnProcessTable must be a logical or NULL.")
+    }
+    
+    output <- c(
+        list(processTable = processTable), 
+        output
+    )
     
     #output <- list(
     #    if(returnProcessTable) processTable = getProcessTable(projectPath = projectPath, modelName = modelName), 
@@ -1956,6 +1978,9 @@ resetModel <- function(projectPath, modelName, processID = NULL, processDirty = 
     #)
     return(output)
 }
+
+
+
 
 
 

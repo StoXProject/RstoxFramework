@@ -888,9 +888,11 @@ getProcessPropertySheet <- function(projectPath, modelName, processID, argumentF
             #processTable <- getProcessTable(projectPath = projectPath, modelName = modelName, beforeProcessID = processID)
             #processTable <- scanForModelError(projectPath = projectPath, modelName = modelName, beforeProcessID = processID)
             
+            
             if(!length(processTable)) {
                 processTable <- scanForModelError(projectPath = projectPath, modelName = NULL, beforeProcessID = processID, argumentFilePaths = argumentFilePaths)
             }
+            
             
             #thisProcessIndex <- which(processTable$processID == processID)
             #processTable <- processTable[seq_len(thisProcessIndex), ]
@@ -1312,7 +1314,7 @@ setProcessPropertyValue <- function(groupName, name, value, projectPath, modelNa
             delete = c("memory", if(!hasUseOutputData(projectPath, modelName, processID)) "text"), 
             deleteCurrent = TRUE, 
             processTable = processTable, 
-            returnProcessTable = TRUE
+            returnProcessTable = NULL
         )$processTable
     }
     
@@ -1444,7 +1446,69 @@ getObjectHelpAsHtml <- function(packageName, objectName) {
         html <- getRstoxFrameworkDefinitions("objectHelp")[[objectName]]
     }
     
+    # If the html is mepty, try to get the documentation live:
+    if(!length(html)) {
+        html <- getHtmlHelp(objectName, packageName)
+    }
+    
     # Return the objectDocumentation:
+    return(html)
+}
+
+
+# Function to get a single html for a function not in the Rstox packages:
+getHtmlHelp <- function(objectName, packageName, stylesheet = "") {
+    
+    # Get the documentation of the package:
+    db <- tools::Rd_db(packageName)
+    
+    # Get the links of the package:
+    Links <- tools::findHTMLlinks(pkgDir = find.package(packageName))
+    
+    # Write the help to file as html and read back:
+    objectName.Rd <- paste0(objectName, ".Rd")
+    # If the objectName.Rd is not present, find the link:
+    if(! objectName.Rd %in% names(db)) {
+        if(objectName %in% names(Links)) {
+            objectName <- basename( tools::file_path_sans_ext(Links[objectName]) )
+            objectName.Rd <- paste0(objectName, ".Rd")
+        }
+        else {
+            warning("")
+        }
+    }
+    
+    
+    # Return empty string if the function 
+    if(! objectName.Rd %in% names(db)) {
+        return("")
+    }
+    
+    #print(objectName.Rd)
+    
+    # Write to a temporary file
+    outfile <- tempfile(fileext = ".html")
+    tools::Rd2HTML(
+        db[[objectName.Rd]], 
+        out = outfile, 
+        package = packageName, 
+        Links = Links, 
+        stylesheet = stylesheet
+    )
+    html <- paste(readLines(outfile), collapse="\n")
+    
+    # This hack was needed as of R 4.1 or something, where the links all of a sudden were with "help" instead of "html":
+    html  <-  gsub("/help/",  "/html/", html)
+    
+    # Add the index links of the Rstox packages:
+    html  <-  gsub(
+        "href=\"00Index.html\">Index",  
+        paste0("href=\"../../", packageName, "/html/00Index.html\">Index"), 
+        html
+    )
+    
+    unlink(outfile, force = TRUE)
+    
     return(html)
 }
 

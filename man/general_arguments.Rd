@@ -56,7 +56,7 @@
 
 \item{only.valid}{Logical: If TRUE subset function arguments (inputs and parameters) to only those to be shown as a consequence of argument hierarchy (e.g., one argument being irrelevant for a specific setting of another).}
 
-\item{returnProcessTable}{Logical: If TRUE return the process table (much used in functions used by the GUI).}
+\item{returnProcessTable}{Logical: If TRUE return the process table of the specified model (much used in functions used by the GUI). If NULL returns the process table of all models.}
 
 \item{applyBackwardCompatibility}{Logical: If TRUE apply backward compatibility actions when running \code{readProjectDescription}.}
 

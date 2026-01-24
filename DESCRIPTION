@@ -1,6 +1,6 @@
 Package: RstoxFramework
 Version: 4.2.0-9007
-Date: 2026-01-21
+Date: 2026-01-24
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 

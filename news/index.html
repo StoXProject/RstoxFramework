@@ -49,7 +49,9 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="4.2.0-9007" id="rstoxframework-v420-9007-2025-01-12">RstoxFramework v4.2.0-9007 (2025-01-12)<a class="anchor" aria-label="anchor" href="#rstoxframework-v420-9007-2025-01-12"></a></h2>
-<ul><li>Fixed bug in Bootstrap() when UseOutputData was TRUE, in which case the stored output file was not found.</li>
+<ul><li>Fixed bug with function input drop-down lists, which were not showing any content when functionInputs were from a different StoX model.</li>
+<li>Fixed bug where links to external (non Rstox) packages did not work in the GUI.</li>
+<li>Fixed bug in Bootstrap() when UseOutputData was TRUE, in which case the stored output file was not found.</li>
 <li>Added message recommending to use the OutputVariables if not given in Bootstrap().</li>
 <li>Fixed bug where a process was shown as terminal (bold face) even if it was used in a later model.</li>
 <li>Added documentation of the output of getProcessTable.</li>

@@ -1,3 +1,7 @@
+# RstoxFramework v4.2.0 (2025-02-04)
+* Fixed bug where adding a process to a blank project resulted in error.
+
+
 # RstoxFramework v4.2.0-9007 (2025-01-12)
 * Fixed bug with function input drop-down lists, which were not showing any content when functionInputs were from a different StoX model.
 * Fixed bug where links to external (non Rstox) packages did not work in the GUI.

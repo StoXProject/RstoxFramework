@@ -210,9 +210,16 @@ getNewDefaultName <- function(names, prefix, start = 1) {
     prefix_is_full_name <- any(prefix %in% names)
     
     
-    # Find the name that start with the prefix:
-    startsWithProcess_Prefix <- which(startsWith(names, prefix))
+    # Find the names that start with the prefix:
+    if(length(names)) {
+        startsWithProcess_Prefix <- which(startsWith(names, prefix))
+    }
+    # f there are no previous names startsWith(names, prefix) will fail:
+    else {
+        startsWithProcess_Prefix <- NULL
+    }
     
+    # Retrun the default name if w do not find the prefix in the names:
     if(!prefix_is_full_name && length(startsWithProcess_Prefix) == 0) {
         if(length(start)) {
             newName <- paste(prefix, start, sep = "_")

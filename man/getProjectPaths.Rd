@@ -11,6 +11,157 @@ getProjectPaths(projectPath, name = NULL)
 
 \item{name}{A string naming the path element to get. Set this to NULL to get all paths.}
 }
+\value{
+A list of file paths prefixed by the input \code{projectPath} and suffixed by the elements listed below (use \code{name} to output only one or more elements). E.g., projectPath = "blah" and name = "inputFolders" returns the vector c("blah/input/acoustic", "blah/input/biotic", "blah/input/landing"). If the input \code{projectPath} points to a zipped StoX project, connections to files inside the zip are returned:
+
+\describe{
+  \item{acoustic}{input/acoustic}
+  \item{biotic}{input/biotic}
+  \item{landing}{input/landing}
+  \item{baseline}{output/baseline}
+  \item{analysis}{output/analysis}
+  \item{report}{output/report}
+  \item{process}{process}
+  \item{inputFolders}{
+    Vector: 
+    \itemize{
+	     \item{input/acoustic}
+	     \item{input/biotic}
+	     \item{input/landing}
+    }
+  }
+  \item{outputFolders}{
+    Vector: 
+    \itemize{
+	     \item{baseline: output/baseline}
+	     \item{analysis: output/analysis}
+	     \item{report: output/report}
+    }
+  }
+  \item{input}{input}
+  \item{output}{output}
+  \item{process}{process}
+  \item{stoxFolders}{
+    Vector: 
+    \itemize{
+	     \item{input: input}
+	     \item{output: output}
+	     \item{process: process}
+    }
+  }
+  \item{stoxFolderStructure}{
+    Vector: 
+    \itemize{
+	     \item{acoustic: input/acoustic}
+	     \item{biotic: input/biotic}
+	     \item{landing: input/landing}
+	     \item{baseline: output/baseline}
+	     \item{analysis: output/analysis}
+	     \item{report: output/report}
+	     \item{process: process}
+    }
+  }
+  \item{projectSessionFolder}{process/projectSession}
+  \item{dataFolder}{process/projectSession/data}
+  \item{memoryFolder}{process/projectSession/memory}
+  \item{statusFolder}{process/projectSession/status}
+  \item{progressFile}{
+    List: 
+    \itemize{
+	     \item{$baseline: process/projectSession/status/baselineProgress.txt}
+	     \item{$analysis: process/projectSession/status/analysisProgress.txt}
+	     \item{$report: process/projectSession/status/analysisProgress.txt}
+    }
+  }
+  \item{NFile}{
+    List: 
+    \itemize{
+	     \item{$baseline: process/projectSession/status/baselineN.txt}
+	     \item{$analysis: process/projectSession/status/analysisN.txt}
+	     \item{$report: process/projectSession/status/reportN.txt}
+    }
+  }
+  \item{stopFile}{
+    List: 
+    \itemize{
+	     \item{$baseline: process/projectSession/status/baselineStop.txt}
+	     \item{$analysis: process/projectSession/status/analysisStop.txt}
+	     \item{$report: process/projectSession/status/reportStop.txt}
+    }
+  }
+  \item{dataModelsFolder}{process/projectSession/data/models}
+  \item{dataModelsFolders}{
+    Vector: 
+    \itemize{
+	     \item{baseline: process/projectSession/data/models/baseline}
+	     \item{analysis: process/projectSession/data/models/analysis}
+	     \item{report: process/projectSession/data/models/report}
+    }
+  }
+  \item{memoryCurrentFolder}{process/projectSession/memory/current}
+  \item{memoryHistoryFolder}{process/projectSession/memory/history}
+  \item{memoryModelsFolder}{process/projectSession/memory/models}
+  \item{memoryModelsFolders}{
+    Vector: 
+    \itemize{
+	     \item{baseline: process/projectSession/memory/models/baseline}
+	     \item{analysis: process/projectSession/memory/models/analysis}
+	     \item{report: process/projectSession/memory/models/report}
+    }
+  }
+  \item{memoryCurrentModelsFolder}{process/projectSession/memory/current/models}
+  \item{memoryCurrentModelsFolders}{
+    Vector: 
+    \itemize{
+	     \item{baseline: process/projectSession/memory/current/models/baseline}
+	     \item{analysis: process/projectSession/memory/current/models/analysis}
+	     \item{report: process/projectSession/memory/current/models/report}
+    }
+  }
+  \item{projectSessionFolderStructure}{Vector: 
+    \itemize{
+	     \item{process/projectSession/data}
+	     \item{process/projectSession/memory}
+	     \item{process/projectSession/status}
+	     \item{process/projectSession/data/models}
+	     \item{process/projectSession/data/models/baseline}
+	     \item{process/projectSession/data/models/analysis}
+	     \item{process/projectSession/data/models/report}
+	     \item{process/projectSession/memory/current}
+	     \item{process/projectSession/memory/history}
+	     \item{process/projectSession/memory/models}
+	     \item{process/projectSession/memory/models/baseline}
+	     \item{process/projectSession/memory/models/analysis}
+	     \item{process/projectSession/memory/models/report}
+	     \item{process/projectSession/memory/current/models}
+	     \item{process/projectSession/memory/current/models/baseline}
+	     \item{process/projectSession/memory/current/models/analysis}
+	     \item{process/projectSession/memory/current/models/report}
+    }
+  }
+  \item{projectXMLFile}{process/project.xml}
+  \item{projectJSONFile}{process/project.json}
+  \item{projectSavedStatusFile}{process/projectSession/status/projectSavedStatus.txt}
+  \item{modelIsRunningFile}{
+    List: 
+    \itemize{
+	     \item{$baseline: process/projectSession/status/baselineIsRunning.txt}
+	     \item{$analysis: process/projectSession/status/analysisIsRunning.txt}
+	     \item{$report: process/projectSession/status/reportIsRunning.txt}
+    }
+  }
+  \item{projectMemoryIndexFile}{process/projectSession/memory/history/projectMemoryIndex.txt}
+  \item{processIndexTableFile}{process/projectSession/memory/current/processIndexTable.txt}
+  \item{activeProcessIDFile}{process/project.xml}
+  \item{maxProcessIntegerIDFile}{process/projectSession/memory/current/maxProcessIntegerID.txt}
+  \item{projectDescriptionAttributesFile}{process/projectSession/memory/models/projectDescriptionAttributes.rds}
+}
+}
 \description{
 This function gets the paths defined by \code{\link{initiateRstoxFramework}}.
+}
+\examples{
+getProjectPaths("blah", "inputFolders")
+
+
 }

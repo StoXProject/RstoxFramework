@@ -1,3 +1,13 @@
+# RstoxFramework v4.2.1-9001 (2025-02-04)
+* Added message when RstoxFramework fails to read memory files that it has created itself, due to system encoding not being URF-8 on Windows.
+* Added support for returning the JSON string to insert into the OutputVariables field in Bootstrap processes in the StoX GUI from getBootstrapOutputVariables().
+* Added documentation of the returned elements from getProjectPaths().
+* Added support for zipped StoX project in getProjectPaths().
+* Added new features in copyProject. Now empty.input = NA now only keeps files in the root "input" folder and input files in the sub folders that are actually used in the StoX project. Similarly, empty.output = NA implies to only keep the output files from enabled processes which are set to write output data. Also, the argument clean.process was added to clear the "process" folder of all files except the project.json file and the projectSession if close = FALSE.
+* Separated the comparison between original and new output out into the new exported function compareModelData(), so that this function can be used to compare projects without running the projects.
+* Added unit tests for the new functionality in copyProject().
+
+
 # RstoxFramework v4.2.0 (2025-02-04)
 * Fixed bug where adding a process to a blank project resulted in error.
 

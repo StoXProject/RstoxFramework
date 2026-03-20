@@ -1,6 +1,6 @@
 Package: RstoxFramework
 Version: 4.2.1-9001
-Date: 2026-03-13
+Date: 2026-03-21
 Title: The Engine of StoX
 Authors@R: c(
   person(given = "Arne Johannes", 
@@ -52,7 +52,7 @@ Imports:
     methods (>= 3.6.0),
     ncdf4 (>= 1.18),
     RstoxBase (>= 2.2.0-9009),
-    RstoxData (>= 2.2.1-9001),
+    RstoxData (>= 2.2.1-9002),
     scales (>= 1.1.0),
     semver (>= 0.2.0),
     sf (>= 0.9.0),

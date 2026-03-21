@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.1-9001</span>
       </span>
     </div>
 
@@ -164,6 +164,79 @@
 
 <dt id="arg-warn">warn<a class="anchor" aria-label="anchor" href="#arg-warn"></a></dt>
 <dd><p>Logical: If TRUE show warnings that are not highly important.</p></dd>
+
+</dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    <p>A table of the following columns:</p><dl><dt><code>processID</code></dt>
+<dd><p>The process ID of the process in the form P001, P002, etc. The process ID exists unchanged throughout the life of the process.</p></dd>
+
+  <dt><code>processName</code></dt>
+<dd><p>The current name of the process.</p></dd>
+
+  <dt><code>modelName</code></dt>
+<dd><p>The name of the model, one of baseline, analysis and report.</p></dd>
+
+  <dt><code>projectPath</code></dt>
+<dd><p>The path to the project folder.</p></dd>
+
+  <dt><code>functionName</code></dt>
+<dd><p>The function name.</p></dd>
+
+  <dt><code>enabled</code></dt>
+<dd><p>Logical: Whether the process enabled?</p></dd>
+
+  <dt><code>showInMap</code></dt>
+<dd><p>Logical: Will the process be shown in the map of the StoX GUI.</p></dd>
+
+  <dt><code>fileOutput</code></dt>
+<dd><p>Logical: Will the process produce output files.</p></dd>
+
+  <dt><code>functionParameters</code></dt>
+<dd><p>A list of function parameters that are shown in the GUI.</p></dd>
+
+  <dt><code>functionInputs</code></dt>
+<dd><p>A list of function inputs that are shown in the GUI.</p></dd>
+
+  <dt><code>functionInputs_UseProcessData</code></dt>
+<dd><p>A list of function inputs that are shown in the GUI, including those that are hidded by UseProcessData = TRUE.</p></dd>
+
+  <dt><code>functionInputsRecursive</code></dt>
+<dd><p>A list of function inputs recursively, including function inputs to processes listed as function inputs in <code>functionInputs.</code></p></dd>
+
+  <dt><code>functionOutputDataType</code></dt>
+<dd><p>The StoX data type of the function output.</p></dd>
+
+  <dt><code>functionInputError</code></dt>
+<dd><p>Logical: Does the process contain errors in function inputs? E.g., is there a function input that does not exist?</p></dd>
+
+  <dt><code>canShowInMap</code></dt>
+<dd><p>Logical: Can the process output be shown in the map?</p></dd>
+
+  <dt><code>hasProcessData</code></dt>
+<dd><p>Logical: Does the process return process data?</p></dd>
+
+  <dt><code>hasBeenRun</code></dt>
+<dd><p>Logical: Has the process been run?</p></dd>
+
+  <dt><code>functionInputProcessIDs</code></dt>
+<dd><p>A list of processIDs of the function inputs. This in only used by the GUI.</p></dd>
+
+  <dt><code>usedInProcessIndices</code></dt>
+<dd><p>A list of indices of the processes in which the current process is used as function input.This in only used by the GUI.</p></dd>
+
+  <dt><code>usedInProcessIDs</code></dt>
+<dd><p>A list of IDs of the processes in which the current process is used as function input.This in only used by the GUI.</p></dd>
+
+  <dt><code>usedInRecursiveProcessIndices</code></dt>
+<dd><p>A list of indices of the processes in which the current process is used as function input, recursively, so that a processes using a process that is using the current process are included.</p></dd>
+
+  <dt><code>usedInRecursiveProcessNames</code></dt>
+<dd><p>A list of IDs of the processes in which the current process is used as function input, recursively, so that a processes using a process that is using the current process are included.</p></dd>
+
+  <dt><code>terminalProcess</code></dt>
+<dd><p>Logical: Is the process a terminal process, i.e. is it not used in any later processes (also in later models)?</p></dd>
+
 
 </dl></div>
 

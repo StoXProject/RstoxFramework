@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.1-9001</span>
       </span>
     </div>
 
@@ -56,7 +56,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getBootstrapOutputVariables</span><span class="op">(</span></span>
 <span>  <span class="va">projectPath</span>,</span>
 <span>  parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GroupingVariables"</span>, <span class="st">"InformationVariables"</span>, <span class="st">"WeightingVariable"</span>,</span>
-<span>    <span class="st">"TargetVariable"</span><span class="op">)</span></span>
+<span>    <span class="st">"TargetVariable"</span><span class="op">)</span>,</span>
+<span>  JSON.out <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -70,6 +71,10 @@
 
 <dt id="arg-parameters">parameters<a class="anchor" aria-label="anchor" href="#arg-parameters"></a></dt>
 <dd><p>Character: A vector of strings naming the parameters to get from the ReportBootstrap functions.</p></dd>
+
+
+<dt id="arg-json-out">JSON.out<a class="anchor" aria-label="anchor" href="#arg-json-out"></a></dt>
+<dd><p>Logical: If TRUE return a JSON string which can be pasted into the OutputVariables parameter in the Bootstrap process.</p></dd>
 
 </dl></div>
 

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">RstoxFramework</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.2.1-9001</span>
       </span>
     </div>
 
@@ -68,7 +68,191 @@
 <dd><p>A string naming the path element to get. Set this to NULL to get all paths.</p></dd>
 
 </dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    <p>A list of file paths prefixed by the input <code>projectPath</code> and suffixed by the elements listed below (use <code>name</code> to output only one or more elements). E.g., projectPath = "blah" and name = "inputFolders" returns the vector c("blah/input/acoustic", "blah/input/biotic", "blah/input/landing"). If the input <code>projectPath</code> points to a zipped StoX project, connections to files inside the zip are returned:</p>
+<dl><dt>acoustic</dt>
+<dd><p>input/acoustic</p></dd>
 
+  <dt>biotic</dt>
+<dd><p>input/biotic</p></dd>
+
+  <dt>landing</dt>
+<dd><p>input/landing</p></dd>
+
+  <dt>baseline</dt>
+<dd><p>output/baseline</p></dd>
+
+  <dt>analysis</dt>
+<dd><p>output/analysis</p></dd>
+
+  <dt>report</dt>
+<dd><p>output/report</p></dd>
+
+  <dt>process</dt>
+<dd><p>process</p></dd>
+
+  <dt>inputFolders</dt>
+<dd><p>Vector:</p><ul><li><p>input/acoustic</p></li>
+<li><p>input/biotic</p></li>
+<li><p>input/landing</p></li>
+</ul><p></p></dd>
+
+  <dt>outputFolders</dt>
+<dd><p>Vector:</p><ul><li><p>baseline: output/baseline</p></li>
+<li><p>analysis: output/analysis</p></li>
+<li><p>report: output/report</p></li>
+</ul><p></p></dd>
+
+  <dt>input</dt>
+<dd><p>input</p></dd>
+
+  <dt>output</dt>
+<dd><p>output</p></dd>
+
+  <dt>process</dt>
+<dd><p>process</p></dd>
+
+  <dt>stoxFolders</dt>
+<dd><p>Vector:</p><ul><li><p>input: input</p></li>
+<li><p>output: output</p></li>
+<li><p>process: process</p></li>
+</ul><p></p></dd>
+
+  <dt>stoxFolderStructure</dt>
+<dd><p>Vector:</p><ul><li><p>acoustic: input/acoustic</p></li>
+<li><p>biotic: input/biotic</p></li>
+<li><p>landing: input/landing</p></li>
+<li><p>baseline: output/baseline</p></li>
+<li><p>analysis: output/analysis</p></li>
+<li><p>report: output/report</p></li>
+<li><p>process: process</p></li>
+</ul><p></p></dd>
+
+  <dt>projectSessionFolder</dt>
+<dd><p>process/projectSession</p></dd>
+
+  <dt>dataFolder</dt>
+<dd><p>process/projectSession/data</p></dd>
+
+  <dt>memoryFolder</dt>
+<dd><p>process/projectSession/memory</p></dd>
+
+  <dt>statusFolder</dt>
+<dd><p>process/projectSession/status</p></dd>
+
+  <dt>progressFile</dt>
+<dd><p>List:</p><ul><li><p>$baseline: process/projectSession/status/baselineProgress.txt</p></li>
+<li><p>$analysis: process/projectSession/status/analysisProgress.txt</p></li>
+<li><p>$report: process/projectSession/status/analysisProgress.txt</p></li>
+</ul><p></p></dd>
+
+  <dt>NFile</dt>
+<dd><p>List:</p><ul><li><p>$baseline: process/projectSession/status/baselineN.txt</p></li>
+<li><p>$analysis: process/projectSession/status/analysisN.txt</p></li>
+<li><p>$report: process/projectSession/status/reportN.txt</p></li>
+</ul><p></p></dd>
+
+  <dt>stopFile</dt>
+<dd><p>List:</p><ul><li><p>$baseline: process/projectSession/status/baselineStop.txt</p></li>
+<li><p>$analysis: process/projectSession/status/analysisStop.txt</p></li>
+<li><p>$report: process/projectSession/status/reportStop.txt</p></li>
+</ul><p></p></dd>
+
+  <dt>dataModelsFolder</dt>
+<dd><p>process/projectSession/data/models</p></dd>
+
+  <dt>dataModelsFolders</dt>
+<dd><p>Vector:</p><ul><li><p>baseline: process/projectSession/data/models/baseline</p></li>
+<li><p>analysis: process/projectSession/data/models/analysis</p></li>
+<li><p>report: process/projectSession/data/models/report</p></li>
+</ul><p></p></dd>
+
+  <dt>memoryCurrentFolder</dt>
+<dd><p>process/projectSession/memory/current</p></dd>
+
+  <dt>memoryHistoryFolder</dt>
+<dd><p>process/projectSession/memory/history</p></dd>
+
+  <dt>memoryModelsFolder</dt>
+<dd><p>process/projectSession/memory/models</p></dd>
+
+  <dt>memoryModelsFolders</dt>
+<dd><p>Vector:</p><ul><li><p>baseline: process/projectSession/memory/models/baseline</p></li>
+<li><p>analysis: process/projectSession/memory/models/analysis</p></li>
+<li><p>report: process/projectSession/memory/models/report</p></li>
+</ul><p></p></dd>
+
+  <dt>memoryCurrentModelsFolder</dt>
+<dd><p>process/projectSession/memory/current/models</p></dd>
+
+  <dt>memoryCurrentModelsFolders</dt>
+<dd><p>Vector:</p><ul><li><p>baseline: process/projectSession/memory/current/models/baseline</p></li>
+<li><p>analysis: process/projectSession/memory/current/models/analysis</p></li>
+<li><p>report: process/projectSession/memory/current/models/report</p></li>
+</ul><p></p></dd>
+
+  <dt>projectSessionFolderStructure</dt>
+<dd><p>Vector:</p><ul><li><p>process/projectSession/data</p></li>
+<li><p>process/projectSession/memory</p></li>
+<li><p>process/projectSession/status</p></li>
+<li><p>process/projectSession/data/models</p></li>
+<li><p>process/projectSession/data/models/baseline</p></li>
+<li><p>process/projectSession/data/models/analysis</p></li>
+<li><p>process/projectSession/data/models/report</p></li>
+<li><p>process/projectSession/memory/current</p></li>
+<li><p>process/projectSession/memory/history</p></li>
+<li><p>process/projectSession/memory/models</p></li>
+<li><p>process/projectSession/memory/models/baseline</p></li>
+<li><p>process/projectSession/memory/models/analysis</p></li>
+<li><p>process/projectSession/memory/models/report</p></li>
+<li><p>process/projectSession/memory/current/models</p></li>
+<li><p>process/projectSession/memory/current/models/baseline</p></li>
+<li><p>process/projectSession/memory/current/models/analysis</p></li>
+<li><p>process/projectSession/memory/current/models/report</p></li>
+</ul><p></p></dd>
+
+  <dt>projectXMLFile</dt>
+<dd><p>process/project.xml</p></dd>
+
+  <dt>projectJSONFile</dt>
+<dd><p>process/project.json</p></dd>
+
+  <dt>projectSavedStatusFile</dt>
+<dd><p>process/projectSession/status/projectSavedStatus.txt</p></dd>
+
+  <dt>modelIsRunningFile</dt>
+<dd><p>List:</p><ul><li><p>$baseline: process/projectSession/status/baselineIsRunning.txt</p></li>
+<li><p>$analysis: process/projectSession/status/analysisIsRunning.txt</p></li>
+<li><p>$report: process/projectSession/status/reportIsRunning.txt</p></li>
+</ul><p></p></dd>
+
+  <dt>projectMemoryIndexFile</dt>
+<dd><p>process/projectSession/memory/history/projectMemoryIndex.txt</p></dd>
+
+  <dt>processIndexTableFile</dt>
+<dd><p>process/projectSession/memory/current/processIndexTable.txt</p></dd>
+
+  <dt>activeProcessIDFile</dt>
+<dd><p>process/project.xml</p></dd>
+
+  <dt>maxProcessIntegerIDFile</dt>
+<dd><p>process/projectSession/memory/current/maxProcessIntegerID.txt</p></dd>
+
+  <dt>projectDescriptionAttributesFile</dt>
+<dd><p>process/projectSession/memory/models/projectDescriptionAttributes.rds</p></dd>
+
+
+</dl></div>
+
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">getProjectPaths</span><span class="op">(</span><span class="st">"blah"</span>, <span class="st">"inputFolders"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "blah/input/acoustic" "blah/input/biotic"   "blah/input/landing" </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

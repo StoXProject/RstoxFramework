@@ -31,6 +31,7 @@
 <url><loc>/reference/StoXGUI_interfaces.html</loc></url>
 <url><loc>/reference/Stratum.html</loc></url>
 <url><loc>/reference/addProcess.html</loc></url>
+<url><loc>/reference/compareModelData.html</loc></url>
 <url><loc>/reference/compareProjectToStoredOutputFiles.html</loc></url>
 <url><loc>/reference/compareProjectToStoredOutputFilesAll.html</loc></url>
 <url><loc>/reference/compareSweptAreaBaseline.html</loc></url>
@@ -50,6 +51,7 @@
 <url><loc>/reference/getAvaiableTemplates.html</loc></url>
 <url><loc>/reference/getAvailableStoxFunctionNames.html</loc></url>
 <url><loc>/reference/getBootstrapOutputVariables.html</loc></url>
+<url><loc>/reference/getEnabledAndFileOutputProcessNames.html</loc></url>
 <url><loc>/reference/getModelData.html</loc></url>
 <url><loc>/reference/getOfficialRstoxPackageVersion.html</loc></url>
 <url><loc>/reference/getOutputVariablesUsedInReport.html</loc></url>
@@ -109,6 +111,7 @@
 <url><loc>/reference/subsetByAllEqual.html</loc></url>
 <url><loc>/reference/unReDoProject.html</loc></url>
 <url><loc>/reference/unlistToDataType.html</loc></url>
+<url><loc>/reference/unzipAndCopyProject.html</loc></url>
 <url><loc>/reference/unzipProject.html</loc></url>
 <url><loc>/reference/writeActiveProcessID.html</loc></url>
 <url><loc>/reference/writeProjectDescription.html</loc></url>
@@ -116,5 +119,6 @@
 <url><loc>/reference/writeStoxJsonSchema.html</loc></url>
 <url><loc>/reference/writeStoxOutput.html</loc></url>
 <url><loc>/reference/write_list_as_tables_NetCDFF4.html</loc></url>
+<url><loc>/reference/zipProject.html</loc></url>
 </urlset>
 

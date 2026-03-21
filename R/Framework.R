@@ -3,18 +3,233 @@
 #' @inheritParams general_arguments
 #' @param name A string naming the path element to get. Set this to NULL to get all paths.
 #' 
+#' @return A list of file paths prefixed by the input \code{projectPath} and suffixed by the elements listed below (use \code{name} to output only one or more elements). E.g., projectPath = "blah" and name = "inputFolders" returns the vector c("blah/input/acoustic", "blah/input/biotic", "blah/input/landing"). If the input \code{projectPath} points to a zipped StoX project, connections to files inside the zip are returned:
+#' 
+#' \describe{
+#'   \item{acoustic}{input/acoustic}
+#'   \item{biotic}{input/biotic}
+#'   \item{landing}{input/landing}
+#'   \item{baseline}{output/baseline}
+#'   \item{analysis}{output/analysis}
+#'   \item{report}{output/report}
+#'   \item{process}{process}
+#'   \item{inputFolders}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{input/acoustic}
+#' 	     \item{input/biotic}
+#' 	     \item{input/landing}
+#'     }
+#'   }
+#'   \item{outputFolders}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{baseline: output/baseline}
+#' 	     \item{analysis: output/analysis}
+#' 	     \item{report: output/report}
+#'     }
+#'   }
+#'   \item{input}{input}
+#'   \item{output}{output}
+#'   \item{process}{process}
+#'   \item{stoxFolders}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{input: input}
+#' 	     \item{output: output}
+#' 	     \item{process: process}
+#'     }
+#'   }
+#'   \item{stoxFolderStructure}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{acoustic: input/acoustic}
+#' 	     \item{biotic: input/biotic}
+#' 	     \item{landing: input/landing}
+#' 	     \item{baseline: output/baseline}
+#' 	     \item{analysis: output/analysis}
+#' 	     \item{report: output/report}
+#' 	     \item{process: process}
+#'     }
+#'   }
+#'   \item{projectSessionFolder}{process/projectSession}
+#'   \item{dataFolder}{process/projectSession/data}
+#'   \item{memoryFolder}{process/projectSession/memory}
+#'   \item{statusFolder}{process/projectSession/status}
+#'   \item{progressFile}{
+#'     List: 
+#'     \itemize{
+#' 	     \item{$baseline: process/projectSession/status/baselineProgress.txt}
+#' 	     \item{$analysis: process/projectSession/status/analysisProgress.txt}
+#' 	     \item{$report: process/projectSession/status/analysisProgress.txt}
+#'     }
+#'   }
+#'   \item{NFile}{
+#'     List: 
+#'     \itemize{
+#' 	     \item{$baseline: process/projectSession/status/baselineN.txt}
+#' 	     \item{$analysis: process/projectSession/status/analysisN.txt}
+#' 	     \item{$report: process/projectSession/status/reportN.txt}
+#'     }
+#'   }
+#'   \item{stopFile}{
+#'     List: 
+#'     \itemize{
+#' 	     \item{$baseline: process/projectSession/status/baselineStop.txt}
+#' 	     \item{$analysis: process/projectSession/status/analysisStop.txt}
+#' 	     \item{$report: process/projectSession/status/reportStop.txt}
+#'     }
+#'   }
+#'   \item{dataModelsFolder}{process/projectSession/data/models}
+#'   \item{dataModelsFolders}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{baseline: process/projectSession/data/models/baseline}
+#' 	     \item{analysis: process/projectSession/data/models/analysis}
+#' 	     \item{report: process/projectSession/data/models/report}
+#'     }
+#'   }
+#'   \item{memoryCurrentFolder}{process/projectSession/memory/current}
+#'   \item{memoryHistoryFolder}{process/projectSession/memory/history}
+#'   \item{memoryModelsFolder}{process/projectSession/memory/models}
+#'   \item{memoryModelsFolders}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{baseline: process/projectSession/memory/models/baseline}
+#' 	     \item{analysis: process/projectSession/memory/models/analysis}
+#' 	     \item{report: process/projectSession/memory/models/report}
+#'     }
+#'   }
+#'   \item{memoryCurrentModelsFolder}{process/projectSession/memory/current/models}
+#'   \item{memoryCurrentModelsFolders}{
+#'     Vector: 
+#'     \itemize{
+#' 	     \item{baseline: process/projectSession/memory/current/models/baseline}
+#' 	     \item{analysis: process/projectSession/memory/current/models/analysis}
+#' 	     \item{report: process/projectSession/memory/current/models/report}
+#'     }
+#'   }
+#'   \item{projectSessionFolderStructure}{Vector: 
+#'     \itemize{
+#' 	     \item{process/projectSession/data}
+#' 	     \item{process/projectSession/memory}
+#' 	     \item{process/projectSession/status}
+#' 	     \item{process/projectSession/data/models}
+#' 	     \item{process/projectSession/data/models/baseline}
+#' 	     \item{process/projectSession/data/models/analysis}
+#' 	     \item{process/projectSession/data/models/report}
+#' 	     \item{process/projectSession/memory/current}
+#' 	     \item{process/projectSession/memory/history}
+#' 	     \item{process/projectSession/memory/models}
+#' 	     \item{process/projectSession/memory/models/baseline}
+#' 	     \item{process/projectSession/memory/models/analysis}
+#' 	     \item{process/projectSession/memory/models/report}
+#' 	     \item{process/projectSession/memory/current/models}
+#' 	     \item{process/projectSession/memory/current/models/baseline}
+#' 	     \item{process/projectSession/memory/current/models/analysis}
+#' 	     \item{process/projectSession/memory/current/models/report}
+#'     }
+#'   }
+#'   \item{projectXMLFile}{process/project.xml}
+#'   \item{projectJSONFile}{process/project.json}
+#'   \item{projectSavedStatusFile}{process/projectSession/status/projectSavedStatus.txt}
+#'   \item{modelIsRunningFile}{
+#'     List: 
+#'     \itemize{
+#' 	     \item{$baseline: process/projectSession/status/baselineIsRunning.txt}
+#' 	     \item{$analysis: process/projectSession/status/analysisIsRunning.txt}
+#' 	     \item{$report: process/projectSession/status/reportIsRunning.txt}
+#'     }
+#'   }
+#'   \item{projectMemoryIndexFile}{process/projectSession/memory/history/projectMemoryIndex.txt}
+#'   \item{processIndexTableFile}{process/projectSession/memory/current/processIndexTable.txt}
+#'   \item{activeProcessIDFile}{process/project.xml}
+#'   \item{maxProcessIntegerIDFile}{process/projectSession/memory/current/maxProcessIntegerID.txt}
+#'   \item{projectDescriptionAttributesFile}{process/projectSession/memory/models/projectDescriptionAttributes.rds}
+#' }
+#' 
+#' @examples
+#' getProjectPaths("blah", "inputFolders")
+#' 
+#' 
 #' @export
 #' 
 getProjectPaths <- function(projectPath, name = NULL) {
+    
     # Paste the project path to the relevant folders:
     paths <- getRstoxFrameworkDefinitions("paths")
-    # Add the project path to all paths:
-    paths <- lapply(paths, function(x) if(is.list(x)) lapply(x, function(y) file.path(projectPath, y)) else structure(file.path(projectPath, x), names = names(x)))
-    if(length(name)) {
+    
+    if(length(name) == 1) {
         paths <- paths[[name]]
     }
-    paths
+    else if(length(name) > 1) {
+        paths <- paths[name]
+    }
+    
+    # If the project is zipped, return connections inside the zip using unz():
+    if(tolower(tools::file_ext(projectPath)) == "zip") {
+        # Prefix with the projectName, since we need that as the full path inside the zip:
+        root <- getRootInZip(projectPath)
+        # The root contains a trailing slash, so we set sep to "":
+        paths <- prefixPaths(paths, root, sep = "")
+        
+        # Add the project path to all paths:
+        paths <- locatePathsInZip(paths, projectPath)
+    }
+    # Otherwise add the project path to all paths:
+    else {
+        paths <- prefixPaths(paths, projectPath)
+    }
+    
+    
+     
+    return(paths)
 }
+
+
+prefixPaths <- function(paths, prefix, sep = "/") {
+    
+    if(is.list(paths)) {
+        paths <- lapply(
+            paths, 
+            function(x) {
+                if(is.list(x)) lapply(x, function(y) paste(prefix, y, sep = sep)) 
+                else structure(paste(prefix, x, sep = sep), names = names(x))
+            }    
+        )
+    }
+    else {
+        paths <- structure(paste(prefix, paths, sep = sep), names = names(paths))
+    }
+    
+    return(paths)
+}
+
+locatePathsInZip <- function(paths, zip) {
+    
+    # The unz() creates a connection that can be read:
+    if(is.list(paths)) {
+        paths <- lapply(
+            paths, 
+            function(x) {
+                if(is.list(x)) lapply(x, function(y) mapply(unz, zip, y, SIMPLIFY = FALSE) ) 
+                else structure(mapply(unz, zip, x, SIMPLIFY = FALSE), names = names(x))
+            }    
+        )
+    }
+    else {
+        paths <- structure(mapply(unz, zip, paths, SIMPLIFY = FALSE), names = names(paths))
+    }
+    
+    
+    return(paths)
+}
+
+
+getRootInZip <- function(zip) {
+    utils::unzip(zip, list = TRUE)[1, 1]
+}
+
 
 # Function for extracting the stoxFunctionAttributes of the package, and adding the package name and full function name (packageName::functionName) to each element (function) of the list.
 getStoxFunctionAttributes <- function(packageName, requestedFunctionAttributeNames = NULL) {
@@ -344,12 +559,17 @@ createProjectSessionFolderStructure <- function(projectPath, showWarnings = FALS
 #' @param saveIfAlreadyOpen Logical: If TRUE save the project before closing if already open and force is TRUE.
 #' @param newProjectPath    The path to the copied StoX project.
 #' @param verbose           Logical: If TRUE, print information to the console, e.g. about backward compatibility.
-#' @param empty.output      Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.
-#' @param empty.memory      Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.
-#' @param empty.input       Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.
+#' @param empty.output      Logical: If TRUE, delete all files in the output folder when copying. If FALSE, all files in the output folder are copied. If NA, only outputs from processes which have the enabled and fileOutput arguent set to TRUE (Enabled and Write output to file in the StoX GUI) are copied to the new project. This can also be a vector of names of the specific output files/folders to empty (relative file paths, e.g. "baseline/ReadBiotic").
+#' @param empty.input       Logical: If TRUE, delete all files in the input folder when copying. If FALSE, all files in the input folder are copied. If NA, keep all usaed input files (in the sub folders of the input folder (acoustic, biotic and landing)), and keep any files in the root input folder (the input folder is frequently used to place stratum files etc, and there are kept while input files are deleted with this option). This can also be a vector of names of the specific input files/folders to empty (relative file paths, e.g. "biotic").
+#' @param empty.memory      Logical: Only used if \code{close} is FALSE. If TRUE, do not include the memory data files when copying. This can also be a vector of names of the specific memory files/folders to empty (file paths relative to the memory folder "projectSession/data/models", e.g. c("analysis", "report") to keep only the baseline memory).
+#' @param clean.process Logical: If TRUE copy only the project.json file in the process folder and ignore any other files (e.g. copies of the project.json  file).
 #' @param close Logical: (In \code{copyProject}) If TRUE, close the project before copying.
 #' @param empty.processData Logical: (In \code{copyProject}) If TRUE, empty the process data listed in \code{processDataToBeEmptied}.
 #' @param processDataToBeEmptied An optional character vector of names of the process data to empty when copying a StoX project. The default (NULL) implies all possible process data (all functions returned from getRstoxFrameworkDefinitions("processDataFunctions")).
+#' 
+#' @details
+#' Hidden files are not copied with \code{copyProject}. To copy the project with all non-hidden files included use clean.process = FALSE (in addition to the defaults empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE).
+#' 
 #' 
 #' @name Projects
 #' 
@@ -702,7 +922,7 @@ saveAsProject <- function(
 #' @export
 #' @rdname Projects
 #' 
-copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, save = NULL, msg = TRUE) {
+copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE, clean.process = TRUE, empty.processData = FALSE, processDataToBeEmptied = NULL, close = FALSE, save = NULL, msg = TRUE) {
     
     # Check whether the project to be used as template exists:
     if(!dir.exists(projectPath) || !isProject(projectPath)) {
@@ -719,58 +939,166 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
         }
     }
     
-    if(close && isOpenProject(projectPath)) {
-        closeProject(projectPath, save = save, msg = msg)
+    #if(close && isOpenProject(projectPath)) {
+    #    closeProject(projectPath, save = save, msg = msg)
+    #}
+    if(close) {
+        empty.memory <- TRUE
     }
-    
     
     #suppressWarnings(dir.create(newProjectPath, recursive = TRUE))
     createProjectSkeleton(newProjectPath, ow = ow)
     
     stoxModelFolders <- getRstoxFrameworkDefinitions("stoxModelFolders")
     stoxDataSourceFolders <- getRstoxFrameworkDefinitions("stoxDataSourceFolders")
+    paths <- getRstoxFrameworkDefinitions("paths")
     
-    # Should input and output be emptied?:
+    
+    #### Translate the empty.output argument into what folders and files to copy: ####
+    
+    
+    # First, get the relative paths to the current output files:
+    outputFolderName <- getRstoxFrameworkDefinitions("stoxFoldersList")$output
+    outputFolderPath <- getProjectPaths(projectPath, outputFolderName)
+    outputDirs <- list.dirs(outputFolderPath, recursive = FALSE, full.names = FALSE)
+    outputSubDirs <- lapply(
+        file.path(outputFolderPath, outputDirs), 
+        function(dir) file.path(
+            basename(dir), 
+            list.dirs(dir, recursive = FALSE, full.names = FALSE)
+        )
+    )
+    names(outputSubDirs) <- outputDirs
+    outputFiles <- setdiff(list.files(outputFolderPath), outputDirs)
+    
+    
+    # If empty.output is TRUE, copy none of the files:
     if(isTRUE(empty.output)) {
-        empty.output <- stoxModelFolders
+        outputToCopy <- NULL
     }
+    # If empty.output is TRUE, keep all of the files and directories:
     else if(isFALSE(empty.output)) {
-        empty.output <- NULL
+        outputToCopy <- file.path(
+            paths$output, 
+            c(outputDirs, outputFiles)
+        )
     }
-    if(isTRUE(empty.input)) {
-        empty.input <- stoxDataSourceFolders
+    # If empty.output is a single NA, copy only output data that are from enabled processes that are set to write output data:
+    else if(length(empty.output) == 1 && is.na(empty.output)) {
+        # Identify all processes which are enabled and write output files:
+        enabledAndFileOutputProcessNames <- getEnabledAndFileOutputProcessNames(projectPath)
+        
+        # Copy only the valid process outputs:
+        outputToCopy <- file.path(
+            paths$output, 
+            unlist(outputSubDirs)[basename(unlist(outputSubDirs)) %in% unlist(enabledAndFileOutputProcessNames)]
+        )
     }
-    else if(isFALSE(empty.input)) {
-        empty.input <- NULL
-    }
-    if(isTRUE(empty.memory)) {
-        empty.memory <- stoxModelFolders
-    }
-    else if(isFALSE(empty.memory)) {
-        empty.memory <- NULL
-    }
-    
-    
-    toCopy <- getRstoxFrameworkDefinitions("stoxFoldersList")
-    
-    if(length(empty.output)) {
-        # Exlcude the models given in empty.output:
-        toCopy$output <- file.path(toCopy$output, setdiff(stoxModelFolders, empty.output))
-    }
-    if(length(empty.input)) {
-        toCopy$input <- file.path(toCopy$input, setdiff(stoxDataSourceFolders, empty.input))
-    }
-    if(isOpenProject(projectPath) && length(empty.memory)) {
-        # Specify what to keep in the projectSession folder (if the original project is open):
-        toCopy$process <- c(
-            file.path(toCopy$process, "project.json"), 
-            file.path(toCopy$process, "projectSession", "status"), 
-            file.path(toCopy$process, "projectSession", "memory"), 
-            file.path(toCopy$process, "projectSession", "data", "models", setdiff(stoxModelFolders, empty.memory))
+    else {
+        outputToCopy <- file.path(
+            paths$output, 
+            setdiff(
+                c(outputDirs, outputFiles), 
+                empty.output
+            )
         )
     }
     
-    toCopy <- unlist(toCopy)
+    
+    #### Translate the empty.input argument into what folders and files to copy: ####
+    
+    # First, get the relative paths to the current output files:
+    inputFolderName <- getRstoxFrameworkDefinitions("stoxFoldersList")$input
+    inputFolderPath <- getProjectPaths(projectPath, inputFolderName)
+    inputDirs <- list.dirs(inputFolderPath, recursive = FALSE, full.names = FALSE)
+    inputFiles <- setdiff(list.files(inputFolderPath), inputDirs)
+    
+    # If empty.input is TRUE, copy none of the files:
+    if(isTRUE(empty.input)) {
+        inputToCopy <- NULL
+    }
+    # If empty.input is TRUE, keep all of the files and directories:
+    else if(isFALSE(empty.input)) {
+        inputToCopy <- file.path(
+            paths$input, 
+            c(inputDirs, inputFiles)
+        )
+    }
+    # If empty.input is a single NA, copy only output data that are from enabled processes that are set to write output data:
+    else if(length(empty.input) == 1 && is.na(empty.input)) {
+        # Copy the files in the root input folder and the used input files:
+        inputToCopy <- c(
+            file.path(paths$input, inputFiles), 
+            getUsedInputFiles(projectPath)
+        )
+    }
+    else {
+        inputToCopy <- file.path(
+            paths$input, 
+            setdiff(
+                c(inputDirs, inputFiles), 
+                empty.input
+            )
+        )
+    }
+    
+    
+    #### Translate the empty.memory argument into what folders and files to copy: ####
+    memoryToCopy <- NULL
+    
+    if(isOpenProject(projectPath)) {
+        
+        
+        # If empty.memory is TRUE, copy none of the files:
+        if(isFALSE(empty.memory)) {
+            memoryToCopy <- file.path(paths$process, "projectSession")
+        }
+        else if(!isTRUE(empty.memory)){
+            memoryToCopy <- c(
+                paths$statusFolder, 
+                paths$memoryFolder, 
+                file.path(paths$dataModelsFolder, setdiff(stoxModelFolders, empty.memory))
+            )
+        }
+    }
+    
+    
+    #### Translate the clean.process argument into what project.json to copy: ####
+    if(clean.process) {
+        processDescriptionToCopy <- file.path(paths$process, "project.json")
+    }
+    else {
+        processDescriptionToCopy <- file.path(
+            paths$process, 
+            setdiff(
+                list.files(getProjectPaths(projectPath, "process")), 
+                list.dirs(getProjectPaths(projectPath, "process"), full.names = FALSE, recursive = FALSE)
+            )
+        )
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    toCopy <- c(
+        input = inputToCopy, 
+        output = outputToCopy, 
+        process = c(
+            processDescriptionToCopy, 
+            memoryToCopy
+        )
+    )
     
     #lapply(list.dirs(projectPath, recursive = FALSE), file.copy, newProjectPath, recursive = TRUE)
     #lapply(toCopy, file.copy, newProjectPath, recursive = TRUE)
@@ -840,7 +1168,7 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
     }
     
     # Close the new project if the old is closed, or has been closed earlier in the function:
-    if(!isOpenProject(projectPath)) {
+    if(close || !isOpenProject(projectPath)) {
         closeProject(newProjectPath, save = save, msg = msg)
     }
     
@@ -854,6 +1182,67 @@ copyProject <- function(projectPath, newProjectPath, ow = FALSE, empty.output = 
 deleteProject <- function(projectPath) {
     unlink(projectPath, force = TRUE, recursive = TRUE)
 }
+
+
+#' Function to get all processes which are enabled and write output files:
+#' 
+#' @inheritParams general_arguments
+#' 
+#' @return A list with one vector of process names per model.
+#' 
+getEnabledAndFileOutputProcessNames <- function(projectPath) {
+    
+    # Read the project.json and identify all processes which are enabled and write output files:
+    projectDescription <- RstoxFramework::readProjectDescription(projectPath)$projectDescription
+    
+    
+    enabledAndFileOutputProcessNames <- lapply(projectDescription, getEnabledAndFileOutputProcessNames_OneModel)
+    
+    return(enabledAndFileOutputProcessNames)
+}
+
+
+getEnabledAndFileOutputProcessNames_OneModel <- function(model) {
+    # Get the process names:
+    processNames <- sapply(model, "[[", "processName")
+    
+    if(!length(processNames)) {
+        return(NULL)
+    }
+    
+    # Get the enabled and fileOutput processParameters:
+    enabled <- sapply(model, "[[", c("processParameters", "enabled"))
+    fileOutput <- sapply(model, "[[", c("processParameters", "fileOutput"))
+    
+    # Return enabled and fileOutput process name:
+    enabledAndFileOutputProcessNames <- processNames[enabled & fileOutput]
+    
+    return(enabledAndFileOutputProcessNames)
+}
+
+getUsedInputFiles <- function(projectPath) {
+    
+    # Read the project.json and identify all processes which are enabled and write output files:
+    projectDescription <- readProjectDescription(projectPath)$projectDescription
+    
+    # Get the used input files:
+    readingFunctions <- c(
+        "RstoxData::ReadBiotic", 
+        "RstoxData::ReadAcoustic", 
+        "RstoxData::ReadLanding"
+    )
+    functionNames <- sapply(projectDescription$baseline, "[[", "functionName")
+    enabled <- sapply(projectDescription$baseline, "[[", c("processParameters", "enabled"))
+    
+    # Find proceses with used input files:
+    atReadingFunctions <- functionNames %in% readingFunctions & enabled
+    inputFilesUsed <- sapply(projectDescription$baseline[atReadingFunctions], "[[", c("functionParameters", "FileNames"))
+    
+    return(inputFilesUsed)
+}
+
+
+
 
 
 #' 
@@ -3141,7 +3530,7 @@ modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processNam
 #' @param check.only.enabled Logical: If TRUE check input errors only for enabled procecsses.
 #' @param processTable The process table as returned from \code{\link{getProcessTable}}. Used in the function \code{updateProcessTable}.
 #' 
-#' @value A table of the following columns:
+#' @return A table of the following columns:
 #' \describe{
 #'   \item{\code{processID}}{The process ID of the process in the form P001, P002, etc. The process ID exists unchanged throughout the life of the process.}
 #'   \item{\code{processName}}{The current name of the process.}
@@ -3154,7 +3543,7 @@ modifyProcessNameInFunctionInputs <- function(projectPath, modelName, processNam
 #'   \item{\code{functionParameters}}{A list of function parameters that are shown in the GUI.}
 #'   \item{\code{functionInputs}}{A list of function inputs that are shown in the GUI.}
 #'   \item{\code{functionInputs_UseProcessData}}{A list of function inputs that are shown in the GUI, including those that are hidded by UseProcessData = TRUE.}
-#'   \item{\code{functionInputsRecursive}}{A list of function inputs recursively, including function inputs to processes listed as function inputs in \code{functionInputs.}
+#'   \item{\code{functionInputsRecursive}}{A list of function inputs recursively, including function inputs to processes listed as function inputs in \code{functionInputs.}}
 #'   \item{\code{functionOutputDataType}}{The StoX data type of the function output.}
 #'   \item{\code{functionInputError}}{Logical: Does the process contain errors in function inputs? E.g., is there a function input that does not exist?}
 #'   \item{\code{canShowInMap}}{Logical: Can the process output be shown in the map?}
@@ -6361,8 +6750,10 @@ getProcessOutputFiles <- function(projectPath, modelName, processID, onlyTableNa
 getFilesRecursiveWithOrder <- function(folderPath) {
     dirs <- list.dirs(folderPath, recursive = FALSE)
     if(length(dirs)) {
+        # Run through the directories and get the files:
         output <- lapply(dirs, getFilesRecursiveWithOrder)
         names(output) <- basename(dirs)
+        # Add the files in the root folder???
         output <- c(
             listMemoryFiles(folderPath),
             output
@@ -6382,6 +6773,17 @@ listMemoryFiles <- function(folderPath) {
     extPattern <- paste0("\\.", ext, "$", collapse = "|")
     #out <- as.list(list.files(folderPath, full.names = TRUE, pattern = "\\.rds$"))
     out <- as.list(list.files(folderPath, full.names = TRUE, pattern = extPattern))
+    
+    # If there are no files, return immediately:
+    if(!length(out)) {
+        return(out)
+    }
+    
+    # Check for invalid file paths, which may indicate encoding issues:
+    if(!all(validUTF8(unlist(out)))) {
+        stop("The file paths of memory files written by StoX contain invalid characters. This is an indication that the Windows system is not set to use UTF-8. One option that could work is to set the Regional format to English (or at least not to Norwegian or other nordic languages) under Time & language in the System settings. Otherwise contact your system administrator.")
+    }
+    
     names(out) <- basename(tools::file_path_sans_ext(unlist(out)))
     
     # Read the order file if present:

@@ -1518,7 +1518,6 @@ resampleData <- function(data, seed, varToResample, resampleBy, makeUniqueVars =
                 data[, c(resampleBy_temp) := NULL]
             }
             else {
-                #browser()
                 for(ind in  seq_along(varToResample)) {
                     data <- resampleDataOne(
                         data = data, 

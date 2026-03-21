@@ -68,6 +68,7 @@ copyProject(
   empty.output = FALSE,
   empty.input = FALSE,
   empty.memory = FALSE,
+  clean.process = TRUE,
   empty.processData = FALSE,
   processDataToBeEmptied = NULL,
   close = FALSE,
@@ -110,11 +111,13 @@ getProject(projectPath)
 
 \item{msg}{Logical: If FALSE no messages are printed to console (except possibly for extremely important ones).}
 
-\item{empty.output}{Logical: If TRUE, do not include the output files when copying. This can also be a vector of names of the output folders to empty.}
+\item{empty.output}{Logical: If TRUE, delete all files in the output folder when copying. If FALSE, all files in the output folder are copied. If NA, only outputs from processes which have the enabled and fileOutput arguent set to TRUE (Enabled and Write output to file in the StoX GUI) are copied to the new project. This can also be a vector of names of the specific output files/folders to empty (relative file paths, e.g. "baseline/ReadBiotic").}
 
-\item{empty.input}{Logical: If TRUE, do not include the input files when copying. This can also be a vector of names of the input data folders to empty.}
+\item{empty.input}{Logical: If TRUE, delete all files in the input folder when copying. If FALSE, all files in the input folder are copied. If NA, keep all usaed input files (in the sub folders of the input folder (acoustic, biotic and landing)), and keep any files in the root input folder (the input folder is frequently used to place stratum files etc, and there are kept while input files are deleted with this option). This can also be a vector of names of the specific input files/folders to empty (relative file paths, e.g. "biotic").}
 
-\item{empty.memory}{Logical: If TRUE, do not include the memory data files when copying. This can also be a vector of names of the memory data folders to empty.}
+\item{empty.memory}{Logical: Only used if \code{close} is FALSE. If TRUE, do not include the memory data files when copying. This can also be a vector of names of the specific memory files/folders to empty (file paths relative to the memory folder "projectSession/data/models", e.g. c("analysis", "report") to keep only the baseline memory).}
+
+\item{clean.process}{Logical: If TRUE copy only the project.json file in the process folder and ignore any other files (e.g. copies of the project.json  file).}
 
 \item{empty.processData}{Logical: (In \code{copyProject}) If TRUE, empty the process data listed in \code{processDataToBeEmptied}.}
 
@@ -122,4 +125,7 @@ getProject(projectPath)
 }
 \description{
 Create a StoX project using \code{createProject}; open an existing (un-opened) project using \code{openProject}, which involves creating files holding the memory of the project; close a project using  \code{closeProject}, which removes the memory files; save the project using \code{saveProject}, which saves the memory files to the project description file; make a copy using \code{copyProject} or \code{saveAsProject}, where the former closes the given project unsaved and opens the copy, or delete a project using \code{deleteProject}.
+}
+\details{
+Hidden files are not copied with \code{copyProject}. To copy the project with all non-hidden files included use clean.process = FALSE (in addition to the defaults empty.output = FALSE, empty.input = FALSE, empty.memory = FALSE).
 }

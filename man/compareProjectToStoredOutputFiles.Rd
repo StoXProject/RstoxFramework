@@ -8,7 +8,15 @@ compareProjectToStoredOutputFiles(
   projectPath,
   projectPath_original = projectPath,
   modelNames = NULL,
+  save = FALSE,
+  try = TRUE,
+  returnBootstrapData = FALSE,
+  selection = list(),
+  BootstrapID = NA,
+  unlistSingleTable = TRUE,
+  unlistSingleBootstrapData = FALSE,
   emptyStringAsNA = FALSE,
+  readCsvAsLines = FALSE,
   intersect.names = TRUE,
   ignore.variable = NULL,
   ignore.process = NULL,
@@ -18,20 +26,12 @@ compareProjectToStoredOutputFiles(
   NAReplacement = NULL,
   ignoreEqual = FALSE,
   classOf = c("first", "second"),
-  try = TRUE,
   data.out = FALSE,
   sort = TRUE,
   compareReports = FALSE,
   checkOutputFiles = TRUE,
-  returnBootstrapData = FALSE,
-  selection = list(),
-  BootstrapID = NA,
-  unlistSingleTable = TRUE,
-  unlistSingleBootstrapData = FALSE,
-  readCsvAsLines = FALSE,
   tolerance = sqrt(.Machine$double.eps),
   debug = FALSE,
-  save = FALSE,
   check.columnNames_identical = FALSE,
   testAllTRUE = FALSE,
   ...
@@ -44,7 +44,23 @@ compareProjectToStoredOutputFiles(
 
 \item{modelNames}{The name of the models (possible values are "baseline", "analysis" and "report").}
 
+\item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
+
+\item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
+
+\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
+
+\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
+
+\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
+
+\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
+
+\item{unlistSingleBootstrapData}{Logical: If TRUE unlist the the top level of the process output if this is a list with a single element of class "BootstrapData" (and named "BootstrapData"). This is the default for historic reasons to match the output of StoX < 4.0.0.}
+
 \item{emptyStringAsNA}{Logical: If TRUE, read empty strings as NA from the stored original tables, as RstoxFramework has started writing NAs as NAs and not as empty strings.}
+
+\item{readCsvAsLines}{Logical: If TRUE read csv files as lines with \code{\link[base]{readLines}}.}
 
 \item{intersect.names}{Logical: If TRUE, compare only same named columns.}
 
@@ -64,8 +80,6 @@ compareProjectToStoredOutputFiles(
 
 \item{classOf}{Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.}
 
-\item{try}{Logical: If FALSE do not run the process in a \code{tryCatch}. Set this to FALSE when debugging, as the \code{tryCatch} masks the errors in the \code{traceback}.}
-
 \item{data.out}{Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.}
 
 \item{sort}{Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.}
@@ -74,29 +88,15 @@ compareProjectToStoredOutputFiles(
 
 \item{checkOutputFiles}{Logical, if TRUE compare the file names of the output files.}
 
-\item{returnBootstrapData}{Logical: If TRUE read the content of bootstrap NetCDF4 file.}
-
-\item{selection}{Hierarchical list of names of the groups/variables. The last element must be a vector of the variables to return from the table specified by the other elements. E.g., list("ImputeSuperIndividuals", "SuperIndividualsData", c("Stratum", "IndividualAge", "Abundance")) will return a data.table of the three columns "Stratum", "IndividualAge" and "Abundance", added the BootstrapID specified in \code{BootstrapID}.}
-
-\item{BootstrapID}{A sequence of bootstrap IDs, i.e., the indices of the bootstrap replicates. The default returns all bootstrap replicates.}
-
-\item{unlistSingleTable}{Logical: For use when only single table process outputs are among the requested processes in \code{OutputProcesses} of \code{\link{Bootstrap}}. If FALSE (default) return a list named by the \code{selection} with a sub-list named by the datatype holding the output data  (e.g. $ImputeSuperIndividuals$SuperIndividualsData). If TRUE return a list named by the \code{selection} holding the output data, replicating the output of \code{\link{Bootstrap}} in StoX <= 3.6.2.}
-
-\item{unlistSingleBootstrapData}{Logical: If TRUE unlist the the top level of the process output if this is a list with a single element of class "BootstrapData" (and named "BootstrapData"). This is the default for historic reasons to match the output of StoX < 4.0.0.}
-
-\item{readCsvAsLines}{Logical: If TRUE read csv files as lines with \code{\link[base]{readLines}}.}
-
 \item{tolerance}{The tolerance to use in all.equal.}
 
 \item{debug}{Logical: If TRUE, interrupt the execution just before priting the test results.}
-
-\item{save}{Logical: If TRUE save the project before closing. Default (NULL) is to ask the user whether to save the project before closing.}
 
 \item{check.columnNames_identical}{Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.}
 
 \item{testAllTRUE}{Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.}
 
-\item{...}{Used in runModel().}
+\item{...}{Arguments passed to \code{\link{readBootstrapData}}, e.g. \code{selection}, which must be set to NA to read the entire file.}
 }
 \description{
 Function for comparing existing output files with the memory read using runProject()

@@ -49,58 +49,59 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 #' @inheritParams readMemoryFile
 #' @inheritParams getProcessOutput
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
-#' @param intersect.names Logical: If TRUE, compare only same named columns.
-#' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
+#' @inheritParams compareModelData
 #' @param ignore.process A vector of names of processes to ignore in the comparison.
-#' @param ignore.process.variable A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth")).
-#' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.
-#' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.
-#' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
-#' @param ignoreEqual Logical: If TRUE, ignore columns where all values are equal.
-#' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
-#' @param data.out Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.
-#' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
-#' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
-#' @param checkOutputFiles Logical, if TRUE compare the file names of the output files.
-#' @param tolerance The tolerance to use in all.equal.
-#' @param debug Logical: If TRUE, interrupt the execution just before priting the test results.
-#' @param check.columnNames_identical Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.
-#' @param testAllTRUE Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.
-#' @param ... Used in runModel().
 #' 
 #' @export
 #'
 compareProjectToStoredOutputFiles <- function(
     projectPath, projectPath_original = projectPath, 
     modelNames = NULL, 
-    emptyStringAsNA = FALSE, intersect.names = TRUE, 
+    save = FALSE, try = TRUE, 
+    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE, 
+    
+    
+    emptyStringAsNA = FALSE,
+    readCsvAsLines = FALSE, 
+    
+    
+    intersect.names = TRUE, 
     ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, 
     skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
     ignoreEqual = FALSE, classOf = c("first", "second"), 
-    try = TRUE, data.out = FALSE, 
+    data.out = FALSE, 
     #mergeWhenDifferentNumberOfRows = FALSE, 
     sort = TRUE, 
     compareReports = FALSE, checkOutputFiles = TRUE, 
-    returnBootstrapData = FALSE, selection = list(), BootstrapID = NA, unlistSingleTable = TRUE, unlistSingleBootstrapData = FALSE, readCsvAsLines = FALSE, 
-    tolerance = sqrt(.Machine$double.eps), debug = FALSE, save = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
+    tolerance = sqrt(.Machine$double.eps), debug = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
     ...
 ) {
     
-    # Unzip if zipped:
-    if(tolower(tools::file_ext(projectPath)) == "zip") {
-        projectPath <- unzipProject(projectPath, exdir = tempdir())
-    }
-    if(projectPath_original != projectPath && tolower(tools::file_ext(projectPath_original)) == "zip") {
+    #   # Unzip if zipped:
+    #   if(tolower(tools::file_ext(projectPath)) == "zip") {
+    #       projectPath <- unzipProject(projectPath, exdir = tempdir())
+    #   }
+    #   if(projectPath_original != projectPath && tolower(tools::file_ext(projectPath_original)) == "zip") {
+    #       projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
+    #   }
+    #   
+    #   # Copy the project:
+    #   projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
+    #   temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
+    
+    
+    
+    
+    # Copy the project, while keeping only the used input files (empty.input = NA) and the valid output files (those from enabled processes which are supposed to write files, empty.output = NA) and only the used project.json file:
+    projectPath_copy <- unzipAndCopyProject(projectPath, ow = TRUE, close = TRUE, msg = FALSE, empty.input = NA, empty.output = NA)
+    
+    
+    # Also unzip the original project if one is specified (normally the project given by projectPath contains the reference output data):
+   if(tolower(tools::file_ext(projectPath_original)) == "zip") {
         projectPath_original <- unzipProject(projectPath_original, exdir = tempdir())
     }
     
-    # Run the test project:
-    projectPath_copy <- file.path(tempdir(), paste0(basename(projectPath), "_copy"))
-    temp <- copyProject(projectPath, projectPath_copy, ow = TRUE, close = TRUE, msg = FALSE)
     
-    if(debug) {
-        browser()
-    }
     # Open the project:
     openProject(projectPath_copy)
     # Changed to using unlistDepth2 = FALSE‚  as this is in line with the bug fix from StoX 3.6.0 where outputs with multiple tables were no longer unlisted in Bootstrap data:
@@ -131,18 +132,8 @@ compareProjectToStoredOutputFiles <- function(
     )
     
     
-    
-    # Reorder the original data to the order of the new data:
-    newOrder <- c(intersect(names(dat), names(dat_orig)), setdiff(names(dat_orig), names(dat)))
-    dat_orig <- dat_orig[newOrder]
-    
-    # Compare only those elemens common to the two datasets:
-    processNames_present <- all(names(dat_orig) %in% names(dat))
-    
-    # Expect all column names:
-    tableNames_identical <- list()
-    columnNames_identical <- list()
     processesToCheck <- setdiff(names(dat_orig), ignore.process)
+    
     
     # Store the file paths of the output files to compare to the new output file paths:
     if(checkOutputFiles) {
@@ -154,6 +145,158 @@ compareProjectToStoredOutputFiles <- function(
         # List the files:
         outputFiles <- unlist(lapply(outputDirs, list.files, full.names = TRUE))
     }
+    
+    
+    allTests <- compareModelData(
+        dat_orig = dat_orig, 
+        dat = dat, 
+        intersect.names = intersect.names, 
+        ignore.variable = ignore.variable, ignore.process.variable = ignore.process.variable, 
+        skipNAFraction = skipNAFraction, skipNAAt = skipNAAt, NAReplacement = NAReplacement, 
+        ignoreEqual = ignoreEqual, classOf = classOf, 
+        data.out = data.out, 
+        processesToCheck = processesToCheck, 
+        sort = sort, 
+        compareReports = compareReports, checkOutputFiles = checkOutputFiles, 
+        tolerance = tolerance, debug = debug, check.columnNames_identical = check.columnNames_identical, testAllTRUE = testAllTRUE, 
+        ...
+    )
+    
+    # Store the file paths of the output files to compare to the new output file paths:
+    if(checkOutputFiles) {
+        # List the output files:
+        newOutputFiles <- unlist(lapply(outputDirs, list.files, full.names = TRUE))
+        allTests$outputFileNames_equal <- outputFiles == newOutputFiles
+    }
+    
+    
+    
+    # Check whether all checks passed:
+    ok <- all(unlist(allTests) %in% TRUE)
+    
+    # If data.out is NULL, but all checks passed, do not return the data:
+    if(!length(data.out)) {
+        data.out <- !ok
+    }
+    
+    # Define the output as formatted tests:
+    out <- lapply(allTests, formatDiffs)
+    
+    
+    # Expand the output if data.out is TRUE:
+    if(data.out) {
+        out <- list(
+            projectPath = projectPath, 
+            projectPath_copy = projectPath_copy, 
+            dat = dat, 
+            dat_orig = dat_orig, 
+            test = out, 
+            ok = ok, 
+            diffData = allTests$diffData
+        )
+        
+        return(out)
+    }
+    # Otherwise return the formatted tests if any of them failed, and TRUE all passed:
+    else {
+        if(!ok) {
+            return(out)
+        }
+        else {
+            return(TRUE)
+        }
+    }
+    
+}
+
+
+#' Copy a StoX project, after unzipping if zipped
+#' 
+#' This function is useful to make a copy of a potentially zipped project.
+#' 
+#' @inheritParams copyProject
+#' @param copydir The directory in which to place the copy, defaulted to the tempdir.
+#' @param ... Passed to \code{\link{copyProject}}.
+#' 
+#' @return The path to the copy of the StoX project.
+#' 
+#' @export
+#'
+unzipAndCopyProject <- function(projectPath, newProjectPath, copydir = tempdir(), ...) {
+    
+    # Unzip if zipped:
+    if(tolower(tools::file_ext(projectPath)) == "zip") {
+        projectPath <- unzipProject(projectPath, exdir = copydir)
+    }
+    
+    # Copy the project:
+    if(missing(newProjectPath)) {
+        # Use a default new name if missing:
+        newProjectPath <- file.path(copydir, paste0(basename(projectPath), "_copy"))
+    }
+    copyProject(projectPath, newProjectPath, ...)
+    
+    return(newProjectPath)
+}
+
+
+
+
+#' Compare two model data
+#' 
+#' @param dat_orig,dat The original and new data to compare.
+#' @param processesToCheck Character: A vector of the names of the processes to compare.
+#' @param intersect.names Logical: If TRUE, compare only same named columns.
+#' @param ignore.variable A vector of names of variables/columns to ignore in the comparison.
+#' @param ignore.process.variable A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth")).
+#' @param skipNAFraction Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.
+#' @param skipNAAt A vector of strings naming the columns in which NA values identifies rows to skip. If more than one variable is given and more than one of these are present in a table, all rows where at least one of the variables are NA are skipped. Note that this may reduce the number of rows and may results in diffs for that reason. Using this option is best used in combination with \code{mergeWhenDifferentNumberOfRows}.
+#' @param NAReplacement List of replacement values for different classes of NA, applied after any merging as to incorporate NAs generated during merging.
+#' @param ignoreEqual Logical: If TRUE, ignore columns where all values are equal.
+#' @param classOf Character string specifying whether to compare after converting to the class of the first or second table. Set this to "first" (default) to convert class to the original data.
+#' @param data.out Logical, if TRUE output the original and new data along with the tests. \code{data.out} = NULL implies \code{data.out} = FALSE if no difference was found and  \code{data.out} = TRUE otherwise.
+#' @param sort Logical, if TRUE sort the tables before all.equal. When  mergeWhenDifferentNumberOfRows = TRUE the tables are always sorted.
+#' @param compareReports Logical, if TRUE compare the report specifically (old method kept for robustness).
+#' @param checkOutputFiles Logical, if TRUE compare the file names of the output files.
+#' @param tolerance The tolerance to use in all.equal.
+#' @param debug Logical: If TRUE, interrupt the execution just before priting the test results.
+#' @param check.columnNames_identical Logical: If TRUE, test that the column names are identical between corresponding tables of the original and new data.
+#' @param testAllTRUE Logical: If FALSE, only test differences between common rows between tables that are compared by merging. If TRUE the function reports test failures when the extra rows from merging wih all = TRUE contains differences.
+#' @param ... Used in runModel().
+#' 
+#' @export
+#'
+compareModelData <- function(
+    dat_orig, 
+    dat, 
+    intersect.names = TRUE, 
+    ignore.variable = NULL, ignore.process.variable = NULL, 
+    skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
+    ignoreEqual = FALSE, classOf = c("first", "second"), 
+    data.out = FALSE, 
+    processesToCheck = NULL, 
+    #mergeWhenDifferentNumberOfRows = FALSE, 
+    sort = TRUE, 
+    compareReports = FALSE, checkOutputFiles = TRUE, 
+    tolerance = sqrt(.Machine$double.eps), debug = FALSE, check.columnNames_identical = FALSE, testAllTRUE = FALSE, 
+    ...
+) {
+    
+    
+    
+    
+    # Reorder the original data to the order of the new data:
+    newOrder <- c(intersect(names(dat), names(dat_orig)), setdiff(names(dat_orig), names(dat)))
+    dat_orig <- dat_orig[newOrder]
+    
+    # Compare only those elemens common to the two datasets:
+    processNames_present <- all(names(dat_orig) %in% names(dat))
+    
+    # Expect all column names:
+    tableNames_identical <- list()
+    columnNames_identical <- list()
+    
+    
     
     
     for(name in processesToCheck) {
@@ -172,9 +315,9 @@ compareProjectToStoredOutputFiles <- function(
     data_equal <- list()
     diffData <- list()
     
-    #if(debug) {
-    #    browser()
-    #}
+    if(debug) {
+        browser()
+    }
     
     
     # Tests will fail for (1) strings "NA" that are written unquoted (as RstoxFramework do from objects of class data.table) and which are read as NA by data.table::fread, and (2) numbers stored as strings (e.g. software version numbers), which are strirpped of leading and trailing zeros by data.table::fread. Thus it is adivced to not compare CESAcocustic().
@@ -236,7 +379,7 @@ compareProjectToStoredOutputFiles <- function(
                 length(dat_orig[[name]][[subname]]) && 
                 # ... and the first element is a data.table:
                 data.table::is.data.table(dat_orig[[name]][[subname]][[1]])
-                ) {
+            ) {
                 for(subsubname in names(dat_orig[[name]][[subname]])) {
                     if(data.table::is.data.table(dat_orig[[name]][[subname]][[subsubname]])) {
                         if(intersect.names) {
@@ -304,21 +447,34 @@ compareProjectToStoredOutputFiles <- function(
         unlist(x)[!unlist(x) == "TRUE"]
     }
     
+    #diffWarning <- function(x) {
+    #    x_info <- unlistDiff(x)
+    #    if(length(x_info)) {
+    #        x_info <- paste0("\n", names(x_info), ":\n", x_info, collapse = "\n")
+    #        msg <- paste0(
+    #            "projectPath:\n", 
+    #            projectPath, 
+    #            "\n", 
+    #            deparse(substitute(x)), 
+    #            ":\n===========================================>>>>>\n", 
+    #            "Project: ", projectPath, 
+    #            "\n", 
+    #            "Old project: ", projectPath_original, 
+    #            x_info, 
+    #            "\n<<<<<==========================================="
+    #        )
+    #        warning(msg)
+    #        message(msg)
+    #    }
+    #}
     diffWarning <- function(x) {
         x_info <- unlistDiff(x)
         if(length(x_info)) {
             x_info <- paste0("\n", names(x_info), ":\n", x_info, collapse = "\n")
             msg <- paste0(
-                "projectPath:\n", 
-                projectPath, 
-                "\n", 
-                deparse(substitute(x)), 
-                ":\n===========================================>>>>>\n", 
-                "Project: ", projectPath, 
-                "\n", 
-                "Old project: ", projectPath_original, 
+                "\n===========================================>>>>>\n", 
                 x_info, 
-                "\n<<<<<==========================================="
+                "\n<<<<<===========================================\n"
             )
             warning(msg)
             message(msg)
@@ -352,47 +508,19 @@ compareProjectToStoredOutputFiles <- function(
         processNames_present = processNames_present,
         tableNames_identical = tableNames_identical,
         columnNames_identical = columnNames_identical,
-        data_equal = data_equal#, 
+        data_equal = data_equal, 
+        diffData = diffData#, 
         #reports_equal = reports_equal
     )
     if(compareReports) {
         allTests$reports_equal <- reports_equal
     }
-    # Store the file paths of the output files to compare to the new output file paths:
-    if(checkOutputFiles) {
-        # List the output files:
-        newOutputFiles <- unlist(lapply(outputDirs, list.files, full.names = TRUE))
-        allTests$outputFileNames_equal <- outputFiles == newOutputFiles
-    }
     
     
-    ok <- all(unlist(allTests) %in% TRUE)
-    if(!length(data.out)) {
-        data.out <- !ok
-    }
     
-    out <- lapply(allTests, formatDiffs)
-    
-    
-    if(data.out) {
-        out <- list(
-            dat = dat, 
-            dat_orig = dat_orig, 
-            test = out, 
-            diffData = diffData
-        )
-        
-        return(out)
-    }
-    
-    
-    if(!ok) {
-        return(out)
-    }
-    else {
-        return(TRUE)
-    }
+    return(allTests)
 }
+
 
 
 
@@ -459,6 +587,7 @@ compareDataTablesUsingClassOf <- function(
     classes_in_y <- sapply(y, getRelevantClass)
     
     tryFormats <- c("%Y-%m-%dT%H:%M:%OSZ", "%Y/%m/%dT%H:%M:%OSZ", "%Y-%m-%d %H:%M:%OS", "%Y/%m/%d %H:%M:%OS", "%Y-%m-%d %H:%M", "%Y/%m/%d %H:%M", "%Y-%m-%d", "%Y/%m/%d")
+    
     
     if(!identical(classes_in_x, classes_in_y)) {
         

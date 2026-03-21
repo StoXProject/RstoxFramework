@@ -821,7 +821,6 @@ escapeForRegex <- function(x) {
 #' 
 hasFileOutput <- function(projectPath, modelName, processID, requireExists = TRUE) {
     
-    #browser()
     #
     #functionArguments <- getFunctionArguments(
     #    projectPath = projectPath, 
@@ -1428,5 +1427,42 @@ onlyOneToResample_Warning <- function(x, toResample, within, functionName = NULL
 
 
 
+
+#' Zip a StoX project
+#' 
+#' @inheritParams general_arguments
+#' @param zipPath The file path of the ziped StoX project.
+#' @param zipDir The file path of the directory in which to place the ziped StoX project.
+#' @param ow Logical: If TRUE overwrite the zip if already present.
+#' 
+#' @export
+#' 
+zipProject <- function(projectPath, zipPath = NULL, zipDir = NULL, ow = FALSE) {
+    
+    if(!length(zipPath)) {
+        zipBaseName <- paste(basename(projectPath), "zip", sep = ".")
+        if(!length(zipDir)) {
+            zipDir <- dirname(projectPath)
+        }
+        zipPath <- file.path(zipDir, zipBaseName)
+    }
+    
+    if(!ow && file.exists(zipPath)) {
+        stop("The zip file ", zipPath, " already exists. Select a different zipPath or zipDir, or remove the file before re-running the function.")
+    }
+    
+    
+    deleteDS_StoreFiles(projectPath)
+    utils::zip(zipPath, basename(projectPath), root = dirname(zipPath))
+    
+    return(zipPath)
+}
+
+
+deleteDS_StoreFiles <- function(x) {
+    l <- list.files(x, recursive=TRUE, full.names=TRUE, all.files =TRUE)
+    DS_Store_files <- l[endsWith(l,  ".DS_Store")]
+    file.remove(DS_Store_files)
+}
 
 

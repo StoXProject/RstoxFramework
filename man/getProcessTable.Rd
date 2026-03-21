@@ -91,6 +91,34 @@ getProcessAndFunctionNames(
 
 \item{warn}{Logical: If TRUE show warnings that are not highly important.}
 }
+\value{
+A table of the following columns:
+\describe{
+  \item{\code{processID}}{The process ID of the process in the form P001, P002, etc. The process ID exists unchanged throughout the life of the process.}
+  \item{\code{processName}}{The current name of the process.}
+  \item{\code{modelName}}{The name of the model, one of baseline, analysis and report.}
+  \item{\code{projectPath}}{The path to the project folder.}
+  \item{\code{functionName}}{The function name.}
+  \item{\code{enabled}}{Logical: Whether the process enabled?}
+  \item{\code{showInMap}}{Logical: Will the process be shown in the map of the StoX GUI.}
+  \item{\code{fileOutput}}{Logical: Will the process produce output files.}
+  \item{\code{functionParameters}}{A list of function parameters that are shown in the GUI.}
+  \item{\code{functionInputs}}{A list of function inputs that are shown in the GUI.}
+  \item{\code{functionInputs_UseProcessData}}{A list of function inputs that are shown in the GUI, including those that are hidded by UseProcessData = TRUE.}
+  \item{\code{functionInputsRecursive}}{A list of function inputs recursively, including function inputs to processes listed as function inputs in \code{functionInputs.}}
+  \item{\code{functionOutputDataType}}{The StoX data type of the function output.}
+  \item{\code{functionInputError}}{Logical: Does the process contain errors in function inputs? E.g., is there a function input that does not exist?}
+  \item{\code{canShowInMap}}{Logical: Can the process output be shown in the map?}
+  \item{\code{hasProcessData}}{Logical: Does the process return process data?}
+  \item{\code{hasBeenRun}}{Logical: Has the process been run?}
+  \item{\code{functionInputProcessIDs}}{A list of processIDs of the function inputs. This in only used by the GUI.}
+  \item{\code{usedInProcessIndices}}{A list of indices of the processes in which the current process is used as function input.This in only used by the GUI.}
+  \item{\code{usedInProcessIDs}}{A list of IDs of the processes in which the current process is used as function input.This in only used by the GUI.}
+  \item{\code{usedInRecursiveProcessIndices}}{A list of indices of the processes in which the current process is used as function input, recursively, so that a processes using a process that is using the current process are included.}
+  \item{\code{usedInRecursiveProcessNames}}{A list of IDs of the processes in which the current process is used as function input, recursively, so that a processes using a process that is using the current process are included.}
+  \item{\code{terminalProcess}}{Logical: Is the process a terminal process, i.e. is it not used in any later processes (also in later models)?}
+}
+}
 \description{
 Functions to get the process table of a model.
 }

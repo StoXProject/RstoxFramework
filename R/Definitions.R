@@ -1032,10 +1032,11 @@ initiateRstoxFramework <- function(){
 #' 
 #' @inheritParams general_arguments
 #' @param parameters Character: A vector of strings naming the parameters to get from the ReportBootstrap functions.
+#' @param JSON.out Logical: If TRUE return a JSON string which can be pasted into the OutputVariables parameter in the Bootstrap process.
 #' 
 #' @export
 #' 
-getBootstrapOutputVariables <- function(projectPath, parameters = c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable")) {
+getBootstrapOutputVariables <- function(projectPath, parameters = c("GroupingVariables", "InformationVariables", "WeightingVariable", "TargetVariable"), JSON.out = FALSE) {
     
     # Read the projectDescription:
     projectDescription <- readProjectDescription(
@@ -1052,7 +1053,14 @@ getBootstrapOutputVariables <- function(projectPath, parameters = c("GroupingVar
     # Extract the variables:
     variableNames <- unique(unlist(lapply(lapply(projectDescription$report[atReportFunctionNames], "[[", "functionParameters"), "[", parameters)))
     
-    message("The following OutputVariables are needed (as can be pasted into the parameter field of StoX): ", paste0("\"", variableNames, "\"", collapse = ", "))
+    #message("The following OutputVariables are needed (as can be pasted into the parameter field of StoX): ", paste0("\"", variableNames, "\"", collapse = ", "))
+    
+    if(JSON.out) {
+        paste0(
+            "[", 
+            paste0("\"", variableNames, "\"", collapse = ", "), 
+            "]")
+    }
     
     return(variableNames)  
 }

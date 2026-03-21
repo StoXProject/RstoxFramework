@@ -7,13 +7,16 @@
 getBootstrapOutputVariables(
   projectPath,
   parameters = c("GroupingVariables", "InformationVariables", "WeightingVariable",
-    "TargetVariable")
+    "TargetVariable"),
+  JSON.out = FALSE
 )
 }
 \arguments{
 \item{projectPath}{The path to the StoX project, i.e., the folder of the project with the sub folders "input", "output" and "process". Can possibly be the path to a file inside the project folder.}
 
 \item{parameters}{Character: A vector of strings naming the parameters to get from the ReportBootstrap functions.}
+
+\item{JSON.out}{Logical: If TRUE return a JSON string which can be pasted into the OutputVariables parameter in the Bootstrap process.}
 }
 \description{
 Get variables used in reports, specifically for use in the argument OutputVariables in Bootstrap()

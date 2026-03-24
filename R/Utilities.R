@@ -1451,9 +1451,12 @@ zipProject <- function(projectPath, zipPath = NULL, zipDir = NULL, ow = FALSE) {
         stop("The zip file ", zipPath, " already exists. Select a different zipPath or zipDir, or remove the file before re-running the function.")
     }
     
-    
     deleteDS_StoreFiles(projectPath)
-    utils::zip(zipPath, basename(projectPath), root = dirname(zipPath))
+    
+    currentWD <- getwd()
+    setwd(dirname(projectPath))
+    utils::zip(zipPath, basename(projectPath), flags = "-q")
+    setwd(currentWD)
     
     return(zipPath)
 }

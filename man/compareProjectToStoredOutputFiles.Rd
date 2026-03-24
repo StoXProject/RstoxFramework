@@ -21,6 +21,7 @@ compareProjectToStoredOutputFiles(
   ignore.variable = NULL,
   ignore.process = NULL,
   ignore.process.variable = NULL,
+  ignore.class = NULL,
   skipNAFraction = FALSE,
   skipNAAt = NULL,
   NAReplacement = NULL,
@@ -69,6 +70,8 @@ compareProjectToStoredOutputFiles(
 \item{ignore.process}{A vector of names of processes to ignore in the comparison.}
 
 \item{ignore.process.variable}{A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth")).}
+
+\item{ignore.class}{A vector of classes or output processes to ignore in the comparison.}
 
 \item{skipNAFraction}{Logical: If TRUE, skip rows with more than 50 percent NAs. Can also be set to a numeric value between 0 and 1.}
 

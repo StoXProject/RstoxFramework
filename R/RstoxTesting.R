@@ -51,6 +51,7 @@ compareProjectToStoredOutputFilesAll <- function(projectPaths, projectPaths_orig
 #' @param projectPath_original The project holding the existing output files, defaulted to \code{projectPath}.
 #' @inheritParams compareModelData
 #' @param ignore.process A vector of names of processes to ignore in the comparison.
+#' @param ignore.class A vector of classes or output processes to ignore in the comparison.
 #' 
 #' @export
 #'
@@ -66,7 +67,7 @@ compareProjectToStoredOutputFiles <- function(
     
     
     intersect.names = TRUE, 
-    ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, 
+    ignore.variable = NULL, ignore.process = NULL, ignore.process.variable = NULL, ignore.class = NULL, 
     skipNAFraction = FALSE, skipNAAt = NULL, NAReplacement = NULL, 
     ignoreEqual = FALSE, classOf = c("first", "second"), 
     data.out = FALSE, 
@@ -131,8 +132,26 @@ compareProjectToStoredOutputFiles <- function(
         readCsvAsLines = readCsvAsLines
     )
     
+    processesToCheck <- names(dat_orig)
     
-    processesToCheck <- setdiff(names(dat_orig), ignore.process)
+    # Ignore specific processes:
+    processesToCheck <- setdiff(processesToCheck, ignore.process)
+    
+    # Ignore sprcific classes:
+    if(length(ignore.class)) {
+        namesOfProcessesToIgnoreByClass <- NULL
+        invalidClass_dat <- sapply(dat, function(x) inherits(x[[1]], ignore.class))
+        namesOfProcessesToIgnoreByClass <- append(namesOfProcessesToIgnoreByClass, names(dat)[invalidClass_dat])
+        
+        invalidClass_dat_orig <- sapply(dat_orig, function(x) inherits(x[[1]], ignore.class))
+        namesOfProcessesToIgnoreByClass <- append(namesOfProcessesToIgnoreByClass, names(dat_orig)[invalidClass_dat_orig])
+        
+        # Ignore specific processes:
+        processesToCheck <- setdiff(processesToCheck, namesOfProcessesToIgnoreByClass)
+    }
+    
+    
+    
     
     
     # Store the file paths of the output files to compare to the new output file paths:

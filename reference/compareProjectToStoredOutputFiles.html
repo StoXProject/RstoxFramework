@@ -70,6 +70,7 @@
 <span>  ignore.variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ignore.process <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ignore.process.variable <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ignore.class <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  skipNAFraction <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  skipNAAt <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  NAReplacement <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -153,6 +154,10 @@
 
 <dt id="arg-ignore-process-variable">ignore.process.variable<a class="anchor" aria-label="anchor" href="#arg-ignore-process-variable"></a></dt>
 <dd><p>A list of variables to ignore for different processes, named by the processes, e.g. list(MeanNASC = c("MinLayerDepth", "MaxLayerDepth")).</p></dd>
+
+
+<dt id="arg-ignore-class">ignore.class<a class="anchor" aria-label="anchor" href="#arg-ignore-class"></a></dt>
+<dd><p>A vector of classes or output processes to ignore in the comparison.</p></dd>
 
 
 <dt id="arg-skipnafraction">skipNAFraction<a class="anchor" aria-label="anchor" href="#arg-skipnafraction"></a></dt>

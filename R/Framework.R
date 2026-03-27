@@ -219,6 +219,10 @@ locatePathsInZip <- function(paths, zip) {
     }
     else {
         paths <- structure(mapply(unz, zip, paths, SIMPLIFY = FALSE), names = names(paths))
+        # Unlist if there is only one element.
+        if(length(paths) == 1) {
+            paths <- paths[[1]]
+        }
     }
     
     

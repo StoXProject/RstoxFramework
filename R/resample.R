@@ -1643,8 +1643,6 @@ resampleOneGroup <- function(subData, seed, varToResample, nextResampleBy = NULL
 #' 
 ResampleMeanLengthDistributionData <- function(MeanLengthDistributionData, Seed) {
     
-    # 2024-04: This function will be renamed to ResampleBioticPSUsInStratum
-    
     # Warn if there are strata with only one PSU, which may result in loss of variance:
     onlyOneToResample_Warning(
         MeanLengthDistributionData$Data, 
@@ -1933,8 +1931,6 @@ ResamplePreySpeciesCategoryCatchDataHierarchicalNotUsingmakeUniqueVars <- functi
 #' @export
 #' 
 ResampleBioticAssignmentByStratum <- function(BioticAssignment, Seed) {
-    
-    # This function will be renamed to ResampleAssignedHaulsInStratum
     
     # Warn if there are strata with only one Haul, which may result in loss of variance:
     onlyOneToResample_Warning(

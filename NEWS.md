@@ -1,5 +1,10 @@
+# RstoxFramework v4.2.1-9002 (2025-05-07)
+* fixed bug in Bootstrap, where the output file was not overwritten when running the process again, but only when the previous file was deleted when running one or more processes in Baseline again. The problem was that the output file need to be kept in order for the argument UseOutputData to work, but the file copy from memory file to output file did not overwrite.
+* Changed the test project tobis_20_depth.zip according to the change in RstoxBase::ReportTransectDesign().
+
+
 # RstoxFramework v4.2.1-9001 (2025-02-04)
-* Added message when RstoxFramework fails to read memory files that it has created itself, due to system encoding not being URF-8 on Windows.
+* Added message when RstoxFramework fails to read memory files that it has created itself, due to system encoding not being UTF-8 on Windows.
 * Added support for returning the JSON string to insert into the OutputVariables field in Bootstrap processes in the StoX GUI from getBootstrapOutputVariables().
 * Added documentation of the returned elements from getProjectPaths().
 * Added support for zipped StoX project in getProjectPaths().
@@ -8,6 +13,7 @@
 * Added unit tests for the new functionality in copyProject().
 * Added the argument ignore.class in compareProjectToStoredOutputFiles(), which can be used to ignore process output of specific classes when comparing original and new data.
 * Fixed bug in zipProject() where using utils::zip() failed due to zip::zip() syntax (zip::zip() will not be used, as the base zip is regarded more reliable).
+* Changed locatePathsInZip() to not return a list when the input 'paths' is of length 1.
 
 
 # RstoxFramework v4.2.0 (2025-02-04)

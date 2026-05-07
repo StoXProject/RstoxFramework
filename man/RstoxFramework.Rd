@@ -28,6 +28,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Arne Johannes Holmin \email{arnejh@hi.no}
   \item Anthony Hennessey
   \item Espen Johnsen
   \item Sindre Vatnehol

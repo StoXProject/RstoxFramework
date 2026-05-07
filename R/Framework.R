@@ -7135,7 +7135,7 @@ writeStoxOutput <- function(
     # Store the process output:
     if(outputFileType == "nc") {
         
-        file.copy(x[[1]], filePath)
+        file.copy(x[[1]], filePath, overwrite = TRUE)
         
         # NO THIS IS NOT SMART. WE CANNOT DELETE THE MEMORY FILE:
         # delete the temporary bootstrap files:

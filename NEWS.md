@@ -1,6 +1,8 @@
 # RstoxFramework v4.2.1-9002 (2025-05-07)
 * Fixed bug in Bootstrap, where the output file was not overwritten when running the process again, but only when the previous file was deleted when running one or more processes in Baseline again. The problem was that the output file need to be kept in order for the argument UseOutputData to work, but the file copy from memory file to output file did not overwrite.
 * Changed the test project tobis_20_depth.zip according to the change in RstoxBase::ReportTransectDesign().
+* Fixed bug in getMapData() which caused EDSUs with no NASC data to not show in the GUI map.
+* Removed error message when there are missing LogOrigin or LogOrigin2 if all other values are equal.
 
 
 # RstoxFramework v4.2.1-9001 (2025-02-04)

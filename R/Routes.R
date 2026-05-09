@@ -465,7 +465,7 @@ getEDSUData <- function(projectPath, modelName, processID) {
         "Beam"
     )
     EDSUData <- sapply(tableNames, function(tableName) getProcessOutput(projectPath = projectPath, modelName = modelName, processID = processID, tableName = tableName)[[tableName]], simplify = FALSE)
-    CruiseLog <- RstoxData::mergeDataTables(EDSUData, tableNames = tableNames, output.only.last = TRUE)
+    CruiseLog <- RstoxData::mergeDataTables(EDSUData, tableNames = tableNames, output.only.last = TRUE, all.x = TRUE)
     # Uniquify in case e.g. there are data from different instruments:
     #EDSUInfoToKeep <- c("EDSU", "Platform", "Log", "DateTime", "Longitude", "Latitude", "EffectiveLogDistance", "BottomDepth")
     EDSUInfoToKeep <- c("EDSU", "Longitude", "Latitude", "LogDistance")
@@ -570,7 +570,7 @@ getEDSUData <- function(projectPath, modelName, processID) {
 
 
 extrapolateEDSU <- function(Log, pos = 0.5) {
-    # Run the extrapolation function on each Paltform, effectively ordering the data by platform:
+    # Run the extrapolation function on each Platform, effectively ordering the data by platform:
     Log <- Log[, extrapolateLongitudeLatitude(.SD), by = CruiseKey, .SDcols = names(Log)]
     
     # Get the click points of the EDSUs:
@@ -600,23 +600,33 @@ getStartMiddleEndPosition <- function(Log, positionOrigins = c("start", "middle"
     positionsNA <- data.table::as.data.table(
         array(NA_real_, dim = c(numPositions, length(positionNames)), dimnames = list(NULL, positionNames))
     )
-    # Fill in the present data:
-    #if(!all(Log$LogOrigin[1] == Log$LogOrigin && Log$LogOrigin2[1] == Log$LogOrigin2)) {
-    if(!Log[, RstoxBase::allEqual(LogOrigin) && RstoxBase::allEqual(LogOrigin2)]) {
-        hasSomeNAs <- Log[, any(is.na(LogOrigin)) && any(!is.na(LogOrigin))]
-        hasSomeNAs2 <- Log[, any(is.na(LogOrigin2)) && any(!is.na(LogOrigin2))]
-        onlyLastLogIsNA <- Log[, is.na(utils::tail(LogOrigin, 1)) && sum(is.na(LogOrigin)) == 1]
-        onlyLastLogIsNA2 <- Log[, is.na(utils::tail(LogOrigin2, 1)) && sum(is.na(LogOrigin2)) == 1]
-        if(onlyLastLogIsNA || onlyLastLogIsNA2) {
-            stop("StoX: The last LogOrigin or LogOrigin2 is NAs, which suggests an incomplete file. Try using FilterStoxAcoustic() to filter out LogOrigin or LogOrigin2 that are NA.")
-        }
-        if(hasSomeNAs || hasSomeNAs2) {
-            stop("StoX: Some LogOrigin or LogOrigin2 are NAs. Try using FilterStoxAcoustic() to filter out LogOrigin or LogOrigin2 that are NA.")
-        }
-        else {
-            stop("StoX: LogOrigin or LogOrigin2 is not constant")
-        }
+    
+    # If there are missing LogOrigin, use the first non-missing if all non-missing are equal:
+    if(!Log[, RstoxBase::allEqual(LogOrigin)]) {
+        
+        setNAToFirstWhenAllNonNAEqual(Log, "LogOrigin")
+        setNAToFirstWhenAllNonNAEqual(Log, "LogOrigin2")
+        
     }
+    
+    
+    ### # Fill in the present data:
+    ### #if(!all(Log$LogOrigin[1] == Log$LogOrigin && Log$LogOrigin2[1] == Log$LogOrigin2)) {
+    ### if(!Log[, RstoxBase::allEqual(LogOrigin) && RstoxBase::allEqual(LogOrigin2)]) {
+    ###     hasSomeNAs <- Log[, any(is.na(LogOrigin)) && any(!is.na(LogOrigin))]
+    ###     hasSomeNAs2 <- Log[, any(is.na(LogOrigin2)) && any(!is.na(LogOrigin2))]
+    ###     onlyLastLogIsNA <- Log[, is.na(utils::tail(LogOrigin, 1)) && sum(is.na(LogOrigin)) == 1]
+    ###     onlyLastLogIsNA2 <- Log[, is.na(utils::tail(LogOrigin2, 1)) && sum(is.na(LogOrigin2)) == 1]
+    ###     if(onlyLastLogIsNA || onlyLastLogIsNA2) {
+    ###         stop("StoX: The last LogOrigin or LogOrigin2 is NAs, which suggests an incomplete file. Try using FilterStoxAcoustic() to filter out LogOrigin or LogOrigin2 that are NA.")
+    ###     }
+    ###     if(hasSomeNAs || hasSomeNAs2) {
+    ###         stop("StoX: Some LogOrigin or LogOrigin2 are NAs. Try using FilterStoxAcoustic() to filter out LogOrigin or LogOrigin2 that are NA.")
+    ###     }
+    ###     else {
+    ###         stop("StoX: LogOrigin or LogOrigin2 is not constant")
+    ###     }
+    ### }
     
     presentNames <- c(outer(Log[1, c(LogOrigin, LogOrigin2)], c("Longitude", "Latitude"), paste0))
     presentVariables <- c("Longitude", "Longitude2", "Latitude", "Latitude2")
@@ -634,6 +644,27 @@ getStartMiddleEndPosition <- function(Log, positionOrigins = c("start", "middle"
     
     Log
 }
+
+
+setNAToFirstWhenAllNonNAEqual <- function(x, var) {
+    
+    if(x[, RstoxBase::allEqual(stats::na.omit(get(var)))]) {
+        # Get the indices at the NAs:
+        atNA <- x[, which(is.na(get(var)))]
+        
+        first <- x[1, get(var)]
+        
+        if(length(atNA)) {
+            x[atNA, eval(var) := NA]
+        }
+    }
+    else {
+        stop("Missing ", var, " is currently only allowed if all non-missing values are equal, in which case the missing values are replaced by that single value.")
+    }
+}
+
+
+
 
 # Add stop position of the EDSUs for plotting in the map:
 extrapolateLongitudeLatitude <- function(Log) {

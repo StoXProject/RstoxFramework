@@ -36,8 +36,8 @@ jobs:
           - {os: windows-latest, r: 'oldrel',  pkgext: '.zip'}
           
           # ubuntu-latest is 24 as of 2024-10-31. Should we use it?
-          - {os: ubuntu-22.04,  r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
-          - {os: ubuntu-22.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-latest,  r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-latest,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
           # - {os: ubuntu-22.04,   r: 'oldrel-2',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"} # Skipping the oldrel-2, as we need equal requirements across platforms
           
     env:
@@ -126,6 +126,16 @@ jobs:
           sudo apt-get install -y libudunits2-dev
           sudo apt-get install -y libcurl4-openssl-dev
           sudo apt-get install -y libnetcdf-dev
+          
+          
+              libgdal-dev 
+          libgeos-dev 
+              libproj-dev 
+          libtbb-dev 
+                libnetcdf-dev
+          
+          
+          
         shell: bash
       
       

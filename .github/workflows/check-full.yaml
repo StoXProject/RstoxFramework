@@ -126,16 +126,6 @@ jobs:
           sudo apt-get install -y libudunits2-dev
           sudo apt-get install -y libcurl4-openssl-dev
           sudo apt-get install -y libnetcdf-dev
-          
-          
-              libgdal-dev 
-          libgeos-dev 
-              libproj-dev 
-          libtbb-dev 
-                libnetcdf-dev
-          
-          
-          
         shell: bash
       
       

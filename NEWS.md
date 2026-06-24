@@ -1,5 +1,5 @@
 # RstoxFramework v4.2.1-9005 (2025-06-13)
-* Fixed bug in zipProject(), where large files failed presumably due to the q flag, which is not removed.
+* Fixed bug in zipProject(), where large files failed, presumably due to the q flag, which is now removed.
 
 
 # RstoxFramework v4.2.1-9002 (2025-05-07)

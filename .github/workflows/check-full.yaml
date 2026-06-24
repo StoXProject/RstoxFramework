@@ -36,8 +36,8 @@ jobs:
           - {os: windows-latest, r: 'oldrel',  pkgext: '.zip'}
           
           # ubuntu-latest is 24 as of 2024-10-31. Should we use it?
-          - {os: ubuntu-22.04,  r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
-          - {os: ubuntu-22.04,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-latest,  r: 'release', pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
+          - {os: ubuntu-latest,   r: 'oldrel',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"}
           # - {os: ubuntu-22.04,   r: 'oldrel-2',  pkgext: '.tar.gz', rspm: "https://cloud.r-project.org"} # Skipping the oldrel-2, as we need equal requirements across platforms
           
     env:
@@ -51,7 +51,7 @@ jobs:
       #### 1. Setup: ####
       ###################
       
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Prepare for deployment at push
         if: github.event_name == 'push'

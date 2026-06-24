@@ -1455,7 +1455,8 @@ zipProject <- function(projectPath, zipPath = NULL, zipDir = NULL, ow = FALSE) {
     
     currentWD <- getwd()
     setwd(dirname(projectPath))
-    utils::zip(zipPath, basename(projectPath), flags = "-q")
+    # Do not use flags = "-q" here, since it appears to fail on large files on macOS:
+    utils::zip(zipPath, basename(projectPath))
     setwd(currentWD)
     
     return(zipPath)

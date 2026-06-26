@@ -7104,6 +7104,10 @@ writeStoxOutput <- function(
     # Then, unlist introduces dots, and we replace by underscore:
     x <- unlistToDataType(x)
     
+    # Get the file extension:
+    outputFileType <- getDefaultOutputFileType(x)
+    
+    
     # Stop if the optional 'filePath' does not have the same length as the data:
     if(!missing(filePath)) {
         if(length(filePath) != length(x)) {
@@ -7111,9 +7115,6 @@ writeStoxOutput <- function(
         }
     }
     else {
-        
-        # Get the file extension:
-        outputFileType <- getDefaultOutputFileType(x)
         
         # Set the default file name:
         filePath <- getProcessOutputTextFilePath(
